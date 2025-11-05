@@ -1,0 +1,102 @@
+. CASHLDGR - CASH LEDGER MENU
+.
+	 INCLUDE   MSCBRAG.TXT
+.
+	 INCLUDE   COMMON.TXT
+.
+INDEX	 FORM	   2		       USER SELECTION VARIABLE
+TIME	 INIT	   "hh:mm:ss"	       hours:minutes:seconds
+ROLLNAME INIT	   "C:\DBC\ROLLFILE.SYS"
+DPORT	 DIM	   8
+PORTX	 DIM	   8
++................................................................
+. MAINLINE
+.
+*................................................................
+.
+	 COMPARE   "5" TO SECURITY
+	 GOTO	   LIBMENU1  IF	 LESS
+*................................................................
+. DISPLAY THE MENU
+.
+CLOCK	 CLOCK	   TIME	TO TIME
+	 DISPLAY   *ES:
+		   *HON:
+		   "ACCOUNTS RECEIVABLE	CASH LEDGER FUNCTIONS":
+		   *P51:1,"Today is ",TODAY:
+			  " Time ",TIME:
+		   *HOFF:
+		   *P01:03,"( 1) ":
+		   "ENTER    C H E C K	DEPOSIT	DATA":
+		   *P01:04,"( 2) ":
+		   "DISPLAY  C H E C K	BATCHES	(BY BATCH NUMBER)":
+		   *P01:05,"( 3) ":
+		   "DISPLAY  C H E C K	BATCHES	(BY DATE)":
+		   *P01:06,"( 4) ":
+		   "PRINT  CASH	LEDGER - BY DATE RANGE ":
+		   *P01:07,"( 5) ":
+		   "DISPLAY  DEPOSIT TOTAL - BY	DATE RANGE":
+		   *P01:08,"( 6) ":
+		   "SELECT NEW PROCESSING SYSTEM":
+		   *EL
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN	   *P1:23,*EL,"Selection by number":
+		   *P25:23,"__",*P25:23,INDEX
+	 COMPARE   "1" TO INDEX
+	 GOTO	   GETINDEX IF LESS
+	 COMPARE   "07"	TO INDEX
+	 GOTO	   GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE	ROUTINE	INDICATED BY THE INDEX
+.
+	 TRAP	   BADCHAIN IF CFAIL
+	 CLOCK	   TIME	TO TIME
+.
+	 BRANCH	   INDEX OF BTCHNTRY:
+			    BTCHDISP:
+			    BTCHDTDS:
+			    BTCHPRNT:
+			    BTCHDEPS:
+			    LIBMENU1
+	 GOTO	   GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN	INSTRUCTIONS
+*................................................................
+BTCHNTRY CHAIN	   "BTCHNTRY"
+	 GOTO	   GETINDEX
+*................................................................
+BTCHDISP CHAIN	   "BTCHDISP"
+	 GOTO	   GETINDEX
+*................................................................
+BTCHDTDS CHAIN	   "BTCHDTDS"
+	 GOTO	   GETINDEX
+*................................................................
+BTCHPRNT CHAIN	   "BTCHPRNT"
+	 GOTO	   GETINDEX
+*................................................................
+BTCHDEPS CHAIN	   "BTCHDEPS"
+	 GOTO	   GETINDEX
+*................................................................
+. 
+. SELECT NEW PROCESSING	SYSTEM
+. 
+LIBMENU1 CHAIN	   "APPMENU1"
+	 GOTO	   GETINDEX
+.
+.............................................
+. 
+YOUCANT	 BEEP
+	 DISPLAY   *P01:23,"YOU	MAY NOT	REQUEST	REPORTS	TO PRINT!",*W3:
+		   *P01:23,*EL
+	 GOTO	   GETINDEX
+. 
+YOUWONT	 BEEP
+	 DISPLAY   *P01:23,"ONLY THE CONSOLE MAY DO A/R	MAINTENANCE !":
+		   *P01:23,*EL
+	 GOTO	   GETINDEX

@@ -1,0 +1,59 @@
++..............................................................
+. INVOICE HEADER I/O ROUTINES
+...............................................................
+. 
+OPENINVC TRAPCLR   IO
+         TRAP      NOINVCHD IF IO
+         OPEN      INVCFILE,INVNAME
+         RETURN
+. 
+NOINVCHD BEEP
+         DISPLAY   *ES,*P01:12,"INVOICE HEADER FILE NOT ON LINE - ":
+                               "JOB ABORTING ",*W,*W,*W
+         BEEP
+         STOP
+. 
+INVIOERR BEEP
+         DISPLAY   *ES,*P01:12,"WARNING! INVOICE FILE I/O ERROR":
+                       *P01:13,"NOTIFY BOB BACHARACH - 698-5577"
+         BEEP
+         GOTO      INVIOERR
+. 
+GETINVC  TRAPCLR   IO
+         TRAP      INVNTFD IF IO
+         READ      INVCFILE,INVKEY;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                                   INVDATE,INVTOTL,INVORDNO,MOREORDR,INVSHIP:
+                                   INVBLNO,INVFOB,FRGTRATE,INVWGHT,INVDTPAY:
+                                   INVCHECK,IAMTRCVD,IDOLSLFT,INVMESG
+         GOTO      INVNTFD IF OVER
+         MOVE      "H"  TO IOSW
+. 
+INVCRTRN RETURN
+. 
+INVNTFD  MOVE      "M"  TO IOSW
+         GOTO      INVCRTRN
+. 
+PUTINVC  TRAPCLR   IO
+         TRAP      INVIOERR IF IO
+         UPDATE    INVCFILE;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,INVORDNO,MOREORDR,INVSHIP:
+                            INVBLNO,INVFOB,FRGTRATE,INVWGHT,INVDTPAY:
+                            INVCHECK,IAMTRCVD,IDOLSLFT,INVMESG
+         MOVE      "H" TO IOSW
+         GOTO      INVCRTRN
+. 
+INVCSKS  TRAPCLR   IO
+         TRAP      INVIOERR IF IO
+         READKS    INVCFILE;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,INVORDNO,MOREORDR,INVSHIP:
+                            INVBLNO,INVFOB,FRGTRATE,INVWGHT,INVDTPAY:
+                            INVCHECK,IAMTRCVD,IDOLSLFT,INVMESG
+         GOTO      EOFINVC IF OVER
+         MOVE      "H" TO IOSW
+         GOTO      INVCRTRN
+. 
+EOFINVC  MOVE      "E" TO IOSW
+         GOTO      INVCRTRN
+. 
+. END OF INVOICE I/O ROUTINES
+. 

@@ -1,0 +1,53 @@
+.
+.
+VERIFY   MATCH     "081350" TO DIMWK9
+         GOTO      GETPSWD IF EQUAL
+         MATCH     "0627" TO DIMWK9
+         GOTO      GETPSWD IF EQUAL
+         RETURN
+.
+GETPSWD  ACTIVATE  PRMT02
+         ACTIVATE  ENTRY02,KEYPSWD,RESULT
+         ACTIVATE  OKButton,VERIKEY,RESULT
+         DISABLEITEM OKButton
+         SETFOCUS  ENTRY02
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+KEYPSWD  COMPARE   "2" TO RESULT
+         RETURN    IF NOT EQUAL
+         CLEAR     PSWRD2
+         GETITEM   ENTRY02,0,PSWRD2
+         ENABLEITEM  OKButton
+         RETURN
+.
+VERIKEY  NORETURN
+         DEACTIVATE  PRMT02
+         DEACTIVATE  ENTRY02
+         DEACTIVATE  OKButton
+         MATCH     "CHARLIE" TO PSWRD2
+         GOTO      PSWDOK IF EQUAL
+         MATCH     "EMF" TO PSWRD2                             
+         GOTO      PSWDOK IF EQUAL
+.
+LOGIT    TRAP      NOLOG IF IO
+         PREPARE   BADLOGIN,BADLOGNM
+         READ      BADLOGIN,SEQEOF;REPLY
+         GOTO      LOGIT2
+.         
+NOLOG    ALERT     STOP,"LOGFILE NOT FOUND!",RESULT
+         TRAPCLR   IO
+         CHAIN     "ANSTEST"
+.
+LOGIT2                  
+         CLOCK     TIMESTAMP TO LOGTIME
+         WRITE     BADLOGIN,SEQ;NAME,PSWRD2,LOGTIME
+         WEOF      BADLOGIN,SEQ
+         CLOSE     BADLOGIN
+         NORETURN
+         SETITEM   ENTRY01,0,NULLFLD
+         GOTO      INIT
+.         
+PSWDOK   RETURN

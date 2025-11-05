@@ -1,0 +1,25 @@
+
+
+
+PAGE    1      commar80                                                                                       02-11-19 11:56:27
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP commar80 
+
+   12.    INCLUDE  A: common.txt
+   14.    INCLUDE  B: rcvbles.txt
+   19.    INCLUDE  C: datetblz.txt
+   27.    INCLUDE  D: custmast.txt
+   81.    INCLUDE  E: accttabl.txt
+  122.    INCLUDE  F: byplist.txt
+  170.    INCLUDE  G: gtcstks.txt
+  324.    INCLUDE  H: bypaccts.txt
+  328.    INCLUDE  I: custio.txt
+  330.    INCLUDE  J: rcvblsio.txt
+  332.    INCLUDE  K: datecalc.txt
+
+   Output: c:\apc\plc\commar80.plc                                                                                                                                                                                                                                   
+      1170 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:56:27 11:56:27
+  0000300C DATA;  00000C02  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

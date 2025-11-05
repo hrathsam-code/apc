@@ -1,0 +1,50 @@
+41610HANNA,WILLIAM(BILL) P.        PO BOX 700                                                  Somewhere       TX12345     1230257381  /  /   test data record   0         
+41246LINDSEY,ED                    PO BOX 700                                                  Somewhere       TX12345     1230258382  /  /   test data record   1         
+41448BURROWS,JERRY                 806 HUNTERWOOD                                              Somewhere       TX12345     1230259383  /  /   test data record   2         
+41735BARBER,DAVID                  699 VERNA                                                   Somewhere       TX12345     1230260384  /  /   test data record   3         
+42018MATHEWS,JR.L.L.(ACE)          1150 QUAIL RIDGE DR                                         Somewhere       TX12345     1230261385  /  /   test data record   4         
+41924FEW,ED                        PO BOX 1168                                                 Somewhere       TX12345     1230262386  /  /   test data record   5         
+41453HANCOCK,D.J.                  PO BOX 700                                                  Somewhere       TX12345     1230263387  /  /   test data record   6         
+41867HART,TOM                      459 FIRST ST                                                Somewhere       TX12345     1230264388  /  /   test data record   7         
+42177LANIER,G.D.                   PO BOX 2008                                                 Somewhere       TX12345     1230265389  /  /   test data record   8         
+42302LINDSEY,MRS.P.E.              PO BOX 700                                                  Somewhere       TX12345     1230266380  /  /   test data record   9         
+41641MATTINGLY,DR.CLAUDE           802 N PEACHTREE                                             Somewhere       TX12345     1230267381  /  /   test data record  10         
+41844GRAY,GUY JAMES                RT 2 BOX 330                                                Somewhere       TX12345     1230268382  /  /   test data record  11         
+41846GATLIN,GARY                   PO BOX 700                                                  Somewhere       TX12345     1230269383  /  /   test data record  12         
+41462LATHAM,E.E.                   851 HUNTERWOOD                                              Somewhere       TX12345     1230270384  /  /   test data record  13         
+41930GRIFFIN,BILLIE P.             PO BOX 2045                                                 Somewhere       TX12345     1230271385  /  /   test data record  14         
+41635FEW,STEVE                     PO BOX 480                                                  Somewhere       TX12345     1230272386  /  /   test data record  15         
+41988GASKAMP,HARVEY                451 N BOWIE                                                 Somewhere       TX12345     1230273387  /  /   test data record  16         
+41918DUPLISSEY,J.H.                PO BOX 636                                                  Somewhere       TX12345     1230274388  /  /   test data record  17         
+42266MCDONALD,MARVIN               104 LAKE DR                                                 Somewhere       TX12345     1230275389  /  /   test data record  18         
+41469HALLAM,LARRY                  PO BOX 447                                                  Somewhere       TX12345     1230276380  /  /   test data record  19         
+42215HARRIS,JAMES                  RT. 4, BOX 756                                              Somewhere       TX12345     1230277381  /  /   test data record  20         
+42065GOBERT,JAMES                  453 LELA STREET                                             Somewhere       TX12345     1230278382  /  /   test data record  21         
+41247MATHEWS,LARRY                 641 EAST MILAM ST.                                          Somewhere       TX12345     1230279383  /  /   test data record  22         
+41793MATHEWS CONSTRUCTION CO.      720 WEST GIBSON                                             Somewhere       TX12345     1230280384  /  /   test data record  23         
+41475BISBEY,BLAIR A                P. O. BOX 2290                                              Somewhere       TX12345     1230281385  /  /   test data record  24         
+42125ALVIS, R.M. (MAX)             P. O. BOX 2290                                              Somewhere       TX12345     1230282386  /  /   test data record  25         
+42041CLARK,M.J.                    RT. 1 BOX 229                                               Somewhere       TX12345     1230283387  /  /   test data record  26         
+41685GOLDEN,JOE BOB                P. O. BOX 1985                                              Somewhere       TX12345     1230284388  /  /   test data record  27         
+41911DOUGLAS,DAVID                 P.O.BOX 1567                                                Somewhere       TX12345     1230285389  /  /   test data record  28         
+41479ELLIS,BILLY RAY               969 HUNTERWOOD                                              Somewhere       TX12345     1230286380  /  /   test data record  29         
+41665BURNS,TOMMY                   P. O. BOX 1329                                              Somewhere       TX12345     1230287381  /  /   test data record  30         
+41978ISOM,ROY                      P. O. BOX 700                                               Somewhere       TX12345     1230288382  /  /   test data record  31         
+42342CRUSE,LIN GRIFFIN             P.O.BOX 1424                                                Somewhere       TX12345     1230289383  /  /   test data record  32         
+41755FIRST NATIONAL BANK           501 WILLOW DRIVE                                            Somewhere       TX12345     1230290384  /  /   test data record  33         
+41477BOURGEOIS,NOEL                P. O. BOX 842                                               Somewhere       TX12345     1230291385  /  /   test data record  34         
+42340BELSCHNER,GENE                1216 WOODLAND PARK AVE.                                     Somewhere       TX12345     1230292386  /  /   test data record  35         
+41691DUNCAN,JANE                   P.O.BOX 700                                                 Somewhere       TX12345     1230293387  /  /   test data record  36         
+41486ADAMS,F.P.(PAT)               P. O. BOX 1988                                              Somewhere       TX12345     1230294388  /  /   test data record  37         
+41487COFFIELD,MARCH                401 WILLOW DRIVE                                            Somewhere       TX12345     1230295389  /  /   test data record  38         
+41811BUSSEY,DR. JIMMY D            315 N. ZAVALLA STREET                                       Somewhere       TX12345     1230296380  /  /   test data record  39         
+41795DAVIS,CHARLES MONROE          331 WEST OLIVE                                              Somewhere       TX12345     1230297381  /  /   test data record  40         
+41499BARNHART,DANNY                P. O. BOX 338                                               Somewhere       TX12345     1230298382  /  /   test data record  41         
+41731COCHRAN,B.F.(MUGGINS)         P. O. BOX 1146                                              Somewhere       TX12345     1230299383  /  /   test data record  42         
+41805BORGEN,JACK                   P.O. BOX 1888                                               Somewhere       TX12345     1230300384  /  /   test data record  43         
+41506BALDWIN,RAY B                 P. O. BOX 2067                                              Somewhere       TX12345     1230301385  /  /   test data record  44         
+42134HERBST,TOM W.                 325 WILLOW DRIVE                                            Somewhere       TX12345     1230302386  /  /   test data record  45         
+41979HALL,ROGER                    P.O.BOX 1761                                                Somewhere       TX12345     1230303387  /  /   test data record  46         
+42077ELLIS,JIMMY E.                P.O. BOX 1775                                               Somewhere       TX12345     1230304388  /  /   test data record  47         
+41516JACKSON,ROBERT M.,JR          P. O. BOX 2068                                              Somewhere       TX12345     1230305389  /  /   test data record  48         
+42317MANICOM,ROY T.,JR             RT. 8,BOX 205                                               Somewhere       TX12345     1230306380  /  /   test data record  49         

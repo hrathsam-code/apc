@@ -1,0 +1,122 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APDIST.IO                                                      ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:    Accounts Payable GL Distribution File Definitions              ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $APDISTVAR
+$APDISTVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APDIST        RECORD
+Entity        DIM               8          1 - 8
+SubEntity     DIM               8          9 - 16
+Vendor        DIM               6         17 - 22
+TransDate     DIM               8         23 - 30
+GLCode        DIM               8         31 - 38
+PostedToGL    FORM              1         39 - 39
+SeqMajor      FORM              7         40 - 46
+TransCode     FORM              1         47 - 47              //0 = Check, 1=Debit Memo, 2=Credit Memo
+Year          DIM               4         48 - 51
+Month         FORM              2         52 - 53
+DebitAmount   FORM              7.2       54 - 63
+CreditAmount  FORM              7.2       64 - 73
+Voucher       FORM              7         74 - 80           //HR 6/1/2005
+CheckNo       FORM              10        81 - 90
+Description   DIM               80        91 - 170
+SeqMinor      FORM              3        171 - 173
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APDISTK1SIZE CONST            "30"                                    (Length of the Key variable)
+APDISTK2SIZE CONST            "48"                                    (Length of the Key variable 2)
+APDISTK3SIZE CONST            "26"                                    (Length of the Key variable 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+APDISTI1DEF  INIT             "1-8,9-16,40-46,171-173"                (Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+..HR 10/7/2005   APDISTI2DEF  INIT             "1-8,31-38,9-16,48-53,40-46,171-173"    (Index definitions for Key 2)
+.
+APDISTI2DEF  INIT             "1-8,31-38,9-16,23-30,40-46,171-173"    (Index definitions for Key 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+APDISTI3DEF  INIT             "1-8,40-46,31-38,171-173"               (Index definitions for Key 2)
+.
+APDISTFSIZE  CONST            "190"                                   (Length of each Record)
+
+APDISTKY    DIM               APDISTK1SIZE                            (The Actual 'Key' variable)
+APDISTKY2   DIM               APDISTK2SIZE                            (The Actual 'Key' variable)
+APDISTKY3   DIM               APDISTK3SIZE                            (The Actual 'Key' variable)
+
+APDISTPROG  INIT              "Program Name"
+APDISTTITLE INIT              "Record Title"                         (Description used later for headers, etc)
+APDISTHELP  INIT              "APDIST.HLP"              (Name of the Help file for later purposes)
+
+APDISTTXTNM  INIT             "$APDATA\","DISTFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+APDISTISI1NM INIT             "$APDATA\","DISTFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+APDISTISI2NM INIT             "$APDATA\","DISTFL2.ISI"               .Actual ISI Filename
+APDISTISI3NM INIT             "$APDATA\","DISTFL3.ISI"               .Actual ISI Filename
+
+APDISTFLST  FILELIST
+           %IFDEF            APDISTKY
+APDISTFL    IFILE             Name=APDISTISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY2
+APDISTFL2   IFILE             Name=APDISTISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY3
+APDISTFL3   IFILE             Name=APDISTISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY4
+APDISTFL4   IFILE             Name=APDISTISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY5
+APDISTFL5   IFILE             Name=APDISTISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY6
+APDISTFL6   IFILE             Name=APDISTISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY7
+APDISTFL7   IFILE             Name=APDISTISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY8
+APDISTFL8   IFILE             Name=APDISTISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDISTKY9
+APDISTFL9   IFILE             Name=APDISTISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $APDISTIO
+           GOTO                 #s
+           INCLUDE           APDIST.IO
+#s
+         %ENDIF

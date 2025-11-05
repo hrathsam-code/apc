@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>1D6901A8E67FA1D5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+
+<?xml version="1.0"?>
+<ShipmentConfirmRequest xml:lang="en-US">
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Customer Comment</CustomerContext>
+    </TransactionReference>
+    <RequestAction>ShipConfirm</RequestAction>
+    <RequestOption>validate</RequestOption>
+  </Request>
+  <LabelSpecification>
+    <LabelPrintMethod>
+      <Code>GIF</Code>
+      <Description>gif file</Description>
+    </LabelPrintMethod>
+    <HTTPUserAgent>Mozilla/4.5</HTTPUserAgent>
+    <LabelImageFormat>
+      <Code>GIF</Code>
+      <Description>gif</Description>
+    </LabelImageFormat>
+  </LabelSpecification>
+  <Shipment>
+   <RateInformation>
+    </RateInformation>
+    <Shipper>
+      <Name>before Shipper Name</Name>
+      <PhoneNumber>1234567890</PhoneNumber>
+      <ShipperNumber>156620</ShipperNumber>
+          <TaxIdentificationNumber>1234567877</TaxIdentificationNumber>
+      <Address>
+        <AddressLine1>Address Line</AddressLine1>
+        <City>City</City>
+        <StateProvinceCode>MD</StateProvinceCode>
+        <PostalCode>21093</PostalCode>
+        <PostcodeExtendedLow></PostcodeExtendedLow>
+        <CountryCode>US</CountryCode>
+     </Address>
+    </Shipper>
+        <ShipTo>
+     <CompanyName>Ship To Company Name</CompanyName>
+      <AttentionName>Ship To Attn Name</AttentionName>
+      <PhoneNumber>9722537171</PhoneNumber>
+      <Address>
+        <AddressLine1>2357 MELVIN PL</AddressLine1>
+        <City>SEAFORD</City>
+        <StateProvinceCode>NY</StateProvinceCode>
+        <PostalCode>11783</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipTo>
+    <ShipFrom>
+      <CompanyName>Ship From Company Name</CompanyName>

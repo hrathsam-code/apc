@@ -1,0 +1,22 @@
+              INCLUDE           workvar.inc
+
+InputCount    FORM              7
+
+              INCLUDE           Sequence.FD
+              INCLUDE           Cust.Fd
+
+
+             CALL              OpenCust
+
+              MOVE              " ",CustKY
+              CALL              RDCust
+              loop
+                CALL              KSCust
+              until             (ReturnFL = 1)
+                clear                    Cust.ShippintAcct(1)
+                clear                    Cust.ShippintAcct(2)
+
+                call                     UPDCust
+
+              REPEAT
+              KEYIN           *p1:24,"Acct Added",ans

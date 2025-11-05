@@ -1,0 +1,745 @@
+...........................................................
+. SMUSYSUD - ENTER/MODIFY/DELETE SYSTEM USER FILE RECORDS .
+...........................................................
+. LAST REVISION - 11/26/01
+.
+. 11/26/01 - Added a User Location Field to User MAster File
+.
+         INCLUDE   NCOMMON.TXT
+.
+REPLY    DIM       1
+IOSW     DIM       1
+DIM2     DIM       2
+DIM3     DIM       3
+DIM9     DIM       9
+AWK2     INIT      "  "
+NWK2     FORM      2
+.
+.
+USERFIL  IFILE     "KEYL=9,UNCOMPRESSED,FIX=30,NODUP
+USERFILN INIT      "SRESUF.ISI"
+USERKEY  DIM       9
+.
+USERID   DIM       9         1 -  9    User ID Number
+USER     DIM       20       10 - 29    User Name
+USERLOC  DIM       1        30 - 30    User Location
+.                                      1=NY, 2=SC, 3=NV
+.
+USERREC  DIM       31
+USERNM   DIM       20
+USERCOD  DIM       9
+USERTABS INIT      "21"
+.
+USERSYS  IFILE     "KEYL=11,UNCOMPRESSED,FIX=13,NODUP
+USERSYSN INIT      "USERSYS.ISI"
+USERSKEY DIM       11
+.
+USYSID   DIM       9         1 -  9    User ID Number
+USYSCOD  DIM       2        10 - 11    Application System Code
+USYSLVL  FORM      2        12 - 13    User Security Level for Application
+.
+LOCLIMIT FORM      "3"
+LOCIDX   FORM      1
+LOCS     DIM       1(3),("1"),("2"),("3")
+.
+USYSREC  DIM       36
+USYSDSC  DIM       28
+USYSCD   DIM       2
+USYSLV   DIM       2
+UTABSETS INIT      "4;33"
+.
+.
+MENUSYS  IFILE     "KEYL=2,UNCOMPRESSED,FIX=30,NODUP
+MENUSYSN INIT      "MENUSYS.ISI"
+MENUSKEY DIM       2
+.
+MSYSID   DIM       2         1 -  2    Application System Code
+MSYSDSC  DIM       28        3 - 30    Application Description         
+.
+MENUREC  DIM       32
+MNUDESC  DIM       28
+MENUCOD  DIM       2
+SPACE    INIT      " "
+SP1      INIT      " "
+TAB      INIT      011
+TABSETS  INIT      "4"
+.
+NDX      FORM      3
+XDX      FORM      3
+AFTRITM  FORM      3
+.
+CHGFLAG  INIT      " "
+NAMFLAG  INIT      " "
+EOJFLAG  INIT      " "
+XITFLAG  INIT      " "
+OPMODE   INIT      " "
+NULLFLD  INIT      "                              ":
+                   "                              "
+CnclButton BUTTON
+QuitButton BUTTON
+WritButton BUTTON
+GetButton  BUTTON
+AddButton  BUTTON
+ChgButton  BUTTON
+NewButton  BUTTON
+RemButton  BUTTON
+.
+.
+TITLTXT  INIT      "SYSTEM USER FILE MAINTENANCE"
+PROGNTXT INIT      "SMUSYSUD"
+FLD01TXT INIT      "User ID"
+FLD02TXT INIT      "User Name"
+FLD2ATXT INIT      "Location"
+FLD03TXT INIT      "Code"
+FLD04TXT INIT      "Application Description"
+FLD05TXT INIT      "Level"
+.
+TITLE    STATTEXT
+PROGNAME STATTEXT
+CURRDATE STATTEXT
+PRMT01   STATTEXT
+PRMT02   STATTEXT
+PRMT02A  STATTEXT
+PRMT03   STATTEXT
+PRMT04   STATTEXT
+PRMT05   STATTEXT
+.
+ENTRY01  EDITTEXT
+ENTRY02  EDITTEXT
+ENTRY02A EDITTEXT
+ENTRY03  EDITTEXT
+ENTRY04  EDITTEXT
+ENTRY05  EDITTEXT
+.
+MENULST  DATALIST
+USERLST  DATALIST
+USRAPPS  DATALIST
+.
+BLUE     COLOR
+BLACK    COLOR
+RED      COLOR
+.
+EVENTS   INIT      "YYYYNN"
+.
+RESULT   FORM      4
+RESULTR  FORM      4
+DA       DIALOG
+DDATA    INIT      "FONTSIZE=8,POS=5:5,SIZE=45:9,":
+                   "TYPE=MODELESS,":
+                   "TEXT=3:5:5:40:'IF YOU HAVE COME HERE ERRONEOUSLY ":
+                   "FROM THE SYSTEM MENUS":
+                   " AND DO NOT WANT TO RUN THIS PROGRAM, ":
+                   "YOU MAY EXIT BY":
+                   " CLICKING THE Quit BUTTON... ":
+                   "OTHERWISE, CLICK Continue',":
+                   "BUTTON=7:8:14:20:'&Continue',": 
+                   "BUTTON=7:8:26:32:'&Quit'" 
+.
+SAVEBOX  DIALOG
+SDATA    INIT      "FONTSIZE=8,POS=5:5,SIZE=45:9,":
+                   "TYPE=MODELESS,":
+                   "TEXT=3:5:5:40:'THIS RECORD HAS CHANGED!  DO YOU ":
+                   "WANT TO SAVE YOUR ":
+                   "CHANGES BEFORE CONTINUING?           ":
+                   "     CLICK THE Save ":
+                   "BUTTON TO SAVE YOUR CHANGES, or ":
+                   "CLICK Discard TO CONTINUE WITHOUT SAVING.',":
+                   "BUTTON=7:8:14:20:'&Save',": 
+                   "BUTTON=7:8:26:32:'&Discard'" 
+.
++........................................................................
+. 
+         CREATE    BLUE=*BLUE
+         CREATE    BLACK=*BLACK
+         CREATE    RED=*RED
+         SETMODE   *LTGRAY=ON,*3D=ON,*DEFILTER=EVENTS,*SCREEN=OFF
+         WINERASE                        
+         CREATE    DA,DDATA
+         ACTIVATE  DA,TESTIT,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+TESTIT   BRANCH    RESULT OF NULL,MAINLINE,INDXIT
+.
+NULL     RETURN
+.
+INDXIT   WINERASE
+         BEEP
+         CHAIN     FROMPGM
+. 
+MAINLINE MOVE      " ",REPLY
+         DEACTIVATE DA
+.
+.
+         CREATE PROGNAME=1:2:1:11,PROGNTXT,"HELVETICA",BORDER:
+                                  STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE TITLE=1:2:23:58,TITLTXT,"HELVETICA(10,BOLD)",CENTER,BORDER:
+                                STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE  CURRDATE=1:2:72:80,TODAY,"HELVETICA",BORDER:
+                                    STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE  PRMT01=4:5:1:9,FLD01TXT,"HELVETICA",BORDER:
+                                STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE  PRMT02=4:5:24:33,FLD02TXT,"HELVETICA",BORDER:
+                                  STYLE=3DOUT,FGCOLOR=BLUE  
+         CREATE  PRMT02A=4:5:59:67,FLD2ATXT,"HELVETICA",BORDER:
+                                  STYLE=3DOUT,FGCOLOR=BLUE  
+         CREATE  PRMT03=16:17:20:24,FLD03TXT,"HELVETICA",CENTER,BORDER:
+                                    STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE  PRMT04=16:17:28:53,FLD04TXT,"HELVETICA",CENTER,BORDER:
+                                    STYLE=3DOUT,FGCOLOR=BLUE
+         CREATE  PRMT05=16:17:56:62,FLD05TXT,"HELVETICA",CENTER,BORDER:
+                                    STYLE=3DOUT,FGCOLOR=BLUE  
+.
+       CREATE  ENTRY01=4:5:11:21,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                 PASSWORD,MAXCHARS=9
+       CREATE  ENTRY02=4:5:35:56,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                 MAXCHARS=20
+       CREATE  ENTRY02A=4:5:69:71,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                 MAXCHARS=1
+       CREATE  ENTRY03=18:19:21:23,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                   MAXCHARS=2
+       CREATE  ENTRY04=18:19:26:55,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                   MAXCHARS=28
+       CREATE  ENTRY05=18:19:57:61,FONT="HELVETICA",BORDER,FGCOLOR=BLACK:
+                                   MAXCHARS=2
+.
+       CREATE  AddButton=7:8:33:41,"&Add"
+       CREATE  ChgButton=9:10:33:41,"&Change"
+       CREATE  RemButton=11:12:33:41,"&Remove"
+       CREATE  NewButton=23:24:15:23,"&NewUser"
+       CREATE  GetButton=23:24:25:33,"&GetUser"
+       CREATE  WritButton=23:24:45:53,"&Save"  
+       CREATE  QuitButton=23:24:55:63,"&Quit"
+       CREATE  CnclButton=23:24:65:73,"Ca&ncel"
+       CREATE  SaveBox,SDATA
+.
+.
+.
+. Open the Application Descriptions File
+.
+         CALL      MENUSOPN
+.
+. Open the System Users File
+.
+         CALL      USEROPEN
+.
+. Open the User/Application File
+.
+         CALL      USERSOPN
+.
+. Create a DATALIST object which contains the application descriptions
+.
+         CREATE    MENULST=7:14:1:31,FONT="HELVETICA",TABSTOPS=TABSETS
+.
+. Insert the application descriptions into the DATALIST
+.
+         MOVE      "1" TO XDX
+         MOVE      "0" TO AFTRITM
+         LOOP
+           READKS  MENUSYS;MSYSID,MSYSDSC
+           GOTO    ENDLOOP IF OVER
+           PACKKEY    MENUREC WITH MSYSID,TAB,MSYSDSC
+           INSERTITEM MENULST,AFTRITM,MENUREC
+BYPINS     MOVE    "999" TO AFTRITM
+           ADD     "1",XDX
+         REPEAT    
+ENDLOOP
+.
+.
+START
+*............................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+LOOP
+.
+         ACTIVATE  TITLE
+         ACTIVATE  PROGNAME
+         ACTIVATE  CURRDATE
+         ACTIVATE  PRMT01
+         ACTIVATE  PRMT02
+         ACTIVATE  PRMT02A
+.
+         ACTIVATE  ENTRY01
+         ACTIVATE  ENTRY02
+         ACTIVATE  ENTRY02A
+         ACTIVATE  QuitButton,EOJ,RESULT
+         ACTIVATE  NewButton,ADDKEY,RESULT
+         ACTIVATE  GetButton,GETKEY,RESULT
+         ACTIVATE  CnclButton,CLRADDS,RESULT
+.
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+.
+GETKEY   CALL      CHKSAV
+         DEACTIVATE NewButton
+         DEACTIVATE GetButton
+.
+. Open the System Users File
+.
+         CALL      USEROPEN
+.
+. Create a DATALIST object which contains the user records
+.
+         CREATE    USERLST=15:22:30:51,FONT="HELVETICA",TABSTOPS=USERTABS
+.
+. Insert the user records into the DATALIST
+.
+         MOVE      "1" TO XDX
+         MOVE      "0" TO AFTRITM
+         LOOP
+           READKS  USERFIL;USERID,USER,USERLOC
+           GOTO    ENDLOOPU IF OVER
+           PACKKEY    USERREC WITH USER,TAB,USERID
+           INSERTITEM USERLST,AFTRITM,USERREC
+           MOVE    "999" TO AFTRITM
+           ADD     "1",XDX
+         REPEAT    
+ENDLOOPU
+.
+. Show the DATALIST
+.
+         ACTIVATE  USERLST,GETUSER,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+.
+. Retrieve an item from the DATALST object 
+.
+GETUSER 		                    ;
+         DEACTIVATE USERLST
+	GETITEM   USERLST,RESULT,USERREC
+         UNPACK    USERREC INTO USERNM,SP1,USERCOD
+.
+         MOVE      USERCOD TO USERKEY
+         DESTROY   USERLST
+.
+MODIFYIT          
+.
+.
+         READ      USERFIL,USERKEY;USERID,USER,USERLOC
+.
+         GOTO      MODIFY IF NOT OVER
+         BEEP
+         ALERT     CAUTION,"INVALID USER CODE - CANNOT MODIFY!",RESULT
+         GOTO      GETKEY
+.
+. Add a New Code to the Table
+.
+ADDKEY   CALL      CHKSAV
+         DEACTIVATE GetButton
+         DEACTIVATE NewButton
+.
+NEWONE   ALERT     NOTE,"THIS IS A NEW USER RECORD ",RESULT
+.
+         MOVE      NULLFLD TO USERID
+         MOVE      NULLFLD TO USER
+         MOVE      NULLFLD TO USERLOC
+         SETITEM   ENTRY01,0,NULLFLD
+         SETITEM   ENTRY02,0,NULLFLD
+         SETITEM   ENTRY02A,0,NULLFLD
+.
+         ACTIVATE  ENTRY01,K01,RESULT
+         SETFOCUS  ENTRY01
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+CHKADD
+         MOVE      USERID TO USERKEY
+.
+         READ      USERFIL,USERKEY;DIM9
+         GOTO      ADDOK IF OVER
+         ALERT     CAUTION,"THAT USER IS ALREADY ON FILE!",RESULT
+         CALL      CLRADDS
+         RETURN
+.
+ADDOK    
+         SETITEM   ENTRY01,0,USERID
+.
+.
+ADDLOOP
+         CREATE    USRAPPS=7:14:43:80,FONT="HELVETICA",SORTED,TABSTOPS=UTABSETS
+         ACTIVATE  ENTRY01
+         ACTIVATE  ENTRY02,K02,RESULT
+         ACTIVATE  ENTRY02A,K02A,RESULT
+         ACTIVATE  MENULST,GETAPPS,RESULT
+         ACTIVATE  USRAPPS,PROCAPPS,RESULTR
+         ACTIVATE  PRMT03
+         ACTIVATE  PRMT04
+         ACTIVATE  PRMT05
+         ACTIVATE  ENTRY03
+         ACTIVATE  ENTRY04
+         ACTIVATE  ENTRY05
+         ACTIVATE  AddButton,ADDAPPS,RESULT
+         ACTIVATE  ChgButton,CHGAPPS,RESULT
+         ACTIVATE  RemButton,REMAPPS,RESULT
+         ACTIVATE  WritButton,SAVE,RESULT
+         SETFOCUS  ENTRY02
+         DISABLEITEM  AddButton
+         DISABLEITEM  ChgButton
+         DISABLEITEM  RemButton
+         MOVE      "A" TO OPMODE
+         MOVE      "X" TO CHGFLAG
+.
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+.
+.
+PROCAPPS
+         GETITEM   USRAPPS,RESULTR,USYSREC
+         UNPACK    USYSREC INTO USYSCD,REPLY,USYSDSC,REPLY,USYSLV
+         SETITEM   ENTRY03,0,USYSCD
+         SETITEM   ENTRY04,0,USYSDSC
+         SETITEM   ENTRY05,0,USYSLV
+         SETFOCUS  ENTRY05
+         ACTIVATE  ENTRY05,K05,RESULT
+         ENABLEITEM  ChgButton
+         ENABLEITEM  RemButton
+         RETURN
+.
+LOADAPPS
+         PACKKEY   USERSKEY WITH USERID
+         READ      USERSYS,USERSKEY;DIM3;
+         MOVE      "1" TO XDX
+         MOVE      "0" TO AFTRITM
+         LOOP
+           READKS  USERSYS;USYSID,USYSCOD,USYSLVL
+           GOTO    ENDLOOPS IF OVER
+           MATCH   USYSID TO USERID
+           GOTO    ENDLOOPS IF NOT EQUAL
+           PACKKEY MENUSKEY WITH USYSCOD
+           READ    MENUSYS,MENUSKEY;MSYSID,MSYSDSC
+           MOVE    MSYSDSC TO USYSDSC
+           PACKKEY USYSREC WITH USYSCOD,TAB,USYSDSC,TAB,USYSLVL
+           INSERTITEM  USRAPPS,AFTRITM,USYSREC
+           MOVE    "999" TO AFTRITM
+           ADD     "1" TO XDX
+         REPEAT
+ENDLOOPS
+         RETURN                    
+.
+MODIFY   
+         MOVE      "U" TO OPMODE
+.
+*............................................................
+. DISPLAY VARIABLES
+DISPVAR  NORETURN
+         CREATE    USRAPPS=7:14:43:80,FONT="HELVETICA",SORTED,TABSTOPS=UTABSETS
+         CALL      LOADAPPS
+         SETITEM   ENTRY01,0,USERID
+         SETITEM   ENTRY02,0,USER
+         SETITEM   ENTRY02A,0,USERLOC
+         ACTIVATE  PRMT03
+         ACTIVATE  PRMT04
+         ACTIVATE  PRMT05
+.
+.
+         ACTIVATE  ENTRY01
+         ACTIVATE  ENTRY02,K02,RESULT
+         ACTIVATE  ENTRY02A,K02A,RESULT
+         ACTIVATE  MENULST,GETAPPS,RESULT
+         ACTIVATE  USRAPPS,PROCAPPS,RESULTR
+         ACTIVATE  ENTRY03
+         ACTIVATE  ENTRY04
+         ACTIVATE  ENTRY05
+         ACTIVATE  AddButton,ADDAPPS,RESULT
+         ACTIVATE  ChgButton,CHGAPPS,RESULT
+         ACTIVATE  RemButton,REMAPPS,RESULT
+         ACTIVATE  WritButton,SAVE,RESULT
+         DISABLEITEM  AddButton
+         DISABLEITEM  ChgButton
+         DISABLEITEM  RemButton
+.
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+*............................................................
+. Routine to select an application from the menu list
+.
+GETAPPS  GETITEM   MENULST,RESULT,MENUREC
+         UNPACK    MENUREC INTO USYSCD,REPLY,USYSDSC
+         SETITEM   ENTRY03,0,USYSCD
+         SETITEM   ENTRY04,0,USYSDSC
+         SETFOCUS  ENTRY05
+         ACTIVATE  ENTRY05,K05,RESULT
+         ENABLEITEM  AddButton
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.                    
+*............................................................
+. Routine to add an application to the User/Application List
+.
+ADDAPPS  PACKKEY   USERSKEY WITH USERID,USYSCD
+         READ      USERSYS,USERSKEY;DIM9
+         GOTO      ENDADD IF NOT OVER
+         MOVE      USERID TO USYSID
+         MOVE      USYSCD TO USYSCOD
+         WRITE     USERSYS,USERSKEY;USYSID,USYSCOD,USYSLVL
+         PACKKEY   USYSREC WITH USYSCOD,TAB,USYSDSC,TAB,USYSLVL
+         MOVE      "999" TO AFTRITM
+         INSERTITEM  USRAPPS,AFTRITM,USYSREC
+         ADD       "1" TO XDX
+ENDADD   DISABLEITEM  AddButton
+         RETURN
+.
+*............................................................
+. Routine to change a security level on the User/Application List
+.
+CHGAPPS
+         PACKKEY   USERSKEY WITH USERID,USYSCD
+         READ      USERSYS,USERSKEY;USYSID,USYSCOD,USYSLV
+         GOTO      ENDCHG IF OVER
+         UPDATE    USERSYS;USYSID,USYSCOD,USYSLVL
+         DELETEITEM  USRAPPS,RESULTR
+         PACKKEY   USYSREC WITH USYSCD,TAB,USYSDSC,TAB,USYSLVL
+         INSERTITEM  USRAPPS,RESULTR,USYSREC
+ENDCHG   DISABLEITEM  ChgButton
+         DISABLEITEM  RemButton           
+         RETURN
+.
+*............................................................
+. Routine to remove an application to the User/Application List
+.
+REMAPPS  
+         PACKKEY   USERSKEY WITH USERID,USYSCD
+         READ      USERSYS,USERSKEY;USYSID,USYSCOD,USYSLV
+         GOTO      ENDREM IF OVER
+         DELETE    USERSYS,USERSKEY
+         DELETEITEM  USRAPPS,RESULTR
+ENDREM   DISABLEITEM  ChgButton
+         DISABLEITEM  RemButton           
+         RETURN
+.
+*............................................................
+. USER ID CODE (PRIMARY KEY TO FILE)
+.
+K01      COMPARE   "2" TO RESULT
+         RETURN    IF NOT EQUAL
+K01A     CLEAR     USERID
+         GETITEM   ENTRY01,0,USERID
+         NORETURN
+         GOTO      CHKADD
+*............................................................
+. USER NAME
+.
+K02      COMPARE   "2" TO RESULT
+         RETURN    IF NOT EQUAL
+         CLEAR     USER
+         GETITEM   ENTRY02,0,USER
+         MOVE      "X" TO CHGFLAG
+         RETURN
+.
+*............................................................
+. USER LOCATION
+.
+K02A     COMPARE   "2" TO RESULT
+         RETURN    IF NOT EQUAL
+         CLEAR     USERLOC
+         GETITEM   ENTRY02A,0,USERLOC
+         SEARCH    USERLOC FROM LOCS(1) TO LOCLIMIT INTO LOCIDX
+         GOTO      LOCOK IF EQUAL
+         ALERT     CAUTION,"LOCATION OUT OF RANGE",RESULT
+         SETFOCUS  ENTRY02A
+         RETURN
+LOCOK    MOVE      "X" TO CHGFLAG
+         RETURN
+.
+*............................................................
+. USER'S SECURITY LEVEL FOR A GIVEN APPLICATION
+.
+K05      COMPARE   "2" TO RESULT
+         RETURN    IF NOT EQUAL
+K05A     CLEAR     USYSLVL
+         MOVE      "0" TO NWK2
+         GETITEM   ENTRY05,0,AWK2
+         TYPE      AWK2
+         GOTO      MOV05 IF NOT EQUAL
+         MOVE      AWK2 TO NWK2
+MOV05    MOVE      NWK2 TO USYSLVL
+         MOVE      "X" TO CHGFLAG
+         RETURN
+.
+.............................................................
+SAVE     MATCH     "A" TO OPMODE
+         GOTO      WRITE IF EQUAL
+UPDAT    MATCH     "X" TO CHGFLAG
+         GOTO      NOCHG IF NOT EQUAL
+.
+         TRAP      BDMNUIO IF IO
+         UPDATE    USERFIL;USERID,USER,USERLOC
+         TRAPCLR   IO
+.
+.
+ENDUP    MOVE      " " TO CHGFLAG
+         MOVE      " " TO OPMODE
+         MOVE      " " TO NAMFLAG
+         CALL      CLRENTRY
+         MATCH     "X" TO EOJFLAG
+         RETURN    IF NOT EQUAL
+         NORETURN
+         GOTO      EOJOK
+.
+NOCHG    ALERT     NOTE,"You didn't change anything!",RESULT
+         GOTO      EXITPNT
+.
+USEROPEN TRAP      NOUSER IF IO
+         OPEN      USERFIL,USERFILN
+         TRAPCLR   IO
+         GOTO      USEROPND
+.         
+NOUSER   ALERT     CAUTION,"Authorized User File NOT FOUND!",RESULT
+         CHAIN     FROMPGM
+.
+USEROPND RETURN         
+.
+.
+USERSOPN TRAP      NOUSERS IF IO
+         OPEN      USERSYS,USERSYSN
+         TRAPCLR   IO
+         GOTO      USRSOPND
+.         
+NOUSERS  ALERT     CAUTION,"User/Application File NOT FOUND!",RESULT
+         CHAIN     FROMPGM
+.
+USRSOPND RETURN         
+.
+.
+MENUSOPN TRAP      NOMENUS IF IO
+         OPEN      MENUSYS,MENUSYSN
+         TRAPCLR   IO
+         GOTO      MENUOPND
+.         
+NOMENUS  ALERT     CAUTION,"Application Code Table NOT FOUND!",RESULT
+         CHAIN     FROMPGM
+.
+MENUOPND RETURN         
+.
+BDMNUIO
+         ALERT     CAUTION,"ERROR ON APPLICATION FILE!",RESULT
+         CHAIN     FROMPGM
+.....................................................................
+.
+WRITE    MATCH     "X" TO CHGFLAG
+         GOTO      NOCHG IF NOT EQUAL
+.
+         TRAP      BDMNUIO IF IO
+         WRITE     USERFIL,USERKEY;USERID,USER,USERLOC
+         TRAPCLR   IO
+.
+.
+         MOVE      " " TO CHGFLAG
+         MATCH     "X" TO EOJFLAG
+         GOTO      ENDWT IF EQUAL
+         MATCH     "X" TO XITFLAG
+         GOTO      ENDWT IF EQUAL
+ENDWT    MOVE      " " TO CHGFLAG
+         MOVE      " " TO NAMFLAG
+         MOVE      " " TO XITFLAG
+         CALL      CLRADDS
+         MATCH     "X" TO EOJFLAG
+         RETURN    IF NOT EQUAL
+         NORETURN
+         GOTO      EOJOK
+.
+.
+CLRADDS  MOVE      NULLFLD TO USERID
+         MOVE      NULLFLD TO USER
+         MOVE      NULLFLD TO USERLOC
+CLRENTRY
+         MOVE      " " TO CHGFLAG
+         SETITEM   ENTRY01,0,NULLFLD
+         SETITEM   ENTRY02,0,NULLFLD
+         SETITEM   ENTRY02A,0,NULLFLD
+         SETITEM   ENTRY03,0,NULLFLD
+         SETITEM   ENTRY04,0,NULLFLD
+         SETITEM   ENTRY05,0,NULLFLD
+EXITPNT
+         DEACTIVATE  WritButton
+         DEACTIVATE  USRAPPS
+         DESTROY     USRAPPS
+         DEACTIVATE  MENULST
+         DEACTIVATE  PRMT03
+         DEACTIVATE  PRMT04
+         DEACTIVATE  PRMT05
+         DEACTIVATE  ENTRY03
+         DEACTIVATE  ENTRY04
+         DEACTIVATE  ENTRY05
+         DEACTIVATE  AddButton
+         DEACTIVATE  ChgButton
+         DEACTIVATE  RemButton
+         ACTIVATE  NewButton,ADDKEY,RESULT
+         ACTIVATE  GetButton,GETKEY,RESULT
+         RETURN
+.
+.
+CHKSAV   MATCH     "X" TO CHGFLAG
+         RETURN    IF NOT EQUAL
+         ACTIVATE  SAVEBOX,TESTSV1,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+TESTSV1  BRANCH    RESULT OF NULLSV1,SAVEIT,DUMPIT
+.
+NULLSV1  RETURN
+.
+SAVEIT   MATCH     "A" TO OPMODE
+         GOTO      DOWRIT IF EQUAL
+         MATCH     "U" TO OPMODE
+         GOTO      DOUPDT IF EQUAL
+         NORETURN
+         GOTO      EXITSV1
+.
+DOWRIT   MOVE      "X" TO XITFLAG
+         CALL      WRITE
+         NORETURN
+         GOTO      EXITSV1
+.
+DOUPDT   CALL      UPDAT
+         NORETURN
+         GOTO      EXITSV1
+.
+DUMPIT   NORETURN
+.
+EXITSV1  DEACTIVATE SAVEBOX
+         MOVE      " " TO CHGFLAG
+         MOVE      " " TO XITFLAG
+         RETURN
+.
+*............................................................
+. END OF JOB
+EOJ      MATCH     "X" TO CHGFLAG
+         GOTO      EOJOK IF NOT EQUAL
+         ACTIVATE  SAVEBOX,TESTSAV,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+TESTSAV  BRANCH    RESULT OF NULLSAV,DOSAVE,EOJOK
+.
+NULLSAV  RETURN
+.
+DOSAVE   MATCH     "A" TO OPMODE
+         CALL      WRITE IF EQUAL
+         MATCH     "U" TO OPMODE
+         CALL      UPDAT IF EQUAL  
+EOJOK
+.
+         CHAIN     FROMPGM
+.
+

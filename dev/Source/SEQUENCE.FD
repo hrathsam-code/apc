@@ -1,0 +1,74 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Sequence.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    12-06-2018 At 11:57                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              001.02   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;
+                     %IFNDEF $SequenceVAR
+$SequenceVAR                     EQUATE         1
+;
+;
+;         Field Definitions
+;=============================================================================;
+;
+;
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+Sequence                         RECORD
+Code                             Dim                6                   1 - 6        //1 - 6
+SeqNo                            Form               9                   7 - 15       //7 - 15
+                                 RECORDEND
+;
+;======================================================================================;
+TempSequence                        record          like   Sequence
+OrigSequence                        record          like   Sequence
+SaveSequence                        record          like   Sequence
+;======================================================================================;
+;
+; File Keys and File Labels
+; --------------------------------------------------
+SequenceTXTNM                          INIT         "Sequence.TXT"
+SequenceISI1NM                         INIT         "Sequence.ISI"
+SequenceI1DEF                           init            "-n,z,y,1-6"
+.
+. By Code
+.
+SequenceKY                       DIM                 6
+;=============================================================================;
+;
+SequenceFLST                         FILELIST
+SequenceFL                          IFILE              name="Sequence.ISI",FIX=15,NODUP,NOPATH
+                                    FILELISTEND
+
+SequenceFileSize       CONST      "15"
+
+SequenceProg           INIT       "Sequence Program"
+SequenceDesc           INIT       "Sequence Maintenance"
+SequenceTITLE          INIT       "Sequence Record"
+SequenceHelp           INIT       "Sequence.HLP"
+
+
+
+
+          %ENDIF          //End of FD Include File
+
+
+          %IFNDEF $SequenceVARIO
+            INCLUDE Sequence.IO
+          %ENDIF          //End of IO Include File

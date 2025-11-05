@@ -1,0 +1,359 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    prtcashr                                                       ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/28/2019 at 11:04am                                          ;
+;                                                                             ;
+;  purpose:    Create the Cash Requirements Program                           ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/28/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+              INCLUDE           NCOMMON.TXT
+              INCLUDE           WORKVAR.INC
+
+ItemCount  FORM              6
+TransDate  DIM               8
+DueDate    DIM               8
+DiscDate   DIM               8
+ProcessDate   DIM               8
+HoldFlag   DIM               1
+AgingDays  FORM              5
+AGINGDAYSD dim               3
+CityState  DIM               42
+Days       FORM              10
+....  TodayDays  FORM              10
+AgingDaysW FORM              10
+
+DiscDays      FORM              10                         //HR 8/30/2005
+DiscDaysW     FORM              10                        //HR 8/30/2005
+
+Bucket     FORM              1
+BucketDays FORM                 3(7)
+BucketDaysD DIM                 3
+AgingAmt   FORM              7.2(7)            //Buckets 1 - 4, 5 = Totals for Vendors
+MinBalanceD   DIM               10
+MinBalance    FORM              7.2
+SortedBy      FORM              1
+AtleastOne    DIM               1
+VendorPrinted   DIM               1
+CheckTransactions FORM          4
+X             FORM              4
+AgingFlag     FORM              1
+PriorityFlag  FORM              1
+AutoPayFlag   form              1
+Priority      DIM               1
+ValidTrans    FORM              1
+DiscDatesFlag FORM              1
+
+CheckDetails  FORM              7(1000)
+
+AgingTotals FORM             10.2(7)   1=Current, 2=30-59, 3=60-89, 4=90 +
+CustAging  FORM              10.2(7)          //1 = Details, 2 = Cust Totals, 3 = Report Totals Only
+TempFile   IFILE
+Aging
+TodayDays     FORM              10
+PreviewMode         form               1
+TotalCheckAmt       form               9.2
+ValidTransFlag      form               1
+
+AllCollection COLLECTION
+
+.
+           GOTO              #S
+           INCLUDE           APTRN.FD
+           INCLUDE              ChkRun.FD
+           INCLUDE              ChkRunDT.FD
+           INCLUDE           CMPNY.FD
+              INCLUDE           Bank.FD
+           INCLUDE           Vendor.FD
+           INCLUDE              Sequence.FD
+
+PrtCashR      PLFORM            PrtCashR
+#S
+STARTPGM      routine
+              winhide
+              MOVE              "Y",PrintGuiMode
+
+              CALL              OpenBank
+
+              FORMLOAD          PrtCashR
+
+              MOVE              "  ",BankKY
+              CALL              RDBank
+              LOOP
+                CALL            KSBank
+              UNTIL             (ReturnFL = 1)
+                INSERTITEM        CBank,999,BankREC.Code
+              REPEAT
+
+              SETITEM           CBank,1,1                            //HR 7/26/2005
+
+              clock             TimeStamp,Today8
+              SETPROP           DTProcessingDate,text=TODAY8         //HR 9/1/2005
+              SETPROP           DTToDiscDate,text=TODAY8             //HR 9/1/2005
+.
+. Calculate the 'From' Discount Date
+.
+..              CLOCK             timestamp to DATE8
+              getprop                  DTProcessingDate,text=Date8
+              CALL              ConvDateToDays using DATE8,TodayDays
+              SUBTRACT          "60",TodayDays
+
+              CALL              ConvDaysToDate using TodayDays,DATE8
+              clear             PreviewMode
+              LOOP
+                WAITEVENT
+              REPEAT
+              STOP
+.
+. We never get to this point above
+;==========================================================================================================
+StartPreview
+                    move               "1",PreviewMode
+
+StartPrint
+                    SETMODE           *MCURSOR=*Wait
+
+..HR 2019.2.8                    CLOCK             TimeStamp,ProcessDate
+                    getprop                  DTProcessingDate,text=ProcessDate
+
+                    MOVE              "Y",FirstFlag
+
+..HR 2019.2.8                    CLOCK             timestamp to DATE8
+                    getprop                  DTProcessingDate,text=Date8
+
+                    CALL              ConvDateToDays using DATE8,TodayDays
+
+                    GETITEM           CBPriority,0,PriorityFlag
+                    GETITEM           CBAging,0,AgingFlag
+                    GETITEM           EPriority,0,Priority
+                    GETITEM           CBDiscountDates,0,DiscDatesFlag
+                    getitem           CBAutoPay,0,AutoPayFlag
+
+                    OPEN              VendorFLST,READ
+                    OPEN              APTRNFLST,READ
+
+                    CALL              OpenSequence
+
+                    CALL              OPENCMPNY
+
+                    GETITEM           CBank,0,CBResult
+                    GETITEM           CBank,CBResult,BankREC.Code
+
+                    GETPROP           NAgingDays,Value=AgingDays
+
+                    CALL              OpenCheckRun
+                    CALL              OpenCheckRunDetail
+                    clear              TotalCheckAmt
+
+                    if                 (PreviewMode = 0)
+                      CLEAR             ValidTrans
+                      PACKKEY           CheckRunKY FROM $Entity
+                      CALL              RDCheckRun
+                      LOOP
+                        CALL              KSCheckRun
+                      UNTIL             (ReturnFL = 1)
+                        IF              (CheckRun.Printed = 1 or CheckRun.CheckNo != 0)
+                          SET               ValidTrans
+                          BREAK
+                        ENDIF
+                      REPEAT
+.
+. Do not Prepare the Check Run files if we have valid transactions that still exist within the system
+.
+                      IF                (ValidTrans)
+                        BEEP
+                        ALERT             Stop,"Unable to Run the Cash Requirements Generation programs.  There are still "::
+                                               "valid transactions that exist",result,"Cannot Run Program"
+                        GOTO              ExitProgram
+                      ENDIF
+
+                      CLOSE             CheckRunFLST
+                      close             CheckRunDetailFLST
+
+                      CALL              PrepCheckRun
+                      CALL              PrepCheckRunDetail
+                      CALL              OpenCheckRun
+                      CALL              OpenCheckRunDetail
+                    endif
+
+                    MOVE              " ",VendorKY
+                    CALL              RDVendor
+
+                    LOOP
+                      CALL              KSVendor
+                    UNTIL             (Returnfl = 1)
+                      CALL              CalculateCheckTotals
+                      ADD               "1",ItemCount
+                    REPEAT
+
+                    SETMODE           *MCURSOR=*Wait
+                    if                 (PreviewMode = 1)
+                    clock              Date,Date10
+                    pack               DataLine from "Total Amount Owed as of ",Date10," is : ",TotalCheckAmt
+                    beep
+                    alert              note,DataLine,result,"TOTAL OWED"
+                    endif
+                    GOTO              ExitProgram
+;=============================================================================
+CalculateCheckTotals
+                    clear             ValidTransFlag
+
+                    CLEAR             CheckDetails
+                    CLEAR             CheckRun
+                    MOVE              "0",CheckTransactions
+                    MOVE              $Entity,CheckRun.Entity
+                    MOVE              $Entity,CheckRun.SubEntity
+                    MOVE              Vendor.AccountNumber,CheckRun.Vendor
+                    MOVE              BankREC.Code,CheckRun.BankCode
+                    MOVE              "A",CheckRun.CheckFlag
+                    MOVE              "0",CheckRun.Printed
+                    MOVE              ProcessDate,CheckRun.TransDate
+
+                    PACKKEY           APTRNKY3,$Entity,Vendor.AccountNumber,"O"
+                    CALL              RDAPTRN3
+                    LOOP
+                      CALL              KSAPTRN3
+                    UNTIL             (ReturnFl = 1 or APTRN.Vendor != Vendor.AccountNumber)
+                      CONTINUE          IF (APTRN.HoldFlag = 1)                          //This is on Hold, ignore it!!!
+                      CALL              CalculateAging
+                    REPEAT
+
+                    MOVE              "1",CheckRun.SeqMajor            //HR 8/31/2005
+
+                    FOR                X FROM "1" TO CheckTransactions USING "1"
+                      PACKKEY           APTRNKY2 FROM $Entity,CheckDetails(X)
+                      CALL              RDAPTRN2
+                      IF                (ReturnFl = 1)
+                        ALERT             stop,"Error processing Transactions...Please re-run to generate Check Requirements",result,"Error in Processing"
+                        GOTO              ExitProgram
+                      ENDIF
+
+                      move              "1",ValidTransFlag
+                      MOVE              CheckRun.Entity,CheckRunDetail.Entity
+                      MOVE              CheckRun.SubEntity,CheckRunDetail.SubEntity
+                      MOVE              CheckRun.BankCode,CheckRunDetail.BankCode
+                      MOVE              APTRN.Voucher,CheckRunDetail.Voucher
+                      MOVE              CheckRun.Vendor,CheckRunDetail.Vendor
+                      MOVE              CheckRun.CheckNo,CheckRunDetail.CheckNo
+                      MOVE              APTRN.SeqMajor,CheckRunDetail.SeqMajor
+
+                      CALL              ConvDateToDays using APTRN.DiscDate,DiscDays
+                      IF                (DiscDays >= TodayDays)                           //The Discount Date is BEFORE today's date!!!!
+                        MOVE              APTRN.DiscAmt,CheckRunDetail.DiscAmt
+                      ELSE
+                        MOVE              "0",CheckRunDetail.DiscAmt
+                      ENDIF
+
+                      MOVE              APTRN.Balance,CheckRunDetail.GrossAmount
+                      CALC              CheckRunDetail.NetAmount = CheckRunDetail.GrossAmount - CheckRunDetail.DiscAmt
+                      if               (PreviewMode = 0)
+                        CALL              WrtCheckRunDetail
+                      endif
+                    REPEAT
+
+                    IF                (CheckRun.CheckAmount >= 0 and ValidTransFlag != 0 and PreviewMode = 0)     //Added =0 as per David, 2019.5.3
+                      CALL              WrtCheckRun
+                    ENDIF
+
+                    if                 (CheckRun.CheckAmount > 0)
+                      add                CheckRun.CheckAmount,TotalCheckAmt
+                    endif
+                    RETURN
+.=============================================================================
+. Calculate the Proper Aging Buckets
+.
+CalculateAging
+                    MOVE              "0",AgingAmt
+                    unpack            APTRN.TransDate,CC,YY,MM,DD
+                    PACK              DATE8,CC,YY,MM,DD
+                    CALL              ConvDateToDays using DATE8,Days
+
+                    SUBTRACT          Days,TodayDays,AgingDaysW
+
+                    CALL              ConvDateToDays using APTRN.DiscDate,DiscDays    //HR 9/1/2005 Moved up here
+
+
+...                    IF                ((AgingDaysW > AgingDays and AgingFlag = 1) or:                 //Item falls within 'Include Transaction Days'
+                    IF                ((ProcessDate >= APTrn.DueDate and  AgingFlag = 1) or:                 //Item falls within 'Include Transaction Days'
+                                       (Vendor.Priority <= Priority and PriorityFlag = 1:
+                                                                    and Vendor.Priority != " ") or:    //Priority Flag set and greater than Parameter
+                                       (Vendor.AutoDisburse = 1 and AutoPayFlag = 1) or:
+                                       (DiscDatesFlag = 1 and DiscDays >= TodayDays and APTRN.DiscAmt > 0))
+
+                    IF                (DiscDays >= TodayDays)                           //The Discount Date is BEFORE today's date!!!!
+                      ADD               APTRN.DiscAmt,CheckRun.DiscAmt
+                      CALC              CheckRun.CheckAmount = CheckRun.CheckAmount + (APTRN.Balance - APTRN.DiscAmt)
+                    ELSE
+                      CALC              CheckRun.CheckAmount = CheckRun.CheckAmount + (APTRN.Balance)
+                    ENDIF
+
+                    ADD               APTRN.Balance,CheckRun.GrossAmount
+                    ADD               "1",CheckTransactions
+                    MOVE              APTRN.SeqMajor,CheckDetails(CheckTransactions)
+                    ENDIF
+                    RETURN
+.=============================================================================
+ExitProgram
+                    winshow
+                    CHAIN             FROMPGM
+                    STOP
+.=============================================================================
+OnClickPriority
+                    GETITEM           CBPriority,0,CBResult
+                    IF                (CBresult = 1)
+                      SETITEM           CBPriority,0,0
+                      SETPROP           EPriority,BGCOLOR=$BtnFace,ReadOnly=1
+                    ELSE
+                      SETITEM           CBPriority,0,1
+                      SETPROP           EPriority,BGCOLOR=$Window,ReadOnly=0
+                      SETFOCUS          EPriority
+                    ENDIF
+                    RETURN
+.=============================================================================
+OnClickDiscounts
+                    GETITEM           CBDiscountAmounts,0,CBResult
+                    IF                (CBresult = 1)
+                      SETITEM           CBDiscountAmounts,0,0
+                      SETPROP           NDiscountAmt,BGCOLOR=$BtnFace,ReadOnly=1
+                    ELSE
+                      SETITEM           CBDiscountAmounts,0,1
+                      SETPROP           NDiscountAmt,BGCOLOR=$Window,ReadOnly=0
+                      SETFOCUS          NDiscountAmt
+                    ENDIF
+                    RETURN
+;=============================================================================
+OnClickAging
+                    GETITEM           CBAging,0,CBResult
+                    IF                (CBresult = 1)
+                      SETITEM           CBAging,0,0
+                      SETPROP           NAgingDays,BGCOLOR=$BtnFace,ReadOnly=1
+                    ELSE
+                      SETITEM           CBAging,0,1
+                      SETPROP           NAgingDays,BGCOLOR=$Window,ReadOnly=0
+                      SETFOCUS          NAgingDays
+                    ENDIF
+                    RETURN
+.=============================================================================
+OnClickDiscountDates
+                    GETITEM           CBDiscountDates,0,CBResult
+                    IF                (CBresult = 1)
+                      SETITEM           CBDiscountDates,0,0
+                    SETPROP           DTToDiscDate,Enabled=0
+                    ELSE
+                    SETITEM           CBDiscountDates,0,1
+                    SETPROP           DTToDiscDate,Enabled=1
+                    ENDIF
+                    RETURN

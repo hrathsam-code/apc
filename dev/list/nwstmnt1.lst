@@ -1,0 +1,41 @@
+
+
+
+PAGE    1      nwstmnt1                                                                                       02-11-19 11:35:54
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP nwstmnt1 -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   22.    INCLUDE  A: common.txt
+   27.    INCLUDE  B: rcvbles.txt
+   36.    INCLUDE  C: datetblz.txt
+   42.    INCLUDE  D: custmast.txt
+  220.                                         PRINT     " ",*FLUSH 
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  230.                                         PRINT     *8,INVKEY," ",INVDATE," ",IDOLSLFT,*FLUSH;
+                                                                                                  *WARNING*
+Warning: I/O control not implemented.
+  236.                                         PRINT     *34,INVKEY," ",INVDATE," ",IDOLSLFT,*FLUSH;
+                                                                                                   *WARNING*
+Warning: I/O control not implemented.
+  332.                                         PRINT     " ",*FLUSH 
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  374.                                         PRINT     *1," ",*FLUSH 
+                                                                      *WARNING*
+Warning: I/O control not implemented.
+  419.    INCLUDE  E: custio.txt
+  421.    INCLUDE  F: gtcustks.txt
+  423.    INCLUDE  G: rcvblsio.txt
+  425.    INCLUDE  H: stdtclc1.txt
+  433.                                         DISPLAY   *ES,*P01:04,"UPDATING THE  C U S T O M E R  M A S T E R":
+                                                      *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\nwstmnt1.plc                                                                                                                                                                                                                                   
+      1033 LINES;      0 ERRORS;      6 WARNINGS; Start/Stop: 11:35:54 11:35:54
+  000024B0 DATA;  00000D38  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

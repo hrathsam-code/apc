@@ -1,0 +1,233 @@
+. PAIDFLUD/TXT - UPDATE THE A/P PAID FILE
+. 
+. THIS PROGRAM WILL PERMIT THE UPDATE OF THE G/L CODE, DESCRIPTION, CHECK NO
+. 
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   APPAIDFD
+. 
+APPAIDFL IFILE     KEYL=19,UNCOMPRESSED
+APPAIDNM INIT      "APPAIDFL/ISAM"
+. 
+         INCLUDE   APMASTFD
+. 
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+APMASTNM INIT      "APMASTER/ISAM"
+. 
+APDISTFL IFILE     KEYL=6,UNCOMPRESSED
+APDISTNM INIT      "APDISTFL/ISAM"
+.
+PAIDBYCK IFILE     KEYL=29,UNCOMPRESSED
+PAIDCKNM INIT      "PAIDBYCK/ISAM"
+.
+PAIDBYDT IFILE     KEYL=25,UNCOMPRESSED
+PAIDDTNM INIT      "PAIDBYDT/ISAM"
+.
+CHKKEY   DIM       29
+.
+DATEKEY  DIM       25
+.
+M        DIM       2
+D        DIM       2
+Y        DIM       2
+.
+. 
+DCODE    DIM       6
+.
+ROLLNAME INIT      "ROLLFILE/SYST:W"
+DESC2    DIM       20
+. 
+DATE8    DIM       8
+. 
+REPLY    DIM       1
+. 
+BUILDKEY DIM       19
+UPDATESW DIM       1
+. 
+NMON     FORM      2
+LOOPTIME FORM      "0"
+LASTCMD  INIT      "G"
+. 
+         DISPLAY   *ES,*P01:01,*HON,"MODIFY PAYMENTS HISTORY MASTER FILE":
+                   *P01:03,"THIS PROGRAM WILL ALLOW YOU TO CHANGE THE FOLL":
+                           "OWING":
+                   *P01:04,"DESCRIPTION, CHECK NUMBER OR G/L DISTRIBUTION ":
+                           "CODE",*HOFF
+. 
+         OPEN      APPAIDFL,APPAIDNM
+         OPEN      APMASTER,APMASTNM
+         OPEN      APDISTFL,APDISTNM
+         OPEN      PAIDBYCK,PAIDCKNM
+         OPEN      PAIDBYDT,PAIDDTNM
+. 
+LOOPIT   DISPLAY   *P01:22,*EL
+         KEYIN     *P01:23,"(G)et record, (U)pdate, (E)nd ",REPLY
+. 
+         MOVE      "0" TO LOOPTIME
+         CMATCH    "G" TO REPLY
+         GOTO      READIT IF EQUAL
+. 
+         CMATCH    "U" TO REPLY
+         GOTO      UPDATEIT IF EQUAL
+. 
+         CMATCH    "E" TO REPLY
+         GOTO      EOJ IF EQUAL
+. 
+         BEEP
+         GOTO      LOOPIT
+. 
+READIT   MOVE      " " TO UPDATESW
+. 
+         MOVE      "G" TO LASTCMD
+. 
+         DISPLAY   *P1:5,*EF
+         KEYIN     *P1:6,"ENTER VENDOR NUMBER ",*DE,TACCN
+         KEYIN     *P1:7,"ENTER INVOICE NUMBER ",*JR,TINVNO
+         KEYIN     *P1:8,"ENTER INVOICE DATE  (MM/DD/YY) ":
+                         *+,*DE,TMON,"/",*+,*DE,TDAY,"/",*-,*DE,TYEAR
+         REPLACE   " 0" IN TMON
+. 
+         MOVE      TACCN TO ACCKEY
+. 
+         INCLUDE   APMASTRD
+. 
+. 
+SETUP    MOVE      "                   "  TO  TRNKEY
+         CLEAR     TRNKEY
+. 
+         APPEND    TACCN TO TRNKEY
+         RESET     TRNKEY  TO  6
+. 
+         APPEND    TYEAR TO TRNKEY
+         APPEND    TMON  TO TRNKEY
+         APPEND    TDAY  TO TRNKEY
+         APPEND    TINVNO TO TRNKEY
+         APPEND    "0"    TO TRNKEY
+. 
+         RESET     TRNKEY TO 19
+         LENSET    TRNKEY
+         RESET     TRNKEY TO 1
+         RESET     TRNKEY
+. 
+         DISPLAY   *P60:23,*HON,TRNKEY,*HOFF
+         TRAPCLR   IO
+         TRAP      NOTFND IF IO
+. 
+         ADD       "1" TO LOOPTIME
+. 
+         INCLUDE   APPAIDRD
+. 
+         GOTO      NOTFND IF OVER
+. 
+         READ      APDISTFL,TDCODE;DCODE,DESC2
+. 
+DISPVAR  DISPLAY   *P41:6,NAME:
+                   *P1:10,"DESCRIPTION    ",TDESC:
+                   *P1:11,"CHECK NUMBER   ",CKNUMBER:
+                   *P1:12,"G/L DIST CODE  ",TDCODE:
+                   *P16:13,DESC2:
+                   *P1:14,"AMOUNT         ",TAMT
+. 
+         MOVE      "X" TO UPDATESW        (PREPARE TO WRITE IT BACK!)
+. 
+         GOTO      LOOPIT
+. 
+NOTFND   COMPARE   "1" TO LOOPTIME
+         GOTO      BEEPIT IF NOT EQUAL
+         MOVE      TMON TO NMON
+         MOVE      NMON TO TMON
+         ADD       "1" TO LOOPTIME
+         GOTO      SETUP
+. 
+BUMGLCD  BEEP
+         DISPLAY   *P1:22,*HON,"BAD G/L CODE ENTERED - RETRY !",*W2,*HOFF
+         DISPLAY   *P1:22,*EL
+         GOTO      UPDATEIT
+. 
+BEEPIT   BEEP
+         DISPLAY   *P1:23,*HON,"RECORD NOT FOUND",*HOFF,*W3,*P1:23,*EL
+         MOVE      "0" TO LOOPTIME
+         GOTO      LOOPIT
+. 
+UPDATEIT CMATCH    "X" TO UPDATESW
+         GOTO      LOOPIT IF NOT EQUAL  (THERE HAD BETTER BE A RECORD!)
+. 
+         MOVE      "U" TO LASTCMD
+. 
+KILLIT   MOVE      " "  TO  REPLY
+         KEYIN     *P01:22,*HON,"DELETE THIS RECORD ? (Y/N) ",*HOFF,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      KILLS IF EQUAL
+         CMATCH    "N" TO REPLY
+         GOTO      UDCONT IF EQUAL
+         BEEP
+         GOTO      KILLIT
+. 
+KILLS    DELETE    APPAIDFL,TRNKEY
+. 
+. CONSTRUCT A KEY FOR DELETION OF PAIDBYDT/ISI KEY
+.
+         CLEAR     CHKKEY
+         CLEAR     DATEKEY
+.
+         MOVE      TPAIDDT  TO  DATE8
+         MOVE      TPAIDDT  TO  M
+         RESET     TPAIDDT  TO  4
+         MOVE      TPAIDDT  TO  D
+         RESET     TPAIDDT  TO  7
+         MOVE      TPAIDDT  TO  Y
+         RESET     TPAIDDT  TO  1
+.
+         APPEND    Y TO CHKKEY
+         APPEND    M TO CHKKEY 
+         APPEND    CKNUMBER TO CHKKEY
+         APPEND    TRNKEY   TO CHKKEY
+         RESET     CHKKEY   TO 1
+         DISPLAY   *P50:23,*EL,CHKKEY,*W
+.
+         DELETEK   PAIDBYCK,CHKKEY
+.
+         APPEND    Y TO DATEKEY
+         APPEND    M TO DATEKEY
+         APPEND    D TO DATEKEY
+         APPEND    TRNKEY TO DATEKEY
+         RESET     DATEKEY TO 1
+         DISPLAY   *P50:23,*EL,DATEKEY,*W
+.
+         DELETEK   PAIDBYDT,DATEKEY
+.
+         DISPLAY   *P01:22,*EL,*HON,"RECORD/INDICES DELETED ",*HOFF,*W2
+         DISPLAY   *P01:22,*EL
+         GOTO      UDOUT
+. 
+. 
+UDCONT   KEYIN     *P41:10,*RV,TDESC:
+                   *P41:11,*RV,CKNUMBER:
+                   *P41:12,*RV,TDCODE
+. 
+         MOVE      "BAD G/L CODE" TO DESC2
+. 
+         TRAPCLR   IO
+         TRAP      NOTFND IF IO
+. 
+         READ      APDISTFL,TDCODE;DCODE,DESC2
+         GOTO      BUMGLCD IF OVER
+. 
+         DISPLAY   *P56:13,*HON,DESC2,*W2,*HOFF
+. 
+         UPDATE    APPAIDFL;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT:
+                            TDESC,TAMT,TLDDAY,TDISA,CKNUMBER:
+                            TPAIDDT,TDCODE
+. 
+         BEEP
+         DISPLAY   *P1:23,*HON,"UPDATE SUCCESSFUL",*W2,*HOFF
+UDOUT    MOVE      " " TO UPDATESW
+         MOVE      "G" TO LASTCMD    (DONT WRITE IT AGAIN!)
+         GOTO      LOOPIT
+. 
+EOJ      CMATCH    "G" TO LASTCMD
+         GOTO      UPDATEIT IF NOT EQUAL
+. 
+CHAINOUT  CHAIN     "APMENU1"
+..................................................................

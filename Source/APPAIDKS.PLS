@@ -1,0 +1,9 @@
+.            APPAIDKS/TXT  -  MODULE
+. 
+. THIS MODULE PERMITS A KEYED SEQUENTIAL READ OF THE PAYMENTS HISTORY FILE
+. 
+         READKS    APPAIDFL;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT:
+                                   TDESC,TAMT,TLDDAY,TDISA,CKNUMBER:
+                                   TPAIDDT,TDCODE
+. 
+. -----------

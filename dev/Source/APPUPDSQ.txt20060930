@@ -1,0 +1,259 @@
+. 
+. APPUPDSQ/TXT - 4/30/83
+. 
+. THIS ROUTINE WILL NOW PRINT THE INVOICE, THEN UPDATE THE ACCOUNTS
+. RECEIVABLE MASTER FILE, WITH A RECORD FOR THIS INVOICE!
+.
+. 
+PRNTINVC MOVE      "000000.00" TO IAMTPD1
+         MOVE      "000000.00" TO IAMTPD2
+         MOVE      "000000.00" TO IAMTPD3
+         MOVE      "000000.00" TO IAMTPD4
+         MOVE      "000000.00" TO IAMTPD5
+         MOVE      "      "    TO ICHK1
+         MOVE      "      "    TO ICHK2
+         MOVE      "      "    TO ICHK3
+         MOVE      "      "    TO ICHK4
+         MOVE      "      "    TO ICHK5
+         MOVE      "      "    TO IDTPD1
+         MOVE      "      "    TO IDTPD2
+         MOVE      "      "    TO IDTPD3
+         MOVE      "      "    TO IDTPD4
+         MOVE      "      "    TO IDTPD5
+         MOVE      "00000000"  TO IPRGDTE
+         MOVE      "0.00"      TO INVTOTL
+         MOVE      "0.00"      TO IDOLSLFT
+         MOVE      "0"         TO IPMNTS
+         MOVE      INVKEY      TO STARTKEY  (SET THE ISAM ADD KEY)
+         MOVE      " "         TO HDRSW
+         MOVE      "0"         TO PAGES
+         GOTO      PRNTS
+. 
+. 
+BEEPS    BEEP
+         DISPLAY   *P1:24,*HON,"UNABLE TO ADD INVOICE TO A/R FILE!",*W2
+         GOTO      BEEPS
+. 
+. NOW PRINT THE INVOICE
+. 
+PRNTS   
+ 	 SPLOPEN   "LPT1:"
+
+	 CMATCH    "C",INVTYPE
+         CALL      HDCREDS IF EQUAL
+. 
+         CMATCH    "I",INVTYPE
+         CALL      HDINVCS IF EQUAL
+. 
+         GOTO      DETPRINT
+. 
+HDCREDS  PRINT     *74,"XXXXXXXXXX",*FLUSH
+         PRINT     *60,"CREDIT NO.",*75,"A",INVKEY,*FLUSH
+         PRINT     " ",*FLUSH
+         GOTO      ADRPRINT
+. 
+HDINVCS  PRINT     " ",*FLUSH
+NUMBPRNT PRINT     *75,"A",INVKEY,*FLUSH
+         PRINT     " ",*FLUSH
+. 
+ADRPRINT PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     *8,"ACCT. ",CUSTKEY,*58,"ACCT. ",CUSTKEY,*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     *8,CUSTNAME,*55,SHIPNAME,*FLUSH
+         PRINT     *8,CUSTADDR,*55,SHIPADDR,*FLUSH
+         PRINT     *8,CUSTCITY," ",CUSTSTAT," ",*ZF,CUSTZIP:
+                   *55,SHIPADR2,*FLUSH
+         PRINT     *8,"ACCOUNTS PAYABLE":
+                   *55,SHIPCITY," ",SHIPSTAT," ",SHIPZIP,*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     *6,INVORDNO,*58,INVORDNO,*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+. 
+         CMATCH    "C",COMPLET
+         GOTO      PARTIAL IF NOT EQUAL
+. 
+         MOVE      "X" TO PC
+         MOVE      " " TO PP
+         GOTO      NXTPRNT
+. 
+PARTIAL  MOVE      " " TO PC
+         MOVE      "X" TO PP
+. 
+NXTPRNT  PRINT     *2,INVORDNO,*15,TODAY,*27,INVWGHT," ",CARTONS:
+                   *38,INVSHIP,*57,"2% 15, NET 30",*73,PC,*79,PP,*FLUSH
+. 
+...........................        PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH     (19 LINES PRINTED SO FAR!)
+         PRINT     " ",*FLUSH     (ADDED 12/16/88 R.B.)
+         MOVE      "19" TO LINES
+         RETURN
+. 
+. END HEADER PRINT
+. 
+. 
+DETPRINT MOVE      "0" TO INDX
+         MOVE      "1" TO DARECNO
+         MOVE      IRECCNTR TO RECCNTR
+         ADD       "1"      TO RECCNTR
+. 
+DETLOOP  ADD       "1" TO INDX
+         COMPARE   INDX   TO  RECCNTR
+         GOTO      NODETS IF  LESS
+. 
+. ITS OKAY TO READ, BUT HOW MANY LINES HAVE WE PRINTED?
+. 
+.
+         COMPARE   "39",LINES
+.
+         CALL      HEADER IF NOT LESS
+. 
+. 
+         ADD       "1" TO DARECNO
+         READ      DAFILE,DARECNO;INVDTKEY,DTLSTAT,MULTIDSC:
+                                INVCKEGS,INVPCSKG,PCSSOLD:
+                                LNDOLS,LINECOST,UOM,PRODCODE:
+                                FILLER,FILLER2
+. 
+         CMATCH    "D",DTLSTAT
+         GOTO      DETLOOP IF EQUAL  (BYPASS DELETED RECORDS)
+. 
+         CMATCH    "*",DTLSTAT
+         GOTO      CONTPRNT IF EQUAL
+. 
+         PRINT     *3,INVCKEGS,*13,PCSSOLD,*23,INVPCSKG,*33,MULTIDSC:
+                   *61,LNDOLS,*71,UOM,*74,LINECOST,*FLUSH
+. 
+. NOW INCREMENT THE TOTALS
+. 
+         ADD       LINECOST  TO  INVTOTL
+. 
+         ADD       "1" TO LINES
+         GOTO      DETLOOP
+. 
+CONTPRNT PRINT     *34,MULTIDSC
+         ADD       "1" TO LINES
+         GOTO      DETLOOP
+. 
+HEADER   PRINT     " ",*FLUSH
+.
+.    10/27/90  PRINT TWO MORE BLANK LINES
+.
+         PRINT     " ",*FLUSH           LINE 40
+         PRINT     " ",*FLUSH
+         ADD       "1",PAGES
+
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+
+         PRINT     " ",*FLUSH           LINE 44
+
+         PRINT     *1,"    PAGE ",PAGES,"   ISO-9002 CERTIFIED",*FLUSH
+
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH           LINE 49
+	 PRINT     " ",*FLUSH
+
+	 PRINT     *1," "               LINE 51
+.
+	 IF    (INVTYPE = "C")
+
+             CALL  HDCREDS
+           ELSE
+             CALL  HDINVCS
+
+         ENDIF 
+. 
+         RETURN
+. 
+. 
+.
+NODETS   COMPARE   "39",LINES
+         GOTO      SPCLOOP IF LESS
+         GOTO      SUBTOTS IF EQUAL
+. 
+SPCLOOP  PRINT     " ",*FLUSH
+         ADD       "1" TO LINES
+         GOTO      NODETS
+. 
+SUBTOTS  MOVE      INVTOTL TO LIBNET
+         ADD       CALCNET TO LIBNET
+.
+. 10/27/90  ADD TWO BLANK LINES
+.
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH
+..................................................................
+         PRINT     *75,INVTOTL,*FLUSH
+         PRINT     *75,CALCNET,*FLUSH
+         PRINT     *74,LIBNET,*FLUSH
+         PRINT     " ",*FLUSH
+. 
+         MOVE      LIBNET TO INVTOTL
+         ADD       INVTOTL TO REPNET
+         MOVE      INVTOTL TO IDOLSLFT
+. 
+         PRINT     " ",*FLUSH
+         PRINT     *24,"ISO-9002 CERTIFIED"
+         PRINT     " ",*FLUSH
+         PRINT     *15," ",*FLUSH
+         PRINT     " ",*FLUSH
+         PRINT     " ",*FLUSH        LINE  51
+.
+.   4-23-2004   ADD SPLCLOSE TO FORCE PRINT OF DOCUMENT
+.
+         SPLCLOSE
+.
+.
+
+
+. 
+.  ADD THE A/R RECORD
+. 
+         TRAPCLR   IO
+         TRAP      BEEPS IF IO
+. 
+         CALL      ADDRCVB
+         CMATCH    "H",IOSW
+         GOTO      BEEPS IF NOT EQUAL
+. 
+. NOW INSERT THE KEY IN THE ARFILEXX/ISI FILE
+. 
+         CLEAR     INSERTKY
+         APPEND    CUSTKEY TO INSERTKY
+         APPEND    INVTYPE TO INSERTKY
+         APPEND    INVKEY  TO INSERTKY
+         RESET     INSERTKY   TO 1
+         REP       " 0"    IN INSERTKY
+. 
+         INSERT    INSERTFL,INSERTKY
+. 
+. NOW INSERT THE KEY IN THE ARFILEDT/ISI FILE
+. 
+         CLEAR     ARFLDTKY
+         APPEND    XYY TO ARFLDTKY
+         APPEND    XMM TO ARFLDTKY
+         APPEND    XDD TO ARFLDTKY
+         APPEND    INVKEY TO ARFLDTKY
+         RESET     ARFLDTKY  TO 1
+. 
+         INSERT    ARFILEDT,ARFLDTKY
+. 
+         CLEAR     NEWFKEY
+         APPEND    INVKEY TO NEWFKEY
+         RESET     NEWFKEY TO 1
+         MOVE      INVKEY TO NINVCNO
+         WRITE     NEWFILE,NEWFKEY;NINVCNO
+.
+.................................................
+. 
+. 
+. NOW UPDATE THE CUSTOMER AND CONTROLS FILES
+. 
+         GOTO      CUSTUPDS
+. 
+..........................................................

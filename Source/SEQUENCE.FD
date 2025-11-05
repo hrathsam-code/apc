@@ -1,0 +1,77 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;     PROGRAM: Sequence.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    05-02-2018 At 13:51                                            ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;         00104   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF         $SequenceVAR
+$SequenceVAR                     EQUATE         1
+;
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+Sequence                         RECORD
+Code                             Dim                6                   1 - 6        //1 - 6
+SeqNo                            Form               9                   7 - 15       //7 - 15
+                                 RECORDEND
+;
+;======================================================================================;
+TempSequence                        record          like   Sequence                        
+OrigSequence                        record          like   Sequence                        
+SaveSequence                        record          like   Sequence                        
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+SequenceTXTNM                          INIT         "$DataDir\Sequence.TXT"
+SequenceISI1NM                         INIT               "$DataDir\Sequence.ISI"
+SequenceI1DEF                           init            "-n,z,y,1-6"
+;
+; By Code
+; 1-6
+;
+SequenceKY                       DIM                 6
+;=============================================================================;
+;
+SequenceFLST                         FILELIST
+SequenceFL                          IFILE              name="$DataDir\Sequence.ISI",FIX=15,NODUP,NOPATH
+                                    FILELISTEND
+ 
+SequenceFileSize       CONST      "15"
+ 
+SequenceProg           INIT       "Sequence Program"
+SequenceDesc           INIT       "Sequence Maintenance"
+SequenceTITLE          INIT       "Sequence Record"
+SequenceHelp           INIT       "Sequence.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $SequenceVARIO
+            INCLUDE Sequence.IO 
+          %ENDIF          //End of IO Include File

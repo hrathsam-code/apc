@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<TrackResponse>
+	<Response>
+		<TransactionReference>
+			<CustomerContext>Your Test Case SummaryDescription</CustomerContext>
+			<XpciVersion>1.0</XpciVersion>
+		</TransactionReference>
+		<ResponseStatusCode>0</ResponseStatusCode>
+		<ResponseStatusDescription>Failure</ResponseStatusDescription>
+		<Error>
+			<ErrorSeverity>Hard</ErrorSeverity>
+			<ErrorCode>151044</ErrorCode>
+			<ErrorDescription>No tracking information available</ErrorDescription>
+		</Error>
+	</Response>
+</TrackResponse>

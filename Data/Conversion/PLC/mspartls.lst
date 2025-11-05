@@ -1,0 +1,116 @@
+
+
+
+PAGE    1      MSPARTLS.DBS IDE                                                                               03-22-04 23:18:45
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "MSPARTLS.DBS","F:\PLC\MSPARTLS.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    3.    INCLUDE  A: f:\source\mscbrag.txt
+    6.    INCLUDE  B: common.txt
+    8.    INCLUDE  C: mspartsf.txt
+   25.    INCLUDE  D: callerr1.inc
+   27.    INCLUDE  E: callerr2.inc
+   83.                                         RETURN 
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\mspartls.plc                                                                                                                                                                                                                                       
+       252 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 23:18:45 23:18:46
+  000011C4 DATA;  000001CA  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      MSPARTLS.DBS IDE                                                                               03-22-04 23:18:46
+                                         
+
+"                                          D      30. E*
+"                                          D      50.  *    39.  
+"01                                        D      35.  *
+"A                                         D      41.  *
+"MSHISTRY                                  D      65.  *
+"PRINT INVENTORY MASTER LIST               D      26.  *
+"S                                         D      44.  *
+0                                          F      31.  *    36.  
+4                                          F      98.  *
+53                                         F      80.  *
+ACCTNUMB                                   D      14. B*
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+BYPASS                                     X      65.  *    61.  
+D                                          O 5    12. D*    13. E    16. E    31. E
+DATE6                                      D      10. B*
+DDATA                                      D      13. D*    13. E
+DOIT                                       X      60.  *    42.  
+ENVS                                       D      11. B*
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*    28. E
+GIMMEKEY                                   X      50.  *    45.  
+HEADER                                     X      90.  *    37.      71.      81.  
+INDXIT                                     X      26. E*    22. E
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LINES                                      F      17.  *    79.      80.      98.  
+LOOP01                                     X      69.  *
+LOOPEND                                    X      85.  *    74.  
+LP1                                        X      73.  *    60.      82.  
+MAINLINE                                   X      30. E*    22. E
+MSDESC                                     D      16. C*    56.      69.      73.      76.  
+MSPARTFL                                   i      10. C*
+MSPARTKY                                   D      20. C*
+MSPARTNM                                   D      11. C*
+MSPARTNO                                   D      14. C*    56.      69.      73.      76.  
+MSPARTSV                                   D      21. C*
+MSPTXKY1                                   D      44. C*
+MSPTXKY2                                   D      45. C*
+MSPTXREF                                   i      39. C*
+MSPTXRNM                                   D      40. C*
+MSSIZE                                     D      15. C*    56.      69.      70.      73.      76.  
+MSSTATUS                                   D      13. C*    56.      69.      73.  
+MSXRFKEY                                   D      47. C*
+MSXRFPT1                                   D      17. C*    57.      69.      73.      76.  
+MSXRFPT2                                   D      18. C*    57.      69.      73.      77.  
+NPARTSFL                                   i      12.  *    34.      56.      69.      73.  
+
+
+
+PAGE    3      MSPARTLS.DBS IDE                                                                               03-22-04 23:18:46
+                                         
+
+NULL                                       X      24. E*    22. E
+PAGES                                      F      10.  *    31.      90.      92.  
+PARTS                                      D      13.  *    34.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+PRINTWAT                                   X      39.  *    48.  
+PRTS                                       X      76.  *    58.  
+REPLY                                      D      18.  *    30. E    39.      40.      41.      44.  
+RESULT                                     F      11. D*    16. E    22. E
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+START                                      X      29.  *
+STARTKEY                                   D      22.  *    50.      51.      52.      53.      54.      56.  
+TERMINAL                                   D      15.  *    35.  
+TESTIT                                     X      22. E*    16. E
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TIME                                       D      16.  *    32.      92.  
+TITLTEXT                                   D       9. D*    26.      15. E
+TODAY                                      D       8. B*    92.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+WHO                                        D      19.  *    70.  
+WHOCNT                                     F      20.  *    36.      78.      87.  
+

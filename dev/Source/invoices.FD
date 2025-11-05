@@ -1,0 +1,159 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Invoices.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    10-29-2019 At 14:01                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00107   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $InvoicesVAR
+$InvoicesVAR                     EQUATE         1
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+Invoices                         RECORD
+Entity                           Dim                8                   1 - 8        //8
+Reference                        Form               9                   9 - 17       //9
+OrderNumber                      Form               9                  18 - 26       //495 - 504           //HR 3/28/2005
+TicketNumber                     Form               9                  27 - 35       //488 - 494
+SeqMajor                         Form               9                  36 - 44       //9
+BillCust                         Dim                10                 45 - 54       //20 - 25
+ShipToCust                       Dim                10                 55 - 64       //30 - 35
+CustomerPO                       Dim                20                 65 - 84       //40 - 59
+EntryDate                        Dim                8                  85 - 92       //60 - 67         CCYYMMDD format
+TransDate                        Dim                8                  93 - 100      //68 - 75         CCYYMMDD format
+BillDate                         Dim                8                 101 - 108      //76 - 83         CCYYMMDD format
+ShipDate                         Dim                8                 109 - 116      //84 - 91         CCYYMMDD format
+OrderDate                        Dim                8                 117 - 124      //374 - 381           //for calculating Tu
+InvCredit                        Dim                1                 125 - 125      //92 - 92
+Freight                          Form               6.2               126 - 134      //93 - 101
+InvoiceAmt                       Form               7.2               135 - 144      //102 - 111
+TaxableAmt                       Form               7.2               145 - 154      //112 - 121
+SalesAmt                         Form               7.2               155 - 164      //2
+FuelAmt                          Form               7.2               165 - 174      //2
+OtherAmt                         Form               7.2               175 - 184      //2
+ShipToName                       Dim                30                185 - 214      //132 - 161
+ShipToAddr1                      Dim                30                215 - 244      //162 - 191
+ShipToAddr2                      Dim                30                245 - 274      //192 - 221
+ShipToAddr3                      Dim                30                275 - 304
+ShipToCity                       Dim                30                305 - 334      //252 - 281
+ShipToSt                         Dim                2                 335 - 336      //282 - 283
+ShipToZip                        Dim                10                337 - 346      //284 - 293
+ShipToCountry                    Dim                3                 347 - 349      //294 - 296
+BillToName                       Dim                30                350 - 379      //132 - 161
+BillToAddr1                      Dim                30                380 - 409      //162 - 191
+BillToAddr2                      Dim                30                410 - 439      //192 - 221
+BillToAddr3                      Dim                30                440 - 469      //222 - 251
+BillToCity                       Dim                30                470 - 499      //252 - 281
+BillToSt                         Dim                2                 500 - 501      //282 - 283
+BillToZip                        Dim                10                502 - 511      //284 - 293
+BillToCountry                    Dim                3                 512 - 514      //294 - 296
+SalesRep                         Dim                4                 515 - 518      //299 - 300
+DiscountAmt                      Form               7.2               519 - 528      //222 - 251
+CommCode                         Dim                4                 529 - 532      //301 - 304
+Year                             Dim                4                 533 - 536      //341 - 344
+Period                           Dim                2                 537 - 538      //345 - 346
+SpecialIns                       Dim                30                539 - 568      //505 - 534           //HR 3/28/2005
+ShipFromLocation                 Dim                8                 569 - 576      //8
+TaxCode                          Dim                6                 577 - 582      //347 - 352
+InternalMemo                     Dim                80                583 - 662      //0
+Printed                          Dim                1                 663 - 663      //477 - 477
+TermCode                         Dim                8                 664 - 671      //462 - 469
+CommissionPct                    Form               3.2               672 - 677      //535 - 540           //HR 3/28/2005
+Source                           Dim                6                 678 - 683      //359 - 364
+Lines                            Form               3                 684 - 686
+ShipVia                          Dim                20                687 - 706
+Completed                        Form               1                 707 - 707
+Weight                           Form               3.2               708 - 713
+Cartons                          Form               3                 714 - 716
+                                 RECORDEND
+;
+;======================================================================================;
+TempInvoices                        record          like   Invoices                        
+OrigInvoices                        record          like   Invoices                        
+SaveInvoices                        record          like   Invoices                        
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+InvoicesTXTNM                          INIT         "Invvoices"
+InvoicesISI1NM                         INIT               "Invoices.ISI"
+InvoicesISI2NM                         INIT               "Invoices2.ISI"
+InvoicesISI3NM                         INIT               "Invoices3.ISI"
+InvoicesISI4NM                         INIT               "Invoices4.ISI"
+InvoicesISI5NM                         INIT               "Invoices5.ISI"
+InvoicesI1DEF                           init            "-n,z,y,1-8,9-17"
+InvoicesI2DEF                           init            "-n,w,z,y,1-8,93-100,9-17"
+InvoicesI3DEF                           init            "-n,w,z,y,1-8,663-663,9-17"
+InvoicesI4DEF                           init            "-n,z,y,1-8,45-54,93-100,9-17"
+InvoicesI5DEF                           init            "-n,z,y,1-8,65-84,9-17"
+;
+; By Entity, Reference
+; 1-8, 9-17
+;
+InvoicesKY                       DIM                17
+;
+; By Entity, TransDate, Reference
+; 1-8, 93-100, 9-17
+;
+InvoicesKY2                      DIM                25
+;
+; By Entity, Printed, Reference
+; 1-8, 663-663, 9-17
+;
+InvoicesKY3                      DIM                18
+;
+; By Entity, BillCust, TransDate, Reference
+; 1-8, 45-54, 93-100, 9-17
+;
+InvoicesKY4                      DIM                35
+;
+; By Entity, CustomerPO, Reference
+; 1-8, 65-84, 9-17
+;
+InvoicesKY5                      DIM                37
+;=============================================================================;
+;
+InvoicesFLST                         FILELIST
+InvoicesFL                          IFILE              name="Invoices.ISI",FIX=800,NODUP,NOPATH
+InvoicesFL2                         IFILE              name="Invoices2.ISI",FIX=800,NODUP,WEOF,NOPATH
+InvoicesFL3                         IFILE              name="Invoices3.ISI",FIX=800,NODUP,WEOF,NOPATH
+InvoicesFL4                         IFILE              name="Invoices4.ISI",FIX=800,NODUP,NOPATH
+InvoicesFL5                         IFILE              name="Invoices5.ISI",FIX=800,NODUP,NOPATH
+                                    FILELISTEND
+ 
+InvoicesFileSize       CONST      "800"
+ 
+InvoicesProg           INIT       "Invoices Program"
+InvoicesDesc           INIT       "Invoices Maintenance"
+InvoicesTITLE          INIT       "Invoices Record"
+InvoicesHelp           INIT       "Invoices.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $InvoicesVARIO
+            INCLUDE Invoices.IO 
+          %ENDIF          //End of IO Include File

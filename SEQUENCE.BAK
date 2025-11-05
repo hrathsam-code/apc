@@ -1,0 +1,108 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Sequence.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %IFNDEF           $SequenceVAR
+$SequenceVAR          EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+SequenceREC           RECORD
+Code                DIM                6            1 - 6
+SeqNo               FORM               9            7 - 15
+                    RECORDEND
+
+
+TempSequenceREC       RECORD            LIKE       SequenceREC
+OrigSequenceREC       RECORD            LIKE       SequenceREC
+SaveSequenceREC       RECORD            LIKE       SequenceREC
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+SequenceK1SIZE        CONST             "6"                                       //Length of the Key variable)
+.
+. By Entity, Seq Major, Seq Minor
+.
+SequenceI1DEF         INIT              "-N,1-6"                                       //Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+.
+SequenceFileSize      CONST             "15"                                       //Length of each Record)
+
+SequenceKY            DIM               SequenceK1SIZE                              //The Actual 'Key' variable)
+
+SequencePROG          INIT              "Program Name"
+SequenceDESC          init              "Sequence description"                      //Description of the Master files
+SequenceTITLE         INIT              "Sequence Code"                           //Description used later for headers, etc)
+SequenceHELP          INIT              "Sequence.HLP"                              //Name of the Help file for later purposes)
+
+SequenceTXTNM         INIT              "$DataDir\","Sequence.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+SequenceISI1NM        INIT              "$DataDir\","Sequence.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+SequenceISI2NM        INIT              "$DataDir\","Sequence2.ISI"                //Actual ISI Filename
+
+SequenceFLST          FILELIST
+                   %IFDEF            SequenceKY
+SequenceFL            IFILE             Name=SequenceISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY2
+SequenceFL2           IFILE             Name=SequenceISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY3
+SequenceFL3           IFILE             Name=SequenceISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY4
+SequenceFL4           IFILE             Name=SequenceISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY5
+SequenceFL5           IFILE             Name=SequenceISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY6
+SequenceFL6           IFILE             Name=SequenceISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY7
+SequenceFL7           IFILE             Name=SequenceISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY8
+SequenceFL8           IFILE             Name=SequenceISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            SequenceKY9
+SequenceFL9           IFILE             Name=SequenceISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $SequenceIO
+                     INCLUDE           Sequence.IO
+                   %ENDIF

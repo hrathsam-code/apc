@@ -1,0 +1,144 @@
+         OPEN      APTRANFL,"APTRANFL"
+. 
+A0A      MOVE      "000000",ACCKEY
+. 
+         INC       APMASTHR
+. 
+         GOTO      A0A1 IF NOT OVER
+         BEEP
+         DISPLAY   *R,*R,*P1:24,"NO A/P MASTER FILE HEADER RECORD ON FILE":
+                   *W,*W,*W,*W,*W
+         CHAIN     "APMENU1"
+. 
+A0A1     CALL      APMASTVK
+         MOVE      NAME TO CNAME
+         COMPARE   "1",OPTION
+         GOTO      A0C IF EQUAL
+A0B      PI        1
+. 
+         INC       APMASTKS
+. 
+         GOTO      A0C IF OVER
+         MOVE      "0",TOTDUE
+         MOVE      "0",OVR90
+         MOVE      "0",OVR60
+         MOVE      "0",OVR30
+         MOVE      "0",CURR
+         MOVE      "0",MTDD
+         MOVE      "0",MTDC
+         MOVE      " ",ACCST
+. 
+         INC       APMASTUP
+. 
+         GOTO      A0B
+. 
+A0C      MOVE      "X",BKUPFLG
+. 
+         MOVE      TODAY TO MM
+         RESET     TODAY TO 4
+         MOVE      TODAY TO DD
+         RESET     TODAY TO 7
+         MOVE      TODAY TO YY
+         RESET     TODAY TO 1
+. 
+         MOVE      MM TO MON
+         MOVE      DD TO DAY
+         MOVE      YY TO YEAR
+         MOVE      "0000000000000000000",TRNKEY
+         INC       APTRANRD
+         GOTO      A0D IF NOT OVER
+         BEEP
+         DISPLAY   *R,*R,*P1:24,"NO HEADER ON TRANSACTION FILE",*W,*W,*W
+. 
+         STOP
+. 
+A0D      MATCH     TRNKEY TO TRNKEY2 
+         GOTO      APTRANBK IF NOT EQUAL
+A1       PI        1
+         INC       APTRANKS
+         GOTO      A1A IF NOT OVER
+         MOVE      "X",OVFLG
+         COMPARE   "2",OPTION
+         GOTO      A1B IF EQUAL
+         GOTO      EOJ
+. 
+. 
+A1A      MATCH     " ",FTFLG
+         GOTO      A2 IF EQUAL
+         MATCH     TACCN,SVACC
+         GOTO      A2 IF EQUAL
+         MOVE      SVACC TO ACCKEY
+. 
+         INCLUDE   APMASTRD
+. 
+. 
+         MOVE      "0",TOT
+A1B      MATCH     "X",OVFLG
+         GOTO      A1B1 IF NOT EQUAL
+         MATCH     " ",FTFLG
+         GOTO      A1B1 IF NOT EQUAL
+         STOP
+. 
+A1B1     MOVE      SVACC TO ACCKEY
+         INC       APMASTRD
+         GOTO      A1B1A IF NOT OVER
+         BEEP
+         DISPLAY   *R,*R,*P1:24,"SECOND READ FOR ACCOUNT ##",ACCKEY," FAILED":
+                   *W,*W,*W,*W,*W
+         GOTO      A1B1              (MODIFIED FROM "STOP" ON 3/13/83)
+. 
+A1B1A    CALL      APMASTVK
+         MOVE      "0",TOTDUE
+         ADD       T90,TOTDUE
+         ADD       T60,TOTDUE
+         ADD       T30,TOTDUE
+         ADD       TCURR,TOTDUE
+         MOVE      T90,OVR90
+         MOVE      T60,OVR60
+         MOVE      T30,OVR30
+         MOVE      TCURR,CURR
+         MOVE      "1",ACCST
+. 
+         INC       APMASTUP
+. 
+         MATCH     "X",OVFLG
+         GOTO      EOJ IF EQUAL
+         MOVE      "0",T90
+         MOVE      "0",T60
+         MOVE      "0",T30
+         MOVE      "0",TCURR
+. 
+A2       MOVE      "X",FTFLG
+         MOVE      TACCN,SVACC
+. 
+. 
+. CALCULATE THE NUMERIC VALUE OF THE TRANSACTION DATE 
+. FOR COMPARISON AGAINST CURRDATE VALUE
+. 
+         CALL      CALCDATE
+         MOVE      CURRDATE  TO    WORKFLD
+         SUBTRACT  TESTDATE  FROM  WORKFLD
+. 
+. TEST THE VALUE FOR AGEING
+. 
+         COMPARE   "90" TO WORKFLD
+         GOTO      TEST60  IF  LESS
+. 
+UP90     ADD       TAMT  TO  T90
+         GOTO      A1
+. 
+TEST60   COMPARE   "60" TO WORKFLD
+         GOTO      TEST31  IF  LESS
+. 
+UP60     ADD       TAMT  TO  T60
+         GOTO      A1
+. 
+TEST30   COMPARE   "30"  TO  WORKFLD
+         GOTO      UPCURR  IF  LESS
+. 
+UP30     ADD       TAMT  TO  T30
+         GOTO      A1
+. 
+UPCURR   ADD       TAMT,TCURR
+         GOTO      A1
+. 

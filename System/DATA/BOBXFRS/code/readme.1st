@@ -1,0 +1,259 @@
+Release: PLBWIN/PLB386 Version 8.6
+ 
+NOTES:
+ 
+    The 386START.BAT that is installed must be edited to make the variables
+    correspond to your actual install locations.  This file is not needed if
+    you do not use PLB386.EXE.  The default runtime for running the PL/B
+    derived utilities is now PLBCON.EXE instead of PLB386.EXE
+ 
+TRAINING:
+ 
+    Sunbelt has several courses to assist in learning either PL/B or
+    PL/B for Windows.  These are taught on a regular schedule and can be
+    invaluable for learning some of the newer features or techniques of
+    the language.  Contact either sales, support or check out our web site for
+    more information on class content and current schedule.
+ 
+RELEASE STRUCTURE/FILES:
+ 
+ \sunbelt\plbwin.86\code: Directory which contains the following file types:
+ 
+                          Binary Executables (.EXE)
+                          PLBWIN support files loaded at run time (.DLL)
+                          Batch files to execute some of the utilities (.BAT)
+                          Utility programs (.PLC)
+                          Windows Help files (.HLP & .CNT)
+                          Screen definition files (.DEF)
+                          Font files (.FON & .FXX)
+                          Release Notes (.1ST & .RFM)
+                          Source code include files (.INC)
+ 
+           README.1ST   - This file
+           DBSERIAL     - Authorization number file
+           PLBWIN.RFM   - Release notes.
+           386START.BAT - Sample batch file to setup UET for proper execution
+                          of PLBWIN & PLB386
+           BLOKEDIT.BAT - Block edit
+           BUILD.BAT    - Build Data File
+           CHAIN.BAT    - Chain
+           DATALEN.BAT  - File data length
+           MENUGEN.BAT  - Generate Windows Menus
+           PLBCMP.BAT   - PL/B Compiler
+           REFORMAT.BAT - Reformat Data Files
+           SETUPPER.BAT - Define Upper Case Translation Table
+           SORTSEQ.BAT  - Create alternate sort sequence
+           SUNADMIN.BAT - Administer File Manger Security
+           SUNDUMP.BAT  - Dump and/or Modify Data Files
+           SUNED.BAT    - Edit Source or Data Files
+           SUNLIST.BAT  - List Files
+           SUNPLBWS.BAT - Start PL/B Workshop
+           SUNSCAN.BAT  - Scan Files
+           TESTDEF.BAT  - Create Screen Definition Files
+           TXTMATCH.BAT - Match Source or Data files
+           ANSI.DEF     - Default screen definition file
+           ANSI31.DEF   - Default screen definition file
+           PLBWBTRV.DLL - Runtime Btrieve support DLL
+           PLBWIN32.DLL - Runtime WIN support DLL
+           PLBWODBC.DLL - Runtime ODBC support DLL
+           PLBWSEC.DLL  - Runtime security DLL
+           SUNFHSYS.DLL - File I/O Dll
+           AUTOSERV.DOC - Automation Server Documentation
+           DOS4GW.EXE   - DOS Extender for PLB386.EXE
+           HEXDUMP.EXE  - Hexadecimal dump utility
+           MAKECON.EXE  - Creates PLBCON.EXE from PLBWIN.EXE.  PLBCON is
+                          a Windows Console mode runtime.
+           MAKEDEF.EXE  - Make screen definition utility
+           OBJMATCH.EXE - Binary file match utility
+           PLB386.EXE   - MSDOS 32 bit PL/B runtime
+           PLBCGI.EXE   - PLB Automation Server Startup Program
+	   PLBCGI.ZIP   - Complete source for generating PLBCGI.EXE
+           PLBCMD.EXE   - PLB Automation Command Line Startup Program
+	   PLBCMD.ZIP   - Complete source for generating PLBCMD.EXE
+           PLBDSIGN.EXE - PLB Window Designer
+           PLBWIN.EXE   - Windows 32 bit PL/B runtime for Windows 95/98/NT
+           SUNAAMDX.EXE - WIN/386 aamdex utility
+           SUNADXNT.EXE - NT/95/98 console aamdex utility
+           SUNIDXNT.EXE - NT/95/98 console sort utility
+           SUNINDEX.EXE - WIN/386 index utility
+           SUNMOD.EXE   - Utility to encrypt/decrypt a file
+           SUNSORT.EXE  - WIN/386 sort utility
+           SUNSRTNT.EXE - NT/95/98 console sort utility
+           PLBWIND.FON  - Special Debugger runtime font file.
+           PLBWIN.FXX   - Special runtime font file
+                          Note: This file is only intended for running
+                                character based program that used the extended
+                                character set for borders, etc. It must be
+                                renamed to PLBWIN.FON for it to take effect.
+           PLBAPI.INC   - Equate file for WINAPI support
+           PLBEQU.INC   - Equate file
+           PLBMETH.INC  - Equate file for the new Methods instructions
+           PLB386.INI   - Generated default control file for PLB386
+           PLBWIN.INI   - Generated default control file for PLBWIN & PLBCON
+           PLB386.LIB   - Library for generating specialized PLB386 runtime
+           BLOKEDIT.PLC - Block edit utility.
+           BUILD.PLC    - Build file utility.
+           CHAIN.PLC    - Chain utility.
+           DATALEN.PLC  - File data length utility
+           HEXDUMP1.PLC - GUI front end for HEXDUMP.EXE
+           MENUGEN.PLC  - Menu Code Generator
+           OBJMTCH1.PLC - GUI front end for OBJMATCH.EXE
+           PLBCMP.PLC   - Win/386 compiler
+           PLBCMP1.PLC  - GUI front end for PLBCMP.PLC
+           PLBDBUG.PLC  - Win/386 source debugger
+           REFORMAT.PLC - Reformat file utility
+           SETUPPER.PLC - Generate Uppercase Translation Table utility
+           SORTSEQ.PLC  - Generate alternate sort sequence file utility
+           SUNAAMDX.PLC - GUI front end for SUNAAMDX.EXE
+           SUNADMIN.PLC - Administer File Manager Security utility
+           SUNDUMP.PLC  - Dump file utility
+           SUNED.PLC    - Edit file utility
+           SUNINDEX.PLC - GUI front end for SUNINDEX.EXE
+           SUNLIST.PLC  - List file utility
+           SUNPLBWS.PLC - Windows workshop utility
+           SUNSCAN.PLC  - Scan file utility
+           SUNSORT.PLC  - GUI front end for SUNSORT.EXE
+           TESTDEF.PLC  - Test screen definition utility
+           TXTMATCH.PLC - Match text files utility
+           TUTORIAL.TXT - Jump start on creating a GUI program
+ 
+Installed only if Typical Install has been selected or HELP has been
+selected with Custom Install
+ 
+           PLB.HLP      - PL/B Language Specification Help File.
+           PLB.CNT      - PL/B Language Specification Table of Contents
+           PLBDSIGN.HLP - PL/B Designer Help File
+           PLBDSIGN.CNT - PL/B Designer Table of Contents
+           PLBRUN.HLP   - PL/B Runtime Help File
+           PLBRUN.CNT   - PL/B Runtime Table of Contents
+           PLBUTIL.HLP  - PL/B Utilities Help File
+           PLBUTIL.CNT  - PL/B Utilities Table of Contents
+ 
+Installed only if EXTCALL has been selected with Custom Install
+ 
+           EXTCALL.PLS  - Sample EXTCALL PL/B program
+           PLBWEX32.C   - Sample EXTCALL DLL source
+           PLBWEX32.DEF
+           PLBWEX32.MAK
+           PLBWEX32.H
+           PLBWEX32.DLL - Sample pre-generated DLL
+           PLBWSP32.DLL - EXTCALL 32 bit support DLL
+           PLBWSP32.LIB - Static support library
+ 
+Installed only if ODBC has been selected with Custom Install
+ 
+           ODBCADM.EXE  - Runtime WIN ODBC administration
+           QURYDEMO.EXE - Sample ODBC test program
+ 
+Installed only if DEMO has been selected with Custom Install
+ 
+ \sunbelt\plbwin.86\demo: Contains sample PL/B programs.  These programs
+                          demonstrate the use of the new GUI (Graphical User
+                          Interface) features now supported.
+
+           ACURA.PCX    - Image
+           ADDRFORM.HLP - Include file for ADDRFORM.PLS
+           ADDRFORM.HPJ - Include file for ADDRFORM.PLS
+           ADDRFORM.PLC - Compiled program
+           ADDRFORM.PLF - Include file for ADDRFORM.PLS
+           ADDRFORM.PLS - Sample GUI Program designed using PLBDSIGN
+           ADDRFORM.RTF - Include file for ADDRFORM.PLS
+           ADDROBJS.PLC - Compiled program
+           ADDROBJS.PLS - Sample GUI program designed without PLBDSIGN
+           ADMSAMP0.BAT - Batch file to try out SUNADMIN
+           ADMSAMP1.PLC - Compiled program
+           ADMSAMP1.PLS - Sample program to use SUNADMIN.PLC
+           ADMSAMP2.PLC - Compiled program
+           ADMSAMP2.PLS - Sample program to use SUNADMIN.PLC
+           ADMSAMP3.PLC - Compiled program
+           ADMSAMP3.PLF - Sample Form for ADMSAMP3.PLS
+           ADMSAMP3.PLS - Sample program to use SUNADMIN.PLC
+           ADO.PLC      - Compiled program
+           ADO.PLF      - Sample Form for ADO.PLS
+           ADO.PLS      - Sample program using Microsoft ADODB
+           ALERT.PLC    - Compiled program
+           ALERT.PLF    - Sample Form for ALERT.PLS
+           ALERT.PLS    - Sample program using ALERTS
+           ANSWER.BMP   - Bitmap for ANSWER program
+           ANSWER.PLC   - Compiled program
+           ANSWER.PLS   - Sample answer program
+           AOFFICE.PLC  - Compiled program
+           AOFFICE.PLS  - Sample program using Automation Objects
+           ASPDEMO.ZIP  -
+           CDIALOG.PLC  - Compiled program
+           CDIALOG.PLS  - Sample program for Dialog
+           CGISAMP.PLC  - Compiled program
+           CGISAMP.PLS  - Sample program for CGI processing
+           CHART.PLC    - Compiled program
+           CHART.PLS    - Sample program using Automation to control EXCELL
+           COLOR.PLC    - Compiled program
+           COLOR.PLS    - Sample program showing Color
+           COMREAD.PLC  - Compiled program
+           COMREAD.PLS  - Sample program for Communications
+           COMWRITE.PLC - Compiled program
+           COMWRITE.PLS - Sample program for Communications
+           CTEST.TXT
+           DRAG.PLC     - Compiled program
+           DRAG.PLS     - Sample program for DRAG
+           DRAGDROP.PLC - Compiled program
+           DRAGDROP.PLS - Sample program for DRAGDRIP
+           EDITTEXT.PLC - Compiled program
+           EDITTEXT.PLS - Sample program for EDITTEXT
+           FASTEVNT.ZIP
+           GETINFO.PLC  - Compiled program
+           GETINFO.PLS  - Sample program for GETINFO
+           GIRL2.PCX    - Image
+           ICONS.PLC    - Compiled program
+           ICONS.PLS    - Sample program for ICONS
+           ISI$AAM.PLS  - Sample program to generate ISAM and AAM files
+           JSCRIPT.ZIP
+           LABEL1.PLF   - Sample FORMS for TABCNTRL program
+           LABEL2.PLF   - Sample FORMS for TABCNTRL program
+           LABEL3.PLF   - Sample FORMS for TABCNTRL program
+           LEAVES.BMP   - Icon File
+           LVDATA.TXT   - Sample data for LVSORT program
+           LVSORT.PLC   - Compiled program
+           LVSORT.PLF
+           LVSORT.PLS   - Sample program for LISTVIEW & SORTING
+           LVSORTS.PLC  - Compiled program
+           LVSORTS.PLS  - Sample External Call for LVSORT program
+           MAIN.PLF     - Sample FORMS for TABCNTRL program
+           MASTER.PLC   - Compiled program
+           MASTER.PLS   - Sample master program
+           MEELBORN.PLC - Compiled program
+           MEELBORN.PLS - Standard meelborn program
+           NECLI.ZIP
+           ODBC.PLC     - Compiled program
+           ODBC.PLS     - Sample program for ODBC interface
+           PARROT.PCX   - Image
+           PAUS-DIS.BMP - Icon File
+           PAUS-DN.BMP  - Icon File
+           PAUS-UP.BMP  - Icon File
+           PICT.PLC     - Compiled program
+           PICT.PLS     - Sample program for PICT objects
+           PLAY-DN.BMP  - Icon File
+           PLAY-UP.BMP  - Icon File
+           PLBROT.INI   -
+           PROFILE.INC  - Sample PROFILE statements for WINAPI calls
+           RGB.TXT      - Text file with suggested color names
+           ROTCLI.PLC   - Compiled program
+           ROTCLI.PLF   - Rotating Objects Table Sample Form
+           ROTCLI.PLS   - Rotating Objects Table Sample Program
+           ROTSRVS.PLC  - Compiled program
+           ROTSRVS.PLS  - Rotating Objects Table Sample Program
+           SCRDEMO.PLC  - Compiled program
+           SCRDEMO.PLS  - Demo using multiple objects
+           STOP-DN.BMP  - Icon File
+           STOP-UP.BMP  - Icon File
+           SUNBELT.PCX  - Image
+           TABCNTRL.PLC - Compiled program
+           TABCNTRL.PLS - Sample program for Tab Controls
+           THREED.PLC   - Compiled program
+           THREED.PLS   - Sample program for 3D
+           TOOLTIP.PLC  - Compiled program
+           TOOLTIP.PLS  - Sample program for WINAPI and tool tips
+           TREEVIEW.PLC - Compiled program
+           TREEVIEW.PLF - Treeview FORM
+           TREEVIEW.PLS - Sample program using TREEVIEW & LISTVIEW objects
+           WINAPI.PLC   - Compiled program
+           WINAPI.PLS   - Sample program for Windows API calls

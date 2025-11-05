@@ -1,0 +1,68 @@
+*******************************************************************************
+Runtime : 'Version 9.9A  21 Apr 2017'
+Date : 11-7-19  Time: 15:17:04
+Flags   : 'Http Header not returned'
+Flags   : 'Secure Sockets Layer (SSL) used'
+Flags   : 'Host request-header field used'
+15:17:06  FhHttpConnect: Connected Ok!
+
+15:17:06  Http Send Data Start:
+Sending (413h) bytes.
+
+Data Start-->POST /ups.app/xml/Track HTTP/1.1
+HOST: wwwcie.ups.com:443
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 879
+Connection: close
+
+<?xml version="1.0"?>
+<AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>4D69C28BC8B614F5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+<?xml version="1.0"?>
+
+<TrackRequest xml:lang="en-US">
+  <ShipperNumber>156620</ShipperNumber>
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Your Test Case Summary
+Description</CustomerContext>
+       <XpciVersion>1.0</XpciVersion>
+    </TransactionReference>
+    <RequestAction>Track</RequestAction>
+    <RequestOption>activity</RequestOption>
+  </Request>
+  <ReferenceNumber>
+<Code>01</Code> <Value>1925</Value></ReferenceNumber> <PickupDateRange><BeginDate>20190908</BeginDate><EndDate>20191107</EndDate></PickupDateRange><DestinationCountryCode>US</DestinationCountryCode><DestinationPostalCode>92010</DestinationPostalCode></TrackRequest>
+<--Data End
+15:17:06  Http Send End:
+
+15:17:06  Http Recv Data Start:
+(20Fh) bytes have been received.
+
+Data Start-->HTTP/1.1 200 200
+Date: Thu, 07 Nov 2019 20:17:00 GMT
+Server: Apache
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Cache-Control: no-cache, no-store, must-revalidate, max-age=0, no-cache=Set-Cookie
+Pragma: no-cache
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Pragma: no-cache
+APIHttpStatus: 400
+APIErrorCode: 151044
+APIErrorMsg: No tracking information available
+Content-Length: 470
+Connection: close
+Content-Type: application/xml;charset=UTF-8
+
+<--Data End
+15:17:06  Http Recv Data End:
+
+15:17:06  Http Disconnect:
+15:17:06  Http Completed: Ok!
+

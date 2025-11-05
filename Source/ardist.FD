@@ -1,0 +1,123 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    ARDist.IO                                                      ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:    Accounts Receivable GL Distribution File Definitions           ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $ARDistVAR
+$ARDistVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+ARDist              RECORD
+Entity              DIM                8          1 - 8
+SubEntity           DIM                8          9 - 16
+filler              DIM                6         17 - 22
+TransDate           DIM                8         23 - 30
+GLCode              DIM                8         31 - 38
+PostedToGL          FORM               1         39 - 39
+SeqMajor            FORM               7         40 - 46
+TransCode           FORM               1         47 - 47              //0 = Check, 1=Debit Memo, 2=Credit Memo
+Year                DIM                4         48 - 51
+Month               FORM               2         52 - 53
+DebitAmount         FORM               7.2       54 - 63
+CreditAmount        FORM               7.2       64 - 73
+Voucher             FORM               7         74 - 80           //HR 6/1/2005
+CheckNo             FORM               10        81 - 90
+Description         DIM                80        91 - 170
+SeqMinor            FORM               3        171 - 173
+CustomerID          dim                10
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+ARDistK1SIZE CONST            "30"                                    (Length of the Key variable)
+ARDistK2SIZE CONST            "48"                                    (Length of the Key variable 2)
+ARDistK3SIZE CONST            "26"                                    (Length of the Key variable 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+ARDistI1DEF  INIT             "-N,1-8,9-16,40-46,171-173"                (Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+..HR 10/7/2005   ARDistI2DEF  INIT             "1-8,31-38,9-16,48-53,40-46,171-173"    (Index definitions for Key 2)
+.
+ARDistI2DEF  INIT             "-N,1-8,31-38,9-16,23-30,40-46,171-173"    (Index definitions for Key 2)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+ARDistI3DEF  INIT             "-N,1-8,40-46,31-38,171-173"               (Index definitions for Key 2)
+.
+ARDistFileSize CONST            "190"                                   (Length of each Record)
+
+ARDistKY    DIM               ARDistK1SIZE                            (The Actual 'Key' variable)
+ARDistKY2   DIM               ARDistK2SIZE                            (The Actual 'Key' variable)
+ARDistKY3   DIM               ARDistK3SIZE                            (The Actual 'Key' variable)
+
+ARDistPROG  INIT              "Program Name"
+ARDistTITLE INIT              "Record Title"                         (Description used later for headers, etc)
+ARDistHELP  INIT              "ARDist.HLP"              (Name of the Help file for later purposes)
+
+ARDistTXTNM  INIT             "$APDATA\","DISTFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+ARDistISI1NM INIT             "$APDATA\","DISTFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+ARDistISI2NM INIT             "$APDATA\","DISTFL2.ISI"               .Actual ISI Filename
+ARDistISI3NM INIT             "$APDATA\","DISTFL3.ISI"               .Actual ISI Filename
+
+ARDistFLST  FILELIST
+           %IFDEF            ARDistKY
+ARDistFL    IFILE             Name=ARDistISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY2
+ARDistFL2   IFILE             Name=ARDistISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY3
+ARDistFL3   IFILE             Name=ARDistISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY4
+ARDistFL4   IFILE             Name=ARDistISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY5
+ARDistFL5   IFILE             Name=ARDistISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY6
+ARDistFL6   IFILE             Name=ARDistISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY7
+ARDistFL7   IFILE             Name=ARDistISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY8
+ARDistFL8   IFILE             Name=ARDistISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDistKY9
+ARDistFL9   IFILE             Name=ARDistISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $ARDistIO
+           GOTO                 #s
+           INCLUDE           ARDist.IO
+#s
+         %ENDIF

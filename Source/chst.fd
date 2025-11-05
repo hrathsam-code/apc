@@ -1,0 +1,102 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    chst                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/09/2019 at 11:52am                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/09/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $CHSTVAR
+$CHSTVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+CHST       RECORD
+Entity     DIM               8          1 - 8
+CustomerID DIM               6          9 - 14
+CustFill   DIM               4         15 - 18
+Year       DIM               4         19 - 22
+PurchAmt   FORM              10.2(13)  23 - 191      //1-12 (Jan-Dec), 13=YTD
+PaidAmt    FORM              10.2(13) 192 - 360      //1-12 (Jan-Dec), 13=YTD
+PurchTotal FORM              4(13)    361 - 412      //1-12 (Jan-Dec), 13=YTD
+PaidTotal  FORM              4(13)    413 - 464      //1-12 (Jan-Dec), 13=YTD
+DiscAmt    FORM              10.2(13) 465 - 633      //1-12 (Jan-Dec), 13=YTD
+LastPayDt  DIM               8        634 - 641      //Last Payment Date
+LastPayAmt FORM              7.2      642 - 651      //Last Payment Amount
+LastCheck  DIM               10       652 - 661      //Last Check Number
+           RECORDEND
+.
+. File Keys and File Labels
+. -------------------------
+.
+CHSTK1SIZE CONST            "22"                      (Length of the Key variable)
+.
+. By Entity, By Vendor, By Year
+.
+CHSTI1DEF  INIT             "1-14,19-22"                    (Index definitions for Key 1)
+.
+CHSTFSIZE  CONST            "661"                     (Length of each Record)
+
+CHSTKY    DIM               CHSTK1SIZE                (The Actual 'Key' variable)
+
+CHSTPROG  INIT              "Customer History"
+CHSTTITLE INIT              "Customer History Record"   (Description used later for headers, etc)
+CHSTHELP  INIT              "CHST.HLP"                (Name of the Help file for later purposes)
+
+CHSTTXTNM  INIT             "$APDATA\","CHSTFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+CHSTISI1NM INIT             "$APDATA\","CHSTFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+CHSTFLST  FILELIST
+           %IFDEF            CHSTKY
+CHSTFL    IFILE             Name=CHSTISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY2
+CHSTFL2   IFILE             Name=CHSTISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY3
+CHSTFL3   IFILE             Name=CHSTISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY4
+CHSTFL4   IFILE             Name=CHSTISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY5
+CHSTFL5   IFILE             Name=CHSTISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY6
+CHSTFL6   IFILE             Name=CHSTISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY7
+CHSTFL7   IFILE             Name=CHSTISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY8
+CHSTFL8   IFILE             Name=CHSTISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CHSTKY9
+CHSTFL9   IFILE             Name=CHSTISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $CHSTIO
+           INCLUDE           CHST.IO
+         %ENDIF
+#end

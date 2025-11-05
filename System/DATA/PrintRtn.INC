@@ -1,0 +1,848 @@
+PortraitMode                 const      "0"
+LandScapeMode                const      "1"
+printOrientation                   form      1
+printInitFailed                    dim      1
+#PrinterName  DIM               40
+TestHar       DIM               40
+#PrinterName2 DIM               40
+#DefaultPrinter DIM             40
+#DefaultCB    FORM              2
+#ComboSelected  FORM            2
+#PrinterSelected DIM            40
+#ItemCount    FORM              2
+PrintCancelFlag  FORM           1
+printPageCnt         form      3
+printLineCnt         form      4
+ReportProg    DIM               14
+PrintByCustomer    DIM          1
+SpoolReport   FORM              1
+SpoolFileName DIM               128
+reportMonth          dim      2
+reportDay           dim      2
+reportYear          dim      4
+ReportYear2         dim      2
+ReportCentury2         dim      2
+reportTime4          dim      4
+reportTime          dim      5
+reportDate8          dim      8
+reportDate          dim      10
+reportTimeStamp     dim      12
+reportProgVer        dim      40
+selectedPrinter     dim      50
+reportTitle         dim      50
+reportDateAndTime   dim      100
+.
+#FTPServer    INIT              "192.168.10.187"
+#FTPFileName  DIM               40
+#FTPUser      INIT              "harry"
+#FTPPassword  INIT              "tim1156"
+
+#Destination  DIM               100
+
+EmailAddress DIM               60
+EmailName    DIM               50
+EmailFile    DIM               50
+
+PrintJobFLST  FILELIST
+PrintJobFile  IFILE             name="PrintJob"
+PrintJobFileP IFILE             name="PrintJbP"
+              FILELISTEND
+
+PrintJobREC   RECORD
+JobNumber     FORM              8            1  -  8
+OutputMethod  FORM              1            9  -  9
+Subject       DIM               100         10  -  109
+SentTo        DIM               300        110  -  409
+FileName      DIM               20         410  -  429
+DocumentType  DIM               30         430  -  459
+CustomerID    DIM               6          460  -  465
+CustomerName  DIM               30         466  -  495
+SubmitDate    DIM               14         496  -  509
+Processed     FORM              1          510  -  510       // 0 - Not Processed, 1 - Processed
+ProcessDate   DIM               14         511  -  524
+SuccessFlag   DIM               1          525  -  525       // Y-Success, N-Not Successful, Null-
+Modem         DIM               10         526  -  535       //Modem Port (i.e. ttyS0, ttyS1)     //HR 3/2/2005
+FaxJob        FORM              8          536  -  543       //Hylafax Job Number                 //HR 3/2/2005
+StatusMessage DIM               60         544  -  603       //Fax Error message (if any)         //HR 3/2/2005
+PagesSent     FORM              2          604  -  605       //Pages sent                         //HR 3/2/2005
+FaxTime       DIM               8          606  -  613       //Fax Time (Actual Telephone Time)   //HR 3/2/2005
+ModemTime     DIM               8          614  -  621       //Modem Time (Total Time spent)      //HR 3/2/2005
+              RECORDEND
+
+#RadioSelected FORM             1
+PrinterOpened FORM              1
+
+#PrintJobKY   DIM               8
+.
+PageWidth  FORM              4
+PageHeight FORM              4
+PreviewOption FORM              1
+
+HeaderFont  FONT                   //Used for the Name of the Company/Entity
+DetailFont  FONT                   //Used for printing Detail Lines
+SubFont     FONT                   //Used for Printing Sub Detail Lines
+TitleFont   FONT                   //Used for the Title of the Program, etc
+TitleHeadingFont FONT
+LineFont    FONT
+SubLineFont FONT
+FooterFont  FONT                   //Used for printing the Footer
+#PrintOption   DIM               1
+
+PrintViaF     PLFORM            PrintVia
+PrintProgress PLFORM            PrntProg.PLF
+
+#Progress     FORM              4.2
+#Percent      FORM              4.2
+
+FaxJobNumber  FORM              4
+FaxJobFile    DIM               50
+TimesFont  font
+.VerdanaFont font
+GothicFont font
+#X            FORM              2
+p          pfile
+PDFFile       FILE
+
+FaxPDFNumber     DIM               12       //HR 12/10/2004
+FaxPDFSubject    DIM               100      //HR 12/10/2004
+
+PDFCounter    FORM              7
+PDFCounterD   DIM               7
+PrintJobs     FORM              4
+#PrintJobs    FORM              4.2
+PDFInfo       DIM               40(1000,2)                               //Changed from 300 on 10.20.2011
+PDFMethod     FORM              1(1000)                                  //Changed from 300 on 10.20.2011
+FTPFileName   DIM               50
+FTPServer     INIT              "192.168.10.187"
+FTPUser       INIT              "harry"
+FTPPassword   INIT              "tim1156"
+FaxTimetoSend DIM               20
+FaxDate       DIM               8
+FaxSubject    DIM               100(1000)                                //Changed from 300 on 10.20.2011
+TodayDays     FORM              10
+PrintByCust   DIM               1         //Are we printing by Customer???
+DocumentType  DIM               30
+FaxCustomerID DIM               6
+
+#SubmitTime   DIM               18
+#SubmitFile   DIM               25
+#SubmitFile2  DIM               50
+
+#ActualFile   DIM               125
+#FaxFile      FILE
+#SeqEOF       FORM              "-3"
+
+
+WebFileName   dim               120
+.
+. HR 9/9/2004
+.
+              INCLUDE           Print.FD
+
+              %IFNDEF    $CUST
+                INCLUDE           Cust.FD            //HR 10/4/2004
+              %ENDIF
+
+
+..              CALL              OpenPrint
+
+..              FORMLOAD          PrintViaF
+
+           GOTO              #End
+
+PrintPreviewInit
+           MOVE              "1",PreviewOption
+           GOTO                 PrintContinue
+PrintInit
+           MOVE              "0",PreviewOption
+PrintContinue
+           MOVE                 "0",FaxJobNumber
+..HR 7/27/2005           MOVE             PO_PORTRAIT,printOrientation
+           clock            timestamp to reportTimestamp
+           unpack           reportTimestamp into reportDate8,reportTime4
+           unpack           reportDate8 into ReportCentury2,ReportYear2,reportMonth,reportDay
+           pack             reportDate with reportMonth,"/",reportDay,"/",reportYear2
+           move             "99:99" to reportTime
+           edit             reportTime4 into reportTime
+           pack             reportDateAndTime with "Generated on ",reportDate," at ",reportTime
+           GETMODE          *ProgName=ReportProg
+.           pack             reportProgVer with program," v",ver
+
+.          if (printPreviewYN=YN_NO)
+.                      clear       selectedPrinter
+.          else
+           IF                   (ProgLoaded = 1)
+             IF                   (SelectedPrinter != "-")
+               CLEAR                SelectedPrinter
+             ENDIF
+           ELSE
+
+             IF                 (PreviewOption = 1)                   //1 should be the Print Preview, Not Zero 0
+               PACK                 SelectedPrinter with "@?"
+             ELSE
+               CLEAR                SelectedPrinter
+             ENDIF
+           ENDIF
+
+           trap             noPrinterSelected if spool
+              move              "Y",PrintInitFailed
+
+              IF                (SpoolReport = 1)
+                prtopen           p,selectedPrinter,reportTitle:
+                                  PageWidth=PageWidth:
+                                  PageHeight=PageHeight:
+                                  SpoolFile=SpoolFileName:
+                                  PageNum=0
+              ELSE
+                %IFDEF            PLBWebServer                  //Using Web Server
+WebClient       CLIENT
+
+                if                (PreviewOption = 1)
+                  move              "pdf:",SelectedPrinter
+                else
+                  move              "pdf:",SelectedPrinter
+                endif
+                Chop              ReportProg,ReportProg
+                pack              WebFileName from "c:\sunbelt\plbweb99\http_root\documents\",reportTimestamp,".PDF"
+                squeeze           WebFileName,WebFileName
+
+                prtopen           p,SelectedPrinter,WebFileName,PDFNAME=WebFileName:
+                                  PageWidth=PageWidth:
+                                  PageHeight=PageHeight:
+                                  PageNum=0
+                %ELSE
+                prtopen           p,selectedPrinter,reportTitle:
+                                  PageWidth=PageWidth:
+                                  PageHeight=PageHeight:
+                                  PageNum=0
+                %ENDIF
+
+              ENDIF
+
+           IF                   (ProgLoaded = 1)
+             IF                   (SelectedPrinter != "-")
+               MOVE                 "-",SelectedPrinter
+             ENDIF
+           ENDIF
+
+              prtpage        p;*Units=*LoEnglish
+           trapclr          spool
+
+           move             "0" to printPageCnt
+           move             "1000" to printLineCnt
+
+           Create            DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+.           Create            DetailFont,">Arial Narrow",Size=10,bold=0    //It's not too bad..Professional too!!!
+.           Create            DetailFont,">Times New Roman",Size=10,bold=0         //Excellent!!!  "Professional
+           Create            SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+.SWG Change           CREATE            HeaderFont,">Arial Narrow",Size=16,bold=1
+.SWG Change           CREATE            TitleFont,">Arial Narrow",Size=14,Bold=0
+           CREATE            HeaderFont,">Arial",Size=16,bold=1
+           CREATE            TitleFont,">Arial",Size=14,Bold=0
+           CREATE            TitleHeadingFont,">Arial",Size=10,Bold=1
+
+           PRTPAGE           p;*Font=DetailFont;
+
+           return
+.=============================================================================
+PrintClose
+           PRTCLOSE             P,Maximize=1:
+                                Zoom=3
+
+           %IFDEF               PLBWebServer                  //Using Web Server
+...           IF                   (PreviewOption = 1)
+             pack                 WebFileName from reportTimestamp,".PDF"
+             squeeze              WebFileName,WebFileName
+             WebClient.Open USING *URL=WebFileName,*Options=1
+...           ENDIF
+           %ENDIF
+           CALL                 SubmitPDFFiles
+           RETURN
+.=============================================================================
+PrintClose1
+           PRTCLOSE             P,Maximize=1:
+                                Zoom=3
+           RETURN
+.=============================================================================
+PrintClose2
+           PRTCLOSE          P,Maximize=1:
+                               Zoom=3
+
+              SWITCH            #PrintOption
+
+              CASE              "F"               //Fax
+                CALL                 "inet;FTPPUTfileP" USING #FTPServer,#FTPFileName,#FtpUser,#FtpPassword
+                CALL                 "Fax;CreateFax" using #FTPFileName
+              CASE              "E"               //Fax
+                MOVE            "Luann Racca",EmailName
+                MOVE            "LRacca@chiron-software.com",EmailAddress
+                MOVE            "123.pdf",EMailFile
+                CALL              "SendMail;SendMail" using EMailAddress,EmailName,EmailFile
+              ENDSWITCH
+
+
+              RETURN
+.=============================================================================
+printHeader
+           add              "1" to printPageCnt
+           compare          "1" to printPageCnt
+           if not equal
+             prtpage      p;*f;
+           endif
+
+.           setprop           VerdanaFont,size=16,bold=1  //was 24
+
+
+              IF                (PrintOrientation = PO_Portrait)     //Portrait Mode
+                PRTPAGE           P;*font=HeaderFont:
+                                  *p=450:20,*alignment=*center:
+                                  *jc,$CompanyName
+
+                PRTPAGE           P;*font=TitleFont:
+                                  *alignment=*center:
+                                  *p=377:48,ReportTitle
+                PRTPAGE           P;*font=TitleHeadingFont:
+                                  *P=10:38,*alignment=*left:
+                                  "Time :":
+                                  *p=10:54,"Date :":
+.                                 *p=690:54
+                                  *alignment=*left:
+                                  *p=690:38:
+                                  "Page :":
+                                  PrintPageCnt:
+                                  *p=60:38,ReportTime:
+                                  *p=60:54,ReportDate:
+                                  *p=668:54,ReportProg:
+                                  *alignment=*left
+              ELSE                                                   //Landscape Mode
+                PRTPAGE           P;*font=HeaderFont:
+                                  *p=600:20,*alignment=*center:
+                                  *jc,$CompanyName
+
+                PRTPAGE           P;*font=TitleFont:
+                                  *alignment=*center:
+                                  *p=522:48,ReportTitle
+
+                PRTPAGE           P;*font=TitleHeadingFont:
+                                  *P=10:38,*alignment=*left:
+                                  "Time :":
+                                  *p=10:54,"Date :":
+                                  *alignment=*left:
+                                  *p=930:38:
+                                  "Page :":
+                                  PrintPageCnt:
+                                  *p=60:38,ReportTime:
+                                  *p=60:54,ReportDate:
+                                  *p=938:54,ReportProg:
+                                 *alignment=*left
+              ENDIF
+
+              MOVE              "80",PrintLineCnt
+              CALL              PrintCustomHeader
+.             PRTPAGE           P;*pensize=2:                          //HR 6/21/03
+.                            *p=10:085,*line=1075:085
+              PRTPAGE           P;*pensize=2:
+                             *p=10:PrintLineCnt,*line=1070:PrintLineCnt
+
+
+           ADD                  "15",PrintLineCnt        //Old Line (85) + 15 = 100 = Old Value
+...HF 6/21/2003           MOVE              "100",PrintLineCnt
+
+           RETURN
+.=============================================================================
+PrintLandScapeMode
+           MOVE                 PO_LandScape,PrintOrientation
+             PRTPAGE           p;*orient=*landscape;
+           RETURN
+.=============================================================================
+
+
+LandScapeMode
+           if                (printOrientation=PO_LANDSCAPE)
+             PRTPAGE           p;*overlayon,*units=*loenglish:
+                               *pictrect=*off,*orient=*landscape;
+
+.            if              (printWatermarkYN=YN_YES)
+.              prtpage         p;*pict=100:755:200:930:watermarkPict;
+.            endif
+
+.            setprop           verdanaFont,size=20,bold=1,italic=1 //was 24
+             prtpage           p;*pensize=4:
+                               *p=025:098,*line=1075:098:
+                               *p=550:024:
+.                              *font=verdanaFont:
+                               *alignment=*center:
+                               "Estimating & Project Management System";
+
+.            SETPROP           verdanaFont,size=14,bold=1,italic=1
+             prtpage           p;*p=550:068:
+.                              *font=verdanaFont:
+                               *alignment=*center:
+                               reportTitle;
+
+.            setprop           haettenschweilerFont,size=14,bold=0,italic=0
+             prtpage           p;*p=550:760,*alignment=*center:
+.                              *font=haettenschweilerFont:
+                               "CDS - © 1982-2002, Contractor's Data Systems":
+                               *alignment=*left:
+.                               *p=025:068,header:
+                               *alignment=*right:
+                               *p=1075:068,*ll,reportProgVer;
+
+.            setprop           haettenschweilerFont,size=10,bold=0,italic=0
+             prtpage           p;*p=025:757,*line=1075:757:
+                               *p=025:761,*line=1075:761:
+.                              *font=verdanaFont,*alignment=*left:
+.                              *font=haettenschweilerFont,*alignment=*left:
+                               *p=025:763,reportDateAndTime:
+                               *alignment=*right:
+                               *p=1002:763,"Page ",printPageCnt;
+
+           else             //Portrait
+             prtpage           p;*overlayon,*units=*loenglish:
+                               *pictrect=*off,*orient=*portrait;
+
+.             if (printWatermarkYN=YN_YES)
+..              prtpage           p;*pict=210:990:35:765:watermarkPict;
+.               prtpage           p;*pict=400:990:35:765:watermarkPict;
+.             endif
+
+.            setprop           verdanaFont,size=20,bold=1,italic=1  //was 24
+             prtpage           p;*pensize=4:
+                               *p=025:098,*line=775:098:
+                               *p=400:024:
+.                              *font=verdanaFont:
+                               *alignment=*center:
+                               "Estimating & Project Management System";
+
+.            setprop           verdanaFont,size=14,bold=1,italic=1
+             prtpage           p;*p=400:068:
+.                              *font=verdanaFont:
+                               *alignment=*center:
+                               reportTitle;
+
+.            setprop           haettenschweilerFont,size=14,bold=0,italic=0
+             prtpage           p;*p=400:985,*alignment=*center:
+.                              *font=haettenschweilerFont:
+                               "CDS - © 1982-2001, Contractor's Data Systems":
+                               *alignment=*left:
+.                               *p=025:068,header:
+                               *alignment=*right:
+                               *p=775:068,*ll,reportProgVer;
+
+.            setprop           haettenschweilerFont,size=10,bold=0,italic=0
+             prtpage           p;*p=025:982,*line=775:982:
+                               *p=025:986,*line=775:986:
+.                              *font=verdanaFont:
+.                              *alignment=*left:
+.                              *font=haettenschweilerFont,*alignment=*left:
+                               *p=025:988,reportDateAndTime:
+                               *alignment=*right:
+                               *p=752:988,"Page ",printPageCnt;
+           endif
+
+           move                "133" to printLineCnt
+
+           return
+
+.=============================================================================
+noPrinterSelected
+           trapclr           spool
+              noreturn
+           pack              selectedPrinter with "@?"
+           move              "N" to printInitFailed
+           return
+.=============================================================================
+LoadPrintersIntoList
+              DLPrinters.ResetContent
+.              CBPrinters.ResetContent
+              GetInfo           Printers,#PrinterName
+              EXPLODE           #PrinterName,",",#DefaultPrinter
+              CHOP              #DefaultPrinter,#DefaultPrinter
+
+              MOVE              "0",#ComboSelected
+
+              GETINFO           Printers,DLPrinters
+              DLPrinters.GetCount giving #ItemCount
+              FOR                #X FROM "0" TO #ItemCount USING "1"
+                DLPrinters.GetText giving #PrinterName using #X
+                CHOP               #PrinterName
+                IF              (#PrinterName = "Win2PDF")
+                  CONTINUE
+                ENDIF
+                ADD             "1",#ComboSelected
+.
+. HR 2/11/2005 Automatically Setup the Default Printer
+.
+                IF              (#PrinterName = #DefaultPrinter)   //Is it the Default Printer
+                  MOVE            #ComboSelected,#DefaultCB
+                ENDIF
+
+                INSERTITEM      CBPrinters,#x,#PrinterName
+..                CBPrinters.InsertString using #PrinterName,#X
+              REPEAT
+              SETITEM           CBPrinters,#DefaultCB,#DefaultCB
+              RETURN
+.=============================================================================
+GetSelectedPrinter
+              GETITEM           RPrintViaPrinter,0,#RadioSelected
+.              RETURN            IF (#RadioSelected != 1)
+
+              CBPrinters.GetCurSel giving #ComboSelected
+              CLEAR             #PrinterSelected
+              IF                (#ComboSelected = -1)
+                BEEP
+                ALERT             Caution,"A valid printer has not been selected",result,"Printer Error"
+                SETFLAG           OVER
+                RETURN
+              ELSE
+                SETFLAG           NOT OVER
+              ENDIF
+
+              CBPrinters.GetText giving #PrinterSelected using #ComboSelected
+              RETURN
+.=============================================================================
+PrintInit2
+              IF                ( RunType = 0 or ( PrinterOpened = 0 and RunType = 1))
+
+                FORMLOAD          PrintViaF
+                IF                (PrintByCustomer = "Y")
+                  SETITEM           RPrintViaCustomer,0,1             //HR 4/26/2005  Set as the Default (i.e. By Customer)
+                ENDIF
+
+                SETPROP           WPrintVia,visible=1
+                RETURN            IF (PrintCancelFlag = 1)            //User Aborted Print options
+              ENDIF
+
+
+           MOVE             PO_PORTRAIT,printOrientation
+           clock            timestamp to reportTimestamp
+           unpack           reportTimestamp into reportDate8,reportTime4
+           unpack           reportDate8 into ReportCentury2,ReportYear2,reportMonth,reportDay
+           pack             reportDate with reportMonth,"/",reportDay,"/",reportYear2
+           move             "99:99" to reportTime
+           edit             reportTime4 into reportTime
+           pack             reportDateAndTime with "Generated on ",reportDate," at ",reportTime
+           GETMODE          *ProgName=ReportProg
+
+              GETITEM           RPrintViaCustomer,0,#RadioSelected
+              IF                (#RadioSelected = 1)
+                MOVE              "C",#PrintOption
+                MOVE              "Y",PrintByCust
+                OPEN              PDFFile,"PDFFile.TXT"
+              ENDIF
+
+              GETITEM           RPrintViaFax,0,#RadioSelected
+              IF                (#RadioSelected = 1)
+                MOVE              "F",#PrintOption
+                MOVE              "Y",PrintByCust
+                OPEN              PDFFile,"PDFFile.TXT"
+              ENDIF
+
+              GETITEM           RPrintViaEMail,0,#RadioSelected
+              IF                (#RadioSelected = 1)
+                MOVE              "E",#PrintOption
+                MOVE              "Y",PrintByCust
+                OPEN              PDFFile,"PDFFile.TXT"
+              ENDIF
+
+              GETITEM           RPrintViaPrinter,0,#RadioSelected
+              IF                (#RadioSelected = 1)
+                MOVE              "P",#PrintOption
+                MOVE              "N",PrintByCust
+              ENDIF
+
+              SWITCH            #PrintOption
+              CASE              "E"                    //E-Mail
+                CALL              PrintOpenFax
+              CASE              "F"                  //Fax
+                CALL              PrintOpenFax
+              CASE              "P"                    //Standard Printer Dialog
+                GETITEM           CBPrinters,0,#ComboSelected
+                GETITEM           CBPrinters,#ComboSelected,#PrinterSelected
+                IF                (PreviewOption = 1)
+                  PACK               SelectedPrinter FROM "@",#PRinterSelected
+                ELSE
+                  MOVE              #PrinterSelected,SelectedPrinter
+                ENDIF
+              CASE              "C"                    //Standard Printer Dialog
+                GETITEM           CBPrinters,0,#ComboSelected
+                GETITEM           CBPrinters,#ComboSelected,#PrinterSelected
+                MOVE              #PrinterSelected,SelectedPrinter
+              ENDSWITCH
+
+
+           trap             noPrinterSelected if spool
+              move              "Y",PrintInitFailed
+
+              prtopen p,selectedPrinter,reportTitle:
+                        PageWidth=PageWidth:
+                        PageHeight=PageHeight:
+                        PageNum=0
+
+              prtpage        p;*Units=*LoEnglish
+           trapclr          spool
+
+           move             "0" to printPageCnt
+           move             "1000" to printLineCnt
+
+           Create            DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+.           Create            DetailFont,">Arial Narrow",Size=10,bold=0    //It's not too bad..Professional too!!!
+.           Create            DetailFont,">Times New Roman",Size=10,bold=0         //Excellent!!!  "Professional
+           Create            SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+.SWG Change           CREATE            HeaderFont,">Arial Narrow",Size=16,bold=1
+.SWG Change           CREATE            TitleFont,">Arial Narrow",Size=14,Bold=0
+           CREATE            HeaderFont,">Arial",Size=16,bold=1
+           CREATE            TitleFont,">Arial",Size=14,Bold=0
+           CREATE            TitleHeadingFont,">Arial",Size=10,Bold=1
+
+           PRTPAGE           p;*Font=DetailFont;
+              MOVE              "1",PrinterOpened
+              RETURN
+.=============================================================================
+PrintOpenByCustomer
+.
+. IF we're NOT Faxing, OR the CustomerID != the last fax that we prepared then return
+.
+              RETURN            IF (PrintByCust != "Y" or CustREC.CustomerID = FaxCustomerID)    //Nothing to do if we're not by Customer!!!
+
+              MOVE              CustREC.CustomerID,FaxCustomerID
+.
+. This routine will open the "appropriate" Printer based upon the Customer selection.....
+.  "IF" we're using the "Print By Customer" method    HR 4/20/2005
+.
+OpenCustomerPrinter
+              RETURN            IF (PrintByCust != "Y")           //Nothing to do if we're not by Customer!!!
+
+              MOVE              "Y",FirstPrint
+              prtclose          P
+.              MOVE              "6312738088",CustREC.Fax
+              chop              CustREC.Fax,CustREC.Fax
+              chop              CustREC.EMail,CustREC.EMail
+              IF                (( CustREC.InvMethod = 2 and CustRec.Fax != "") or:
+                                ( CustREC.InvMethod = 1 and CustREC.EMail != ""))        //2=Fax, 1=EMail
+                call            PrintOpenFax
+..                move            CustREC.fax,PDFInfo(FaxJobNumber,2)
+.
+..HR 11/4/2004                pack            FaxSubject(FaxJobNumber) from DocumentType," :  for Customer : ":
+..HR 11/4/2004                                         CustKY," - ",CustREC.Name
+..HR 3/25/2005                pack            FaxSubject(FaxJobNumber) from DocumentType," :  for Customer : ":
+..HR 3/25/2005                                         CustREC.CustomerID," - ",CustREC.Name
+
+                pack            FaxSubject(FaxJobNumber) from "JOBID:",PDFInfo(FaxJobNumber,1)," - ",DocumentType," :  for Customer : ":
+                                           CustREC.CustomerID," - ",CustREC.Name         //HR 3/25/2005
+
+
+              else
+                trap             noPrinterSelected if spool
+                move              "Y",PrintInitFailed
+
+                prtopen           p,selectedPrinter,reportTitle:
+                                  PageWidth=PageWidth:
+                                  PageHeight=PageHeight:
+                                  PageNum=0
+
+                trapclr           spool
+              endif
+
+              prtpage           p;*Units=*LoEnglish
+              move              "0" to printPageCnt
+              move              "1000" to printLineCnt
+
+              Create            DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+              Create            SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+              CREATE            HeaderFont,">Arial",Size=16,bold=1
+              CREATE            TitleFont,">Arial",Size=14,Bold=0
+              CREATE            TitleHeadingFont,">Arial",Size=10,Bold=1
+
+              PRTPAGE           p;*Font=DetailFont;
+              RETURN
+
+.=============================================================================
+PrintOpenFax
+.
+. Read next Sequential Number
+.
+              ADD               "1",FaxJobNumber
+. HR 9/28/2004
+.
+              filepi          3;PDFFile
+              read            PDFFile,ZEROSEQ;PDFCounter
+              add             "1",PDFCounter
+              write           PDFFile,ZEROSEQ;PDFCounter
+
+              move            PDFCounter,PDFCounterD
+              replace         " 0",PDFCounterD
+              move            PDFCounterD,PDFInfo(FaxJobNumber,1)
+              IF                (CustREC.InvMethod = 2)       //Fax Method
+                move            CustREC.fax,PDFInfo(FaxJobNumber,2)
+              ELSE                                            //E-Mail Method
+                MOVE              CustREC.Email,PDFInfo(FaxJobNumber,2)
+              ENDIF
+
+              MOVE              CustREC.InvMethod,PDFMethod(FaxJobNumber)   //HR 10/11/2004
+                                                                                                   //HR 3/18/2005 Added JOBID
+              pack            FaxSubject(FaxJobNumber) from "JOBID:",PDFInfo(FaxJobNumber,1)," - ",DocumentType," :  for Customer : ":
+                                         CustREC.CustomerID," - ",CustREC.Name
+
+..HR 10/4/2004          pack            FaxSubject(FaxJobNumber) from "Invoice :",INVCNUMO,"  for Customer : ",CustKEY," - ",CUSTNAME
+
+              PACK              FaxJobFile FROM "PrintID=","F:\data\",PDFCounterD
+              SQUEEZE           FaxJobFile,FaxJobFile
+
+..              SETMODE           *ENV="PrintID=F:\data\123"
+              SETMODE           *ENV=FaxJobFile
+
+..              PACK               #FTPFileName,"123.pdf"
+              PACK              #FTPFileName,PDFInfo(FaxJobNumber,1),".pdf"
+              SQUEEZE           #FTPFileName,#FTPFileName
+
+..              prtopeN             P,"Win2PDF",""   Perfect!!!!
+              PRTOPEN             P,"pdf:",#FTPFileName                 //HR 11.13.2014
+
+..HR 10/4/2004              MOVE              "Win2PDF",SelectedPrinter
+              MOVE              "SeqNo",PrintREC.FileName
+              MOVE              "F",PrintREC.SendVia
+              MOVE              "5169328140",PrintREC.Destination
+              ADD               "1",PrintREC.SeqNo
+.              CALL              WrtPrint                           //Add to the Printer File
+              CALL              WritePrintRecord
+              RETURN
+;=============================================================================
+WritePrintRecord
+              GETFILE           PrintJobFile
+              IF                Not ZERO             //File is not opened
+                OPEN              PrintJobFLST
+              ENDIF
+
+
+              MOVE              CustREC.InvMethod,PrintJobREC.OutputMethod
+              MOVE              PDFCounter,PrintJobREC.JobNumber
+              MOVE              PDFInfo(FaxJobNumber,2),PrintJobREC.SentTo
+              MOVE              FaxSubject(FaxJobNumber),PrintJobREC.Subject
+              MOVE              CustREC.CustomerID,PrintJobREC.CustomerID
+              MOVE              CustREC.Name,PrintJobREC.CustomerName
+              MOVE              DocumentType,PrintJobREC.DocumentType
+              MOVE              #FtpFileName,PrintJobREC.FileName
+              MOVE              " ",PrintJobREC.SuccessFlag
+              IF                (PrintJobREC.OutputMethod = 1)
+                MOVE              "1",PrintJobREC.Processed                 //E-Mail...Consider it already processed
+              ELSE
+                MOVE              "0",PrintJobREC.Processed
+              ENDIF
+              CLOCK             TimeStamp,PrintJobREC.SubmitDate
+              WRITE             PrintJobFLST;PrintJobREC
+              RETURN
+.=============================================================================
+SubmitPDFFiles
+SendFaxJobs
+              RETURN            if ( FaxJobNumber = 0 )   //Nothing to do, THAT'S why!!!!
+
+              FORMLOAD          PrintProgress
+              SETPROP           PProgressBar,value=0
+
+SendFaxJobs2
+              CLOCK             TimeStamp,#SubmitTime                  //HR 2/23/2005
+              PACK              #SubmitFile,#SubmitTime,".new"         //HR 2/23/2005
+              PREP              #FaxFile,#SubmitFile,Exclusive         //HR 2/23/2005
+
+              FOR               PrintJobs FROM "1" to FaxJobNumber BY "1"
+              PACK              FTPFileName from PDFInfo(PrintJobs,1),".pdf"
+              SQUEEZE           FTPFileName,FTPFileName
+              clock             TimeStamp to Date8                          //Get the Date from Today
+.
+. Convert into GMT for 8:00PM EST
+.
+              CALL              ConvDateToDays using DATE8,TodayDays        //HR 9/27/2004
+              add               "1",TodayDays                               //HR 9/27/2004
+              call              ConvDaysToDate using TodayDays,FaxDate      //HR 9/27/2004
+
+..HR 9/27/2004           move      "20040928",FaxDate
+..HR 2/3/2005              pack              FaxTimeToSend from FaxDate,"0100"   //9:00PM EST :00 seconds
+              pack              FaxTimeToSend from "08:00PM"        //9:00PM EST :00 seconds
+              IF                (PDFMethod(PrintJobs) = 1)      //E-Mail
+                MOVE              FTPFileName,EMailFile
+                MOVE              PDFInfo(PrintJobs,2),EmailName
+                MOVE              PDFInfo(PrintJobs,2),EmailAddress
+                CALL              "SendMail;SendMail" using EMailAddress,EmailName,EmailFile
+                MOVE              FaxSubject(PrintJobs),FaxPDFSubject       //HR 3/18/2005
+              ELSE
+                MOVE              FaxSubject(PrintJobs),FaxPDFSubject
+                MOVE              FaxSubject(PrintJobs),FaxPDFSubject       //HR 3/18/2005
+                MOVE              PDFInfo(PrintJobs,2),FaxPDFNumber
+                PACK              #Destination FROM "/var/spool/hylafax/tmp/",FTPFileName,"|192.168.10.187:3934"
+
+                TRAP              ErrorWithSunFM IF IO
+                PACK              #FTPFileName from "F:\DATA\",FTPFileName                //HR 3.31.2016
+                COPYFILE          #FTPFileName,#Destination  // Local to SunFM             //HR 3.31.2016      changed to #FTPFilename from FTPFilename
+                TRAPCLR           IO
+
+                CALL              "Fax;CreateFax" using FTPFileName,FaxPDFNumber:
+                                                        FaxTimeToSend,FaxPDFSubject:
+                                                        #FaxFile
+              ENDIF
+
+              MOVE              PDFInfo(PrintJobs,1),PrintJobREC.JobNumber
+              MOVE              PrintJobREC.JobNumber,#PrintJobKY
+              READ              PrintJobFile,#PrintJobKY;PrintJobREC
+              IF                NOT OVER
+                MOVE              FaxPDFSubject,PrintJobREC.Subject
+                UPDATE            PrintJobFLST;PrintJobREC
+              ENDIF
+
+              MOVE              FaxJobNumber,#Progress
+              MOVE              PrintJobs,#PrintJobs
+              CALC              #Percent = (#PrintJobs / #Progress) * 100
+              SETPROP           PProgressBar,value=#Percent
+              REPEAT
+
+              WEOF              #FaxFile,#SEQEOF
+              close             #FaxFile
+              PACK              #Destination FROM "/faxjobs/",#SubmitFile,"|192.168.10.187:3934"
+
+              TRAP              ErrorWithSunFM IF IO
+              PACK              #SubmitFile2 from "F:\DATA\",#SubmitFile                                    //HR 3.31.2016
+
+              COPYFILE          #SubmitFile2,#Destination                         //HR 4.1.2016 Changed #SubmitFile to #SubmitFile2
+              TRAPCLR           IO
+
+              ERASE             #SubmitFile2                   //HR 4.1.2016
+
+              SETPROP           WPrintProgress,visible=0   //Start the PrintProgess Window
+              RETURN
+.=============================================================================
+ErrorWithSunFM
+              TRAPCLR           IO
+ErrorFile2    FILE
+              OPEN                 ErrorFile2,"ERRORFL.HAR"
+              WRITE                ErrorFile2,SEQEof;S$CmdLin
+              WEOF                 ErrorFile2,seq
+              close                ErrorFile2
+              RETURN
+.=============================================================================
+SubmitPDFFilesBADROUTINE
+              RETURN            IF (PrintByCust != "Y")    //Nothing to do if we're not by Customer!!!
+
+              FOR       PrintJobs FROM "1" to FaxJobNumber BY "1"
+                PACK      FTPFileName from PDFInfo(PrintJobs,1),".pdf"
+                SQUEEZE   FTPFileName,FTPFileName
+                clock     TimeStamp to Date8                     //Get the Date from Today
+.
+. Convert into GMT for 8:00PM EST
+.
+                CALL      ConvDateToDays using DATE8,TodayDays        //HR 9/27/2004
+                add       "1",TodayDays                               //HR 9/27/2004
+                call      ConvDaysToDate using TodayDays,FaxDate      //HR 9/27/2004
+
+..HR 9/27/2004           move      "20040928",FaxDate
+                pack      FaxTimeToSend from FaxDate,"0100"   //9:00PM EST :00 seconds
+..HR 2/5/2005             move      "NOW",FaxTimeToSend
+                CALL                 "inet;FTPPUTfileP" USING FTPServer,FTPFileName,FtpUser,FtpPassword
+                CALL                 "Fax;CreateFax" using FTPFileName,PDFInfo(PrintJobs,2):
+                                                      FaxTimeToSend,FaxSubject(PrintJobs)
+              REPEAT
+              RETURN
+
+
+
+#End

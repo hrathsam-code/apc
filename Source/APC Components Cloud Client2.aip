@@ -1,0 +1,155 @@
+﻿[Setup]
+Version=6.6
+Edition=0
+GUID={1B90284C-9068-41CD-982D-43CEFB0A05E5}
+AppName=APC Components Cloud Client
+AppVersion=1.3
+AppDescription=APC Components Client Installation
+CompanyName=APC Components
+WebSite=www.apcomponents.com
+SupportLink=
+InstallMode=0
+InstallLevel=1
+PromptUninstall=1
+PromptSilentUninstall=1
+CheckVersions=0
+CheckMinVer=1.0
+CheckMaxVer=2.0
+CheckNoUpdate=0
+Windows XP=1
+Windows Vista=1
+Windows 7=1
+Windows 8=1
+Windows 8.1=1
+Windows 10=1
+Windows Server 2003=0
+Windows Server 2008=0
+Windows Server 2008 R2=0
+Windows Server 2012=0
+Windows Server 2012 R2=0
+Windows Server 2016=0
+x64=0
+Admin=1
+Internet=0
+CloseApp=0
+CloseAppFile=iexplore.exe
+CloseAppText=Internet Explorer
+dotNET=0
+dotNETVersion=0
+LinkDN=http://www.microsoft.com/en-us/download/details.aspx?id=17113
+IE=0
+IEVersion=0
+LinkIE=http://www.microsoft.com/en-us/download/internet-explorer-10-details.aspx
+AR=0
+ARVersion=5
+LinkAR=http://get.adobe.com/reader/
+Java=0
+JavaVersion=0
+LinkJR=http://www.java.com/en/download/manual.jsp
+SQL=0
+SQLVersion=0
+LinkSQL=http://www.microsoft.com/en-us/download/details.aspx?id=5783
+SQLE=0
+SQLEVersion=0
+SQLExpressVersion=2005
+LinkSQLE=http://www.microsoft.com/en-us/download/details.aspx?id=30438
+VisualCpp=0
+VisualCppVersion=0
+LinkVisualCpp=https://www.microsoft.com/en-us/download/details.aspx?id=5555
+PackageType=0
+DataFileName=
+SetupFolder=C:\apc
+SetupFileName=APCClientInstall
+SetupFile=C:\apc\APCClientInstall.exe
+IconFile=Default
+SourceDir=C:\APC
+InstallationPath=<ProgramFiles>\<AppName>
+MainExecutable=
+ProgramGroup=<AppName>
+Uninstall=1
+ShowAddRemove=1
+SilentUninstall=0
+UninstallForce=0
+UninstallRestart=0
+UninstallSettings=0
+UninstallSettingsCommand=
+VisitUninstallPage=0
+UninstallURL=http://www.company.com/uninstall.html
+Updater=1
+UpdateURL=http://www.company.com/update.txt
+CheckUpdateBefore=0
+AutoCheckUpdate=0
+UpdateDay=1
+AutoSilentUpdate=0
+WizardBitmap=C:\Program Files\Actual Installer\Bitmaps\Wizard\01.bmp
+HeaderBitmap=C:\Program Files\Actual Installer\Bitmaps\Header\01.bmp
+LogoBitmap=C:\Program Files\Actual Installer\Bitmaps\Logo\01.bmp
+SilentInstall=0
+Theme=1
+ShowPublisher=1
+HideFileNames=0
+DialogWelcome=1
+DialogLicense=0
+DialogReadme=0
+DialogUserInfo=1
+DialogDestinationFolder=1
+DialogAdditionalTasks=1
+DialogReady=1
+DialogFinish=1
+DefaultLanguage=English
+AutoDetectLanguage=0
+AcceptAgreement=0
+InfoUserName=0
+InfoUserNameReq=0
+InfoCompany=0
+InfoCompanyReq=0
+InfoCustom=0
+InfoCustomReq=0
+InfoCustomName=
+InfoCustomType=0
+InfoSerial=1
+InfoSerialReq=1
+SerialsCount=1
+RestartComputer=0
+LaunchFile=1
+LaunchFileName=<InstallDir>\APCClient.exe
+LaunchFileChecked=1
+ViewReadme=0
+ViewReadmeFile=
+ViewReadmeChecked=0
+CustomAction=0
+CustomActionName=Visit Web Site
+CustomActionCommand=<WebSite>
+CustomActionChecked=0
+TotalFiles=5
+
+[Languages]
+English=
+
+[Serials]
+0=Boats
+
+[Files]
+0=C:\APC\APCClient.exe?<InstallDir>\APCClient.exe?1?-1
+1=C:\APC\APC Components Cloud.lnk?<InstallDir>\APC Components Cloud.lnk?1?-1
+2=C:\Program Files\Actual Installer\Uninstall.exe?<InstallDir>\Uninstall1.exe?1?-1
+3=C:\Program Files\Actual Installer\Updater.exe?<InstallDir>\Updater.exe?1?-1
+4=C:\Program Files\Actual Installer\Uninstall.exe?<InstallDir>\Uninstall.exe?1?-1
+
+[License]
+(Default)=
+English=
+
+[Readme]
+(Default)=
+English=
+
+[Shortcuts]
+0=<Desktop>*?APC Components Cloud Client*?<InstallDir>\APCClient.exe*?APC Components System*?answer*?<InstallDir>*?<InstallDir>\APCClient.exe*?0*?Normal
+1=<CommonDesktop>*?APC Components  Program*?<InstallDir>\APCClient.exe*?APC Components System*?answer*?<InstallDir>*?<InstallDir>\APCClient.exe*?0*?Normal
+2=<ProgramGroup>*?Uninstall <AppName>*?<InstallDir>\Uninstall1.exe*?*?*?<InstallDir>*?*?0*?Normal
+3=<ProgramGroup>*?Check for Updates*?<InstallDir>\Updater.exe*?*?*?<InstallDir>*?*?0*?Normal
+
+[FileOptions]
+0=C:\APC?D
+

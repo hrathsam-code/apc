@@ -1,0 +1,235 @@
+Date:  01-06-2004
+ 
+Subject:  Patch RELEASE 8.7E Runtime Files
+ 
+    Included you will find the patch release of:
+ 
+         PLBSERVE        8.7E  06 Jan 2004     8.7.0150
+         PLBCLIENT       8.7E  06 Jan 2004     8.7.0150
+         PLBCLICON       8.7E  06 Jan 2004     8.7.0150
+         PLBWIN          8.7E  06 Jan 2004     8.7.0150
+         PLBDSIGN        8.7E  06 Jan 2004     8.7.0150
+         SUNFYSYS.DLL    8.7E  06 Jan 2004     8.7.0150
+         SUNFHDLL.DLL    8.7E  06 Jan 2004     8.7.0150
+         SUNFHDLL.LIB    8.7E  06 Jan 2004
+         PLBCMP          8.7E  06 Jan 2004
+         SUNIDE          8.7E  06 Jan 2004
+ 
+         SUNSORT         8.7E  06 Jan 2004
+         SUNSRTNT        8.7E  06 Jan 2004     8.7.0150
+         ODSBAC32.DLL    8.7E  06 Jan 2004
+         SETGUID         8.7E  06 Jan 2004     8.7.0150
+         SUNMOD          8.7E  06 Jan 2004     8.7.0150
+         MAKEDEF         8.7E  06 Jan 2004     8.7.0150
+         PLBWSEC.DLL     8.7E  06 Jan 2004     8.7.0150
+         PLBWODBC.DLL    8.7E  06 Jan 2004     8.7.0150
+         EMBEDINI        8.7E  06 Jan 2004
+         MAKECON         8.7E  06 Jan 2004
+         MAKECLI         8.7E  06 Jan 2004
+         PLBEQU.INC      8.7D  24 Nov 2003
+ 
+*==============================================================================
+The following files have been changed as follows:
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Modified the log output to report the PORT NUMBER as an unsigned
+           decimal value.
+ 
+         - Corrected a problem where the FGCOLOR and BGCOLOR controls for
+           a PRTPAGE instruction were not being sent to the client.
+ 
+-------------------------------------------------------------------------------
+PLBCLIENT- Corrected a GPF error caused when a PANEL object was specified
+           as the parent window for a FORMLOAD operation.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the Isam PREP key specifications to accept a key
+PLBSERVE   part that specified as a single starting key location without
+PLB (UNIX) having a terminating key location.
+ 
+         - Modified the FILEPI to waste some time when all of the files
+           in the file list could not be locked for the filepi operation.
+           This change corrects a CPU % usage problem when a large number of
+           tasks were waiting for a FILEPI lock to be granted.
+ 
+         - Corrected a problem where a FILEPI deadlock situation might
+           occur when two different files were specified in different
+           programs in different file list order.
+ 
+           Example:
+                   FILE1   FILE
+                   FILE2   FILE
+                   .
+                   .
+                           FILEPI  99;FILE1,FILE2   //Used in Program 1
+                   .
+                   .
+                           FILEPI  99;FILE2,FILE1   //Used in Program 2
+ 
+         - Corrected a problem where a fractional *T value for a COMREAD
+           and COMWRITE was causing an invalid timeout that was shorter
+           than expected.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - In release 8.7D, a correction was made for a SETITEM operation
+           for a RADIO button group that caused the current focus to be
+           changed.  This focus change was being made unconditionally and
+           was a problem for some applications.  For the 8.7E release
+           the SETITEM operation for a RADIO button group is being modified
+           to only change the focus if one of the RADIO buttons in the
+           group currently has the focus.  Otherwise, the SETITEM operation
+           does not change the focus.
+ 
+         - Modified the runtime to minimize repaint border flickering for
+           EDITTEXT objects that overlap each other and exist on a
+           TABCONTROL object.
+ 
+         - Modified the runtime to detect an Extended Bitmap Format that
+           is identified as a BITFIELD compression type for a '.bmp' file.
+           This corrects a problem where a 32-bit bitmap was not being
+           displayed for a PICT object.
+ 
+         - Corrected a problem where a buddy control for an EDITNUMBER
+           was not drawn properly when the EDITNUMBER existed in a
+           COLLECTION and a SETPROP VISIBLE operation for the COLLECTION
+           was executed.  Also, this same operation was causing a
+           small rectangle to be drawn in the upper left corner of the
+           client area of a form.  This small rectangle is no longer
+           being drawn with this correction.
+ 
+         - Corrected a GPF error that might occur when a FORMLOAD 
+           was executed for a PLF format that contained a STATUSBAR or
+           TOOLBAR object that existed as the last object in the form.
+           This problem was very intermittent and would only occur 
+           when memory was allocated in a certain manner.
+ 
+         - Corrected a problem where a STATTEXT tool tip would not become
+           visible when the parent window for the STATTEXT object was
+           a PANEL object.
+ 
+         - Corrected a problem where a function key was not being recognized
+           by a KEYIN *T0 operation.
+ 
+-------------------------------------------------------------------------------
+PLBWCEPK - Corrected a COMBOBOX WIDTH resizing problem where the combobox
+PLBWCEPT   line items could not be accessed after the WIDTH property was
+PLBWCEHH   was changed.
+ 
+         - Corrected a problem where the Locale Settings were not being used
+           for the CE runtimes.  This correction allows the EDITTEXT decimal
+           point to be substituted with a Locale character when using the
+           DECIMAL edit type property.
+ 
+         - Corrected a problem where the text output to a STATUSBAR panel
+           was invalid for the CE runtimes.
+ 
+-------------------------------------------------------------------------------
+PLBWCEPK - The Windows CE runtimes do not support a 'Right Mouse Click'.
+           However, the Pocket PC Windows CE OS does support a concept called
+           'Context Menu Gesture'.  The 'Context Menu Gesture' means that a
+           user is holding the stylus at the same point on the CE device
+           screen for an extended period of time.  Specialized logic has
+           been added to the 8.7Eb PLBWCEPK runtime to detect the 'Context
+           Menu Gesture'.  When a 'Context Menu Gesture' is detected for
+           a PL/B object, then a right mouse action is simulated.  Please
+           note that a 'Context Menu Gesture' is not supported for the
+           Palm Top or Handle Held Windows CE devices.  Also, note that I
+           have been unable to determine any Microsoft documentation that
+           defines the use of ALT key sequencing to produce a mouse right
+           click action.
+-------------------------------------------------------------------------------
+PLB (UNIX)- Corrected a problem for UNIX ODBC support that could cause a
+            SEGV error when an ODBC error was being reported.
+ 
+          - Corrected a problem for UNIX Postgres SQL where extended error
+            data was being reported incorrectly.
+ 
+-------------------------------------------------------------------------------
+PLBCMP   - Modified the ZQ option output to display at the home down
+           screen position.  This corrects display problems under Unix.
+ 
+         - Corrected a problem the pcode for a NFORMAT statement was
+           invalid when an expression was used for both the whole and
+           fraction operand values.  This was causing the destination
+           numeric variable to be formatted with an invalid number of
+           whole digits.
+ 
+         - Corrected a problem where the first line in a compiler listing
+           output was too long and the date/time could not be printed.
+ 
+         - Corrected a MACRO parameter problem where '&i' and '&#' were
+           being used the same as the internal symbol reference of '&id'.
+ 
+         - Corrected a problem where the compiler was allowing an EQU as
+           a parameter in a CALL USING list.  This would cause invalid
+           PCODE that could cause a GPF in a PL/B runtime.  A compilation
+           error is now given if an EQU is specified in a CALL USING list.
+ 
+-------------------------------------------------------------------------------
+PLBDSIGN - Corrected a problem where the BUTTONHEIGHT and BUTTONWIDTH
+           properties were not being save and restored when the AUTOSIZE
+           property for a TOOLBAR was set to FALSE.  The BUTTONHEIGHT and
+           BUTTONWIDTH properties are now saved and restored as expected.
+ 
+         - Corrected a problem where a change to the ALIGNMENT property for
+           an EDITNUMBER object was not showing immediately.
+ 
+-------------------------------------------------------------------------------
+SUNFHSYS.DLL- Corrected a problem where a PREP for an IFILE using a
+              key specification could cause a memory leak.
+ 
+-------------------------------------------------------------------------------
+ADMIN    - Modified the log output to report the PORT NUMBER as an unsigned
+           decimal value.
+ 
+         - Corrected a GPF problem that would occur when an ADMLOGON
+           operation was performed to log on to an ADMIN service executing
+           on a Forward Byte Order platform.
+ 
+-------------------------------------------------------------------------------
+SUNIDE   - Fixed a bug that was introduced in the 8.7C where the editor was
+           checking file attributes based on a timer.  After a file was closed,
+           the timer was not deactivated.
+
+         - Fixed a bug where the editor would was not correctly checking file
+           timestamps to detect changes outside of SUNIDE.
+ 
+         - Modified the editor to only check timestamp changes if the file is
+           opened in read only mode.
+
+         - Corrected a problem where a blank line could be inserted in the code
+           during file load.
+
+         - Corrected a problem where the expanded month from the date mask
+           could be interpreted as part of the date mask.
+
+         - Fixed Clean logic to only delete files in the specified output paths
+           so to not conflict with production files that may be on the
+           PLB_PATH.
+
+         - Fixed a bug in list file processing to ignore list files that do not
+           include either the L or the X options.
+
+         - Fixed a problem where page headers in a list file cross reference
+           could be treated as errors.
+
+         - Added editor module version checking on loading each new instance of
+           the editor.  This helps to verify the correct running of the program
+           when you have copied SUNIDE to other directories and they did not
+           have an update applied when an update was released.
+
+         - Fixed a problem where the project's ini file was not being loaded
+           when a new project was created.
+
+         - Fixed a bug where the PLBCMP_EXT in the projects ini file was not
+           being used.
+
+         - Fixed a bug where the PLBCMP_PRT keyword in the projects ini file
+           was not being used.
+
+         - Fixed a bug where the PLBCMP_OUT keyword in the projects ini file
+           was not being used.
+
+         - Fixed a bug where the project ini file may not be used when a
+           program is executed. 
+

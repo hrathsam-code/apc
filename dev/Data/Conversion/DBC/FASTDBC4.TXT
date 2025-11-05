@@ -1,0 +1,813 @@
+.
+. FAST DB/C routines for user verbs
+. ACTIONBAR, ACTION, ACTIONSTORE, ACTIONPUTQ, ACTIONNOINTR, ACTIONINTRCLR
+.
+. tab settings 7,13,19,...
+.
+noextdef4	equate 1
+	inc fastdbc
+.
+. variables
+.
+. global variables
+gbl.queue	gqueue entries=32, size=4
+.
+keyword		char @
+var1		var @
+var2		var @
+parmindex	int 5
+letters		init "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+toupper		init "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ"
+ctlchars		init 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a:
+			     0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13:
+			     0x14,0x15,0x16,0x17,0x18,0x19,0x1a
+errormsg		char 20
+routine		label @
+.
+. actionbar and action variables
+.
+act.item		char [70]@
+act.itemcnt		int 3
+act.itemfkey		int 3[70]
+act.itemdesel		num [70]@
+act.entry		char [15]@
+act.entrycnt		int 2
+act.entrynum		int 2
+act.entryhorz		int 3[15]
+act.entrywidth		int 3[15]
+act.entryitems		int 3[15]
+act.entryiteme		int 3[15]
+act.entrylist		char @[]
+act.fkey		int 2
+act.keylist	int @[]
+act.count	int @
+act.itemcheck		num [70]@
+act.itemmap		char 70
+act.itemlist		char @[]
+act.trapflags		char 4
+act.trap2flags	char 4
+act.trapstate	char 300
+act.trapwin		char 600
+act.h			int 3
+act.width		int 3
+act.wtop		int 3
+act.wbot		int 3
+act.wlft		int 3
+act.wrgt		int 3
+act.noreturn	int 2
+act.retcount	int 2
+act.barflag		int 1
+act.dropflag	int 1
+act.dropsave	char 500
+act.statesave	char 215
+act.flag1		int 1
+act.charvar		char @
+act.char1		char 1
+act.char1a		char 1
+act.char20		char 20
+act.index		int 3
+act.worknum		int 3
+act.worknum2	int 3
+act.worknum3	int 3
+act.worknum4	int 3
+act.fkeychar	char 5
+act.fkeychars	init "F1 F2 F3 F4 F5 F6 F7 F8 F9 F10F11F12"
+act.blank	init "                                        "
+act.noitemflag	int	1
+act.nointerruptflag	int 1
+act.interruptlabel	label @
+act.f10status	int	1
+act.entryflag 	int 1
+act.entrystate	dim 300
+act.tempstate		dim 300
+.
+act.getqvarflag	int 1
+act.getqvar	char @
+act.putqvar	char @
+.
+lbl01			label @
+lbl02			label @
+lbl03			label @
+lbl04			label @
+lbl05			label @
+lbl06			label @
+lbl07			label @
+lbl08			label @
+lbl09			label @
+lbl10			label @
+lbl11			label @
+lbl12			label @
+lbl13			label @
+lbl14			label @
+lbl15			label @
+lbl16			label @
+lbl17			label @
+lbl18			label @
+lbl19			label @
+lbl20			label @
+lbl21			label @
+lbl22			label @
+lbl23			label @
+lbl24			label @
+lbl25			label @
+lbl26			label @
+lbl27			label @
+lbl28			label @
+lbl29			label @
+lbl30			label @
+lbl31			label @
+lbl32			label @
+lbl33			label @
+lbl34			label @
+lbl35			label @
+lbl36			label @
+lbl37			label @
+lbl38			label @
+lbl39			label @
+lbl40			label @
+lbl41			label @
+lbl42			label @
+lbl43			label @
+lbl44			label @
+lbl45			label @
+lbl46			label @
+lbl47			label @
+lbl48			label @
+lbl49			label @
+lbl50			label @
+lbl51			label @
+lbl52			label @
+lbl53			label @
+lbl54			label @
+lbl55			label @
+lbl56			label @
+lbl57			label @
+lbl58			label @
+lbl59			label @
+lbl60			label @
+lbl61			label @
+lbl62			label @
+lbl63			label @
+lbl64			label @
+lbl65			label @
+lbl66			label @
+lbl67			label @
+lbl68			label @
+lbl69			label @
+lbl70			label @
+lbl71			label @
+lbl72			label @
+lbl73			label @
+lbl74			label @
+lbl75			label @
+lbl76			label @
+lbl77			label @
+lbl78			label @
+lbl79			label @
+lbl80			label @
+lbl81			label @
+lbl82			label @
+lbl83			label @
+lbl84			label @
+lbl85			label @
+lbl86			label @
+lbl87			label @
+lbl88			label @
+lbl89			label @
+lbl90			label @
+lbl91			label @
+lbl92			label @
+lbl93			label @
+lbl94			label @
+lbl95			label @
+lbl96			label @
+lbl97			label @
+lbl98			label @
+lbl99			label @
+lbl100			label @
+
+act.abortkey	int 2
+act.abortlbl	label @
+barb external
+
+.
+. ACTIONBAR verb
+.
+. ACTIONBAR ENTRY=<cvarlit>, ITEM=<cvarlit>, ROUTINE=<label>,
+. F1, ... F12, CTLA, CTLB, ... CTLZ, DESELECT=<nvar>, CHECKMARK=<nvar>,
+. ENTRYLIST=<carray>, ITEMLIST=<carray>, ROUTINELIST=<array>, KEYLIST=<array>
+.
+ACTIONBAR routine
+	disable
+	statesave act.trapstate
+	clear parmindex, act.entrycnt, act.itemcnt, act.noitemflag
+	clear act.entrywidth, act.itemfkey
+	fill " " into act.itemmap
+	move 2 to act.entryhorz[1]
+	loop
+		getparm keyword, var1, var2
+		break if over
+		add 1 to parmindex
+		switch keyword
+		case "ENTRY"
+			if (act.entrycnt <> 0)
+				if (act.noitemflag)
+					clear act.entryitems[act.entrycnt], act.entryiteme[act.entrycnt]
+				else
+					move act.itemcnt to act.entryiteme[act.entrycnt]
+				endif
+			endif
+ 			add 1 to act.entrycnt
+			goto actionerr1 if (act.entrycnt > 20)
+			moveadr var1 to act.entry[act.entrycnt]
+			move (act.itemcnt + 1) to act.entryitems[act.entrycnt]
+			clear act.entrywidth[act.entrycnt]
+			if (act.entrycnt < 20)
+				move (length act.entry[act.entrycnt] + 2) to act.index
+				move (act.entryhorz[act.entrycnt] + act.index) to act.entryhorz[act.entrycnt + 1]
+			endif
+			set act.noitemflag
+		case "ITEM"
+			clear act.flag1, act.noitemflag
+			add 1 to act.itemcnt
+			goto actionerr2 if (act.entrycnt = 0)
+			goto actionerr3 if (act.itemcnt > 100)
+			moveadr var1 to act.item[act.itemcnt]
+			move (length act.item[act.itemcnt]) to act.index
+			if (act.index > act.entrywidth[act.entrycnt])
+				move act.index to act.entrywidth[act.entrycnt]
+			endif
+		case "ROUTINE"
+			goto actionerr4 if (act.flag1)
+			set act.flag1
+			movevl var1 to routine
+			actionstore routine=routine:act.itemcnt
+		case "DESELECT"
+			moveadr var1 to act.itemdesel[act.itemcnt]
+			reset act.itemmap to act.itemcnt
+			move act.itemmap to act.char1
+			rep " 123" in act.char1
+			cmove act.char1 to act.itemmap
+			movelabel actiontoggle to routine
+			actionstore routine=routine:act.itemcnt
+		case "CHECKMARK"
+			moveadr var1 to act.itemcheck[act.itemcnt]
+			reset act.itemmap to act.itemcnt
+			move act.itemmap to act.char1
+			rep " 213" in act.char1
+			cmove act.char1 to act.itemmap
+			movelabel actiontoggle to routine
+			actionstore routine=routine:act.itemcnt
+		case "ABORT"
+			movevl var2 to act.abortlbl
+			moveadr var1 to act.charvar
+			move act.charvar to act.char20
+			rep toupper in act.char20
+			movesize act.char20 to act.worknum
+			if (fchar act.char20 = "F" and act.worknum > 1 and act.worknum < 4)
+				bump act.char20
+				move act.char20 to act.index
+				if (act.index > 0 and act.index < 13)
+					move (act.index + 26) to act.abortkey
+					continue
+				endif
+			else if (act.worknum = 4)
+				setlptr act.char20 to 3
+				if (act.char20 = "CTL")
+					reset act.char20 to 4
+					scan act.char20 in letters
+					if equal
+						movefptr letters to act.abortkey
+						reset letters
+						continue
+					endif
+				endif
+			endif
+			goto actionerr10
+		case "ENTRYLIST"
+			goto actionerr8 if (act.entrycnt <> 0)
+			moveadr var1 to act.entrylist
+			loop
+				goto actionerr1 if (act.entrycnt >= 20)
+				break if not (formptr act.entrylist[act.entrycnt + 1])
+	 			add 1 to act.entrycnt
+				moveadr act.entrylist[act.entrycnt] to act.entry[act.entrycnt]
+			repeat
+			set act.noitemflag
+		case "ITEMLIST"
+			clear act.flag1, act.noitemflag, act.itemcnt, act.worknum2
+			goto actionerr2 if (act.entrycnt = 0)
+			moveadr var1 to act.itemlist
+			move 1 to act.entryitems[1]
+			for act.worknum from 1 to act.entrycnt
+				loop 
+					add 1 to act.worknum2
+					while (formptr act.itemlist[act.worknum2])
+					goto actionerr3 if (act.worknum2 > 100)
+					add 1 to act.itemcnt
+					moveadr act.itemlist[act.worknum2] to act.item[act.itemcnt]
+					move (length act.item[act.itemcnt]) to act.index
+					if (act.index > act.entrywidth[act.worknum])
+						move act.index to act.entrywidth[act.worknum]
+					endif
+				repeat
+				move act.itemcnt to act.entryiteme[act.worknum]
+				move (act.itemcnt + 1) to act.entryitems[act.worknum + 1]
+				move (act.entryhorz[act.worknum] + length act.entry[act.worknum] + 2) to act.entryhorz[act.worknum + 1]
+			repeat
+			clear act.entryitems[act.entrycnt + 1]
+		case "KEYLIST"
+			goto actionerr9 if (not act.itemcnt)
+			moveadr var1 to act.keylist
+			for act.index from 1 to act.itemcnt
+				move act.keylist[act.index] to act.itemfkey[act.index]
+			repeat
+		default
+			move (length keyword) to act.worknum
+			if (fchar keyword = "F" and act.worknum > 1 and act.worknum < 4)
+				move keyword to act.char20
+				bump act.char20
+				clear act.index
+				move act.char20 to act.index
+				if (act.index > 0 and act.index < 13)
+					move (act.index + 26) to act.itemfkey[act.itemcnt]
+					continue
+				endif
+			endif
+			if (act.worknum = 4)
+				move keyword to act.char20
+				setlptr act.char20 to 3
+				if (act.char20 = "CTL")
+					reset act.char20 to 4
+					scan act.char20 in letters
+					if equal
+						movefptr letters to act.itemfkey[act.itemcnt]
+						reset letters
+						continue
+					endif
+				endif
+			endif
+			goto actionerr3
+		endswitch
+		move act.itemcnt to act.entryiteme[act.entrycnt]
+	repeat
+	if (act.entrycnt <> 0 & act.noitemflag)
+		clear act.entryitems[act.entrycnt], act.entryiteme[act.entrycnt]
+	endif
+	display *resetsw, *color=colorfore.menu, *bgcolor=colorback.menu, *p1:2, *revon, " ";
+	for act.index from 1 to act.entrycnt
+		display " ", act.entry[act.index], " ";
+	repeat
+	display *el, *revoff, *coloroff;
+	staterestore act.trapstate
+	for act.index from 1 to act.itemcnt
+		move act.itemfkey[act.index] to act.fkey
+		if (act.fkey <> 0)
+			call actiontrapset
+		endif
+	repeat
+	add 1 to act.itemcnt
+	movelabel actionbarf10 to routine
+	actionstore routine=routine:act.itemcnt
+	sub 1 from act.itemcnt
+	move 1 to act.entrynum
+	trap actionbarentry noreset prior if f10
+	enable
+	return
+
+actionbarf10
+	if (act.dropflag)
+		display *setswall=act.wtop:act.wbot:act.wlft:act.wrgt;
+		winrestore act.trapwin
+		clear act.dropflag
+	endif
+	if (act.f10status = 1)
+		trap actionbarentry if f10
+		clear act.f10status
+		display *resetsw;
+		return
+	endif
+
+. entry to actionbar (when f10 key is pressed)
+actionbarentry
+	trap actiontrape disable giving act.fkeychar if f10
+	set act.f10status
+	set act.entryflag
+	flagsave act.trapflags
+	statesave act.trapstate
+	retcount act.retcount
+	display *resetsw, *color=colorfore.menu, *bgcolor=colorback.menu;
+	move 1 to act.entrynum
+actionbarentry1
+	loop
+		move act.entryhorz[act.entrynum] to act.h
+		set act.barflag
+		display *p=act.h:2, *ll, " ", act.entry[act.entrynum], " ";
+		keyin *p=1:2, *eoff, *cursoff, *kcon, *uc, act.char1, *in;
+		clear act.barflag
+		if (act.entryiteme[act.entrynum] & act.entryitems[act.entrynum])
+			goto actionitem if down
+			goto actionitem if enter
+		endif
+		display *revon, *p=act.h:2, *ll, " ", act.entry[act.entrynum], " ", *revoff;
+		if left
+			sub 1 from act.entrynum
+			if (act.entrynum < 1)
+				move act.entrycnt to act.entrynum
+			endif
+		endif
+		if right
+			add 1 to act.entrynum
+			if (act.entrynum > act.entrycnt)
+				move 1 to act.entrynum
+			endif
+		endif
+		if (formptr act.char1 = 1)
+			move act.entrynum to act.index
+			loop
+				add 1 to act.index
+				if (act.index > act.entrycnt)
+					move 1 to act.index
+				endif
+				move act.entry[act.index] to act.char1a
+				rep toupper in act.char1a
+				if (act.char1a = act.char1)
+					move act.index to act.entrynum
+					goto actionitem
+				endif
+				break if (act.index = act.entrynum)
+			repeat
+		endif
+	repeat
+
+. entry to pull down menu
+actionitem
+	move act.entrywidth[act.entrynum] to act.width
+	move (act.entryiteme[act.entrynum] - act.entryitems[act.entrynum] + 1) to act.worknum
+	move 3 to act.wtop
+	move (act.entryhorz[act.entrynum] - 1) to act.wlft
+	move (act.wlft + act.width + 3) to act.wrgt
+	move (act.worknum + 4) to act.wbot
+	display *setswall=act.wtop:act.wbot:act.wlft:act.wrgt;
+	winsave act.trapwin
+	set act.dropflag
+	move (act.wrgt - act.wlft + 1) to act.index
+	display *revon, *es, *ulc, *rptchar=*hln:act.index, *urc:
+		*va=1, *rptdown=*vln:act.worknum:
+		*p=1:2, *rptdown=*vln:act.worknum:
+		*hd, *llc, *rptchar=*hln:act.index, *lrc, *p1:2;
+	move act.entryitems[act.entrynum] to act.worknum
+	move act.entryiteme[act.entrynum] to act.worknum2
+	move 1 to act.worknum4
+	for act.index from act.worknum to act.worknum2
+		add 1 to act.worknum4
+		call actionitemdsp
+	repeat
+	display *revoff;
+	clear act.fkey
+	move act.worknum to act.index
+	loop
+		move (act.index - act.worknum + 2) to act.worknum4
+		call actionitemdsp
+		trap actionitemdo disable if enter
+		keyin *hu, *eoff, *cursoff, *kcon, *uc, act.char1, *in;
+		trapclr enter
+		display *revon;
+		call actionitemdsp
+		display *revoff;
+		if left
+			winrestore act.trapwin
+			display *resetsw, *revon, *p=act.entryhorz[act.entrynum]:2, *ll, " ", act.entry[act.entrynum], " ", *revoff;
+			sub 1 from act.entrynum
+			if (act.entrynum < 1)
+				move act.entrycnt to act.entrynum
+			endif
+			display *p=act.entryhorz[act.entrynum]:2, *ll, " ", act.entry[act.entrynum], " ";
+			goto actionitem if (act.entryiteme[act.entrynum] & act.entryitems[act.entrynum])
+			goto actionbarentry1
+		endif
+		if right
+			winrestore act.trapwin
+			display *resetsw, *revon, *p=act.entryhorz[act.entrynum]:2, *ll, " ", act.entry[act.entrynum], " ", *revoff;
+			add 1 to act.entrynum
+			if (act.entrynum > act.entrycnt)
+				move 1 to act.entrynum
+			endif
+			display *p=act.entryhorz[act.entrynum]:2, *ll, " ", act.entry[act.entrynum], " ";
+			goto actionitem if (act.entryiteme[act.entrynum] & act.entryitems[act.entrynum])
+			goto actionbarentry1
+		endif
+		if up
+			sub 1 from act.index
+			if (act.index < act.worknum)
+				move act.worknum2 to act.index
+			endif
+		endif
+		if down
+			add 1 to act.index
+			if (act.index > act.worknum2)
+				move act.worknum to act.index
+			endif
+		endif
+		if (formptr act.char1 = 1)
+			move act.index to act.worknum3
+			loop
+				add 1 to act.index
+				if (act.index > act.worknum2)
+					move act.worknum to act.index
+				endif
+				move (fchar act.item[act.index]) to act.char1a
+				rep toupper in act.char1a
+				break if (act.index = act.worknum3 or act.char1a = act.char1)
+			repeat
+		endif
+	repeat
+
+. display an item
+actionitemdsp
+	reset act.itemmap to act.index
+	move act.itemmap to act.char1a
+	if (act.char1a = "1" or act.char1a = "3")
+		if (act.itemdesel[act.index])
+			move "-" to act.char1a
+		endif
+	endif
+	if (act.char1a = "2" or act.char1a = "3")
+		if (act.itemcheck[act.index])
+			move "*" to act.char1a
+		endif
+	endif
+	rep "1 2 3 " in act.char1a
+	move (act.wrgt - act.wlft - 2 - length act.item[act.index]) to act.worknum3
+	setlptr act.blank to act.worknum3
+	display *p=2:act.worknum4, act.char1a, act.item[act.index], *sl, act.blank;
+	return
+
+. do an action item
+actionitemdo
+	return if (formptr act.char1 <> 0)
+	move 2 to act.f10status
+	winrestore act.trapwin
+	clear act.dropflag
+	goto actiontrapend1
+
+. set actionbar traps (accelerator keys)
+actiontrapset
+	if (act.fkey < 27)
+		reset ctlchars to act.fkey
+		trap actiontrapc disable noreset prior giving act.fkeychar if ctlchars
+		return
+	endif
+	sub 26 from act.fkey
+	branch act.fkey of ats01, ats02, ats03, ats04, ats05, ats06:
+		ats07, ats08, ats09, ats10, ats11, ats12
+	goto actionerr5
+ats01 trap actiontrapf disable noreset prior giving act.fkeychar if f1
+	return
+ats02 trap actiontrapf disable noreset prior giving act.fkeychar if f2
+	return
+ats03 trap actiontrapf disable noreset prior giving act.fkeychar if f3
+	return
+ats04 trap actiontrapf disable noreset prior giving act.fkeychar if f4
+	return
+ats05 trap actiontrapf disable noreset prior giving act.fkeychar if f5
+	return
+ats06 trap actiontrapf disable noreset prior giving act.fkeychar if f6
+	return
+ats07 trap actiontrapf disable noreset prior giving act.fkeychar if f7
+	return
+ats08 trap actiontrapf disable noreset prior giving act.fkeychar if f8
+	return
+ats09 trap actiontrapf disable noreset prior giving act.fkeychar if f9
+	return
+ats10 trap actiontrapf disable noreset prior giving act.fkeychar if f10
+	return
+ats11 trap actiontrapf disable noreset prior giving act.fkeychar if f11
+	return
+ats12 trap actiontrapf disable noreset prior giving act.fkeychar if f12
+	return
+
+. control key accelerator keys entry point
+actiontrapc
+	statesave act.entrystate
+	flagsave act.trap2flags
+	reset ctlchars
+	scan act.fkeychar in ctlchars
+	movefptr ctlchars to act.fkey
+
+	if (act.nointerruptflag and act.fkey = act.abortkey)
+		flagrestore act.trap2flags
+		call act.abortlbl
+		noreturn
+		noreturn
+		return
+	endif
+
+	goto actiontrapend
+
+. f10 key entry point
+actiontrape
+	flagsave act.trap2flags
+	move (act.itemcnt + 1) to act.index
+	goto actiontrapend1
+
+. function key accelerator keys entry point
+actiontrapf
+	statesave act.entrystate
+	flagsave act.trap2flags
+	reset act.fkeychars
+	scan act.fkeychar in act.fkeychars
+	move ((formptr act.fkeychars + 2) / 3) to act.fkey
+.	if (act.nointerruptflag and act.fkey = 5)
+.		flagrestore act.trap2flags
+.		return
+.	endif
+
+. end of accelerator key trap
+actiontrapend
+	if (act.f10status = 1)
+		move 2 to act.f10status
+	endif
+	if (act.dropflag)
+		display *setswall=act.wtop:act.wbot:act.wlft:act.wrgt;
+		winrestore act.trapwin
+		clear act.dropflag
+	endif
+	for act.index from 1 to act.itemcnt
+		break if (act.itemfkey[act.index] = act.fkey)
+	repeat
+	goto actionerr6 if (act.index < 1 or act.index > act.itemcnt) 
+	staterestore act.entrystate
+actiontrapend1
+	trapclr enter
+	if (act.noreturn <> 0)
+		loop
+			retcount act.worknum
+			break if (act.worknum = act.noreturn)
+			noreturn
+		repeat while not over
+		clear act.noreturn
+	else if (act.retcount <> 0)
+		if (act.barflag)
+			statesave act.tempstate
+			display *color=colorfore.menu, *bgcolor=colorback.menu;
+			display *resetsw, *p=act.h:2, *ll, " ", act.entry[act.entrynum], " ";
+			staterestore act.tempstate
+		endif
+		if (act.dropflag)
+			winrestore act.dropsave
+		endif
+		loop
+			retcount act.worknum
+			break if (act.worknum = act.retcount)
+			noreturn
+		repeat while not over
+		move act.trapflags to act.trap2flags
+	endif
+	put gbl.queue; "$", act.index
+	statesave act.tempstate
+	display *color=colorfore.menu, *bgcolor=colorback.menu;
+	display *resetsw, *revon, *p=act.entryhorz[act.entrynum]:2, *ll, " ":
+		act.entry[act.entrynum], " ", *revoff, *coloroff;
+	staterestore act.tempstate
+	clear act.retcount
+	flagrestore act.trap2flags
+	if (act.entryflag)
+		staterestore act.trapstate
+		clear act.entryflag
+	endif
+	goto act.interruptlabel if (act.nointerruptflag)
+	return
+.
+actiontoggle
+	return if (act.char1 = "1")
+	if (act.char1 = "3")
+		return if (act.itemdesel[act.index])
+	endif
+	move (not act.itemcheck[act.index]) to act.itemcheck[act.index]
+	return
+.
+actionstore routine
+ACTIONSTORE routine
+	getparm keyword, var1, var2
+	if (keyword = "ROUTINE")
+		movevl var1 to routine
+		moveadr var2 to act.count
+	else
+		goto actionstoerr1
+	endif
+	storelabel routine into act.count of lbl01, lbl02, lbl03, lbl04, lbl05, lbl06, lbl07, lbl08, lbl09:
+		lbl10, lbl11, lbl12, lbl13, lbl14, lbl15, lbl16, lbl17, lbl18, lbl19:
+		lbl20, lbl21, lbl22, lbl23, lbl24, lbl25, lbl26, lbl27, lbl28, lbl29:
+		lbl30, lbl31, lbl32, lbl33, lbl34, lbl35, lbl36, lbl37, lbl38, lbl39:
+		lbl40, lbl41, lbl42, lbl43, lbl44, lbl45, lbl46, lbl47, lbl48, lbl49:
+		lbl50, lbl51, lbl52, lbl53, lbl54, lbl55, lbl56, lbl57, lbl58, lbl59:
+		lbl60, lbl61, lbl62, lbl63, lbl64, lbl65, lbl66, lbl67, lbl68, lbl69:
+		lbl70, lbl71, lbl72, lbl73, lbl74, lbl75, lbl76, lbl77, lbl78, lbl79:
+		lbl80, lbl81, lbl82, lbl83, lbl84, lbl85, lbl86, lbl87, lbl88, lbl89:
+		lbl90, lbl91, lbl92, lbl93, lbl94, lbl95, lbl96, lbl97, lbl98, lbl99:
+		lbl100
+	return
+.
+.
+. ACTION =cvarlit
+.
+ACTION routine
+action routine
+	clear act.getqvarflag
+	getparm keyword, var1
+	if not over
+		type var1 into act.worknum
+		if (act.worknum = 1)
+			moveadr var1 to act.getqvar
+			set act.getqvarflag
+		endif
+	endif
+	loop
+		wait gbl.queue
+		get gbl.queue; act.char1, act.worknum
+		if ((act.char1 <> "$") or (act.worknum = 0))
+			if (act.getqvarflag)
+				set act.getqvarflag
+				move (act.char1 + char act.worknum) to act.getqvarflag
+			endif
+			return
+		endif
+		if (mnt.msgflag)
+			messageerase
+			clear mnt.msgflag
+		endif
+		perform act.worknum of lbl01, lbl02, lbl03, lbl04, lbl05, lbl06, lbl07, lbl08, lbl09:
+			lbl10, lbl11, lbl12, lbl13, lbl14, lbl15, lbl16, lbl17, lbl18, lbl19:
+			lbl20, lbl21, lbl22, lbl23, lbl24, lbl25, lbl26, lbl27, lbl28, lbl29:
+			lbl30, lbl31, lbl32, lbl33, lbl34, lbl35, lbl36, lbl37, lbl38, lbl39:
+			lbl40, lbl41, lbl42, lbl43, lbl44, lbl45, lbl46, lbl47, lbl48, lbl49:
+			lbl50, lbl51, lbl52, lbl53, lbl54, lbl55, lbl56, lbl57, lbl58, lbl59:
+			lbl60, lbl61, lbl62, lbl63, lbl64, lbl65, lbl66, lbl67, lbl68, lbl69:
+			lbl70, lbl71, lbl72, lbl73, lbl74, lbl75, lbl76, lbl77, lbl78, lbl79:
+			lbl80, lbl81, lbl82, lbl83, lbl84, lbl85, lbl86, lbl87, lbl88, lbl89:
+			lbl90, lbl91, lbl92, lbl93, lbl94, lbl95, lbl96, lbl97, lbl98, lbl99:
+			lbl100
+	repeat
+.
+.
+. ACTIONPUTQ #cvarlit
+.
+
+ACTIONPUTQ routine act.putqvar
+	put gbl.queue; act.putqvar
+	return
+.
+actionnointr routine
+ACTIONNOINTR routine
+	getparm keyword, var1
+	goto actionnoerr1 if (keyword <> "ROUTINE")
+	set act.nointerruptflag
+	movevl var1 to act.interruptlabel
+	retcount act.retcount
+	subtract 1 from act.retcount
+	return
+.
+actionintrclr routine
+ACTIONINTRCLR routine
+	clear act.nointerruptflag
+	return
+.
+actionerr1
+	move "ACTIONBAR 1" to errormsg
+	goto errorexit
+actionerr2
+	move "ACTIONBAR 2" to errormsg
+	goto errorexit
+actionerr3
+	move "ACTIONBAR 3" to errormsg
+	goto errorexit
+actionerr4
+	move "ACTIONBAR 4" to errormsg
+	goto errorexit
+actionerr5
+	move "ACTIONBAR 5" to errormsg
+	goto errorexit
+actionerr6
+	move "ACTIONBAR 6" to errormsg
+	goto errorexit
+actionerr7
+	move "ACTIONBAR 7" to errormsg
+	goto errorexit
+actionerr8
+	move "ACTIONBAR 8" to errormsg
+	goto errorexit
+actionerr9
+	move "ACTIONBAR 9" to errormsg
+	goto errorexit
+actionerr10
+	move "ACTIONBAR 10" to errormsg
+	goto errorexit
+actionnoerr1
+	move "ACTIONNOINTR 1" to errormsg
+	goto errorexit
+actionstoerr1
+	move "ACTIONSTORE 1" to errormsg
+errorexit
+	display *resetsw, *hu, "*** ERROR - ", *ll, errormsg;
+	stop

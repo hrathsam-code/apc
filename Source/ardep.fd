@@ -1,0 +1,91 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+..
+..
+. Program Created On : 01/24/03 At 9:10:am
+..
+           %IFNDEF   $ARDepVAR
+$ARDepVAR  EQUATE            1
+..
+..
+. Field Definitions
+. -----------------
+..
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+
+ARDepREC      RECORD
+DepositID     DIM               14       1 - 14
+DepositDate   DIM               8       15 - 22
+ControlTotal  FORM              10.2    23 - 35
+AppliedTotal  FORM              10.2    36 - 48
+ApprovalUser  DIM               20      49 - 68
+ApprovalDate  DIM               8       69 - 76
+ApprovalTime  DIM               8       77 - 84
+Approved      FORM              1       85 - 85
+Period        DIM               2       86 - 87
+Year          DIM               4       88 - 91
+              RECORDEND
+..
+..
+. File Keys and File Labels
+. -------------------------
+..
+ARDepK1SIZE CONST            "22"                                  (Length of the Key variable 1)
+..
+. By AR Deposit ID
+..
+ARDepI1DEF  INIT             "-N,1-22"                             .Index Size of Key 1
+..
+ARDepFSIZE  CONST            "300"                                (Length of each Record)
+ARDepFileSIZE  CONST            "300"                                (Length of each Record)
+
+ARDepKY    DIM               ARDepK1SIZE                          (The Actual 'Key' variable)
+
+ARDepPROG  INIT              "AR Deposit"
+ARDepTITLE INIT              "AR Deposit Master Record"           (Description used later for headers, etc)
+ARDepHELP  INIT              "ARDep.HLP"                          (Name of the Help file for later purposes)
+
+ARDepTXTNM  INIT             "$APDATA\","ARDEPFL.TXT"             .Actual Text Filename  (i.e. CUSTFL.TXT)
+ARDepISI1NM INIT             "$APDATA\","ARDEPFL.ISI"             .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+ARDepFLST  FILELIST
+           %IFDEF            ARDepKY
+ARDepFL    IFILE             Name=ARDepISI1NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY2
+ARDepFL2   IFILE             Name=ARDepISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY3
+ARDepFL3   IFILE             Name=ARDepISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY4
+ARDepFL4   IFILE             Name=ARDepISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY5
+ARDepFL5   IFILE             Name=ARDepISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY6
+ARDepFL6   IFILE             Name=ARDepISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY7
+ARDepFL7   IFILE             Name=ARDepISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY8
+ARDepFL8   IFILE             Name=ARDepISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDepKY9
+ARDepFL9   IFILE             Name=ARDepISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+
+         goto              #End
+         %ENDIF
+
+         %IFNDEF           $ARDepIO
+           INCLUDE           ARDep.IO
+         %ENDIF
+#end

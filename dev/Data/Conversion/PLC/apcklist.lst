@@ -1,0 +1,155 @@
+
+
+
+PAGE    1      APCKLIST.PLS IDE                                                                               03-22-04 14:49:36
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APCKLIST.PLS","F:\PLC\APCKLIST.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    5.    INCLUDE  A: common.pls
+    7.    INCLUDE  B: apmastfd.pls
+  102.    INCLUDE  C: getdate.pls
+
+   Output: f:\plc\apcklist.plc                                                                                                                                                                                                                                       
+       259 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:49:35 14:49:36
+  0000120C DATA;  000002D6  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APCKLIST.PLS IDE                                                                               03-22-04 14:49:36
+                                         
+
+"                                          D      44.  *    47.      24. C    25. C    40. C    67. C
+" 0                                        D      63.  *
+#                                          D      28. C*
+"2                                         D      99.  *
+"APCASHRQ                                  D     100.  *
+"APCHECKS.TXT                              D      49.  *
+"APMASTER.ISI                              D      50.  *
+"E                                         D      33. C*    36. C    39. C    50. C    53. C    56. C    59. C
+"X                                         D      54.  *    74. C
+0                                          F      85.  *
+1                                          F      48. C*    54. C
+13                                         F      51. C*
+32                                         F      57. C*
+51                                         F      75.  *
+A0                                         X      54.  *
+A1                                         X      70.  *    92.  
+A2                                         X      86.  *    76.  
+ACCKEY                                     D       9. B*
+ACCNO                                      D      13. B*    70.      86.  
+ACCST                                      D      21. B*
+ACCTNUMB                                   D      14. A*
+ADD1                                       D      15. B*
+ADD2                                       D      16. B*
+AMT                                        F      13.  *    70.      87.      90.  
+APCHECKS                                   f       9.  *    49.      70.      96.  
+APCONTRL                                   F      43. B*
+APMASTER                                   i      18.  *    50.  
+APOVRFLG                                   D      10. B*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+BKUPFLG                                    D      35.  *    54.      72. C
+CITY                                       D      17. B*
+CKD                                        D      11.  *    70.      86.  
+CKM                                        D      10.  *    70.      86.  
+CKNO                                       F      25.  *    88.  
+CKNUMBER                                   D      26.  *    70.      86.  
+CKY                                        D      12.  *    70.      86.  
+CNAME                                      D      19.  *
+CONT                                       D      36. B*
+CRDRAT                                     D      22. B*
+CURR                                       F      26. B*
+DATE6                                      D      10. A*
+DATEDESC                                   D      27.  *    26. C
+DATERROR                                   D      28.  *    24. C    33. C    36. C    39. C    40. C    50. C    53. C
+                                                     *    56. C    59. C    67. C
+DATFLG                                     D      36.  *    25. C    74. C
+DD                                         D      30.  *    58.      65.      30. C    34. C    46. C
+DISA                                       F      14.  *    70.      87.      91.  
+DISPLAY                                    X      41.  *
+DIVNO                                      D      35. B*
+ENVS                                       D      11. A*
+EOJ                                        X      93.  *    74.  
+ERRORSW1                                   D      21. A*
+
+
+
+PAGE    3      APCKLIST.PLS IDE                                                                               03-22-04 14:49:36
+                                         
+
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EXT                                        D      34. B*
+FD                                         F      33.  *    46. C    54. C    57. C
+FIRSTIME                                   D      17. A*
+FM                                         F      32.  *    45. C    48. C    51. C
+FROMPGM                                    D      16. A*
+FUT                                        D      38. B*
+FY                                         F      34.  *    47. C
+GD1                                        X      34. C*    32. C
+GD10                                       X      72. C*    29. C
+GD2                                        X      37. C*    35. C
+GD3                                        X      40. C*    38. C
+GD3A                                       X      45. C*    41. C
+GD4                                        X      51. C*    49. C
+GD5                                        X      54. C*    52. C
+GD6                                        X      57. C*    55. C
+GD7                                        X      61. C*    58. C
+GD9                                        X      67. C*
+GETDATE                                    X      24. C*    44. C    71. C    73. C
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+LINES                                      F      16.  *    75.      85.      89.  
+LPAGE                                      F      44. B*
+LPAT                                       F      33. B*
+MDAY                                       D      31. B*
+MM                                         D      29.  *    56.      63.      64.      27. C    28. C    31. C    45. C
+MMON                                       D      30. B*
+MTDC                                       F      28. B*
+MTDD                                       F      27. B*
+MYEAR                                      D      32. B*
+NAME                                       D      14. B*    70.      86.  
+OVR30                                      F      25. B*
+OVR60                                      F      24. B*
+OVR90                                      F      23. B*
+PAGE                                       F      17.  *    77.      80.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+RD                                         D      21.  *    65.      80.  
+REPLY                                      D      39.  *    44.      46.      47.  
+RM                                         D      20.  *    64.      80.  
+ROLLNAME                                   D      38.  *
+RY                                         D      22.  *    66.      80.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. A*
+SEQ                                        F      15.  *    70.  
+STATE                                      D      18. B*
+TAXC                                       D      20. B*
+
+
+
+PAGE    4      APCKLIST.PLS IDE                                                                               03-22-04 14:49:36
+                                         
+
+TELEFONE                                   D      37. B*
+TESTONE                                    D      18. A*    99.  
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TODAY                                      D       8. A*    52.      56.      57.      58.      59.      60.      61.  
+TOT                                        F      23.  *    90.      94.  
+TOTDIS                                     F      24.  *    91.      94.  
+TOTDUE                                     F      29. B*
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+YY                                         D      31.  *    60.      66.      30. C    37. C    47. C
+ZIP                                        D      19. B*
+

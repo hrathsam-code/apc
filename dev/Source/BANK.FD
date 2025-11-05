@@ -1,0 +1,93 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $BankVAR
+$BankVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+BankREC   RECORD
+Code       DIM               6          1 - 6
+Name       DIM               30         7 - 36
+Address1   DIM               30        37 - 66
+Address2   DIM               30        67 - 96
+Address3   DIM               30        97 - 126
+City       DIM               20       127 - 146
+State      DIM               2        147 - 148
+Zip        DIM               10       149 - 158
+Country    DIM               3        159 - 161
+Telephone  DIM               10       162 - 171
+Fax        DIM               10       172 - 181
+Contact    DIM               20       182 - 201
+GLAccount  DIM               8        202 - 221
+RoutingNo  DIM               15       222 - 236
+AccountNo  DIM               15       237 - 251
+LastCheck  DIM               8        252 - 259
+           RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+BankK1SIZE CONST            "6"                                  (Length of the Key variable)
+.
+. By Bank Code
+.
+BankI1DEF  INIT             "-N,1-6"                                 (Index definitions for Key 1)
+.
+BankFSIZE  CONST            "300"                                (Length of each Record)
+
+BankKY    DIM               BankK1SIZE                            (The Actual 'Key' variable)
+
+BankPROG  INIT              "Bank Master"
+BankTITLE INIT              "Bank Code"                     (Description used later for headers, etc)
+BankHELP  INIT              "Bank.HLP"              (Name of the Help file for later purposes)
+
+BankTXTNM  INIT             "$APDATA\","BankFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+BankISI1NM INIT             "$APDATA\","BankFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+BankISI2NM INIT             "$APDATA\","BankFL2.ISI"               .Actual ISI Filename
+
+BankFLST  FILELIST
+           %IFDEF            BankKY
+BankFL    IFILE             Name=BankISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY2
+BankFL2   IFILE             Name=BankISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY3
+BankFL3   IFILE             Name=BankISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY4
+BankFL4   IFILE             Name=BankISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY5
+BankFL5   IFILE             Name=BankISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY6
+BankFL6   IFILE             Name=BankISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY7
+BankFL7   IFILE             Name=BankISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY8
+BankFL8   IFILE             Name=BankISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            BankKY9
+BankFL9   IFILE             Name=BankISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $BankIO
+           INCLUDE           Bank.IO
+         %ENDIF

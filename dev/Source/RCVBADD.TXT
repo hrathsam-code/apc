@@ -1,0 +1,37 @@
+.....................................................................
+.  ADD THE A/R RECORD
+.....................................................................
+. 
+         TRAPCLR   IO
+. 
+         CALL      ADDRCVB
+. 
+. NOW INSERT THE KEY IN THE ARFILEXX/ISI FILE
+. 
+         CLEAR     INSERTKY
+         APPEND    CUSTKEY TO INSERTKY
+         APPEND    INVTYPE TO INSERTKY
+         APPEND    INVKEY  TO INSERTKY
+         RESET     INSERTKY   TO 1
+         REP       " 0"    IN INSERTKY
+. 
+         INSERT    INSERTFL,INSERTKY
+. 
+. NOW INSERT THE KEY IN THE ARFILEDT/ISI FILE
+. 
+         CLEAR     ARFLDTKY
+         APPEND    XYY TO ARFLDTKY
+         APPEND    XMM TO ARFLDTKY
+         APPEND    XDD TO ARFLDTKY
+         APPEND    INVKEY TO ARFLDTKY
+         RESET     ARFLDTKY  TO 1
+. 
+         INSERT    ARFILEDT,ARFLDTKY
+. 
+         CLEAR     NEWFKEY
+         APPEND    INVKEY TO NEWFKEY
+         RESET     NEWFKEY TO 1
+         MOVE      INVKEY TO NINVCNO
+         WRITE     NEWFILE,NEWFKEY;NINVCNO
+.
+.................................................

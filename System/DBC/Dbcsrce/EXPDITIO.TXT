@@ -1,0 +1,25 @@
+................................................................
+.  EXPEDITIO/TEXT - I/O ROUTINES FOR EXPEDITE FUNCTIONS        .
+................................................................
+         
+EXPOPEN  TRAPCLR   IO
+         TRAP      NOEXP IF IO
+.
+         MOVE      "EXPEDITE"  TO  EXPNAME
+         OPEN      EXPEDITE,EXPEDTNM
+.
+         MOVE      "EXACTINV"  TO  EXPNAME
+         OPEN      EXACCTIN,EXACINNM
+.
+         MOVE      "EXACTPO"   TO  EXPNAME
+         OPEN      EXACCTPO,EXACPONM
+.
+         MOVE      "H" TO IOSW
+         RETURN
+.
+NOEXP    BEEP
+         DISPLAY   *P1:23,*EL,"EXPEDITE FILE: ",EXPNAME," NOT ON LINE!":
+                   *W2
+         BEEP
+         CHAIN     "ANSWER"
+.

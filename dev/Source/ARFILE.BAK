@@ -1,0 +1,125 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    ARFile                                                         ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/09/2019 at 11:50am                                          ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/09/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+..
+           %IFNDEF   $ARFileVAR
+$ARFileVAR  EQUATE            1
+..
+..
+. Field Definitions                                                    3rd RTBN India Company,  PLT 3092 Box 16325
+. -----------------
+..
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+ARFile              RECORD
+Invoice             DIM                5      1 - 5
+Type                DIM                1      6 - 6 I=INVOICE,  C=CREDIT
+Compaony            DIM                1      7 - 7
+Status              DIM                1      8 - 8 STATUS: O=OPEN, P=PARTIAL, V=VOID, X=PAID, W=WRITEOFF
+CustomerID          DIM                4      9 - 12
+InvDate             DIM                6      13- 18 MMDDYY
+InvTotal            FORM               6.2    19- 27
+Payments            FORM               1      28- 28 MAXIMUM OF 5 PAYMENTS
+.
+AmtPaid1            FORM               6.2
+AmtPaid2            FORM               6.2
+AmtPaid3            FORM               6.2
+AmtPaid4            FORM               6.2
+AmtPaid5            FORM               6.2
+CheckNo1            DIM                6
+CheckNo2            DIM                6
+CheckNo3            DIM                6
+CheckNo4            DIM                6
+CheckNo5            DIM                6
+.
+PaidDate1           DIM                6
+PaidDate2           DIM                6
+PaidDate3           DIM                6
+PaidDate4           DIM                6
+PaidDate5           DIM                6
+Balance             FORM               6.2                  DOLLARS OUTSTANDING
+PurgeDate           DIM                8      PURGE DATE
+                    RECORDEND
+
+..
+..
+. File Keys and File Labels
+. -------------------------
+..
+ARFileK1SIZE CONST            "5"                                 (Length of the Key variable 1)
+ARFileK2SIZE CONST            "10"                                 (Length of the Key variable 1)
+..
+. By Entity, Customer, Reference (Invoice No)
+..
+ARFileI1DEF  INIT             "-1-5"                                   .Index Size of Key 1
+ARFileI2DEF  INIT             "-P8#X,9-12,6,1-5"                       .Index Size of Key 1
+..
+ARFileFSIZE  CONST            "229"                                (Length of each Record)
+
+ARFileKY    DIM               ARFileK1SIZE                         (The Actual 'Key' variable)
+ARFileKY2   DIM               ARFileK2SIZE                         (The Actual 'Key' variable)
+
+ARFilePROG  INIT              "A/P Transaction Detail"
+ARFileTITLE INIT              "A/P Transaction Record"             (Description used later for headers, etc)
+ARFileHELP  INIT              "ARFile.HLP"                         (Name of the Help file for later purposes)
+
+
+ARFileTXTNM  INIT             "ARFile.TXT"               .Actual Text Filename  (i.e. CUSTFL.TXT)
+ARFileISI1NM INIT             "ARFile.NEW"             .Actual ISI Filename   (i.e. CUSTFL.ISI)
+ARFileISI2NM INIT             "ARFileXX.new"             .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+ARFileFLST  FILELIST
+           %IFDEF            ARFileKY
+ARFileFL    IFILE             Name=ARFileISI1NM,DUPLICATES,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY2
+ARFileFL2   IFILE             Name=ARFileISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY3
+ARFileFL3   IFILE             Name=ARFileISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY4
+ARFileFL4   IFILE             Name=ARFileISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY5
+ARFileFL5   IFILE             Name=ARFileISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY6
+ARFileFL6   IFILE             Name=ARFileISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY7
+ARFileFL7   IFILE             Name=ARFileISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY8
+ARFileFL8   IFILE             Name=ARFileISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARFileKY9
+ARFileFL9   IFILE             Name=ARFileISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+
+         goto              #End
+         %ENDIF
+
+         %IFNDEF           $ARFileIO
+           INCLUDE           ARFile.IO
+         %ENDIF
+#end

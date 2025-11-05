@@ -1,0 +1,2085 @@
+.
+. FAST DB/C routines for user verbs
+. MAINT, MAINTFLGSAVE, MAINTFLGREST, SCREEN, SCREENERASE, SCREENKEYIN,
+. SCREENDISPLAY, DIALOG
+.
+. tab settings 7,13,19,...
+.
+
+noextdef2	equate 1
+	inc fastdbc
+.
+. variables
+.
+. global variables
+gbl.queue	gqueue entries=32, size=4
+gbl.loadmodcnt	gint	3
+.
+. variables used everywhere
+.
+keyword		char @
+var1		var @
+var2		var @
+parmindex	int 5
+tempint		int	@
+letters		init "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+toupper		init "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ"
+ctlchars		init 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a:
+			     0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13:
+			     0x14,0x15,0x16,0x17,0x18,0x19,0x1a
+errormsg		char 20
+routine		label @
+.
+. maint variables
+mnt.xview	define 1
+mnt.xbegin	define 2
+mnt.xend	define 3
+mnt.xsave	define 4
+mnt.xexit	define 5
+mnt.xfind	define 6
+mnt.xnext	define 7
+mnt.xback	define 8
+mnt.xadd	define 9
+mnt.xaddend	define 10
+mnt.xchange	define 11
+mnt.xchangeend	define 12
+mnt.xdelete	define 13
+mnt.xerase	define 14
+mnt.xget	define 15
+mnt.xput	define 16
+mnt.xtotal	define 16
+
+mnt.entrylist		char [15]@
+mnt.itemcnt		int 3
+mnt.itemlist		char [70]@
+mnt.routcnt		int 3
+mnt.noflag		int 1[10]
+mnt.parmmap		char 50
+mnt.record		list @
+mnt.table		list @
+mnt.openflag	int 1
+mnt.oldrecflag		int 1
+mnt.oldnewflag		int 1
+mnt.oldchgflag		int 1
+mnt.fixfield	int 3
+mnt.savkey	char 99
+mnt.lastkey	char 99
+mnt.viewkey	char 99[24]
+mnt.char1		char 1
+mnt.char20		char 20
+mnt.charvar		char @
+mnt.dummychar		char 1
+mnt.numvar		num @
+mnt.index		int 3
+mnt.worknum		int 3
+mnt.worknum2		int 3
+mnt.bottom	int 2
+mnt.line	int 2
+mnt.size	int 2
+mnt.lblfindkey		label @
+mnt.key		char @
+mnt.retlabel	label	@
+mnt.itemfkey	int 2[60]
+mnt.fkey		int 2[60]
+mnt.itemflag	int 1
+mnt.lblview	label @
+mnt.lblbegin	label @
+mnt.lblend	label @
+mnt.lblsave	label @
+mnt.lblexit	label @
+mnt.lblfind	label @
+mnt.lblnext	label @
+mnt.lblback	label @
+mnt.lbladd	label @
+mnt.lbladdend	label @
+mnt.lblchange	label @
+mnt.lblchangeend	label @
+mnt.lbldelete	label @
+mnt.lblerase	label @
+mnt.lblget	label @
+mnt.lblput	label @
+mnt.autosaveflag	int 1
+mnt.exitflag	int 1[mnt.xtotal]
+mnt.genkey	char 40
+
+mnt.vwentrylist	char [3]@
+mnt.vwitemlist	char [11]@
+mnt.vwfkey		int 2[8]
+
+. screen variables
+scr.etabcnt		int 3
+scr.etabmap		char 75
+scr.etabh		int 3[75]
+scr.etabv		int 3[75]
+scr.dtabcnt		int 3
+scr.dtabmap		char 75
+scr.dtabh		int 3[75]
+scr.dtabv		int 3[75]
+scr.dtabvar		var [75]@
+scr.initflag		int 1[75]
+scr.initvar		var [75]@
+scr.lasttexth	int 3
+scr.lasttextv	int 3
+scr.lastfieldh	int 3
+scr.lastfieldv	int 3
+scr.lastdatah	int 3
+scr.lastdatav	int 3
+scr.h			int 3
+scr.v			int 3
+scr.repeat		int 2[75]
+scr.ctlcode		int 3[75]
+scr.arraychar	char @[]
+scr.arraynum	num @[]
+scr.index		int 3
+scr.worknum		int 3
+scr.worknum2	int 3
+scr.worknum3	int 3
+scr.worknum4	int 3
+scr.numvar		num @
+scr.numvar2		num @
+scr.char1		char 1
+scr.char1a		char 1
+scr.charvar		char @
+scr.charvar2		char @
+scr.chartemp		char 80
+scr.char6		char 6
+scr.char8		char 8
+scr.eraseflg	int 1
+scr.upflag		int 1
+scr.dateflg		int 1[75]
+
+scr.viewvar		var [15]@
+scr.viewcnt		int 2
+scr.viewsave		char 6212
+scr.viewwidth		int 2[15]
+scr.viewcolh		int 2[15]
+scr.viewdesc		char [15]@
+scr.viewdescflag	int 1
+scr.viewtot		int 3
+scr.viewdefaultha	int 2
+scr.blank	init " "
+scr.displayexit	label @
+scr.displayflag	int 1
+scr.eraseexit	label @
+scr.eraseflag	int 1
+scr.fldexit	int 1[75]
+scr.keyflag	int 1
+scr.dateflag	int @
+scr.dateh	int @
+scr.datev	int @
+scr.nochange	int 2
+scr.top		int 2
+scr.lblix	int 2
+scr.lbl01	label @
+scr.lbl02	label @
+scr.lbl03	label @
+scr.lbl04	label @
+scr.lbl05	label @
+scr.lbl06	label @
+scr.lbl07	label @
+scr.lbl08	label @
+scr.lbl09	label @
+scr.lbl10	label @
+scr.lbl11	label @
+scr.lbl12	label @
+scr.lbl13	label @
+scr.lbl14	label @
+scr.lbl15	label @
+scr.lbl16	label @
+scr.lbl17	label @
+scr.lbl18	label @
+scr.lbl19	label @
+scr.lbl20	label @
+scr.lbl21	label @
+scr.lbl22	label @
+scr.lbl23	label @
+scr.lbl24	label @
+scr.lbl25	label @
+scr.lbl26	label @
+scr.lbl27	label @
+scr.lbl28	label @
+scr.lbl29	label @
+scr.lbl30	label @
+scr.lbl31	label @
+scr.lbl32	label @
+scr.lbl33	label @
+scr.lbl34	label @
+scr.lbl35	label @
+scr.lbl36	label @
+scr.lbl37	label @
+scr.lbl38	label @
+scr.lbl39	label @
+scr.lbl40	label @
+scr.lbl41	label @
+scr.lbl42	label @
+scr.lbl43	label @
+scr.lbl44	label @
+scr.lbl45	label @
+scr.lbl46	label @
+scr.lbl47	label @
+scr.lbl48	label @
+scr.lbl49	label @
+scr.lbl50	label @
+
+. dialog variables
+dlg.tabcnt		int 3
+dlg.tabmap		char 20
+dlg.tabh		int 3[20]
+dlg.tabv		int 3[20]
+dlg.tabvar		var [20]@
+dlg.state		char 215
+dlg.win		char 1000
+dlg.trap		char 200
+dlg.downflag	int 1
+dlg.horz		int 3
+dlg.vert		int 3
+dlg.h			int 3
+dlg.v			int 3
+dlg.width		int 3
+dlg.length		int 3
+dlg.maxh		int 3
+dlg.maxv		int 3
+dlg.wtop		int 3
+dlg.wbot		int 3
+dlg.wlft		int 3
+dlg.wrgt		int 3
+dlg.worknum		int 3
+dlg.index		int 3
+dlg.nofldflg	int 1
+dlg.numvar		num @
+dlg.charvar		char @
+dlg.char20		char 20
+dlg.textflg		int 1
+dlg.yesno		init " "
+dlg.yesnoflg		int 1[20]
+dlg.requireflg		int 1[20]
+dlg.flags		char 4
+.
+.
+. MAINT RECORD=<listvar>, TABLE=<list>, FINDKEY=<label>, FILEITEM=<cvarlit>,
+.       LOOKUPITEM=<cvarlit>, MODIFYITEM=<cvarlit>, OPTIONSITEM=<cvarlit>,
+.       ROUTINE=<label>, ENTRYLIST=<list>, ITEMLIST=<list>, FKEYLIST=<list>,
+.	F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+.	CTLA, CTLB, CTLC, CTLD, CTLE, CTLF, CTLG, CTLH, CTLI,
+.	CTLJ, CTLK, CTLL, CTLM, CTLN, CTLO, CTLP, CTLQ, CTLR,
+.	CTLS, CTLT, CTLU, CTLV, CTLW, CTLX, CTLY, CTLZ,
+.	NOSAVE, NOEXIT, NOFIND, NONEXT, NOBACK, NOADD,
+.	NOCHANGE, NODELETE, NOERASE, MAKEVIEW,
+.	AUTOSAVE, FINDKEY=<label>, BEGIN=<label>, END=<label>,
+.	SAVE=<label>, EXIT=<label>, FIND=<label>, NEXT=<label>, BACK=<label>,
+.	ADD=<label>, ADDEND=<label>, CHANGE=<label>, DELETE=<label>, GET=<label>,
+.	PUT=<label>, VIEW=<label>
+
+MAINT routine
+	moveadr "File" to mnt.entrylist[1]
+	moveadr "Lookup" to mnt.entrylist[2]
+	moveadr "Modify" to mnt.entrylist[3]
+	moveadr "Options" to mnt.entrylist[4]
+	moveadr mnt.dummychar to mnt.entrylist[5]
+	movelabel maintgenfind to mnt.lblfindkey
+	clear parmindex, mnt.index
+	clear mnt.noflag, mnt.openflag, mnt.recflag, mnt.newflag, mnt.chgflag
+	clear mnt.itemflag, mnt.exitflag, mnt.autosaveflag
+	set mnt.noflag[6]
+	loop
+		add 1 to parmindex
+		getparm keyword, var1
+		break if over
+		switch keyword
+		case "RECORD"
+			moveadr var1 to mnt.record
+		case "TABLE"
+			moveadr var1 to mnt.table
+		case "NOSAVE"
+			set mnt.noflag[1]
+		case "NOEXIT"
+			set mnt.noflag[2]
+		case "NOFIND"
+			set mnt.noflag[3]
+		case "NONEXT"
+			set mnt.noflag[4]
+		case "NOBACK"
+			set mnt.noflag[5]
+		case "MAKEVIEW"
+			clear mnt.noflag[6]
+		case "NOADD"
+			set mnt.noflag[7]
+		case "NOCHANGE"
+			set mnt.noflag[8]
+		case "NODELETE"
+			set mnt.noflag[9]
+		case "NOERASE"
+			set mnt.noflag[10]
+		case "FILEITEM"
+			reset mnt.parmmap to parmindex
+			cmove "F" to mnt.parmmap
+			goto mainterr4 if (mnt.itemflag)
+			set mnt.itemflag
+		case "LOOKUPITEM"
+			reset mnt.parmmap to parmindex
+			cmove "L" to mnt.parmmap
+			goto mainterr5 if (mnt.itemflag)
+			set mnt.itemflag
+		case "MODIFYITEM"
+			reset mnt.parmmap to parmindex
+			cmove "M" to mnt.parmmap
+			goto mainterr6 if (mnt.itemflag)
+			set mnt.itemflag
+		case "OPTIONSITEM"
+			reset mnt.parmmap to parmindex
+			cmove "O" to mnt.parmmap
+			goto mainterr7 if (mnt.itemflag)
+			set mnt.itemflag
+		case "ROUTINE"
+			goto mainterr3 if (not mnt.itemflag)
+			clear mnt.itemflag
+		case "AUTOSAVE"
+			set mnt.autosaveflag
+		case "FINDKEY"
+			movevl var1 to mnt.lblfindkey
+		case "BEGIN"
+			set mnt.exitflag[mnt.xbegin]
+			movevl var1 to mnt.lblbegin
+		case "END"
+			set mnt.exitflag[mnt.xend]
+			movevl var1 to mnt.lblend
+		case "SAVE"
+			set mnt.exitflag[mnt.xsave]
+			movevl var1 to mnt.lblsave
+		case "EXIT"
+			set mnt.exitflag[mnt.xexit]
+			movevl var1 to mnt.lblexit
+		case "FIND"
+			set mnt.exitflag[mnt.xfind]
+			movevl var1 to mnt.lblfind
+		case "NEXT"
+			set mnt.exitflag[mnt.xnext]
+			movevl var1 to mnt.lblnext
+		case "BACK"
+			set mnt.exitflag[mnt.xback]
+			movevl var1 to mnt.lblback
+		case "ADD"
+			set mnt.exitflag[mnt.xadd]
+			movevl var1 to mnt.lbladd
+		case "ADDEND"
+			set mnt.exitflag[mnt.xaddend]
+			movevl var1 to mnt.lbladdend
+		case "CHANGE"
+			set mnt.exitflag[mnt.xchange]
+			movevl var1 to mnt.lblchange
+		case "DELETE"
+			set mnt.exitflag[mnt.xdelete]
+			movevl var1 to mnt.lbldelete
+		case "ERASE"
+			set mnt.exitflag[mnt.xerase]
+			movevl var1 to mnt.lblerase
+		case "GET"
+			set mnt.exitflag[mnt.xget]
+			movevl var1 to mnt.lblget
+		case "PUT"
+			set mnt.exitflag[mnt.xput]
+			movevl var1 to mnt.lblput
+		case "VIEW"
+			set mnt.exitflag[mnt.xview]
+			movevl var1 to mnt.lblview
+		default
+			move (length keyword) to mnt.worknum
+			if (fchar keyword = "F" and mnt.worknum > 1 and mnt.worknum < 4)
+				move keyword to mnt.char20
+				bump mnt.char20
+				clear mnt.index
+				move mnt.char20 to mnt.index
+				if (mnt.index > 0 and mnt.index < 13)
+					move (mnt.index + 26) to mnt.itemfkey[parmindex]
+					continue
+				endif
+			endif
+			if (mnt.worknum = 4)
+				move keyword to mnt.char20
+				setlptr mnt.char20 to 3
+				if (mnt.char20 = "CTL")
+					reset mnt.char20 to 4
+					scan mnt.char20 in letters
+					if equal
+						movefptr letters to mnt.itemfkey[parmindex]
+						reset letters
+						continue
+					endif
+				endif
+			endif
+			goto mainterr2
+		endswitch
+	repeat
+	add 1 to gbl.loadmodcnt
+	move ("fastdbc4<maint" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+	loadmod mnt.char20
+	move 1 to mnt.itemcnt
+	if (not mnt.noflag[1])
+		moveadr "SAVE   ctl-S" to mnt.itemlist[mnt.itemcnt]
+		move 19 to mnt.fkey[mnt.itemcnt]
+		actionstore routine=maintsave:mnt.itemcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[2])
+		moveadr "EXIT   ctl-X" to mnt.itemlist[mnt.itemcnt]
+		move 24 to mnt.fkey[mnt.itemcnt]
+		actionstore routine=maintexit:mnt.itemcnt
+		add 1 to mnt.itemcnt
+	endif
+	move mnt.itemcnt to mnt.routcnt
+	move "F" to mnt.char1
+	movelabel maintret1 to mnt.retlabel
+	goto maintact2
+
+maintret1
+	moveadr mnt.dummychar to mnt.itemlist[mnt.itemcnt]
+	add 1 to mnt.itemcnt
+	if (not mnt.noflag[3])
+		moveadr "FIND   ctl-F" to mnt.itemlist[mnt.itemcnt]
+		move 6 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintfind:mnt.routcnt
+		add 1 to mnt.itemcnt
+		add 1 to mnt.routcnt
+	endif
+	if (not mnt.noflag[4])
+		moveadr "NEXT   ctl-N" to mnt.itemlist[mnt.itemcnt]
+		move 14 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintnext:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[5])
+		moveadr "BACK   ctl-B" to mnt.itemlist[mnt.itemcnt]
+		move 2 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintback:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[6])
+		moveadr "VIEW   ctl-V" to mnt.itemlist[mnt.itemcnt]
+		move 22 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintview:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	move "L" to mnt.char1
+	movelabel maintret2 to mnt.retlabel
+	goto maintact2
+
+maintret2
+	moveadr mnt.dummychar to mnt.itemlist[mnt.itemcnt]
+	add 1 to mnt.itemcnt
+	if (not mnt.noflag[7])
+		moveadr "ADD    ctl-A" to mnt.itemlist[mnt.itemcnt]
+		move 1 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintadd:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[8])
+		moveadr "CHANGE ctl-C" to mnt.itemlist[mnt.itemcnt]
+		move 3 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintchange:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[9])
+		moveadr "DELETE ctl-D" to mnt.itemlist[mnt.itemcnt]
+		move 4 to mnt.fkey[mnt.routcnt]
+		actionstore routine=maintdelete:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	if (not mnt.noflag[10])
+		moveadr "ERASE  ctl-E" to mnt.itemlist[mnt.itemcnt]
+		move 5 to mnt.fkey[mnt.routcnt]
+		actionstore routine=mainterase:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+	endif
+	move "M" to mnt.char1
+	movelabel maintret3 to mnt.retlabel
+	goto maintact2
+
+maintret3
+	moveadr mnt.dummychar to mnt.itemlist[mnt.itemcnt]
+	add 1 to mnt.itemcnt
+	reset mnt.parmmap
+	scan "O" in mnt.parmmap
+	if equal
+		move "O" to mnt.char1
+		movelabel maintret4 to mnt.retlabel
+		goto maintact2
+	else
+		moveadr mnt.dummychar to mnt.entrylist[4]
+	endif
+
+maintret4
+	moveadr mnt.dummychar to mnt.itemlist[mnt.itemcnt]
+	add 1 to mnt.itemcnt
+	moveadr mnt.dummychar to mnt.itemlist[mnt.itemcnt]
+	actionbar entrylist=mnt.entrylist, itemlist=mnt.itemlist, keylist=mnt.fkey:
+		abort="ctle":maintabort
+	call mnt.lblbegin if (mnt.exitflag[mnt.xbegin])
+	return
+
+maintact2
+	reset mnt.parmmap
+	loop
+		scan mnt.char1 in mnt.parmmap
+		break if not equal
+		movefptr mnt.parmmap to mnt.index
+		loadparm mnt.index into keyword, var1
+		moveadr var1 to mnt.itemlist[mnt.itemcnt]
+		add 1 to mnt.index
+		loadparm mnt.index into keyword, var1
+		goto mainterr1 if (keyword <> "ROUTINE")
+		movevl var1 to routine
+		move mnt.itemfkey[mnt.index + 1] to mnt.fkey[mnt.routcnt]
+		actionstore routine=routine:mnt.routcnt
+		add 1 to mnt.routcnt
+		add 1 to mnt.itemcnt
+		bump mnt.parmmap
+		break if eos
+	repeat
+	goto mnt.retlabel
+
+maintsave
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xsave])
+		call mnt.lblsave
+		return if eos
+	endif
+	return
+
+maintexit
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xexit])
+		call mnt.lblexit
+		return if eos
+	endif
+	call mnt.lblend if (mnt.exitflag[mnt.xend])
+	move ("fastdbc4<maint" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+	unload mnt.char20
+	sub 1 from gbl.loadmodcnt
+	noreturn
+	return
+
+maintfind
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xfind])
+		call mnt.lblfind
+		return if eos
+	endif
+	call mnt.lblfindkey
+	return if eos
+	if (mnt.exitflag[mnt.xget])
+		call mnt.lblget
+		return if eos
+	endif
+	fastread mnt.table, mnt.record
+maintfind1
+	if over
+		call screenerase if (mnt.recflag)
+		clear mnt.recflag
+		message text="RECORD NOT FOUND"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+	else
+		fastbuildkey mnt.table, mnt.record
+		screendisplay
+		set mnt.recflag
+	endif
+	return
+
+maintgenfind
+	dialog text="Enter primary key...", field=mnt.genkey
+	if eos
+		setflag eos
+		return
+	endif
+	noreturn
+	fastreadwithkey mnt.table, mnt.record, mnt.genkey
+	goto maintfind1
+
+maintnext
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xnext])
+		call mnt.lblnext
+		return if eos
+	endif
+	fastreadnext mnt.table, mnt.record
+	if over
+		call screenerase
+		clear mnt.recflag
+		message text="NO NEXT RECORD"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+	else
+		fastbuildkey mnt.table, mnt.record
+		screendisplay
+		set mnt.recflag
+	endif
+	return
+
+maintback
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xback])
+		call mnt.lblback
+		return if eos
+	endif
+	fastreadback mnt.table, mnt.record
+	if over
+		call screenerase
+		clear mnt.recflag
+		message text="NO PREVIOUS RECORD"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+	else
+		fastbuildkey mnt.table, mnt.record
+		screendisplay
+		set mnt.recflag
+	endif
+	return
+.
+
+maintview
+	call maintrewrite
+	return if eos
+	if (mnt.exitflag[mnt.xview])
+		call mnt.lblview
+		return if eos
+	endif
+	add 1 to gbl.loadmodcnt
+	move ("fastdbc4<view" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+	loadmod mnt.char20
+
+	moveadr "File" to mnt.vwentrylist[1]
+	moveadr "Lookup" to mnt.vwentrylist[2]
+	moveadr mnt.dummychar to mnt.vwentrylist[3]
+
+	moveadr "Exit with selection  ctl-S" to mnt.vwitemlist[1]
+	move 19 to mnt.vwfkey[1]
+	actionstore routine=viewexitchg:1
+
+	moveadr "Exit no change       ctl-X" to mnt.vwitemlist[2]
+	move 24 to mnt.vwfkey[2]
+	actionstore routine=viewexit:2
+	moveadr mnt.dummychar to mnt.vwitemlist[3]
+
+	moveadr "Next line     ctl-N" to mnt.vwitemlist[4]
+	move 14 to mnt.vwfkey[3]
+	actionstore routine=viewnext:3
+
+	moveadr "Back line     ctl-B" to mnt.vwitemlist[5]
+	move 2 to mnt.vwfkey[4]
+	actionstore routine=viewback:4
+
+	moveadr "Page forward  ctl-F" to mnt.vwitemlist[6]
+	move 6 to mnt.vwfkey[5]
+	actionstore routine=viewpagef:5
+
+	moveadr "Page previous ctl-P" to mnt.vwitemlist[7]
+	move 16 to mnt.vwfkey[6]
+	actionstore routine=viewpagep:6
+
+	moveadr "Home          ctl-H" to mnt.vwitemlist[8]
+	move 8 to mnt.vwfkey[7]
+	actionstore routine=viewhome:7
+
+	moveadr "End           ctl-E" to mnt.vwitemlist[9]
+	move 5 to mnt.vwfkey[8]
+	actionstore routine=viewend:8
+
+	moveadr mnt.dummychar to mnt.vwitemlist[10]
+	moveadr mnt.dummychar to mnt.vwitemlist[11]
+
+	scrnsave scr.viewsave
+
+	if (scr.viewdescflag)
+		display *p1:3, *ef
+		for scr.index from 1 to scr.viewcnt
+			display *p=scr.viewcolh[scr.index]:3, scr.viewdesc[scr.index];
+		repeat
+		display *p1:4, *rptchar *hln:80, *setswtb=5:24;
+		move 20 to mnt.size
+	else
+		display *p1:3, *ef, *setswtb=3:24;
+		move 22 to mnt.size
+	endif
+
+	actionbar entrylist=mnt.vwentrylist, itemlist=mnt.vwitemlist, keylist=mnt.vwfkey
+
+	fastgetkey mnt.savkey
+	if (not mnt.recflag)
+		fastreadnext mnt.table, mnt.record
+		if over
+			move ("fastdbc4<view" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+			unload mnt.char20
+			sub 1 from gbl.loadmodcnt
+			scrnrest scr.viewsave
+			return
+		endif
+	endif
+	move 1 to mnt.line
+	call viewdspscr
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[1]
+	display *p1:mnt.line;
+
+	action
+
+	return
+.
+viewdspline
+	display *h=1, *el;
+	for scr.worknum2 from 1 to scr.viewcnt
+		type scr.viewvar[scr.worknum2] into mnt.index
+		if (mnt.index = 1)
+			moveadr scr.viewvar[scr.worknum2] into mnt.charvar
+			display *h=scr.viewcolh[scr.worknum2], mnt.charvar;
+		else
+			moveadr scr.viewvar[scr.worknum2] into mnt.numvar
+			display *h=scr.viewcolh[scr.worknum2], mnt.numvar;
+		endif
+	repeat
+	return
+
+viewdspscr
+	move 1 to mnt.bottom
+	loop
+		fastbuildkey mnt.table, mnt.record
+		fastgetkey mnt.viewkey[mnt.bottom]
+		display *p1:mnt.bottom;
+		if (mnt.bottom = mnt.line)
+			display *revon;
+		endif
+		call viewdspline
+		if (mnt.bottom = mnt.line)
+			display *revoff;
+		endif
+		fastreadnext mnt.table, mnt.record
+		break if over
+		break if (mnt.bottom + 1 > mnt.size)
+		add 1 to mnt.bottom
+	repeat
+	return
+
+viewnomore
+	message text="NO MORE RECORDS"
+	beep
+	set mnt.msgflag
+ 	empty gbl.queue
+	return
+
+viewexitchg
+	move ("fastdbc4<view" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+	unload mnt.char20
+	fastbuildkey mnt.table, mnt.record
+	fastgetkey mnt.savkey
+	set mnt.recflag
+	goto viewexit1
+viewexit
+	move ("fastdbc4<view" + squeeze char gbl.loadmodcnt + ">") to mnt.char20
+	unload mnt.char20
+viewexit1
+	sub 1 from gbl.loadmodcnt
+	fastreadwithkey mnt.table, mnt.record, mnt.savkey
+	scrnrest scr.viewsave
+	screendisplay
+	noreturn
+	return
+
+viewnext
+	if (mnt.line = mnt.bottom)
+		goto viewnomore if (mnt.line != mnt.size)
+		fastreadnextpart mnt.table
+		if over
+			fastreadbackpart mnt.table
+			goto viewnomore
+		endif
+		call viewdspline
+		fastreadseq mnt.table, mnt.record
+		display *r, *p=1:mnt.line, *revon;
+		call viewdspline
+		display *p=1:mnt.line, *revoff;
+		for scr.worknum from 2 to mnt.size
+			move mnt.viewkey[scr.worknum] to mnt.viewkey[scr.worknum - 1]
+		repeat
+		fastbuildkey mnt.table, mnt.record
+		fastgetkey mnt.viewkey[mnt.size]
+	else
+		call viewdspline
+		fastreadnext mnt.table, mnt.record
+		add 1 to mnt.line
+		display *p=1:mnt.line, *revon;
+		call viewdspline
+		display *p=1:mnt.line, *revoff;
+	endif
+	return
+
+viewback
+	if (mnt.line = 1)
+		fastreadbackpart mnt.table
+		if over
+			fastreadnextpart mnt.table
+			goto viewnomore
+		endif
+		call viewdspline
+		fastreadseq mnt.table, mnt.record
+		display *rd, *p=1:mnt.line, *revon;
+		call viewdspline
+		display *p=1:mnt.line, *revoff;
+		for scr.worknum from mnt.size to 2 by -1
+			move mnt.viewkey[scr.worknum - 1] to mnt.viewkey[scr.worknum]
+		repeat
+		fastbuildkey mnt.table, mnt.record
+		fastgetkey mnt.viewkey[1]
+	else
+		call viewdspline
+		fastreadback mnt.table, mnt.record
+		sub 1 from mnt.line
+		display *p=1:mnt.line, *revon;
+		call viewdspline
+		display *p=1:mnt.line, *revoff;
+	endif
+	return
+
+viewpagef
+	goto viewnomore if (mnt.bottom != mnt.size)
+	call viewdspline
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.size]
+	fastreadnext mnt.table, mnt.record
+	if over
+		fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.line]
+		display *p1:mnt.line, *revon;
+		call viewdspline
+		display *p1:mnt.line, *revoff;
+		goto viewnomore
+	endif
+	for mnt.worknum2 from 2 to mnt.size
+		display *r, *p1:mnt.size;
+		call viewdspline
+		for scr.worknum from 2 to mnt.size
+			move mnt.viewkey[scr.worknum] to mnt.viewkey[scr.worknum - 1]
+		repeat
+		fastbuildkey mnt.table, mnt.record
+		fastgetkey mnt.viewkey[mnt.size]
+		fastreadnext mnt.table, mnt.record
+		break if over
+	repeat
+	if (mnt.worknum2 <= mnt.size and mnt.line >= mnt.worknum2)
+		move (mnt.line - mnt.worknum2 + 1) to mnt.line
+	endif
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.line]
+	display *p=1:mnt.line, *revon;
+	call viewdspline
+	display *p=1:mnt.line, *revoff;
+	return
+
+viewpagep
+	goto viewnomore if (mnt.bottom != mnt.size)
+	call viewdspline
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[1]
+	fastreadback mnt.table, mnt.record
+	if over
+		fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.line]
+		display *p1:mnt.line, *revon;
+		call viewdspline
+		display *p1:mnt.line, *revoff;
+		goto viewnomore
+	endif
+	for mnt.worknum2 from 2 to mnt.size
+		display *rd, *p1:1;
+		call viewdspline
+		for scr.worknum from mnt.size to 2 by -1
+			move mnt.viewkey[scr.worknum - 1] to mnt.viewkey[scr.worknum]
+		repeat
+		fastbuildkey mnt.table, mnt.record
+		fastgetkey mnt.viewkey[1]
+		fastreadback mnt.table, mnt.record
+		break if over
+	repeat
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.line]
+	display *p=1:mnt.line, *revon;
+	call viewdspline
+	display *p=1:mnt.line, *revoff;
+	return
+
+viewhome
+	call viewdspline
+	if (mnt.bottom <> mnt.size)
+		move 1 to mnt.line
+		display *p1:1, *revon;
+		call viewdspline
+		display *revoff, *p1:1;
+		return
+	endif
+	clear mnt.record
+	fastread mnt.table, mnt.record
+	if over
+		fastreadnext mnt.table, mnt.record
+	endif
+	move 1 to mnt.line
+	call viewdspscr
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[1]
+	display *p1:1;
+	return
+
+viewend
+	if (mnt.bottom <> mnt.size)
+		call viewdspline
+		move mnt.bottom to mnt.line
+		display *p1:mnt.line, *revon;
+		call viewdspline
+		display *revoff, *p1:mnt.line;
+		return
+	endif
+	fill 0xff into mnt.lastkey
+	fastreadwithkey mnt.table, mnt.record, mnt.lastkey
+		for mnt.worknum from 1 to mnt.size
+		fastreadbackpart mnt.table
+	repeat
+	fastreadseq mnt.table, mnt.record
+	move mnt.size to mnt.line
+	call viewdspscr
+	fastreadwithkey mnt.table, mnt.record, mnt.viewkey[mnt.size]
+	display *p1:mnt.size;
+	return
+
+maintdelete
+	if (mnt.exitflag[mnt.xdelete])
+		call mnt.lbldelete
+		return if eos
+	endif
+	if (mnt.recflag)
+		if (not mnt.newflag)
+			fastdelete mnt.table
+		endif
+		call screenerase
+		clear mnt.recflag, mnt.newflag, mnt.chgflag
+	else
+		message text="NO RECORD TO DELETE"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+	endif
+	return
+
+mainterase
+	if (mnt.exitflag[mnt.xerase])
+		call mnt.lblerase
+		return if eos
+	endif
+	if (not mnt.recflag)
+		message text="NO RECORD TO ERASE"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+	else
+		screenerase
+	endif
+	clear mnt.recflag, mnt.newflag, mnt.chgflag
+	return
+
+maintadd
+	call maintrewrite
+	return if eos
+	empty gbl.queue
+	actionnointr routine=maintaddend
+	if (mnt.exitflag[mnt.xadd])
+		call mnt.lbladd
+		return if eos
+	endif
+	clear mnt.record
+	set mnt.recflag, mnt.newflag, mnt.chgflag
+	screenerase
+	screendisplay
+maintadd1
+	screenkeyin
+
+maintaddend
+	if (mnt.exitflag[mnt.xaddend])
+		call mnt.lbladdend
+		goto maintadd1 if eos
+	endif
+	fastbuildkey mnt.table, mnt.record
+	actionintrclr
+	return
+
+maintabort routine
+	clear mnt.recflag, mnt.newflag, mnt.chgflag
+	screenerase
+	actionintrclr
+	return
+.
+maintchange
+	if (not mnt.recflag)
+		message text="NO RECORD TO CHANGE"
+		beep
+		set mnt.msgflag
+		empty gbl.queue
+		return
+	endif
+	actionnointr routine=maintchangeend
+	if (mnt.exitflag[mnt.xchange])
+		call mnt.lblchange
+		return if eos
+	endif
+	set mnt.chgflag
+maintchange1
+	screenkeyin scr.nochange
+maintchangeend
+	if (mnt.exitflag[mnt.xchangeend])
+		call mnt.lblchangeend
+		goto maintchange1 if eos
+	endif
+	actionintrclr
+	return
+.
+maintrewrite routine
+	if (not mnt.openflag)
+		fastopen mnt.table
+		if over
+			error text="UNABLE TO OPEN FILE"
+			clear mnt.openflag
+			noreturn
+		else
+			set mnt.openflag
+		endif
+		clear mnt.recflag, mnt.chgflag
+		return
+	endif
+	return if (not mnt.recflag or not mnt.chgflag)
+	if (not mnt.autosaveflag)
+		dialog text="ok to save ? (Y/N) ", yesno
+		if equal
+			setflag eos
+			return
+		endif
+	endif
+. if eos is set, then return after user exit
+. if over is clear, then clear eos before returning from maintrewrite
+	if (mnt.exitflag[mnt.xput])
+		call mnt.lblput
+		if eos
+			if not over
+				setflag not eos
+			endif
+			return
+		endif
+	endif
+	if (mnt.newflag)
+		fastreadpart mnt.table, mnt.record
+		if over
+			fastwrite mnt.table, mnt.record
+			clear mnt.newflag, mnt.chgflag
+			return
+		endif
+	else
+		fastupdateall mnt.table, mnt.record
+		if not over
+			clear mnt.newflag, mnt.chgflag
+			return
+		else if eos
+			error text="ERROR DURING WRITE"
+			setflag eos
+			return
+		endif
+	endif
+	error text="RECORD ALREADY EXISTS"
+	setflag eos
+	return
+.
+. MAINTFLGSAVE routine to save value of recflag, newflag, & chgflag
+.
+MAINTFLGSAVE routine
+maintflgsave routine
+	move mnt.recflag to mnt.oldrecflag
+	move mnt.newflag to mnt.oldnewflag
+	move mnt.chgflag to mnt.oldchgflag
+	return
+.
+MAINTFLGREST routine
+maintflgrest routine
+	move mnt.oldrecflag to mnt.recflag
+	move mnt.oldnewflag to mnt.newflag
+	move mnt.oldchgflag to mnt.chgflag
+	return
+.
+.SCREEN	verb DISPLAY=<label>, ERASE=<label>:
+.	H=<nvarlit>, V=<nvarlit>, HA=<nvarlit>, VA=<nvarlit>:
+.	TEXT=<cvarlit>, FIELD=<cnvar>, DATA=<var>:
+.	REPEATFIELD=<array>:<nvarlit>, MMDDYY, MMDDYYYY, YYMMDD:
+.	YYYYMMDD, YN, UC, DE, JR, ZF, FIELDEXIT=<label>, NOCHANGE:
+.   FIELDINIT=<cnvarlit>, VIEWFIELD=<cnvar>, VIEWDESC=<varlit>:
+.   VIEWH=<nvarlit>, VIEWHA=<nvarlit>, VIEWWIDTH=<nvarlit>:
+.   VIEWDEFAULTHA=<nvarlit>:
+.   NEWPAGE (not yet implemented)
+. 
+SCREEN routine
+	display *resetsw, *color=colorfore.scrn, *bgcolor=colorback.scrn, *p=1:3, *ef;
+	move 1 to scr.h
+	move 3 to scr.v
+	clear scr.etabcnt, scr.dtabcnt, scr.displayflag, scr.eraseflag
+	clear scr.repeat, scr.ctlcode, scr.lblix, scr.nochange
+	clear scr.dtabh, scr.dtabv, scr.etabh, scr.etabv, scr.initflag
+	clear scr.lasttexth, scr.lastdatah, scr.lastfieldh
+	clear scr.lasttextv, scr.lastdatav, scr.lastfieldv
+	clear scr.viewcnt, scr.viewcolh, scr.viewdescflag, scr.viewtot
+	move 1 to scr.viewdefaultha
+	move 1 to scr.viewcolh[1]
+	loop
+		getparm keyword, var1, var2
+		break if over
+		switch keyword
+		case "TEXT"
+			if (scr.lasttexth)
+				move scr.lasttexth to scr.h
+			endif
+			if (scr.lasttextv)
+				move (scr.lasttextv + 1) to scr.v
+			endif
+			moveadr var1 to scr.charvar
+			display *p=scr.h:scr.v, scr.charvar;
+			move scr.h to scr.lasttexth
+			move scr.v to scr.lasttextv
+			move "T" to scr.char1
+			call screen1
+		case "DATA"
+			if (scr.lastdatah)
+				move scr.lastdatah to scr.h
+			endif
+			if (scr.lastdatav)
+				move (scr.lastdatav + 1) to scr.v
+			endif
+			move scr.h to scr.lastdatah
+			move scr.v to scr.lastdatav
+			move "D" to scr.char1
+			call screen1
+		case "FIELD"
+			if (scr.lastfieldh)
+				move scr.lastfieldh to scr.h
+			endif
+			if (scr.lastfieldv)
+				move (scr.lastfieldv + 1) to scr.v
+			endif
+			move scr.h to scr.lastfieldh
+			move scr.v to scr.lastfieldv
+			move "F" to scr.char1
+			call screen1
+		case "REPEATFIELD"
+			if (scr.lastfieldh)
+				move scr.lastfieldh to scr.h
+			endif
+			if (scr.lastfieldv)
+				move (scr.lastfieldv + 1) to scr.v
+			endif
+			move scr.h to scr.lastfieldh
+			move "F" to scr.char1
+			type var1 into scr.worknum3
+			if (scr.worknum3 = 3)
+				moveadr var1 to scr.arraychar
+			else
+				moveadr var1 to scr.arraynum
+			endif
+			moveadr var2 to tempint
+			for scr.worknum4 from 1 to tempint
+				if (scr.worknum3 = 3)
+					moveadr scr.arraychar[scr.worknum4] to var1
+				else
+					moveadr scr.arraynum[scr.worknum4] to var1
+				endif
+				call screen1
+				move (tempint - scr.worknum4 + 1) to scr.repeat[scr.dtabcnt]
+				add 1 to scr.v
+				move scr.lastfieldh to scr.h
+			repeat
+			move (scr.v - 1) to scr.lastfieldv
+		case "H"
+			moveadr var1 to tempint
+			move tempint to scr.h
+			clear scr.lasttexth, scr.lastdatah, scr.lastfieldh
+		case "V"
+			moveadr var1 to tempint
+			move tempint to scr.v
+			clear scr.lasttextv, scr.lastdatav, scr.lastfieldv
+		case "HA"
+			moveadr var1 to tempint
+			move tempint to scr.index
+			add scr.index to scr.h
+			clear scr.lasttexth, scr.lastdatah, scr.lastfieldh
+		case "VA"
+			moveadr var1 to tempint
+			move tempint to scr.index
+			add scr.index to scr.v
+			clear scr.lasttextv, scr.lastdatav, scr.lastfieldv
+		case "YN"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movelabel edyn to routine
+			call screenstore
+		case "UC"
+			add 1 to scr.ctlcode[scr.dtabcnt]
+		case "DE"
+			add 2 to scr.ctlcode[scr.dtabcnt]
+		case "JR"
+			add 4 to scr.ctlcode[scr.dtabcnt]
+		case "ZF"
+			add 8 to scr.ctlcode[scr.dtabcnt]
+		case "MMDDYY"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movelabel eddate1 to routine
+			call screenstore
+			add 2 to scr.ctlcode[scr.dtabcnt]
+		case "MMDDYYYY"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movelabel eddate2 to routine
+			call screenstore
+			add 2 to scr.ctlcode[scr.dtabcnt]
+		case "YYMMDD"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movelabel eddate3 to routine
+			call screenstore
+			add 2 to scr.ctlcode[scr.dtabcnt]
+		case "YYYYMMDD"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movelabel eddate4 to routine
+			call screenstore
+			add 2 to scr.ctlcode[scr.dtabcnt]
+		case "FIELDINIT"
+			moveadr var1 to scr.initvar[scr.dtabcnt]
+			set scr.initflag[scr.dtabcnt]
+		case "FIELDEXIT"
+			add 1 to scr.lblix
+			move scr.lblix to scr.fldexit[scr.dtabcnt]
+			movevl var1 to routine
+			call screenstore
+		case "NOCHANGE"
+			move scr.dtabcnt to scr.nochange
+		case "DISPLAY"
+			movevl var1 to scr.displayexit
+			set scr.displayflag
+		case "ERASE"
+			movevl var1 to scr.eraseexit
+			set scr.eraseflag
+.		case "VIEWFIELD"
+.			add 1 to scr.viewcnt
+.			moveadr var1 to scr.viewvar[scr.viewcnt]
+.		case "VIEWDESC"
+.			moveadr var1 to scr.viewdesc
+
+		case "VIEWFIELD"
+			add 1 to scr.viewcnt
+			goto screenerr10 if (scr.viewcnt > 15)
+			moveadr var1 to scr.viewvar[scr.viewcnt]
+			type var1 into scr.index
+			if (scr.index = 1)
+				moveadr var1 into scr.charvar
+				movelength scr.charvar to scr.viewwidth[scr.viewcnt]
+			else
+				moveadr var1 into scr.numvar
+				movesize scr.numvar to scr.viewwidth[scr.viewcnt]
+			endif
+			add scr.viewwidth[scr.viewcnt] to scr.viewtot
+			moveadr scr.blank to scr.viewdesc[scr.viewcnt]
+		case "VIEWDESC"
+			if (not scr.viewcnt)
+				goto screenerr8
+			endif
+			moveadr var1 to scr.viewdesc[scr.viewcnt]
+              if (scr.viewwidth[scr.viewcnt] < length scr.viewdesc[scr.viewcnt])
+				move (length scr.viewdesc[scr.viewcnt]) to scr.viewwidth[scr.viewcnt]
+			endif
+			set scr.viewdescflag
+		case "VIEWH"
+			if (not scr.viewcnt)
+				goto screenerr5
+			endif
+			moveadr var1 to tempint
+			move tempint to scr.viewcolh[scr.viewcnt]
+		case "VIEWHA"
+			if (not scr.viewcnt)
+				goto screenerr6
+			endif
+			moveadr var1 to tempint
+			move (-1 * tempint) to scr.viewcolh[scr.viewcnt]
+		case "VIEWDEFAULTHA"
+			moveadr var1 to tempint
+			move tempint to scr.viewdefaultha
+		case "VIEWWIDTH"
+			if (not scr.viewcnt)
+				goto screenerr7
+			endif
+			moveadr var1 to tempint
+			move tempint to scr.viewwidth[scr.viewcnt]
+		default
+			goto screenerr1
+		endswitch
+	repeat
+
+	if (scr.viewtot > 80)
+		goto screenerr9
+	endif
+	for scr.index from 2 to scr.viewcnt
+		if (not scr.viewcolh[scr.index])
+			move (scr.viewcolh[scr.index - 1] + scr.viewwidth[scr.index - 1] + scr.viewdefaultha) to scr.viewcolh[scr.index]
+		else if (scr.viewcolh[scr.index] < 0)
+			move (scr.viewcolh[scr.index - 1] + scr.viewwidth[scr.index - 1] + (-1 * scr.viewcolh[scr.index])) to scr.viewcolh[scr.index]
+		endif
+	repeat
+	add 1 to scr.nochange
+	display *coloroff;
+	return
+
+screen1
+	for scr.index from 1 to scr.etabcnt
+		continue if (scr.etabv[scr.index] < scr.v)
+		continue if (scr.etabv[scr.index] = scr.v and scr.etabh[scr.index] < scr.h)
+		for scr.worknum from scr.etabcnt to scr.index
+			move (scr.worknum + 1) to scr.worknum2
+			move scr.etabh[scr.worknum] to scr.etabh[scr.worknum2]
+			move scr.etabv[scr.worknum] to scr.etabv[scr.worknum2]
+			reset scr.etabmap to scr.worknum
+			move scr.etabmap to scr.char1a
+			reset scr.etabmap to scr.worknum2
+			cmove scr.char1a to scr.etabmap
+		repeat
+		goto screen2
+	repeat
+	add 1 to scr.etabcnt
+	goto screenerr2 if (scr.etabcnt > 100)
+screen2
+	move scr.h to scr.etabh[scr.index]
+	move scr.v to scr.etabv[scr.index]
+	reset scr.etabmap to scr.index
+	cmove scr.char1 to scr.etabmap
+	if (scr.char1 <> "T")
+		add 1 to scr.dtabcnt
+		move (scr.h + 1) to scr.dtabh[scr.dtabcnt]
+		move scr.v to scr.dtabv[scr.dtabcnt]
+		moveadr var1 to scr.dtabvar[scr.dtabcnt]
+		reset scr.dtabmap to scr.dtabcnt
+		cmove scr.char1 to scr.dtabmap
+	endif
+	type var1 into scr.index
+	if (scr.index = 1 or scr.index = 3)
+		moveadr var1 to scr.charvar
+		movesize scr.charvar to scr.worknum
+		add scr.worknum to scr.h
+		return
+	endif
+	if (scr.index = 2 or scr.index = 4)
+		moveadr var1 to scr.numvar
+		movesize scr.numvar to scr.worknum
+		add scr.worknum to scr.h
+		return
+	endif
+	goto screenerr3
+.
+. SCREENKEYIN
+.
+SCREENKEYIN routine
+screenkeyin routine
+	set scr.keyflag
+	display *color=colorfore.scrn, *bgcolor=colorback.scrn;
+	getparm keyword, var1
+	if over
+		move 1 to scr.index
+	else
+		moveadr var1 to scr.numvar
+		move scr.numvar to scr.index
+	endif
+	move scr.index to scr.worknum2
+	loop while (scr.index <= scr.dtabcnt)
+		reset scr.dtabmap to scr.index
+		if (fchar scr.dtabmap <> "F")
+			add 1 to scr.index
+			continue
+		endif
+		if (scr.fldexit[scr.index])
+			move scr.fldexit[scr.index] to scr.lblix
+			call screenexit
+			if not eos
+				if up
+					if (scr.index = scr.worknum2)
+						move scr.dtabcnt to scr.index
+					else
+						sub 1 to scr.index
+					endif
+				else if bktab
+					if (scr.index = scr.worknum2)
+						move scr.dtabcnt to scr.index
+					else
+						sub 1 to scr.index
+					endif
+				else
+					add 1 to scr.index
+				endif
+				continue
+			endif
+		endif
+		display *p=scr.dtabh[scr.index]:scr.dtabv[scr.index];
+		type scr.dtabvar[scr.index] into scr.worknum
+		if (scr.worknum = 1)
+			moveadr scr.dtabvar[scr.index] to scr.charvar
+			move scr.charvar to scr.chartemp
+			keyin *curson;
+			if (scr.ctlcode[scr.index] = 1)
+				keyin *uc, *edit, scr.charvar, *cursoff, *in;
+			else if (scr.ctlcode[scr.index] = 2)
+				keyin *de, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 4)
+				keyin *jr, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 5)
+				keyin *uc, *jr, *edit, scr.charvar, *cursoff, *in;
+			else if (scr.ctlcode[scr.index] = 6)
+				keyin *de, *jr, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 8)
+				keyin *zf, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 9)
+				keyin *uc, *zf, *edit, scr.charvar, *cursoff, *in;
+			else if (scr.ctlcode[scr.index] = 10)
+				keyin *de, *zf, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 12)
+				keyin *jr, *zf, *edit, scr.charvar, *cursoff;
+			else if (scr.ctlcode[scr.index] = 13)
+				keyin *uc, *jr, *zf, *edit, scr.charvar, *cursoff, *in;
+			else if (scr.ctlcode[scr.index] = 14)
+				keyin *de, *jr, *zf, *edit, scr.charvar, *cursoff;
+			else
+				keyin *edit, scr.charvar, *cursoff;
+			endif
+			if (scr.repeat[scr.index] & scr.charvar = scr.chartemp & squeeze scr.chartemp = "")
+				setflag eos
+			endif
+		else
+			moveadr scr.dtabvar[scr.index] to scr.numvar
+			if (scr.numvar = 0)
+				clear scr.worknum
+			endif
+			movesize scr.numvar to scr.worknum3
+			keyin *rptchar=" ":scr.worknum3, *p=scr.dtabh[scr.index]:scr.dtabv[scr.index]:
+			*curson, *rv, scr.numvar, *p=scr.dtabh[scr.index]:scr.dtabv[scr.index]:
+			*dv, scr.numvar, *cursoff;
+			if (not scr.repeat[scr.index] | scr.worknum)
+				setflag not eos
+			endif
+		endif
+		if up
+			if (scr.index = scr.worknum2)
+				move scr.dtabcnt to scr.index
+			else
+				sub 1 to scr.index
+			endif
+		else if bktab
+			if (scr.index = scr.worknum2)
+				move scr.dtabcnt to scr.index
+			else
+				sub 1 to scr.index
+			endif
+		else if eos
+			add scr.repeat[scr.index] to scr.index				
+		else
+			add 1 to scr.index
+		endif
+	repeat
+	display *coloroff;
+	return
+.
+. SCREENDISPLAY
+.
+SCREENDISPLAY routine
+screendisplay routine
+	clear scr.keyflag
+	display *color=colorfore.scrn, *bgcolor=colorback.scrn;
+	if (mnt.newflag)
+		for scr.index from 1 to scr.dtabcnt
+			reset scr.dtabmap to scr.index
+			if (scr.initflag[scr.index] and fchar scr.dtabmap <> "T")
+				type scr.dtabvar[scr.index] into scr.worknum
+				if (scr.worknum = 1)
+					moveadr scr.dtabvar[scr.index] to scr.charvar
+					moveadr scr.initvar[scr.index] to scr.charvar2
+					move scr.charvar2 to scr.charvar
+				else
+					moveadr scr.dtabvar[scr.index] to scr.numvar
+					moveadr scr.initvar[scr.index] to scr.numvar2
+					move scr.numvar2 to scr.numvar
+				endif
+			endif
+		repeat
+	endif
+	if (scr.displayflag)
+		call scr.displayexit
+		if eos
+			display *coloroff;
+			return
+		endif
+	endif
+	for scr.index from 1 to scr.dtabcnt
+		reset scr.dtabmap to scr.index
+		continue if (fchar scr.dtabmap = "T")
+		if (scr.fldexit[scr.index])
+			move scr.fldexit[scr.index] to scr.lblix
+			call screenexit 
+			continue if eos
+		endif
+		display *p=scr.dtabh[scr.index]:scr.dtabv[scr.index];
+		type scr.dtabvar[scr.index] into scr.worknum
+		if (scr.worknum = 1)
+			moveadr scr.dtabvar[scr.index] to scr.charvar
+			display scr.charvar;
+		else
+			moveadr scr.dtabvar[scr.index] to scr.numvar
+			display scr.numvar;
+		endif
+	repeat
+	display *coloroff;
+	return
+.
+. SCREENERASE
+.
+SCREENERASE routine
+screenerase routine
+	display *color=colorfore.scrn, *bgcolor=colorback.scrn;
+	if (scr.eraseflag)
+		call scr.eraseexit
+		if eos
+			display *coloroff;
+			return
+		endif
+	endif
+	clear scr.eraseflg
+	for scr.index from 1 to scr.etabcnt
+		reset scr.etabmap to scr.index
+		if (scr.eraseflg and scr.etabv[scr.index] <> scr.v)
+			display *p=scr.h:scr.v, *el;
+			clear scr.eraseflg
+		endif
+		if (fchar scr.etabmap = "T")
+			if (scr.eraseflg)
+				move (scr.h - scr.etabh[scr.index] + 1) to scr.worknum
+				display *p=scr.h:scr.v, *rptchar=" ":scr.worknum;
+				clear scr.eraseflg
+			endif
+		else
+			if (not scr.eraseflg)
+				move scr.etabh[scr.index] to scr.h
+				move scr.etabv[scr.index] to scr.v
+				set scr.eraseflg
+			endif
+		endif
+	repeat
+	if (scr.eraseflg)
+		display *p=scr.h:scr.v, *el;
+	endif
+	display *coloroff;
+	return
+.
+screenstore lroutine
+	storelabel routine from scr.lblix of scr.lbl01, scr.lbl02, scr.lbl03:
+		scr.lbl04, scr.lbl05, scr.lbl06, scr.lbl07, scr.lbl08:
+		scr.lbl09, scr.lbl10, scr.lbl11, scr.lbl12, scr.lbl13:
+		scr.lbl14, scr.lbl15, scr.lbl16, scr.lbl17, scr.lbl18:
+		scr.lbl19, scr.lbl20, scr.lbl21, scr.lbl22, scr.lbl23:
+		scr.lbl24, scr.lbl25, scr.lbl26, scr.lbl27, scr.lbl28:
+		scr.lbl29, scr.lbl30, scr.lbl31, scr.lbl32, scr.lbl33:
+		scr.lbl34, scr.lbl35, scr.lbl36, scr.lbl37, scr.lbl38:
+		scr.lbl39, scr.lbl40, scr.lbl41, scr.lbl42, scr.lbl43:
+		scr.lbl44, scr.lbl45, scr.lbl46, scr.lbl47, scr.lbl48:
+		scr.lbl49, scr.lbl50
+	return
+.
+screenexit lroutine
+	loadlabel routine from scr.lblix of scr.lbl01, scr.lbl02, scr.lbl03:
+		scr.lbl04, scr.lbl05, scr.lbl06, scr.lbl07, scr.lbl08:
+		scr.lbl09, scr.lbl10, scr.lbl11, scr.lbl12, scr.lbl13:
+		scr.lbl14, scr.lbl15, scr.lbl16, scr.lbl17, scr.lbl18:
+		scr.lbl19, scr.lbl20, scr.lbl21, scr.lbl22, scr.lbl23:
+		scr.lbl24, scr.lbl25, scr.lbl26, scr.lbl27, scr.lbl28:
+		scr.lbl29, scr.lbl30, scr.lbl31, scr.lbl32, scr.lbl33:
+		scr.lbl34, scr.lbl35, scr.lbl36, scr.lbl37, scr.lbl38:
+		scr.lbl39, scr.lbl40, scr.lbl41, scr.lbl42, scr.lbl43:
+		scr.lbl44, scr.lbl45, scr.lbl46, scr.lbl47, scr.lbl48:
+		scr.lbl49, scr.lbl50
+	call routine with scr.keyflag, scr.dtabh[scr.index], scr.dtabv[scr.index]
+	return
+.
+. DIALOG verb
+.
+. DIALOG HORZ=<nvarlit>, VERT=<nvarlit>, WIDTH=<nvarlit>, LENGTH=<nvarlit>:
+.        H=<varlit>, V=<nvarlit>, TEXT=<cvarlit>, FIELD=<var>:
+.        REQUIRED, YESNO
+.
+DIALOG routine
+	clear dlg.horz, dlg.vert, dlg.width, dlg.length, dlg.maxh, dlg.maxv
+	clear dlg.tabcnt, dlg.tabh, dlg.tabv, dlg.textflg, dlg.requireflg
+	clear dlg.yesnoflg
+	move 1 to dlg.h
+	move 1 to dlg.v
+	loop
+		getparm keyword, var1, var2
+		break if over
+		switch keyword
+		case "HORZ"
+			moveadr var1 to tempint
+			move tempint to dlg.horz
+		case "VERT"
+			moveadr var1 to tempint
+			move tempint to dlg.vert
+		case "WIDTH"
+			moveadr var1 to tempint
+			move tempint to dlg.width
+		case "LENGTH"
+			moveadr var1 to tempint
+			move tempint to dlg.length
+		case "TEXT"
+			add 1 to dlg.tabcnt
+			if (dlg.tabh[dlg.tabcnt] = 0)
+				move 3 to dlg.h
+			endif
+			if (dlg.tabv[dlg.tabcnt] = 0)
+				add 1 to dlg.v
+			endif
+			reset dlg.tabmap to dlg.tabcnt
+			cmove "T" to dlg.tabmap
+			move dlg.h to dlg.tabh[dlg.tabcnt]
+			move dlg.v to dlg.tabv[dlg.tabcnt]
+			moveadr var1 to dlg.tabvar[dlg.tabcnt]
+			moveadr var1 to dlg.charvar
+			movesize dlg.charvar to dlg.worknum
+			if (dlg.h <> 0)
+				add dlg.worknum to dlg.h
+			endif
+			set dlg.textflg
+		case "FIELD"
+			if (not dlg.textflg)
+				if (dlg.tabh[dlg.tabcnt] = 0)
+					move 3 to dlg.h
+				endif
+				if (dlg.tabv[dlg.tabcnt] = 0)
+					add 1 to dlg.v
+				endif
+			endif
+			add 1 to dlg.tabcnt
+			reset dlg.tabmap to dlg.tabcnt
+			cmove "F" to dlg.tabmap
+			move dlg.h to dlg.tabh[dlg.tabcnt]
+			move dlg.v to dlg.tabv[dlg.tabcnt]
+			moveadr var1 to dlg.tabvar[dlg.tabcnt]
+			type var1 into dlg.worknum
+			if (dlg.worknum = 1)
+				moveadr var1 to dlg.charvar
+				movelength dlg.charvar to dlg.worknum
+			else
+				moveadr var1 to dlg.numvar
+				movesize dlg.numvar to dlg.worknum
+			endif
+			if (dlg.h <> 0)
+				add dlg.worknum to dlg.h
+			endif
+		case "YESNO"
+			if (not dlg.textflg)
+				if (dlg.tabh[dlg.tabcnt] = 0)
+					move 3 to dlg.h
+				endif
+				if (dlg.tabv[dlg.tabcnt] = 0)
+					add 1 to dlg.v
+				endif
+			endif
+			add 1 to dlg.tabcnt
+			reset dlg.tabmap to dlg.tabcnt
+			cmove "F" to dlg.tabmap
+			move dlg.h to dlg.tabh[dlg.tabcnt]
+			move dlg.v to dlg.tabv[dlg.tabcnt]
+			moveadr dlg.yesno to dlg.tabvar[dlg.tabcnt]
+			set dlg.yesnoflg[dlg.tabcnt]
+			if (dlg.h <> 0)
+				add 1 to dlg.h
+			endif
+		case "H"
+			moveadr var1 to tempint
+			move (tempint + 1) to dlg.h
+			move dlg.h to dlg.tabh[dlg.tabcnt + 1]
+		case "V"
+			moveadr var1 to tempint
+			move (tempint + 1) to dlg.v
+			move dlg.v to dlg.tabv[dlg.tabcnt + 1]
+		case "REQUIRED"
+			set dlg.requireflg[dlg.tabcnt]
+		default
+			goto dialogerr1
+		endswitch
+		if (dlg.h > dlg.maxh)
+			move dlg.h to dlg.maxh
+		endif
+		if (dlg.v > dlg.maxv)
+			move dlg.v to dlg.maxv
+		endif
+	repeat
+	reset dlg.tabmap
+	scan "F" in dlg.tabmap
+	goto dialogerr2 if not equal
+	if (dlg.width = 0)
+		move (dlg.maxh + 1) to dlg.width
+	endif
+	if (dlg.length = 0)
+		move (dlg.maxv + 1) to dlg.length
+	endif
+	if (dlg.horz = 0)
+		move (41 - dlg.width / 2) to dlg.horz
+	endif
+	if (dlg.vert = 0)
+		move (13 - dlg.length / 2) to dlg.vert
+	endif
+	move (dlg.horz + dlg.width - 1) to dlg.wrgt
+	move (dlg.vert + dlg.length - 1) to dlg.wbot
+	statesave dlg.state
+	display *setswall=dlg.vert:dlg.wbot:dlg.horz:dlg.wrgt;
+	winsave dlg.win
+	trapsave dlg.trap
+	trapclr all
+	move (dlg.width - 2) to dlg.worknum
+	move (dlg.length - 2) to dlg.index
+	display *color=colorfore.box, *bgcolor=colorback.box, *es, *ulc:
+		*rptchar=*hln:dlg.worknum, *urc:
+		*va=1, *rptdown=*vln:dlg.index:
+		*p=1:2, *rptdown=*vln:dlg.index:
+		*hd, *llc, *rptchar=*hln:dlg.worknum, *lrc;
+	for dlg.index from 1 to dlg.tabcnt
+		type dlg.tabvar[dlg.index] into dlg.worknum
+		if (dlg.worknum = 1)
+			moveadr dlg.tabvar[dlg.index] to dlg.charvar
+		endif
+		if (dlg.worknum = 2)
+			moveadr dlg.tabvar[dlg.index] to dlg.numvar
+			move dlg.numvar to dlg.char20
+			moveadr dlg.char20 to dlg.charvar
+		endif
+		move dlg.tabh[dlg.index] to dlg.h
+		move dlg.tabv[dlg.index] to dlg.v
+		if (dlg.h = 0)
+			movesize dlg.charvar to dlg.worknum
+			move (dlg.width - dlg.worknum / 2) to dlg.h
+		endif
+		display *p=dlg.h:dlg.v, *ll, dlg.charvar;
+	repeat
+	clear dlg.index, dlg.nofldflg
+	set dlg.downflag
+	loop
+		if (dlg.downflag)
+			if (dlg.index = dlg.tabcnt)
+				move 1 to dlg.index
+			else
+				add 1 to dlg.index
+			endif
+		else
+			if (dlg.index = 1)
+				move dlg.tabcnt to dlg.index
+			else
+				sub 1 from dlg.index
+			endif
+		endif
+		reset dlg.tabmap to dlg.index
+		continue if (fchar dlg.tabmap = "T")
+		set dlg.nofldflg
+		move (dlg.tabh[dlg.index]) to dlg.h
+		move (dlg.tabv[dlg.index]) to dlg.v
+
+		if (dlg.yesnoflg[dlg.index])
+			loop
+				clear dlg.yesno
+				keyin *cl, *p=dlg.h:dlg.v, " ", *p=dlg.h:dlg.v, *uc, *curson:
+					dlg.yesno, *in, *cursoff;
+				if f12
+					goto dialogf12 if (not dlg.requireflg[dlg.index])
+					beep
+					continue
+				else if (fchar dlg.yesno = "Y")
+					move "0000" to dlg.flags
+				else if (fchar dlg.yesno = "N")
+					move "0100" to dlg.flags
+				else
+					beep
+					continue
+				endif
+				break
+			repeat
+			break
+		endif
+		type dlg.tabvar[dlg.index] into dlg.worknum
+		if (dlg.worknum = 1)
+			moveadr dlg.tabvar[dlg.index] to dlg.charvar
+			loop
+				keyin *cl, *p=dlg.h:dlg.v, *edit, *curson, dlg.charvar, *cursoff;
+				if f12
+					goto dialogf12 if (not dlg.requireflg[dlg.index])
+					beep
+					continue
+				else if (formptr dlg.charvar)
+					move "0000" to dlg.flags
+				else if (not dlg.requireflg[dlg.index])
+					move "0001" to dlg.flags
+				else
+					beep
+					continue
+				endif
+				break
+			repeat
+		else
+			moveadr dlg.tabvar[dlg.index] to dlg.numvar
+			keyin *cl, *p=dlg.h:dlg.v, *rv, *curson, dlg.numvar, *cursoff;
+			goto dialogf12 if f12
+			move "0000" to dlg.flags
+		endif
+		if enter
+			break if (dlg.index = dlg.tabcnt)
+			bump dlg.tabmap
+			scan "F" in dlg.tabmap
+			break if not equal
+			reset dlg.tabmap to dlg.index
+		else if up
+			clear dlg.downflag
+		else 
+			set dlg.downflag
+		endif
+	repeat
+	goto dialogend
+dialogf12
+	move "1000" to dlg.flags
+dialogend
+	winrestore dlg.win
+	staterestore dlg.state
+	traprestore dlg.trap
+	empty gbl.queue
+	flagrestore dlg.flags
+	display *coloroff;
+	return
+.
+. test validity of date in mmddyy format
+eddate1 lroutine scr.dateflag, scr.dateh, scr.datev
+	moveadr scr.dtabvar[scr.index] to scr.charvar
+	if (scr.dateflag)
+		loop
+			keyin *pscr.dateh:scr.datev, "        ", *curson:
+				*edit, *de, *pscr.dateh:scr.datev, scr.charvar:
+				*cursoff;
+			call chkdate
+			break if eos
+			beep
+		repeat
+	endif
+	if (squeeze scr.charvar <> "")
+		move "99/99/99" to scr.chartemp
+		edit scr.charvar to scr.chartemp
+		display *pscr.dateh:scr.datev, *sl, scr.chartemp;
+	else
+		display *pscr.dateh:scr.datev, "        ";
+	endif
+	setflag eos
+	return
+
+. test validity of date in mmddyyyy format
+eddate2 lroutine scr.dateflag, scr.dateh, scr.datev
+	moveadr scr.dtabvar[scr.index] to scr.charvar
+	if (scr.dateflag)
+		loop
+			keyin *pscr.dateh:scr.datev, *sl, "          ", *curson:
+				*edit, *de, *pscr.dateh:scr.datev, scr.charvar:
+				*cursoff;
+			call chkdate
+			break if eos
+			beep
+		repeat
+	endif
+	if (squeeze scr.charvar <> "")
+		move "99/99/9999" to scr.chartemp
+		edit scr.charvar to scr.chartemp
+		display *pscr.dateh:scr.datev, *sl, scr.chartemp;
+	else
+		display *pscr.dateh:scr.datev, "          ";
+	endif
+	setflag eos
+	return
+
+. test validity of date in yymmdd format and change from mmddyy to yymmdd
+eddate3 lroutine scr.dateflag, scr.dateh, scr.datev
+	moveadr scr.dtabvar[scr.index] to scr.charvar
+	if (squeeze scr.charvar <> "")
+		clear scr.char6
+		reset scr.charvar to 3
+		move scr.charvar to scr.char6
+		endset scr.char6
+		reset scr.charvar
+		setlptr scr.charvar to 2
+		append scr.charvar to scr.char6
+		setlptr scr.charvar
+	else
+		move "      " to scr.char6
+	endif
+	if (scr.dateflag)
+		loop
+			keyin *pscr.dateh:scr.datev, "        ", *curson, *edit, *de:
+				*pscr.dateh:scr.datev, *sl, scr.char6, *cursoff;
+			call chkdate
+			break if eos
+			beep
+		repeat
+		clear scr.charvar
+		reset scr.char6 to 5
+		move scr.char6 to scr.charvar
+		endset scr.charvar
+		reset scr.char6
+		setlptr scr.char6 to 4
+		append scr.char6 to scr.charvar
+		setlptr scr.char6
+	endif
+	if (squeeze scr.char6 <> "")
+		reset scr.char6
+		move "99/99/99" to scr.chartemp
+		edit scr.char6 to scr.chartemp
+		display *pscr.dateh:scr.datev, *sl, scr.chartemp;
+	else
+		display *pscr.dateh:scr.datev, *sl, scr.char6;
+	endif
+	setflag eos
+	return
+
+. test validity of date in yyyymmdd format and change from mmddyy to yyyymmdd
+eddate4 lroutine scr.dateflag, scr.dateh, scr.datev
+	moveadr scr.dtabvar[scr.index] to scr.charvar
+	if (squeeze scr.charvar <> "")
+		clear scr.char8
+		reset scr.charvar to 5
+		move scr.charvar to scr.char8
+		endset scr.char8
+		reset scr.charvar
+		setlptr scr.charvar to 4
+		append scr.charvar to scr.char8
+		setlptr scr.charvar
+	else
+		move "        " to scr.char8
+	endif
+	if (scr.dateflag)
+		loop
+			keyin *pscr.dateh:scr.datev, "          ", *curson:
+				*edit, *de, *pscr.dateh:scr.datev, *sl:
+				scr.char8, *cursoff;
+			call chkdate
+			break if eos
+			beep
+		repeat
+		clear scr.charvar
+		reset scr.char8 to 5
+		move scr.char8 to scr.charvar
+		endset scr.charvar
+		reset scr.char8
+		setlptr scr.char8 to 4
+		append scr.char8 to scr.charvar
+		setlptr scr.char8
+	endif
+	if (squeeze scr.char8 <> "")
+		reset scr.char8
+		move "99/99/9999" to scr.chartemp
+		edit scr.char8 to scr.chartemp
+		display *pscr.dateh:scr.datev, *sl, scr.chartemp;
+	else
+		display *pscr.dateh:scr.datev, *sl, scr.char8;
+	endif
+	setflag eos
+	return
+
+chkdate
+	setflag eos
+	return
+
+. YN type field
+edyn lroutine scr.dateflag, scr.dateh, scr.datev
+	moveadr scr.dtabvar[scr.index] to scr.charvar
+	if (scr.dateflag)
+		loop
+			keyin *pscr.dateh:scr.datev, " ", *curson:
+				*uc, *edit, *pscr.dateh:scr.datev, scr.charvar:
+				*cursoff, *in;
+			break if (scr.charvar = "Y" or scr.charvar = "N")
+			beep
+		repeat
+	else
+		display *pscr.dateh:scr.datev, scr.charvar;
+	endif
+	return
+.
+.
+. errors
+.
+dialogerr1
+	move "DIALOG 1" to errormsg
+	goto errorexit
+dialogerr2
+	move "DIALOG 2" to errormsg
+	goto errorexit
+mainterr1
+	move "MAINT 1" to errormsg
+	goto errorexit
+mainterr2
+	move "MAINT 2" to errormsg
+	goto errorexit
+mainterr3
+	move "MAINT 3" to errormsg
+	goto errorexit
+mainterr4
+	move "MAINT 4" to errormsg
+	goto errorexit
+mainterr5
+	move "MAINT 5" to errormsg
+	goto errorexit
+mainterr6
+	move "MAINT 6" to errormsg
+	goto errorexit
+mainterr7
+	move "MAINT 7" to errormsg
+	goto errorexit
+screenerr1
+	move "SCREEN 1" to errormsg
+	goto errorexit
+screenerr2
+	move "SCREEN 2" to errormsg
+	goto errorexit
+screenerr3
+	move "SCREEN 3" to errormsg
+	goto errorexit
+screenerr4
+	move "SCREEN 4" to errormsg
+	goto errorexit
+screenerr5
+	move "SCREEN 5" to errormsg
+	goto errorexit
+screenerr6
+	move "SCREEN 6" to errormsg
+	goto errorexit
+screenerr7
+	move "SCREEN 7" to errormsg
+	goto errorexit
+screenerr8
+	move "SCREEN 8" to errormsg
+	goto errorexit
+screenerr9
+	move "SCREEN 9" to errormsg
+	goto errorexit
+screenerr10
+	move "SCREEN 10" to errormsg
+errorexit
+	display *resetsw, *hu, "*** ERROR - ", *ll, errormsg;
+	stop

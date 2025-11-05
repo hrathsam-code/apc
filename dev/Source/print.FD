@@ -1,0 +1,86 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $PrintVAR
+$PrintVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+PrintREC      RECORD
+FileName      DIM               20       1 - 20
+SendVia       DIM               1       21 - 21       //E-Mail, F-Fax
+Contact       DIM               25      22 - 46       //Contact Name
+Destination   DIM               50      47 - 96       //Phone Number or E-mail address
+SeqNo         FORM              6       97 - 102      //Sequence Number
+JobNo         FORM              4      103 - 106      //Job Number (Multiple persons running reports)
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+PrintK1SIZE CONST            "6"                                    (Length of the Key variable)
+.PrintK2SIZE CONST            ""                                     (Length of the Key variable 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+PrintI1DEF  INIT             "103-106,97-102"                       (Index definitions for Key 1)
+.
+.
+PrintFSIZE  CONST            "140"                                  (Length of each Record)
+
+PrintKY    DIM               PrintK1SIZE                            (The Actual 'Key' variable)
+.PrintKY2   DIM               PrintK2SIZE                            (The Actual 'Key' variable)
+
+PrintPROG  INIT              "Program Name"
+PrintTITLE INIT              "Record Title"                         (Description used later for headers, etc)
+PrintHELP  INIT              "Print.HLP"              (Name of the Help file for later purposes)
+
+PrintTXTNM  INIT             "$APDATA\","PrintFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+PrintISI1NM INIT             "$APDATA\","PrintFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+PrintISI2NM INIT             "$APDATA\","PrintFL2.ISI"               .Actual ISI Filename
+
+PrintFLST  FILELIST
+           %IFDEF            PrintKY
+PrintFL    IFILE             Name=PrintISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY2
+PrintFL2   IFILE             Name=PrintISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY3
+PrintFL3   IFILE             Name=PrintISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY4
+PrintFL4   IFILE             Name=PrintISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY5
+PrintFL5   IFILE             Name=PrintISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY6
+PrintFL6   IFILE             Name=PrintISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY7
+PrintFL7   IFILE             Name=PrintISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY8
+PrintFL8   IFILE             Name=PrintISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PrintKY9
+PrintFL9   IFILE             Name=PrintISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $PrintIO
+           INCLUDE           Print.IO
+         %ENDIF

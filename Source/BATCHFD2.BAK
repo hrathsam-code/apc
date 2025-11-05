@@ -1,0 +1,129 @@
+..........................................................
+.   BATCHFD/TEXT    CASH BATCH FILE DESCRIPTION          .
+..........................................................
+.
+BATCHFL  IFILE     KEYL=11,UNCOMPRESSED,FIXED=284
+BATCHNM  INIT      "C:\DBC\BTCHBYDT.ISI"
+.
+BATCHKEY DIM       5
+.
+BSTATUS  DIM       1       ("B" BALANCED, "U" UNBALANCED, "C" CANCELED)
+BCHECKS  FORM      2
+BATCHTOT FORM      7.2
+BTCHDATE DIM       6       (YYMMDD)
+.
+ACCTARG  DIM       4
+BACCT1   DIM       4
+BACCT2   DIM       4
+BACCT3   DIM       4
+BACCT4   DIM       4
+BACCT5   DIM       4
+BACCT6   DIM       4
+BACCT7   DIM       4
+BACCT8   DIM       4
+BACCT9   DIM       4
+BACCT10  DIM       4
+BACCT11  DIM       4
+BACCT12  DIM       4
+BACCT13  DIM       4
+BACCT14  DIM       4
+BACCT15  DIM       4
+BACCT16  DIM       4
+BACCT17  DIM       4
+BACCT18  DIM       4
+BACCT19  DIM       4
+BACCT20  DIM       4
+.
+BCHKNO1  DIM       6
+BCHKNO2  DIM       6
+BCHKNO3  DIM       6
+BCHKNO4  DIM       6
+BCHKNO5  DIM       6
+BCHKNO6  DIM       6
+BCHKNO7  DIM       6
+BCHKNO8  DIM       6
+BCHKNO9  DIM       6
+BCHKNO11 DIM       6
+BCHKNO12 DIM       6
+BCHKNO13 DIM       6
+BCHKNO14 DIM       6
+BCHKNO15 DIM       6
+BCHKNO16 DIM       6
+BCHKNO17 DIM       6 
+BCHKNO18 DIM       6
+BCHKNO19 DIM       6
+BCHKNO20 DIM       6
+.
+BDTPD1   DIM       6
+BDTPD2   DIM       6
+BDTPD3   DIM       6
+BDTPD4   DIM       6
+BDTPD5   DIM       6
+BDTPD6   DIM       6
+BDTPD7   DIM       6
+BDTPD8   DIM       6
+BDTPD9   DIM       6
+BDTPD10  DIM       6
+BDTPD11  DIM       6
+BDTPD12  DIM       6
+BDTPD13  DIM       6
+BDTPD14  DIM       6
+BDTPD15  DIM       6
+BDTPD16  DIM       6
+BDTPD17  DIM       6
+BDTPD18  DIM       6
+BDTPD19  DIM       6
+BDTPD20  DIM       6
+.
+CHECKAMT FORM      6.2
+BCAMT1   FORM      6.2
+BCAMT2   FORM      6.2
+BCAMT3   FORM      6.2
+BCAMT4   FORM      6.2
+BCAMT5   FORM      6.2
+BCAMT6   FORM      6.2
+BCAMT7   FORM      6.2
+BCAMT8   FORM      6.2
+BCAMT9   FORM      6.2
+BCAMT10  FORM      6.2
+BCAMT11  FORM      6.2
+BCAMT12  FORM      6.2
+BCAMT13  FORM      6.2
+BCAMT14  FORM      6.2
+BCAMT15  FORM      6.2
+BCAMT16  FORM      6.2
+BCAMT17  FORM      6.2
+BCAMT18  FORM      6.2
+BCAMT19  FORM      6.2
+BCAMT20  FORM      6.2
+.
+BCSTAT1  DIM       1
+BCSTAT2  DIM       1
+BCSTAT3  DIM       1
+BCSTAT4  DIM       1
+BCSTAT5  DIM       1
+BCSTAT6  DIM       1
+BCSTAT7  DIM       1
+BCSTAT8  DIM       1
+BCSTAT9  DIM       1
+BCSTAT10 DIM       1
+BCSTAT11 DIM       1
+BCSTAT12 DIM       1
+BCSTAT13 DIM       1
+BCSTAT14 DIM       1
+BCSTAT15 DIM       1
+BCSTAT16 DIM       1
+BCSTAT17 DIM       1
+BCSTAT18 DIM       1
+BCSTAT19 DIM       1
+BCSTAT20 DIM       1
+.
+.....................
+.
+BTCHRDKY DIM       11     (YYMMDD&BATCH#)
+BATCH5   DIM       5
+LASTBTCH DIM       5
+THISBTCH DIM       5
+BTCHINDX FORM      2
+CURRCHK  FORM      2
+................................................................

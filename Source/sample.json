@@ -1,0 +1,21 @@
+{
+  "a": 1,
+  "d": 23,
+  "a1": [ 12, 14, 15, "Smith" ],
+  "a2": [
+    {
+      "d": 2.34,
+      "z": true
+    },
+    {
+      "d": 2.34,
+      "z": null
+    }
+  ],
+  "Person": {
+    "Name": "Bill",
+    "City": "North Bay",
+    "Age": 55,
+    "Male": true
+  }
+}

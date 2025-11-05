@@ -1,0 +1,91 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+              goto              #end
+           %IFNDEF   $CMPNYVAR
+$CMPNYVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+CMPNYREC   RECORD
+Entity     DIM               8            1 - 8
+Name       DIM               40           9 - 48
+Addr1      DIM               30          49 - 78
+Addr2      DIM               30          79 - 108
+Addr3      DIM               30         109 - 138
+City       DIM               20         139 - 158
+St         DIM               2          159 - 160
+Zip        DIM               10         161 - 170
+Country    DIM               3          171 - 173
+SelectAll  FORM              1          174 - 174
+Complete   FORM              1          175 - 175
+           RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+CMPNYK1SIZE CONST            "8"                      (Length of the Key variable)
+.
+. By Entity, Seq Major, Seq Minor
+.
+CMPNYI1DEF  INIT             "1-8"                    (Index definitions for Key 1)
+.
+CMPNYFSIZE  CONST            "150"                    (Length of each Record)
+
+CMPNYKY    DIM               CMPNYK1SIZE              (The Actual 'Key' variable)
+
+CMPNYPROG  INIT              "Company/Entity Master"
+CMPNYTITLE INIT              "Company Code"           (Description used later for headers, etc)
+CMPNYHELP  INIT              "CMPNY.HLP"              (Name of the Help file for later purposes)
+
+.CMPNYTXTNM  INIT             "$APDATA\","CMPNYFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+.CMPNYISI1NM INIT             "$APDATA\","CMPNYFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+CMPNYTXTNM  INIT             "CMPNYFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+CMPNYISI1NM INIT             "CMPNYFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+CMPNYFLST  FILELIST
+           %IFDEF            CMPNYKY
+CMPNYFL    IFILE             Name=CMPNYISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY2
+CMPNYFL2   IFILE             Name=CMPNYISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY3
+CMPNYFL3   IFILE             Name=CMPNYISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY4
+CMPNYFL4   IFILE             Name=CMPNYISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY5
+CMPNYFL5   IFILE             Name=CMPNYISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY6
+CMPNYFL6   IFILE             Name=CMPNYISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY7
+CMPNYFL7   IFILE             Name=CMPNYISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY8
+CMPNYFL8   IFILE             Name=CMPNYISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CMPNYKY9
+CMPNYFL9   IFILE             Name=CMPNYISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $CMPNYIO
+           INCLUDE           CMPNY.IO
+         %ENDIF
+#end

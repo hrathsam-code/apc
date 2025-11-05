@@ -1,0 +1,94 @@
+. 
+. =======================================================================
+. 
+. APCKNEW/TXT - THIS ROUTINE WILL READ THE ACCOUNTS PAYABLE FILE 
+.               KEY SEQUENTIALLY 7, AND ALLOW FOR ALL INVOICES 30 DAYS
+.               OLDER OR MORE TO BE PAID
+. 
+         MOVE      " ",FTFLG
+         CLEAR     TRNKEY
+         APPEND    ACCNO  TO TRNKEY
+         MOVE      ACCNO  TO SVACCN
+         APPEND    "             "  TO  TRNKEY
+         RESET     TRNKEY TO 1
+. 
+. THE FOLLOWING READ IS TO SET THE APTRANFL FOR THIS ACCOUNT,
+. AND IS AN AUTOMATIC  "RECORD NOT FOUND"
+. 
+         READ      APTRANFL,TRNKEY;;
+. 
+N6       TRAPCLR   PARITY    (NOP)
+. 
+. NOW READ THE APTRANFL KEY SEQUENTIALLY AND MATCH ON ACCOUNTS
+. 
+         INC       APTRANKS.TXT
+. 
+         GOTO      N7 IF NOT OVER
+. 
+         MATCH     " ",FTFLG
+         GOTO      N7A IF NOT EQUAL
+. 
+N6A      GOTO      VENDLOOP      (NO TRANSACTIONS EXIST - SO LOOPBACK)
+. 
+N7       MATCH     TACCN,SVACCN
+         GOTO      CHKDATEZ IF EQUAL
+         MATCH     " ",FTFLG
+         GOTO      N6A IF EQUAL
+N7A      CALL      CHKPRT
+         GOTO      N6A
+. 
+. NOW DETERMINE THE AGE OF THE INVOICE USING THE CALCDATE ROUTINE
+. 
+. SINCE WE ARE USING THE FIELDS TYEAR,TMON,TDAY FROM THE APTRANFL
+. IT IS   N O T  NECESSARY TO RESET ANY FIELDS TO CALCULATE THIS DATE
+. 
+.        (FOLLOWING CHANGE EFFECTIVE 9/14/83)
+.
+. FIRST DETERMINE IF THIS VENDOR IS AN "AUTO-PAY" VENDOR BY
+. INTERROGATING THE FUT (FUTURE) FIELD IN THE APMASTER RECORD
+. 
+CHKDATEZ CMATCH    "X" TO FUT
+         GOTO      N8 IF EQUAL
+.
+.10/22/84     ADD NEW CODE TO BYPASS CERTAIN VENDORS FROM DATE PAYMENT
+.
+         CMATCH    "B" TO FUT
+         GOTO      N6  IF EQUAL
+.
+....................................
+. 
+         CALL      CALCDATE
+. 
+         MOVE      CURRDATE TO WORKFLD
+. 
+XXBY1    SUBTRACT  TESTDATE FROM WORKFLD
+. 
+XXBY2    COMPARE   AGEDAYS TO WORKFLD
+         GOTO      N8   IF EQUAL
+         GOTO      N6 IF LESS      (LOOPBACK IF INVOICE IS UNDER 30 OLD!)
+. 
+. 
+N8       MOVE      "X",FTFLG
+         MOVE      "D",DUFLG
+         MOVE      TACCN,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    TYEAR,TRNKEY
+         APPEND    TMON,TRNKEY
+         APPEND    TDAY,TRNKEY
+         APPEND    TINVNO TO TRNKEY
+         APPEND    TCNT TO TRNKEY
+         RESET     TRNKEY
+         MOVE      TAMT,PTAMT
+. 
+         CALL      CKDISA
+         CMATCH    "X",DISFLG
+         GOTO      N9 IF NOT EQUAL
+         MOVE      TDISA,PTDISA
+         SUB       TDISA,PTAMT
+         GOTO      N10
+N9       MOVE      "0",PTDISA
+N10      CALL      STBPRT
+         MOVE      "X" TO FTFLG
+         GOTO      N6
+. 
+. =========================================================================

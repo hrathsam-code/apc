@@ -1,0 +1,17 @@
+.................................................................
+. CUSTRDKS/TEXT:W - MODULE TO READ CUSTOMER FILE KEY SEQUENTIALLY
+.................................................................
+. 
+READCUST  TRAPCLR   IO
+. 
+         READ     INFILE,SEQ;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                                    CUSTADR2:
+                                    CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+                                                              CUSTCATG:
+                                    LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+                                    COMMCODE:
+                                    CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+                                    PDOVR90,MTDCASH,MTDCRED,TELEFONE
+.
+. 
+. ..........................................

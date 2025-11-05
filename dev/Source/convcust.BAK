@@ -1,0 +1,94 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    convcust                                                       ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/09/2019 at 12:27pm                                          ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/09/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+              INCLUDE           workvar.inc
+              INCLUDE           CustMast.txt
+              include                  Sequence.FD
+
+              INCLUDE           CUST.FD
+..              INCLUDE           Comments.FD
+
+
+CUSTFILE IFILE     KEYLEN=6,UNCOMPRESSED
+CustFile2     FILE
+CSTNAME  INIT      "               "
+CSTNAMEX INIT      "ACCOUNTS.ISI"
+InputCounter  FORM              6
+InputFile           file
+
+
+              OPEN              InputFile,"c:\apc\data\accounts.txt",READ
+
+..              call              PrepCust
+              CALL              OpenCust
+              call              OpenSequence
+
+              LOOP
+                READ      InputFile,seq;CUSTKEY
+
+.                                       ,CUSTSTTS,CUSTNAME,CUSTADDR:
+.                                        CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+.                                        CUSTCATG:
+.                                        LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+.                                        COMMCODE:
+.                                        CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+.                                        PDOVR90,MTDCASH,MTDCRED
+              UNTIL             (over)
+                MOVE              CustKey,Cust.CustomerID
+                MOVE              Cust.CustomerID,CUSTKY
+...HR                CALL              TSTCUST
+                CALL              RDCUST
+                IF                (Returnfl = 1)
+                  ADD               "1",InputCounter
+                  DISPLAY           *P10:10,"Input Counter : ",InputCounter
+                  MOVE              CUSTSTTS,Cust.CUSTSTTS
+                  MOVE              CUSTNAME,Cust.Name
+                  MOVE              CUSTNAME,Cust.LookupName
+                  MOVE              CUSTADDR,Cust.Addr1
+                  MOVE              CUSTADR2,Cust.Addr2
+                  MOVE              CUSTCITY,Cust.City
+                  MOVE              CUSTSTAT,Cust.St
+                  MOVE              CUSTZIP,Cust.Zip
+                  MOVE              CUSTCRED,Cust.CreditLimit
+                  MOVE              CUSTCATG,Cust.CUSTCATG
+                  MOVE              COMMCODE,Cust.CommCode
+                  move                 "USA",Cust.Country
+                  MOVE              "   ",Cust.Email
+.                  squeeze           TELEFONE,TELEFONE,"("
+.                  squeeze           TELEFONE,TELEFONE,")"
+.                  squeeze           TELEFONE,TELEFONE,"-"
+.                  MOVE              TELEFONE,Cust.Telephone
+                  MOVE              " ",Cust.Fax
+                  MOVE              "C",Cust.Class
+                  CALL              WRTCUST
+                ELSE
+.                  squeeze           TELEFONE,TELEFONE,"("
+.                  squeeze           TELEFONE,TELEFONE,")"
+.                  squeeze           TELEFONE,TELEFONE,"-"
+.                  MOVE              TELEFONE,Cust.Telephone
+..                   MOVE              "C",Cust.Class
+..                   CALL              UPDCust
+                ENDIF
+              REPEAT
+              STOP
+
+

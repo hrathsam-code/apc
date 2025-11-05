@@ -1,0 +1,84 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $CommentsVAR
+$CommentsVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+CommentsREC   RECORD
+Entity        DIM               8          1 - 8
+CustomerID    DIM               6          9 - 14
+EntryDate     DIM               8         15 - 22
+SalesRepID    DIM               4         23 - 26
+Comments      DIM               256       27 - 282
+Code          DIM               4        283 - 286
+SeqNo         FORM              7        287 - 293
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+CommentsK1SIZE CONST            "21"                                 (Length of the Key variable)
+.
+. By Entity, CustomerID, Sequence Number
+.
+CommentsI1DEF  INIT             "1-14,287-293"                      (Index definitions for Key 1)
+.
+.
+CommentsFSIZE  CONST            "300"                                   (Length of each Record)
+
+CommentsKY    DIM               CommentsK1SIZE                            (The Actual 'Key' variable)
+
+CommentsPROG  INIT              "Comments Inquiry"
+CommentsTITLE INIT              "Comments Record"                         (Description used later for headers, etc)
+CommentsHELP  INIT              "Comments.HLP"              (Name of the Help file for later purposes)
+
+CommentsTXTNM  INIT             "$APDATA\","CMNTSFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+CommentsISI1NM INIT             "$APDATA\","CMNTSFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+CommentsFLST  FILELIST
+           %IFDEF            CommentsKY
+CommentsFL    IFILE             Name=CommentsISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY2
+CommentsFL2   IFILE             Name=CommentsISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY3
+CommentsFL3   IFILE             Name=CommentsISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY4
+CommentsFL4   IFILE             Name=CommentsISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY5
+CommentsFL5   IFILE             Name=CommentsISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY6
+CommentsFL6   IFILE             Name=CommentsISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY7
+CommentsFL7   IFILE             Name=CommentsISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY8
+CommentsFL8   IFILE             Name=CommentsISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CommentsKY9
+CommentsFL9   IFILE             Name=CommentsISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $CommentsIO
+           INCLUDE           Comments.IO
+         %ENDIF

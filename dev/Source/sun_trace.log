@@ -1,0 +1,33 @@
+*******************************************************************************
+Runtime : 'Version 9.6Cb 11 Sep 2013'
+Date : 9-12-13  Time: 08:24:53
+08:24:53  FhHttpConnect: Connected Ok!
+
+08:24:53  Http Send Start: -->
+GET /index.php HTTP/1.0
+
+
+08:24:53  Http Send End: <--
+
+08:24:53  Http Recv Data Start: -->
+
+HTTP/1.1 200 OK
+Date: Thu, 12 Sep 2013 13:24:57 GMT
+Server: Apache
+X-Powered-By: PleskLin
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+<!-- START OF header.tmpl TEMPLATE -->
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> -->
+<html dir="ltr">
+<head>
+<link rel="SHORTCUT ICON" href="http://www.sunbelt-plb.com/favicon.ico" />
+
+<META Name="description" Content="Home page for Sunbelt Computer Systems, Inc., Tyler, Tx.  Sunbelt has been providing quality PL/B language solutions since 1980.  We currently offer Windows and UNIX PL/B (Databus) compilers, runtimes and utilities.  Our web pages offer product descriptions, free demonstrations, sales information and technical support." />
+<META Name="keywords" Content="PL/B, Visual PL/B, Databus, Datashare, programming language, 3GL, 4GL, language, programming language for business, UNIX, Windows, MS-DOS, network, ISAM, Associative Index Method, AIM, AAM, ODBC, Datapo
+08:24:53  Http Recv Data End: <--
+
+08:24:53  Http Disconnect:
+08:24:53  Http Completed: Ok!
+

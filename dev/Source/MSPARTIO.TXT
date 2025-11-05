@@ -1,0 +1,141 @@
+.................................................................
+.     MSPARTIO/TXT - I/O ROUTINES FOR  MILSPEC PART FILE        .
+.                                                               .
+. USE OF THIS ROUTINE REQUIRES THE INCLUSION OF MSPARTSF/TXT    .
+.................................................................
+. 
+CLRTRAPS TRAPCLR   IO
+         TRAPCLR   PARITY
+         TRAPCLR   RANGE
+         TRAPCLR   FORMAT
+         RETURN
+.................................................................
+. 
+MSPTOPEN TRAP      NOMSPART IF IO
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL.ISI" TO IOERFILE
+         MOVE      "OPEN"         TO IOTYPE
+         OPEN      MSPARTFL,MSPARTNM
+         MOVE      "H" TO IOSW
+         RETURN
+. 
+.................................................................
+NOMSPART BEEP      
+         DISPLAY   *P01:23,*EF,*HON,"MILSPEC PART NUMBER FILE NOT ON-LINE":
+                   " - REINDEXING NECESSARY!",*HOFF,*W4
+         GOTO      NOMSPART
+.................................................................
+. 
+MSPTREAD TRAP      MSPTNOTF IF IO
+         TRAP      STDFMTER IF FORMAT 
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL.ISI" TO IOERFILE
+         MOVE      "READ"         TO IOTYPE
+         READ      MSPARTFL,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+                                     MSXRFPT1,MSXRFPT2
+. 
+         GOTO      MSPTRTRN IF OVER
+         MOVE      "H" TO IOSW
+         RETURN
+.................................................................
+.
+MSPTNOTF BEEP
+         DISPLAY   *P01:23,*EL,*HON,"INVALID PART NUMBER - ",MSPARTKY:
+                   *HOFF,*W2
+         RETURN
+.................................................................
+. 
+MSXRFRD  TRAP      MSPTRTRN IF IO
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         MOVE      "MSPTXREF.ISI" TO IOERFILE
+         MOVE      "READ"         TO IOTYPE
+         READ      MSPTXREF,MSXRFKEY;MSPTXKY1,MSPTXKY2
+. 
+         GOTO      MSPTRTRN IF OVER
+         MOVE      "H" TO IOSW
+         RETURN
+.................................................................
+. 
+MSXRFRKS TRAP      STDIOERR IF IO
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         MOVE      "MSPTXREF.ISI" TO IOERFILE
+         MOVE      "READKS"       TO IOTYPE
+         READKS    MSPTXREF;MSPTXKY1,MSPTXKY2
+. 
+         GOTO      MSPTRTRN IF OVER
+. 
+         MOVE      "H" TO IOSW
+. 
+. FALLTHRU MEANS   N O T  AT END-OF-FILE
+. 
+         RETURN
+..................................................................
+. 
+MSXRFWRT TRAP      XRFEXIST IF IO
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         WRITE     MSPTXREF,MSXRFKEY;MSPTXKY1,MSPTXKY2
+         MOVE      "H" TO IOSW
+         RETURN
+. 
+XRFEXIST BEEP
+         DISPLAY   *P01:23,*EL,*HON,"CROSS-REFERENCE NUMBER ALREADY EXISTS!":
+                   *HOFF,*W2,*P1:23,*EL
+         RETURN
+.................................................................
+. 
+MSPTRDKS TRAP      STDIOERR IF IO
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL.ISI" TO IOERFILE
+         MOVE      "READKS"       TO IOTYPE
+. 
+         READKS    MSPARTFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+                            MSXRFPT1,MSXRFPT2
+. 
+         GOTO      MSPTRTRN IF OVER
+. 
+. NOTE FALLTHRU MEANS THAT WE ARE  N O T   AT END-OF-FILE
+. 
+         MOVE      "H" TO IOSW
+MSPTRTRN RETURN
+..................................................................
+. 
+MSPTWRIT TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDFMTER IF FORMAT
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL.ISI" TO IOERFILE
+         MOVE      "WRITE"        TO IOTYPE
+         WRITE     MSPARTFL,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+                                     MSXRFPT1,MSXRFPT2
+         MOVE      "H" TO IOSW
+         RETURN
+..................................................................
+. 
+MSPTUPDT TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDFMTER IF FORMAT
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL.ISI" TO IOERFILE
+         MOVE      "UPDATE"       TO IOTYPE
+         UPDATE    MSPARTFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+                            MSXRFPT1,MSXRFPT2
+         MOVE      "H" TO IOSW
+         RETURN
+. 
+..........................................................................

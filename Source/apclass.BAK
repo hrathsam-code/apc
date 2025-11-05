@@ -1,0 +1,92 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APCLASS.FD                                                     ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/16/2005 AT 12:40AM                                          ;
+;                                                                             ;
+;  PURPOSE:    Harry Rathsam                                                  ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   07/21/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $APClassVAR
+$APClassVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APClass       RECORD
+Code          DIM               4            1 - 4
+Desc          DIM               15           5 - 19
+Active        FORM              1           20 - 20
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APClassK1SIZE CONST            "4"                                  (Length of the Key variable)
+.
+. By APClass Code
+.
+APClassI1DEF  INIT             "1-4"                                  (Index definitions for Key 1)
+.
+APClassFSIZE  CONST            "20"                                 (Length of each Record)
+
+APClassKY    DIM               APClassK1SIZE                            (The Actual 'Key' variable)
+
+APClassPROG  INIT              "APClass Master"
+APClassTITLE INIT              "APClass Code"                 (Description used later for headers, etc)
+APClassHELP  INIT              "APClass.HLP"              (Name of the Help file for later purposes)
+
+APClassTXTNM  INIT             "$APDATA\","APClass.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+APClassISI1NM INIT             "$APDATA\","APClass.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+APClassISI2NM INIT             "$APDATA\","APClass2.ISI"               .Actual ISI Filename
+
+APClassFLST  FILELIST
+           %IFDEF            APClassKY
+APClassFL    IFILE             Name=APClassISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY2
+APClassFL2   IFILE             Name=APClassISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY3
+APClassFL3   IFILE             Name=APClassISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY4
+APClassFL4   IFILE             Name=APClassISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY5
+APClassFL5   IFILE             Name=APClassISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY6
+APClassFL6   IFILE             Name=APClassISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY7
+APClassFL7   IFILE             Name=APClassISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY8
+APClassFL8   IFILE             Name=APClassISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APClassKY9
+APClassFL9   IFILE             Name=APClassISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $APClassIO
+           INCLUDE           APClass.IO
+         %ENDIF

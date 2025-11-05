@@ -1,0 +1,141 @@
+
+
+
+PAGE    1      SMMENU.PLS IDE                                                                                 03-22-04 14:48:10
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "SMMENU.PLS","F:\PLC\SMMENU.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    8.    INCLUDE  A: ncommon.txt
+
+   Output: f:\plc\smmenu.plc                                                                                                                                                                                                                                         
+       274 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:48:10 14:48:11
+  00001AA8 DATA;  00000420  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      SMMENU.PLS IDE                                                                                 03-22-04 14:48:11
+                                         
+
+"&Continue                                 D     156.  *
+"&Quit                                     D     157.  *
+"HELVETICA                                 D     129.  *   142.     145.     150.     151.     154.  
+"HELVETICA(10,BOLD)                        D     149.  *
+"MASTER                                    D     233.  *
+"User Menus File NOT FOUND!                D      81.  *
+0                                          F      99.  *   116.     213.     220.  
+1                                          F      98.  *   178.     188.     200.  
+16                                         F     111.  *   192.     216.     223.  
+2                                          F     113.  *   167.     183.  
+ACCTNUMB                                   D      14. A*
+AINDEX                                     F      14.  *    98.     107.     108.     113.     121.     167.     183.  
+APPCODE                                    D      31. A*    93.      96.  
+APPSECUR                                   F      32. A*
+BADCHAIN                                   X     210.  *   202.  
+BLD1MENU                                   X     122.  *   121.  
+BLD2MENU                                   X     132.  *   121.  
+BLDIT                                      X     120.  *   117.  
+BREACH                                     X     236.  *
+BTM                                        F      17.  *   122.     127.     132.     143.  
+CLR1                                       X     213.  *   194.  
+CLR1LOOP                                   X     214.  *   218.  
+CLR2                                       X     220.  *   184.  
+CLR2LOOP                                   X     221.  *   225.  
+COMPSYS                                    D      39.  *    96.     105.  
+COMPUSER                                   D      38.  *    95.     103.  
+CONTBUTTON                                 O 1    62.  *   156.     164.  
+DATE                                       O16    57.  *   151.     163.  
+DATE6                                      D      10. A*
+DIM3                                       D      19.  *    97.  
+DISPLAY                                    X     147.  *   130.  
+DUMMY                                      X     227.  *
+ENDLPUM                                    X     115.  *   102.     104.     106.  
+ENVS                                       D      11. A*
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+FIRSTIME                                   D      17. A*
+FOUR                                       F      16.  *   228.  
+FROMPGM                                    D      16. A*   204.  
+GETINDEX                                   X     199.  *   164.     206.     234.  
+GRP1DATA                                   D      66.  *    91.     107.     108.     124.     125.     126.     128.  
+                                                     *   134.     135.     136.     137.     138.     139.     141.     144.  
+INDEX                                      F      10.  *   180.     182.     190.     193.  
+INDEXC                                     F      11.  *   181.     191.     192.     200.     205.  
+INDEXX                                     F      12.  *   213.     214.     215.     216.     220.     221.     222.  
+                                                     *   223.  
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+LIBMENU1                                   X     233.  *   165.  
+
+
+
+PAGE    3      SMMENU.PLS IDE                                                                                 03-22-04 14:48:11
+                                         
+
+LINDEX                                     F      13.  *    99.     109.     110.     111.     116.     122.     132.  
+LOOPBACK                                   X     114.  *   112.  
+MENU1                                      O13    60.  *   127.     140.     166.     182.     215.  
+MENU2                                      O13    61.  *   143.     169.     193.     222.  
+NOUSERM                                    X      81.  *    76.  
+NYA                                        O16    59.  *   154.     227.     229.  
+NYATEXT                                    D      54.  *   154.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PROG                                       D      42.  *   110.     205.  
+PROGNAME                                   O16    56.  *   150.     161.  
+PROGNTXT                                   D      55.  *   150.     204.  
+PROGRAM                                    D      41.  *
+QUITBUTTON                                 O 1    63.  *   157.     165.  
+RESULT                                     F      64.  *    81.     118.     166.     169.     178.     180.     181.  
+                                                     *   188.     190.     191.     237.  
+RESULTB                                    F      65.  *   164.     165.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SCRTITL                                    D      52.  *   147.  
+SECURITY                                   F       9. A*
+SEMCOL                                     D      18.  *   108.  
+SETINDX1                                   X     177.  *   166.  
+SETINDX2                                   X     187.  *   169.  
+SETONE                                     F      43.  *   182.     193.  
+SETZERO                                    F      44.  *   215.     222.  
+SKIP2                                      X     170.  *   168.  
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TIME                                       D      15.  *   203.  
+TITLE                                      O16    58.  *   149.     162.  
+TITLTXT                                    D      53.  *   147.     149.  
+TODAY                                      D       8. A*   151.  
+UMNPRGDS                                   D      30.  *   101.     107.  
+UMNPRGNM                                   D      29.  *   101.     110.  
+UMNSELNO                                   D      28.  *   101.  
+UMNUCD                                     D      27.  *
+UMNUCOD                                    D      36.  *   101.     105.  
+UMNUDSC                                    D      33.  *
+UMNUID                                     D      26.  *   101.     103.  
+UMNUPGM                                    D      34.  *
+UMNUREC                                    D      32.  *
+UMNUSEL                                    D      35.  *
+USERCODE                                   D      29. A*    93.      95.  
+USERLOCN                                   D      25. A*
+USERMKEY                                   D      24.  *    92.      93.      94.      97.  
+USERMNUN                                   D      23.  *    77.  
+USERMNUS                                   i      22.  *    77.      97.     101.  
+USERMOPN                                   X      76.  *
+USERNAME                                   D      30. A*
+USRMOPND                                   X      84.  *    79.  
+
+
+
+PAGE    4      SMMENU.PLS IDE                                                                                 03-22-04 14:48:11
+                                         
+
+VARBTMS                                    D      46.  *   122.     132.  
+VENDNUMB                                   D      15. A*
+

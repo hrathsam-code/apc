@@ -1,0 +1,152 @@
+
+
+
+PAGE    1      ACCTSTAT.DBS IDE                                                                               03-22-04 20:07:03
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "ACCTSTAT.DBS","F:\PLC\ACCTSTAT.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    8.    INCLUDE  A: common.pls
+   22.    INCLUDE  B: custmast.pls
+   51.    INCLUDE  C: callerr1.pls
+   53.    INCLUDE  D: callerr2.pls
+   70.                                         GOTO      READ IF OVER
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+   80.    INCLUDE  E: custrdks.pls
+
+   Output: f:\plc\acctstat.plc                                                                                                                                                                                                                                       
+       358 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 20:07:03 20:07:04
+  00001340 DATA;  000002F8  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      ACCTSTAT.DBS IDE                                                                               03-22-04 20:07:04
+                                         
+
+"                                          D      30. D*    65.      87.  
+" 0                                        D     104.  *   120.     121.  
+"ACCOUNT LIST BY STATE                     D      52.  *
+"ACCTMNU1                                  D      75.  *   201.  
+"APP                                       D      60.  *
+0                                          F     140.  *   141.     157.     179.  
+1                                          F     189.  *
+2                                          F     192.  *
+48                                         F     172.  *
+50                                         F     100.  *
+6                                          F     181.  *
+ACCTNUMB                                   D      14. A*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+BRKSTAT                                    X     172.  *    94.     188.  
+CHKSTAT                                    X      93.  *    85.  
+COMMCODE                                   D      26. B*    11. E
+COMP                                       D      28.  *    60.  
+COMPVAR                                    D      31.  *    61.     156.  
+CONT1                                      X      62.  *
+CURNTDUE                                   F      31. B*    12. E
+CUSTADDR                                   D      11. B*     7. E   127.  
+CUSTADR2                                   D      12. B*
+CUSTCATG                                   D      17. B*     9. E
+CUSTCITY                                   D      13. B*     8. E   128.  
+CUSTCRED                                   F      16. B*     8. E
+CUSTFILE                                   i      11.  *    59.      68.       7. E   199.  
+CUSTKEY                                    D       8. B*     7. E   125.  
+CUSTNAME                                   D      10. B*     7. E   126.  
+CUSTSTAT                                   D      14. B*     8. E    86.      93.     129.     136.     180.  
+CUSTSTTS                                   D       9. B*     7. E
+CUSTZIP                                    F      15. B*     8. E   103.  
+D                                          O 5    12. C*    13. D    16. D    31. D
+DASHLINE                                   D      37.  *   174.     177.  
+DATE6                                      D      10. A*
+DDATA                                      D      13. C*    13. D
+DETCALC                                    X      96.  *
+DETOUT                                     X     100.  *
+DUMMFLD                                    D      24.  *    68.  
+ENVS                                       D      11. A*
+EOJ                                        X     197.  *    82.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+FIRST                                      D      38.  *    84.      87.  
+FIRSTIME                                   D      17. A*
+FROMPGM                                    D      16. A*    28. D
+HEADER                                     X     150.  *    63.     101.     173.  
+INDXIT                                     X      26. D*    22. D
+INREC1                                     D      20.  *
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+
+
+
+PAGE    3      ACCTSTAT.DBS IDE                                                                               03-22-04 20:07:04
+                                         
+
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+LINECT                                     F      15.  *   100.     134.     157.     172.     181.     192.  
+LR                                         F      18.  *   189.  
+LRTOT                                      F      19.  *    96.     191.  
+LSTPAYDT                                   D      22. B*    10. E   113.     114.     115.     116.     117.     118.  
+LSTPAYPR                                   F      24. B*    10. E
+LSTSALDT                                   D      21. B*    10. E   106.     107.     108.     109.     110.     111.  
+LSTSALPR                                   F      23. B*    10. E
+MAINLINE                                   X      30. D*    22. D
+MOVREP                                     X      61.  *
+MTDCASH                                    F      39. B*    13. E
+MTDCRED                                    F      40. B*    13. E
+NAME                                       D      10.  *    59.  
+NOFILE                                     X      72.  *    58.  
+NULL                                       X      24. D*    22. D
+NWFLD1                                     D      27.  *
+PAGE                                       F      16.  *   150.     154.  
+PCUSTZIP                                   D      25.  *   103.     104.     130.  
+PD01TO30                                   F      32. B*    12. E
+PD31TO60                                   F      33. B*    12. E
+PD61TO90                                   F      34. B*    12. E
+PDD                                        D      42.  *   115.  
+PDOVR90                                    F      35. B*    13. E
+PMM                                        D      41.  *   113.     121.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PYY                                        D      43.  *   117.  
+READ                                       X      80.  *    67.      69.      70.     145.  
+READCUST                                   X       5. E*
+READKY                                     D      39.  *    68.  
+REPLY                                      D      12.  *    30. D    65.  
+REPTITL                                    D      30.  *    61.  
+RESULT                                     F      11. C*    16. D    22. D
+RID01                                      F      17.  *   141.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVESTAT                                   D      34.  *    86.      93.     136.     175.     180.  
+SDD                                        D      45.  *   108.  
+SECURITY                                   F       9. A*
+SMM                                        D      44.  *   106.     120.  
+STATACCT                                   F      35.  *   135.     176.     179.  
+SW1P                                       F      14.  *   140.  
+SWMR                                       F      13.  *
+SYY                                        D      46.  *   110.  
+TESTIT                                     X      22. D*    16. D
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TIME                                       D      33.  *    55.  
+TITLTEXT                                   D       9. C*    52.      15. D
+TODAY                                      D       8. A*   155.  
+
+
+
+PAGE    4      ACCTSTAT.DBS IDE                                                                               03-22-04 20:07:04
+                                         
+
+TOTOUT                                     X     187.  *   197.  
+TURNOFF                                    X     140.  *
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+

@@ -1,0 +1,280 @@
+. 
+. MODTRAN/TXT - WRITTEN 7/23/83 TO EXPAND A/P TRANSACTION RECORD TO INCLUDE
+.               THE PRIMARY DISTRIBUTION CODE
+. 
+         INCLUDE   COMMON
+. 
+APPAIDFL FILE
+APPAIDNW FILE
+. 
+         INCLUDE   APTRANFD
+. 
+REPLY    DIM       1
+RECSIN   FORM      6
+RECSOUT  FORM      6
+SEQ      FORM      "-1"
+. 
+         DISPLAY   *ES,*P01:01,*HON,"EXPAND THE ACCOUNTS PAYABLE TRANS  FILE"
+. 
+         MOVE      " " TO REPLY
+TESTIT   KEYIN     *P1:4,"TEST 200 RECORDS ? (Y/N) ",REPLY
+. 
+         CMATCH    "Y",REPLY
+         GOTO      XXX IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      XXX IF EQUAL
+         BEEP
+         GOTO      TESTIT
+. 
+. 
+XXX      OPEN      APPAIDFL,"APTRANFL/TXT:D2"
+         PREP      APPAIDNW,"APTRANFL/MOD:D3"
+. 
+         READ      APPAIDFL,SEQ;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT,TDESC:
+                                TAMT,TLDDAY,TDISA
+         MOVE      "0.00" TO TAMT
+         MOVE      "0.00" TO TDISA
+         MOVE      "00000000" TO TLDDAY
+. 
+. 
+         MOVE      "000000" TO TDCODE
+. 
+         WRITE     APPAIDNW,SEQ;*-,TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT,TDESC:
+                                TAMT,TLDDAY,TDISA,TDCODE
+. 
+         ADD       "1" TO RECSIN
+. 
+RDLOOP   READ      APPAIDFL,SEQ;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT,TDESC:
+                                TAMT,TLDDAY,TDISA
+. 
+         GOTO      EOJ IF OVER
+. 
+         ADD       "1" TO RECSIN
+. 
+         CMATCH    "Y",REPLY    (IS IT A TEST?)
+         GOTO      YYY IF NOT EQUAL
+         COMPARE   "201" TO RECSIN
+         GOTO      EOJ IF EQUAL
+. 
+. 
+YYY      MATCH     "      " TO TDESC
+         GOTO      DESCOK   IF NOT EQUAL
+. 
+. FALLTHRU MEANS NO DESCRIPTION ENTERED THEREFORE CALL IT MATERIAL 
+. 
+         MOVE      "MATERIAL PURCHASE" TO TDESC
+         MOVE      "4101  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+. 
+DESCOK   MATCH     "MATERIAL" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+         MATCH     "PLATING" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+         MATCH     "PUR" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+         MATCH     "DEBIT" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+         MATCH     "CREDIT" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+         MATCH     "DEDIT" TO TDESC
+         GOTO      MATERIAL IF EQUAL
+. 
+         MATCH     "AUTO" TO TDESC
+         GOTO      AUTO   IF EQUAL
+         MATCH     "CAR"  TO TDESC
+         GOTO      AUTO   IF EQUAL
+.
+. 
+         MATCH     "RENT" TO TDESC
+         GOTO      RENT   IF EQUAL
+. 
+         MATCH     "PHONE" TO TDESC
+         GOTO      PHONE  IF EQUAL
+         MATCH     "TELEPHONE" TO TDESC
+         GOTO      PHONE  IF EQUAL
+. 
+         MATCH     "ENTERTAIN" TO TDESC
+         GOTO      ENTERTAN IF EQUAL
+. 
+         MATCH     "PAYROLL" TO TDESC
+         GOTO      PAYROLL IF EQUAL
+. 
+         MATCH     "ALARM" TO TDESC
+         GOTO      ALARM IF EQUAL
+. 
+         MATCH     "STATION" TO TDESC   (STATIONARY)
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "PAPER PROD" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "INDEX" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "COMPUTOR" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "LEDGER" TO TDESC
+         GOTO      OFFSUPPS  IF EQUAL
+         MATCH     "INVOICE" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "WRITING PAD" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "PRINTED LINE" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+         MATCH     "COMPUTER RIBBON" TO TDESC
+         GOTO      OFFSUPPS IF EQUAL
+. 
+         MATCH     "LIBRARY" TO TDESC
+         GOTO      SUBSCRPT IF EQUAL
+         MATCH     "SUBSCRIPT" TO TDESC
+         GOTO      SUBSCRPT IF EQUAL
+. 
+         MATCH     "COMM" TO TDESC
+         GOTO      COMM IF EQUAL
+. 
+         MATCH     "ELECTRI" TO TDESC
+         GOTO      REPAIRS IF EQUAL
+. 
+         MATCH     "GARBAGE" TO TDESC
+         GOTO      GARBAGE IF EQUAL
+. 
+         MATCH     "FREIGHT OUT" TO TDESC
+         GOTO      FRTOUT IF EQUAL
+         MATCH     "TRUCKING OUT" TO TDESC
+         GOTO      FRTOUT IF EQUAL
+. 
+         MATCH     "FREIGHT IN" TO TDESC
+         GOTO      FRTIN IF EQUAL
+         MATCH     "TRUCKING IN" TO TDESC
+         GOTO      FRTIN IF EQUAL
+. 
+         MATCH     "FEB" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "RULER" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "BIRD" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "SALES ADV" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "CUPS" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "KEY" TO TDESC
+         GOTO      ADVERT IF EQUAL
+         MATCH     "CATALOGS" TO TDESC
+         GOTO      ADVERT IF EQUAL
+. 
+         MATCH     "MEDICAL" TO TDESC
+         GOTO      MEDICAL IF EQUAL
+         MATCH     "HOSPITAL" TO TDESC
+         GOTO      MEDICAL IF EQUAL
+. 
+         MATCH     "ADVERT" TO TDESC
+         GOTO      ADVERT IF EQUAL
+. 
+         MATCH     "CONSULT" TO TDESC
+         GOTO      PROFESS IF EQUAL
+         MATCH     "LEGAL" TO TDESC
+         GOTO      PROFESS   IF EQUAL
+. 
+         MATCH     "SERVICE" TO TDESC
+         GOTO      REPAIRS IF EQUAL
+. 
+         MATCH     "SHIPPING" TO TDESC
+         GOTO      SHIPPING IF EQUAL
+         MATCH     "WRAPPING" TO TDESC
+         GOTO      SHIPPING IF EQUAL
+         MATCH     "PLASTIC SHIPPING" TO TDESC
+         GOTO      SHIPPING IF EQUAL
+         MATCH     "STOCK" TO TDESC
+         GOTO      SHIPPING IF EQUAL
+         MATCH     "SUPPLIES" TO TDESC
+         GOTO      SHIPPING IF EQUAL
+. 
+         MATCH     "CLEANING" TO TDESC
+         GOTO      CLEANING IF EQUAL
+. 
+         MATCH     "POSTAGE" TO TDESC
+         GOTO      POSTAGE IF EQUAL
+         MATCH     "STAMP" TO TDESC
+         GOTO      POSTAGE IF EQUAL
+. 
+. 
+. FALLTHRU INITIALIZES TO MISCELLANEOUS CATEGORY
+. 
+         MOVE      "8121  "  TO  TDCODE
+         GOTO      ENDLOOP
+. 
+. 
+MATERIAL MOVE      "4101  " TO TDCODE
+         MATCH     "PUR" TO TDESC
+         GOTO      ENDLOOP IF NOT EQUAL
+         MOVE      "MATERIAL PURCHASE" TO TDESC
+         GOTO      ENDLOOP
+. 
+AUTO     MOVE      "6105  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+PHONE    MOVE      "8107  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+ENTERTAN MOVE      "6103  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+RENT     MOVE      "8101  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+PAYROLL  MOVE      "5103  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+ALARM    MOVE      "8104  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+OFFSUPPS MOVE      "8109  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+SUBSCRPT MOVE      "6107  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+COMM     MOVE      "6101  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+REPAIRS  MOVE      "8103  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+GARBAGE  MOVE      "8105  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+FRTOUT   MOVE      "7102  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+FRTIN    MOVE      "4102  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+ADVERT   MOVE      "6106  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+MEDICAL  MOVE      "8113  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+PROFESS  MOVE      "8108  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+SHIPPING MOVE      "7101  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+CLEANING MOVE      "8106  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+POSTAGE  MOVE      "8110  " TO TDCODE
+         GOTO      ENDLOOP
+. 
+ENDLOOP  WRITE     APPAIDNW,SEQ;*-,TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT,TDESC:
+                                TAMT,TLDDAY,TDISA,TDCODE
+. 
+         ADD       "1" TO RECSOUT
+         GOTO      RDLOOP
+. 
+EOJ      WEOF      APPAIDNW,SEQ
+         CLOSE     APPAIDNW
+         DISPLAY   *P1:10,*HON,"RECORDS READ = ",RECSIN:
+                           "   RECORDS WRITTEN = ",RECSOUT
+         KEYIN     REPLY
+         STOP

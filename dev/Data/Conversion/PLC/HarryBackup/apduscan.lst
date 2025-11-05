@@ -1,0 +1,229 @@
+
+
+
+PAGE    1      APDUSCAN.PLS IDE                                                                               03-22-04 14:50:11
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APDUSCAN.PLS","F:\PLC\APDUSCAN.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    5.    INCLUDE  A: common.pls
+    7.    INCLUDE  B: aptranfd.pls
+    9.    INCLUDE  C: apmastfd.pls
+   42.    INCLUDE  D: apcalndr.pls
+   46.    INCLUDE  E: callerr1.inc
+   50.    INCLUDE  F: callerr2.inc
+   98.    INCLUDE  G: aptranrd.pls
+  107.    INCLUDE  H: aptranks.pls
+  118.    INCLUDE  I: apmastrd.pls
+  181.    INCLUDE  J: getdate.txt
+  183.    INCLUDE  K: apdates.txt
+
+   Output: f:\plc\apduscan.plc                                                                                                                                                                                                                                       
+       543 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:50:11 14:50:11
+  0000166C DATA;  0000053E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APDUSCAN.PLS IDE                                                                               03-22-04 14:50:11
+                                         
+
+"                                          D      30. F*    54.     162.      24. J    25. J    40. J    67. J
+" 0                                        D      79.  *
+"/                                         D      81.  *    83.  
+"0000000000000000000                       D      96.  *
+#                                          D      28. J*
+"APMASTER.ISI                              D      69.  *
+"APTRANFL.ISI                              D      68.  *
+"E                                         D      33. J*    36. J    39. J    50. J    53. J    56. J    59. J
+"PAYABLES AMOUNT DUE ON DATE               D      48.  *
+"PAYMENT DATE                              D      71.  *
+"X                                         D      66.  *    74. J
+0                                          F     174.  *   175.      13. K    14. K    15. K    16. K    30. K
+1                                          F      48. J*    54. J
+13                                         F      51. J*
+1900                                       F      54. K*
+2000                                       F      50. K*
+30                                         F     130.  *
+32                                         F      57. J*
+365                                        F      24. K*
+9                                          F     143.  *    25. K    36. K    43. K
+99                                         F      19. K*
+A2                                         X      66.  *
+ACCKEY                                     D       9. C*   116.       2. I
+ACCNO                                      D      13. C*     2. I
+ACCST                                      D      21. C*     3. I
+ACCTNUMB                                   D      14. A*
+ADD1                                       D      15. C*     2. I
+ADD2                                       D      16. C*     2. I
+ADDIT                                      X     141.  *   121.     135.     136.  
+APCONTRL                                   F      43. C*
+APMASTER                                   i      12.  *    69.       2. I   177.  
+APOVRFLG                                   D      10. C*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+APR                                        F       8. D*    32. K
+APTRANFL                                   i      11.  *    68.       2. G     2. H   178.  
+ASTER20                                    D      44.  *   155.     158.     160.  
+AUG                                        F      12. D*    33. K
+BAILOUT                                    X      61.  *    58.  
+BBPASS                                     X      41. K*    37. K
+BKUPFLG                                    D      29.  *    66.      72. J
+BYPASSED                                   F      22.  *   138.     159.     175.  
+BYPRT                                      X     148.  *   144.  
+CALCDATE                                   X      12. K*    87.     126.  
+CALINDX                                    F      18. D*    14. K    29. K    32. K
+CALSET                                     F      19. D*    13. K    30. K    32. K    35. K
+CITY                                       D      17. C*     2. I
+CONT                                       D      36. C*     5. I
+CRDRAT                                     D      22. C*     3. I
+CURR                                       F      26. C*     4. I
+CURRDATE                                   F      21. D*    89.     134.  
+D                                          O 5    12. E*    13. F    16. F    31. F
+DATE6                                      D      10. A*
+
+
+
+PAGE    3      APDUSCAN.PLS IDE                                                                               03-22-04 14:50:11
+                                         
+
+DATEDESC                                   D      35.  *    71.      26. J
+DATEFLG                                    D      27. D*
+DATERROR                                   D      37.  *    24. J    33. J    36. J    39. J    40. J    50. J    53. J
+                                                     *    56. J    59. J    67. J
+DATFLG                                     D      36.  *    25. J    74. J
+DAY                                        D      19.  *
+DAYN                                       F      22. D*    41. K    42. K
+DD                                         D      27.  *    76.      82.      30. J    34. J    46. J
+DDATA                                      D      13. E*    13. F
+DEC                                        F      16. D*    33. K
+DIVNO                                      D      35. C*     5. I
+DTRTRN                                     X      47. K*    44. K
+DUEDATE                                    D      39.  *    78.      80.      81.      82.      83.      84.      85.  
+                                                     *   156.  
+ENVS                                       D      11. A*
+EOJ                                        X     153.  *   109.  
+EOJ1                                       X     162.  *   168.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EXT                                        D      34. C*     5. I
+FD                                         F      33.  *    46. J    54. J    57. J
+FEB                                        F       6. D*    32. K
+FIRSTIME                                   D      17. A*
+FM                                         F      32.  *    45. J    48. J    51. J
+FROMPGM                                    D      16. A*    28. F    61.     103.     170.  
+FUT                                        D      38. C*     5. I   120.     141.  
+FY                                         F      34.  *    47. J
+GD1                                        X      34. J*    32. J
+GD10                                       X      72. J*    29. J
+GD2                                        X      37. J*    35. J
+GD3                                        X      40. J*    38. J
+GD3A                                       X      45. J*    41. J
+GD4                                        X      51. J*    49. J
+GD5                                        X      54. J*    52. J
+GD6                                        X      57. J*    55. J
+GD7                                        X      61. J*    58. J
+GD9                                        X      67. J*
+GETDATE                                    X      24. J*    72.      44. J    71. J    73. J
+GETYEAR                                    X      18. K*
+INDXIT                                     X      26. F*    22. F
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+JAN                                        F       5. D*    32. K
+JUL                                        F      11. D*    33. K
+JUN                                        F      10. D*    32. K
+LPAGE                                      F      44. C*
+LPAT                                       F      33. C*     5. I
+MAINLINE                                   X      30. F*    22. F
+MAR                                        F       7. D*    32. K
+
+
+
+PAGE    4      APDUSCAN.PLS IDE                                                                               03-22-04 14:50:11
+                                         
+
+MAY                                        F       9. D*    32. K
+MDAY                                       D      31. C*     4. I
+MM                                         D      26.  *    75.      79.      80.      27. J    28. J    31. J    45. J
+MMON                                       D      30. C*     4. I
+MON                                        D      18.  *
+MTDC                                       F      28. C*     4. I
+MTDD                                       F      27. C*     4. I
+MULTWORK                                   X      23. K*    52. K    56. K
+MYEAR                                      D      32. C*     4. I
+NAME                                       D      14. C*     2. I
+NOV                                        F      15. D*    33. K
+NULL                                       X      24. F*    22. F
+OCT                                        F      14. D*    33. K
+OVR30                                      F      25. C*     3. I
+OVR60                                      F      24. C*     3. I
+OVR90                                      F      23. C*     3. I
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+REPLY                                      D      38.  *    30. F    54.      56.     162.     164.  
+RESULT                                     F      11. E*    16. F    22. F
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+S1                                         X     105.  *    99.     139.     149.  
+SCANMON                                    X      29. K*    26. K
+SECURITY                                   F       9. A*   143.      25. K    36. K    43. K
+SEP                                        F      13. D*    33. K
+SET1900                                    X      54. K*    20. K
+SETY2K                                     X      50. K*    21. K
+STARTS                                     X      63.  *    59.     179.  
+STARTUP                                    X      54.  *
+STATE                                      D      18. C*     2. I
+TACCN                                      D      12. B*     2. G     5. G     2. H   116.  
+TAMT                                       F      19. B*     3. G     3. H   138.     141.     148.  
+TAXC                                       D      20. C*     3. I
+TCNT                                       F      17. B*     2. G    11. G     2. H
+TDAY                                       D      15. B*    76.       2. G     9. G     2. H   141.      41. K
+TDCODE                                     D      22. B*     3. G     3. H
+TDESC                                      D      18. B*     3. G     3. H
+TDISA                                      F      21. B*     3. G     3. H
+TELEFONE                                   D      37. C*
+TEST2                                      F      31.  *
+TESTAMNT                                   F      40.  *
+TESTDATE                                   F      25. D*    89.     130.     134.      16. K    47. K
+TESTIT                                     X      22. F*    16. F
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TINVNO                                     D      16. B*     2. G    10. G     2. H
+TITLTEXT                                   D       9. E*    48.      15. F
+TLDDAY                                     D      20. B*     3. G     3. H
+TMON                                       D      14. B*    75.       2. G     8. G     2. H   141.      29. K
+TODAY                                      D       8. A*
+
+
+
+PAGE    5      APDUSCAN.PLS IDE                                                                               03-22-04 14:50:11
+                                         
+
+TODDAY                                     D      15.  *
+TODMON                                     D      14.  *
+TODYEAR                                    D      16.  *
+TOTDUE                                     F      29. C*     4. I
+TOTLDUE                                    F      24.  *   148.     157.     174.  
+TRNKEY                                     D       9. B*    96.       2. G
+TRNKEY2                                    D      10. B*     5. G     6. G     7. G     8. G     9. G    10. G    11. G
+                                                     *    12. G
+TRYMORE                                    X     174.  *   166.  
+TYEAR                                      D      13. B*    74.       2. G     7. G     2. H   141.      18. K
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+WORKFLD                                    F      20. D*    15. K    24. K    35. K    42. K    47. K    50. K    51. K
+                                                     *    54. K    55. K
+XX1                                        X      96.  *
+YEAR                                       D      20.  *
+YEARN                                      F      23. D*    18. K    19. K    51. K    55. K
+YY                                         D      28.  *    74.      84.      30. J    37. J    47. J
+ZIP                                        D      19. C*     2. I
+

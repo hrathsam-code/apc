@@ -1,0 +1,836 @@
+       -----------------------------------------------------------          
+                            Form Designer Tutorial
+
+                                   May 1997            
+       -----------------------------------------------------------
+
+(c) Copyright Sunbelt Computer Systems, 1997
+
+Welcome to the Sunbelt GUI Form Designer tutorial.  This text file may be viewed or printed using NOTEPAD, WORDPAD or any text editor.  We suggest you print the document rather than switch between windows.  Once printed, you will be able to read each step and perform the task indicated with a clear uncrowded screen.  If you are viewing this document using the Notepad application, please ensure that the WordWrap option of the Edit menu is checked.
+
+Please note that the 8.1.B release of PL/B:Windows is required.  To verify the version, execute the Workshop and select Help/About Runtime from the menu.
+
+Our goal in this tutorial is to walk you through the process of generating a real program using the Sunbelt GUI Form Designer.  Along the way, we will introduce you to the various components of the Designer and some of the new features of PL/B:Windows.
+
+The tutorial is intentionally simple. Upon completion, however, you will have a fully functional PL/B program employing a GUI form.  At several points along the way you will have the opportunity to compile and execute the program.  This allows you to see the results of your work while the changes are fresh on your mind.  You may also stop at any of these points and resume the exercise at a later time.
+
+We do assume that the PL/B:Windows software has been installed properly.  Please review the installation sheet which accompanied the software if you are uncertain. 
+
+                    ----------------------------
+                    Introduction to the Designer
+                    ----------------------------
+
+Executing the Designer
+----------------------
+We begin the tutorial by executing the Workshop for the Sunbelt PL/B group.  From the "Tools" menu, select "Designer". Once the Designer begins execution, two items will be displayed:  the Program Menu across the top of the screen and the floating Toolbox on the left. Feel free to explore the Menu and Toolbox.  Note that as you move over items in the Toolbox and pause, an object description is displayed.  This will be very handy in later steps.
+
+Creating a New Form
+-------------------
+Our first task is to create a new form.  From the File menu, select New Form or press the CTRL and "N" keys.  The Designer will then open three (3) additional windows: the Form Window, the Source Code Window and the Properties Window.  
+
+These windows will be layered and you may not initially see much more than the Form Window.  It is identified by the grid within the window and the name Form001 in the title bar.  The Form Window is where the objects are drawn, selected, placed and sized.
+
+Beneath the Form Window lies the Source Code Window.  You can bring it to the foreground by clicking the white portion of the window that is visible beneath the Form Window or by selecting Window/Code from the menu bar.  Another shortcut to display the Source Code Window is the F3 key.  The Source Code Window is allows you to enter PL/B instructions for specific objects and events.
+
+The third window that was activated by the New Form command is the Properties Window.  You may not be able to see much of this window initially, but by selecting Window/Properties from the menu it will be brought to the top. The shortcut key from the Properties Window is F4.  The Properties Window allows you to specify characteristics and values for the objects you create on a form.
+
+Adding Objects to the Form
+--------------------------
+To begin, we will add some items to the currently empty form.  Start by selecting the Form Window if it is not already active (F2).  The Toolbox should also be visible at this time.  If it is not, select Window/Tools or press the F5 key.  The Toolbox contains objects that may be used to design a form.  This includes items such as static text, datalist, edittext and comboboxes.
+
+There are two methods by which you may add items to the form:  
+
+The first method is to click on an object in the Toolbox.  You should note that the button stays depressed indicating that it is the selected tool. You will also note that as you move the cursor within the Form Window, it changes to a cross-hair.  The Designer is prompting you to provide a beginning position for the object. By pressing and holding the left mouse button and moving the mouse both horizontally and vertically, you will be able to draw an outline of the object.  Releasing the mouse button completes the process of specifying the initial size and position of the object.  Don't worry if you think that you may later want to change the size and position.  That is easily done at any time.
+
+The second method of adding objects to the form is done by double-clicking on an object within the Toolbox.  This creates the object using a default size in the center of the form.
+
+Sizing and Placing Objects
+--------------------------
+A task that you will repeat many times is that of arranging and sizing of objects on the form.  The visual representation of the graphical screen is one of the primary features of the Designer.  To move an object on the form, you position the mouse pointer anywhere within the object and press and hold the left mouse button. You may then use the mouse to move the object to the new position and release the mouse button.
+
+Another common task is sizing an object.  You begin this task by selecting the object.  A single left mouse click anywhere within the object will cause it to become selected.  You can tell when an item is selected by the sizing handles (eight small black squares) that are displayed around the object.  As you move the mouse pointer across the various sizing handling, the pointer will change to indicate the direction in which you can drag the handle to change the size the object.  The center top and bottom handles allow you to make the item taller while the center left and right handles allow you to make it wider.  The corner handles allow changing both the height and width at the same time.
+
+While we are on the subject of selecting objects, we should note that the Designer allows you to select multiple objects at once.  Two methods are provided to allow multiple selection.  The first method is to hold the control or shift key down while clicking on objects.  You will see that after the first item is selected, the sizing handles are gray instead of the normal black.  This is your visual clue that multiple objects are selected.  Another method of selecting multiple objects is a lot more fun.  Simply press the left mouse button down and drag to create a box on the screen.  Any object touched by the box will be selected.
+
+Multiple selections make arranging objects on the screen and setting common properties much easier.  Anytime this document references a selected item, it also applies to multiple selections.
+
+Removing Objects
+----------------
+To remove an object from the form, select the object by clicking anywhere within the object.  The sizing handles should be shown.  To delete the object, press the DEL key or choose Edit/Delete from the menu. The object and any associated source code will be removed from the form.
+
+Saving the Form
+---------------
+Once you have some objects sized and placed a variety of objects on the form, it is time to save your work.  By selecting File/Save or using the CTRL-S key combination, a Save As dialog will appear.  Save the file as FORM1.PLF in the SUNBELT\DEMO directory.
+
+                       ----------------------------
+                            The Host Program
+                       ----------------------------
+
+Writing a Host Program
+------------------------
+Now that we have a form generated, we need to construct a program to employ it.  You should leave the Designer running and switch back to the Workshop using the ALT-Tab key sequence.  Select Tools/Editor from the menu, enter the name "FORMTEST" and click the "OK" button.  Once the editor comes up, enter the following lines:
+
+MAIN     PLFORM    FORM1.PLF
+.
+         FORMLOAD  MAIN
+.
+         LOOP
+         WAITEVENT
+         REPEAT
+
+These few lines of code will load and run a Designer form file.  The first line (PLFORM) is a new compiler directive.  It is similar to an INCLUDE directive except that it requires a label.  Its purpose is to include both the form image and any source code statements that the form may contain.  The FORMLOAD statement is also new.  It is responsible for creating the form and its objects and making them visible.  From there, we fall into a common WAITEVENT loop in which the program will accept and dispatch events endlessly.  Our first form does not have any event code defined so there is not much for the WAITEVENT to do.
+
+Compiling the Host Program
+--------------------------
+Once you have entered the host program using the editor, return to the Workshop. Select Tools/Compiler from the menu and specify the program name (FORMTEST). You should always set the Label Size option to thirty-two (32) when compiling programs that use form files.  This may be done by clicking the Label Size checkbox of the compiler screen, entering 32 and clicking on OK.  Many of the Designer generated internal labels will be longer than the eight (8) character compiler default.  Once the label size has been changed, compile the program by clicking the "OK" button.
+
+Executing the Host Program
+------------------------
+After the compiler has finished, you will want to execute the program. Select "Run" and "Chain PL/B" from the Workshop menu.  After specifying your program name (FORMTEST) and clicking the "OK" button, your program will start and the form will be displayed.  You may use the mouse to change checkboxes and select portions of the edittext data that you may have created.  You may also use the keyboard to enter information into the edittext boxes and the tab key to move among the objects.  To exit the program, you must select File/Exit from the main (or default) window.
+
+
+                          ----------------------------
+                              The Address Program
+                          ----------------------------
+
+A More Realistic Example
+------------------------
+Now that you have successfully completed the basics of designing a form and having a program execute it, it is time to move to a more complete example.  In the remainder of this tutorial, we will create a simple address program and learn some new items and shortcuts along the way.
+
+Back to the Designer
+--------------------
+To begin the new exercise, use the ALT-TAB key to switch back to the Form Designer.  Let's start by clearing the current form.  Select Edit/Clear Form from the Designer's menu.  After confirming the operation, the form will be erased.  We should also check our option settings, just to make sure we get off on the right foot.  From the Edit Menu, select Options. "Display Grid" should be checked with a grid width and height of 5.  The grid is used in the Designer to aid in the placement of objects. "Align to Grid" should also be checked. This option greatly simplifies the alignment of objects in the form. The "Windows on Top" items should be clear. You may set the "Invert Case for Code Entry" to your own preference.  If set, unshifted source code entered in the Source Code Window will be uppercase.
+
+"Use Object Name Prefix" should be set.  This option causes object names to be created using a form specific prefix.  It is a good practice to be consistent and employ a naming convention for your objects.  By using a form specific prefix, you will always have unique default object names. 
+
+The naming convention I use is as follows:
+
+<prefix>_<descriptive name>_<type>
+
+The <prefix> is described above.  All objects on a form should have the same prefix.  I typically try to keep this short - 3 or four characters.  The underline character simply makes the name easier to read.  The <descriptive name> is exactly that. It is also followed by another underline.  Finally, I add an object type abbreviation to the name.  I use the following abbreviations:
+
+R = Radio Button
+B = Command Button
+XB = Check Box
+CB = Combo Box
+DL = Datalist
+ET = Edittext
+SB = Scroll Bar
+W = Window
+
+The abbreviations prevent me using the wrong instructions or properties with a given object.  I can tell the type of an object from its name.  For example, a radio button on a form named Address which indicates the type of customer might be constructed as "Adr_CustType_R".
+
+Feel free to implement any naming convention you like, but standardize early.
+
+Press OK to close the options dialog.
+
+Form Size and Position
+----------------------
+Now that we have a clean form and our options set, we can begin by setting some properties of the form itself.  You should start by sizing the form.  This is done in a manner that should be known to all Windows users.  Simply position the mouse pointer to an edge or corner of the Form Window and press and hold the left mouse button. As you move the mouse the size of the form will be changed.  The position and size of the form you set in the Designer will be its initial position and size at runtime. 
+
+Changing Object Properties
+--------------------------
+Another item we should change is the form title.  The default name is "Form001".  To change the title, first make sure the form is selected.  If you are in doubt, simply click anywhere within the form where there is not an object or press F2.  Next, we will need view the Properties Window.  Use the F4 shortcut key to make it visible.  There are some things you should know about the Properties Window.  
+
+Beneath the title of the window (Properties) is a combobox containing the name and type of the currently selected object.  In this case, it contains "Form001-Window".  By clicking the adjoining down arrow, a list of all the objects currently on the form are displayed. At this point we only have the form window.  But later, by selecting an item from this list, we can save the steps of going back to the Form Window, selecting an object and then returning to the Properties Window to change a property.
+
+Beneath the object combobox is an edittext box containing the current value of the property selected.  By default, the datalist of properties is positioned to Object Name property and "Form001" is displayed in the value box.
+
+Below the value box is a datalist containing all the properties available for the selected object.  This list may be quite long depending on the type of object selected and a vertical scroll bar is available.  You will note that if you click on a property in the list, the value box changes to reflect the current value associated with that property.
+
+Properties may be changed using a number of methods depending on the values available.  For instance, if you select the Visible property, the value box should say "True" (i.e. the form will initially be visible at execution time).  If you click the down arrow adjoining the value box, you will see that your choices are "True" or "False".  One of the benefits of using the designer is that you cannot specify an invalid choice. You are forced to choose between True and False.  This eliminates many common errors.  Another method of changing some values in the property list is to double click the property (not the value)in the properties datalist.  This action allows the Visible property to alternate between True and False values.  Other properties with multiple values will progress through each value available and then repeat the process. However, some properties, such as the form title, have no default values and will require keyboard entry. 
+
+Now that you understand how the Properties Window works, it is time to get back to the task of changing the form title. With "Form001-Window" selected, scroll the Properties Window until "Title" is visible.  Click the word "Title" to select the property.  The value box should change to reflect the current value of "Form001".  Now, click in the value box and change the title to "My Address Book" by backspacing or deleting and typing.  Be sure to press the Enter key when you finish typing the line.  You should notice that the title of the form in the Form Window has immediately been changed. Let's also change the background color.  Double click the Back Color item in the Properties Window.  A color selection dialog will appear from which you may choose any color you like.  Once you respond "OK", the form's background color will change.
+
+Before proceeding, change the value of the Object Prefix property to "Addr_".  Please also set the following properties for the form:
+
+Top=92
+Height=226
+Left=91
+Width=409
+Object Name=Address_W
+
+One final note regarding property setting.  If multiple objects are selected, the Properties Window will show a cumulative list of properties for all selected objects.  Not all properties will necessarily apply to all selected objects.  The Designer will determine which property changes to apply to each object.  This is a very handy method for quickly changing the properties of a number of objects.
+
+Adding Additional Objects
+-------------------------
+Now that the Form Window has been changed, it is time to add some additional objects.  We will start by adding five edittext boxes.  
+
+From the Toolbox, select the edittext object and draw it on the screen.  In the Properties Window, set the object properties as follows:
+
+Height=20
+Width=200
+Left=96
+Top=28
+Enabled=False
+Object Name=Addr_Name_ET
+Text= (delete all text)
+
+To create the four remaining edittext boxes, you could use the same method as above.  Instead, let's explore the copy and paste method.  Begin by selecting the first edittext object using a mouse click.  Once selected, choose Edit/Copy from the menu.  The shortcut key sequence is CTRL-C.  This makes a copy of the edittext object including all of its current properties and places the copy on the Windows clipboard.  You may then select Edit/Paste from the menu or use the CTRL-V shortcut key. A new edittext object will then be pasted to the upper left hand corner of the form. Click on the new edittext object and drag the box down to a position such that there are two grid units of vertical spacing between the two boxes and align it horizontally. 
+
+Repeat this process described above to create a total of five boxes.  The boxes will be our name, company, address, city/state/zip and phone number edittext objects.
+
+Once the edittext objects are created, we should assign meaningful names to them.  It would be hard to remember that Addr_EditText002 is the company and Addr_EditText003 is the address in a more complicated form.  Select each edittext and in the Properties Window change the Object Names to "Addr_Company_ET", "Addr_Address_ET", "Addr_City_ET" and "Addr_Phone_ET" respectively. 
+
+We should also add some static text to serve as labels for the edittext objects.  This will allow the user to understand the contents of the objects.  From the Toolbox, create a StatText object by double-clicking on the tool. Using the Properties Window, change the following values:
+
+Text = Na&me:
+Alignment = Right
+Height = 15
+Width = 65
+Top = 28
+Left = 20
+Fore Color = White (or whatever you like)
+Back Style = Transparent
+
+This should produce a nice label for the first edittext object.  Use the cut and paste method to duplicate this object four times.  Drag the labels to the correct position and change their text properties to "C&ompany:", "Add&ress:", "Ci&ty/State:" and "P&hone:".  The ampersands in the text indicate an ALT+Key sequence.  For example, when the alt key is held down and a "o" is pressed, a click event will occur for the stattext object containing "Company".  The letter following the ampersand will be underlined by the Designer and runtime to indicate that it is an ALT+Key sequence.  You may wander how one would create a stattext object with an ampersand in text and not have the runtime assume it indicates an ALT+Key sequence.  This is done by setting the "Use Mnemonic" property to False.
+
+Add Command Buttons
+-------------------
+Our application will also require Five (5) command buttons.  These will be used to indicate Add, Save, Delete, Next and Previous.
+
+Create a button on the form and set the properties as follows:
+
+Height=24
+Width=68
+Left=328
+Top=32
+Title=&Add
+Object Name= Addr_Add_B
+
+Copy this button to the clip board and then paste a copy of it back to the form.  Place this button two grid units below the Add button. This button should be named Addr_Save_B and its title should be "&Save".  Paste another button to the form and place it two grid units below the Save button. This button should be named Addr_Delete_B and its title should be "&Delete".
+
+Paste another button to the screen.  Change the Top property to 176, the Left property to 96, the name to Add_Previous_B and the Text to "&Previous".  Paste the final button to the screen.  Change the Top property to 176, the Left property to 228, the name to Add_Next_B and the Text to "&Next".  
+
+Specifying the Tab Order
+------------------------
+Now that we have all the objects on the screen, we need to establish a tab sequence.  This is the order in which the focus will move from field to field as the Tab and the Shift Tab keys are struck.  We should begin by assigning the first edittext object (Addr_Name_ET) a Tab ID of one (1). As you move down the form, assign the edittext objects consecutive numbers of two (2) through five (5).  The "Previous" button should be six (6) and the "Next" button should be seven (7). The "Add", "Save" and "Delete" buttons from top to bottom should be eight (8) through ten (10).
+
+One handy item of the Edit menu is a Lock Controls menu selection.  By selecting this item, the objects on the screen will not be allowed to move. You may still select them however. This prevents accidental movement when setting properties.
+
+Adding Event Code
+-----------------
+Now that you have become familiar with property manipulation, it is time to add some source code to our form.  For this example, we will begin with two small changes. We want to hide the main (default) window and we want the program to stop execution upon a Close event.  A Close event occurs when the use selects "Close" from the Window's system menu or clicks the "X" button in Windows 95 or NT.
+
+To add the code to hide the main window, select the form's Source Code Window by double-clicking the form anywhere not occupied by an object. The Source Code Window has several items of interest.
+
+You will notice that the Source Code Window has three areas: the Object Combobox, the Event Combobox and the source code area.  The Object Combobox should currently display "Address_W-Window".  You will see that if you open the combobox by clicking the adjoining arrow, all defined objects are selectable.  The Event Combobox will be positioned to "Activate" by default.  Opening this combobox will display all the events that are valid for the current object (a form).  If you select another object in the Object Combobox, you will see that the events in the Event Combobox change.  
+
+Our task is to add code to be executed when the form is first loaded.  Choose "Address_W-Window" in the Object Combobox and "LoadForm" in the Event Combobox.  Any code we type in the source code area will be executed when the form is loaded.  For this example, we want to hide the main window.  To accomplish this, enter the PL/B instruction "WINHIDE".  Remember that we are writing PL/B source code.  Within the source area, you should press the tab key to skip past the label area and then enter "WINHIDE". Without indenting at least one space, the compiler will think that WINHIDE is a program label.  While this would not cause a compiler error, the result would not be what we want.
+
+Another point with regard to the source code is that this code will be CALLed by the WAITEVENT instruction in our host program.  For this example, the Designer will automatically generate a program label named "Load_Address_W".  When the program starts and the form is loaded by the "FORMLOAD" instruction, this event will occur and the label will be called.  You may wonder why if this code is called, that we do not add a "RETURN" statement.  You may, if you wish, but the Designer will always add one automatically.
+
+While we have the "Address_W" object selected, let's add code for the "Close" event.  After selecting the Close event in the events combobox, enter "STOP" in the source area just as we added the "WINHIDE" instruction above.  Now, when Windows generates a Close event for this window, the program execution will end.
+
+The Designer has several features which assist you when working in the Source Code Window.  You should notice that events which have source code attached to them have an asterisk (*) before the event name in the event combobox.  The Designer will also automatically position you to the first event which has source code when switching from the Form Window to the Source Code Window by double clicking the object.
+
+Need help with the PL/B language instructions?  Simply highlight a verb in the Source Code Window and press F1.  The Language Reference topic for that verb will be displayed. You may also use the F1 key for help on any of the objects in the Toolbox or properties in the Properties Window.
+
+Verify our Work
+-----------------
+This is good place to save our work and take a break.  Save the current form as "MADDRESS.PLF" in the SUNBELT\DEMO directory. Write a simple host program (ADDRESS.PLS) as we did before and test the logic we have added.  You will notice that the Workshop's gray background and its menu are now hidden from view.  Also, executing a Windows Close (ALT+F4 or clicking the "X" button) will cause the program to terminate.
+
+                        ----------------------------
+                          Attaching External Data
+                        ----------------------------
+
+Adding Files
+------------
+Continuing our work on the Address Book application, let's add the file definition to our host program, tie the file data to our edittext objects and add code for the buttons we have created.
+ 
+Where's the Code?
+-----------------
+Sooner or later you will be faced with the decision of where to place the source code.  Some folks do not like any code in the form.  They feel it is hidden and difficult to find.  Conversely, keeping the code that is relevant only to the particular object and event in the form makes a nice package.  We will try to walk the line between the two worlds in this example. In this application we will place the file definition and some common routines in the host program.  Most of the remaining code will be in the form. Any variables which are used by more than one object/event will be defined in the host program.
+
+Write the Host Program
+----------------------
+The source code for the host program follows. You may enter it by hand or use an application such as NOTEPAD to cut and paste it to your program.  We will explain the contents after the code is entered.
+
+$TRUE	 	CONST		"1"
+$FALSE	CONST		"0"
+.
+A	  	RECORD
+NAME		DIM		50
+COMPANY	DIM		50
+ADDRESS	DIM		50
+CITY		DIM		50
+PHONE		DIM	 	50
+		RECORDEND
+.
+ADDRESS	IFILE
+.
+RESULT	INTEGER   	1
+KEY	 	DIM	   	50
+ETOBJS	COLLECTION
+.
+MAIN		PLFORM	MADDRESS.PLF
+*
+.Construct a Collection	of the Edittext Objects
+.
+	 	LISTINS   	ETOBJS,Addr_Name_ET,Addr_Company_ET,Addr_Address_ET:
+		    	   	 Addr_City_ET,Addr_Phone_ET
+*
+.Load the Form
+.
+	  	FORMLOAD 	MAIN
+*
+.Wait for an Event to Occur
+.
+		LOOP
+		WAITEVENT
+		REPEAT
+*
+.Store the Record Contents into the Edittext Objects
+.
+SETDATA
+	  	SETITEM	Addr_Name_ET,0,A.NAME
+	  	SETITEM     Addr_Company_ET,0,A.COMPANY
+	  	SETITEM     Addr_Address_ET,0,A.ADDRESS
+	  	SETITEM     Addr_City_ET,0,A.CITY
+	  	SETITEM     Addr_Phone_ET,0,A.PHONE
+	  	RETURN
+*
+.Retrieve the Edittext Contents into the Record	Variables
+.
+GETDATA
+	  	GETITEM     Addr_Name_ET,0,A.NAME
+	  	GETITEM     Addr_Company_ET,0,A.COMPANY
+	  	GETITEM     Addr_Address_ET,0,A.ADDRESS
+	  	GETITEM     Addr_City_ET,0,A.CITY
+	  	GETITEM     Addr_Phone_ET,0,A.PHONE
+	  	RETURN
+*
+.Enable or Disable the Next and Previous Buttons 
+.  Based upon the Current File Position
+.
+UPDNP
+	 	SETPROP	Addr_Next_B,ENABLED=$FALSE
+	 	SETPROP   	Addr_Previous_B,ENABLED=$FALSE
+.
+	 	COUNT	   	RESULT,A.NAME
+	 	RETURN	IF ZERO
+.
+	 	READ	   	ADDRESS,A.NAME;;
+	 	READKS	ADDRESS;;
+	 	IF	   	NOT OVER
+	 	SETPROP   	Addr_Next_B,ENABLED=$TRUE
+	 	ENDIF
+.
+	 	READ	   	ADDRESS,A.NAME;;
+	 	READKP	ADDRESS;;
+	 	IF	   	NOT OVER
+	 	SETPROP   	Addr_Previous_B,ENABLED=$TRUE
+	 	ENDIF
+.
+	 	RETURN
+*
+.Display the Selected Record
+.
+SHOWREC
+		CALL		SETDATA
+		SETPROP	ETOBJS,ENABLED=$TRUE
+		SETPROP	Addr_Delete_B,ENABLED=$TRUE
+		CALL		UPDNP
+		SETFOCUS	Addr_Name_ET
+		RETURN
+
+
+Now that the host program is entered, let's examine the code.
+
+We begin by defining the constant values of $TRUE and $FALSE.  I use a leading dollar sign to indicate that the label is a constant (not changeable) value.  Using a CONST allows me to associate a value with a label and not have to worry about it being accidentally changed.  If a FORM was used instead of CONST, who is to say what the value is at any point in time. With CONST, I know it will not change.
+
+Following the constant values we define a RECORD named A.  A RECORD is a structure that is made up of individual variables. This RECORD is composed of five 50 byte variables: NAME, COMPANY, ADDRESS, CITY, and PHONE. The entire record is addressed using the label "A".  Individual variables within the record are address using the record name (A) followed by a period (.) and then the variable name.  For example, the COMPANY variable is addressed as A.COMPANY.  In this program, we will use the RECORD label for READs and WRITEs and operations that affect all the variables in the RECORD.
+
+Following the RECORD definition is the address ISAM file definition.  This is followed three utility variables:  
+
+1. The numeric RESULT variable is used by a number of routines. 
+2. KEY is used by the ADD logic to note the current file position prior to adding a record.  By saving the current key, we can restore the currently displayed record if we should decide to abandon the new record addition. 
+3. ETOBJS is a new structure called a COLLECTION.  A COLLECTION is simply a grouping of objects.  Grouping objects allows you to act upon several objects with one PL/B statement.
+
+Finally, we define our form and begin the executable statements.  The only statement that is new is the LISTINS.  LISTINS is used to insert all of the edittext objects into the ETOBJS collection.  We can then manipulate all of the edittext objects with a single statement.
+
+The first two subroutines will handle the transfers between the record fields and the edittext objects.  The SETDATA routine transfers from the fields to the edittext objects and the GETDATA does the reverse.
+
+The third subroutine (UPDNP) enables or disables the Next and Previous buttons based upon the current file position.  If a record exist before the record whose key is in A.NAME, the Previous button is enabled.  Otherwise, it is disabled.  The same holds true for succeeding records and the Next button.
+
+The final subroutine handles the display of a record.  It first transfers the data from the record to the edittext objects. It then enables the edittext objects for modification. It changes the focus to the first field (Name) and it updates the Next and Previous buttons based on the current file position.
+
+You should compile the host program (MADDRESS.PLS) at this point to ensure you have no typos.
+
+Adding Code to the Form
+-----------------------
+In this step, we are going to add code to the form to handle the file open or creation.  Using the Designer, double click the form to bring up the Source Code Window.  The selected object should be "Address_W-Window".  Notice that the designer positioned us to the first event in the list which has code defined.  In this case, the Close event. Select the "LoadForm" Event.  This event occurs when the FORMLOAD instruction in our host program occurs.  Since this only occurs once during our host program execution, it is a good place to add the open logic.  Change the source code to read as follows:
+
+*
+.Hide the Main Window and Set the Focus to the Add Button
+.
+	WINHIDE
+	SETFOCUS  	Addr_Add_B
+*
+.Open the Address File
+.
+	TRAP		#PREP IF IO
+	OPEN	  	ADDRESS,"MADDRESS"
+	TRAPCLR   	IO
+*
+.Read and Display the First Record
+.
+	READKS	ADDRESS;A
+	RETURN	IF OVER		// Empty File
+*
+.Display the Data 
+.
+	CALL	  	SHOWREC
+	RETURN
+*......................................................................
+.
+.Address File IO Error
+.
+#PREP	
+	ALERT	  PLAIN,"The Address File Does Not Exist - Create It? ":
+		   RESULT,"Warning"
+	STOP	  IF (RESULT > 1)	No or Cancel?
+*
+.Create the File
+.
+	PREP	  ADDRESS,"MADDRESS","MADDRESS","50","250"
+	RETURN
+
+This logic begins by hiding the main (or default) window.  It then sets the focus to the Add button in case the file is empty. We next attempt to open the address file (ADDRESS.ISI).  If the open fails, an alert box allows the user the option of creating the file or exiting. Once the file has been opened or created, we read the first record.  If the read is successful, we call a routine in the host program which will display the record and update the Delete, Next and Previous Buttons as appropriate.
+
+One item you should note is the use of the pound sign (#) before the PREP label.  This character instructs the compiler to append the compiler inclusion letter to beginning of the label. Internally, the compiler would view #PREP as APREP since our program has only one inclusion file (inclusion A).  The use of the pound sign may also be applied to variables.  It is good practice to define all variables and labels in a form file with this prefix.
+
+Another item of interest is the use of the RECORD label in the READ statement rather than individual variables.
+
+Button Management
+-----------------
+We're making great progress, but we still have some work to do.  We need to write the code for the add, save, delete, next and previous buttons. Perhaps we should first think about our program's execution.  The real power of a Windows program is that most user mistakes should be anticipated.  Rather than write code for each object to catch invalid events, we can eliminate a lot of confusion by correctly manipulating the ENABLED property of each button.
+
+For example, when the program is first executed and there are no records in the file, the Delete button should be disabled.  The runtime will then not allow any events for the button and we will not have to concern ourselves with code to catch a user clicking the Delete button when no record exist.  If we manage the buttons correctly, we can safely assume that if the user clicked the button, it was enabled and is a valid action.  By the same token, we should not allow the save button to be enabled unless there has been a change to some data and we have a valid key (name field).
+
+Let's think about how our program will execute button by button.
+
+Our program has some basic premises. A record (if any) will always be present on the screen.  If a record is deleted, the program will attempt to bring the succeeding record to the screen.  That failing, an attempt to bring the preceding record to the screen will be made.  Only when the file is empty will nothing be displayed.
+
+Additionally, if the file is empty, only the Add button will be enabled.  There is no other choice available to the user.
+
+The Add button will allow new records to be added.  Clicking this button will clear the edittext and allow data to be entered.  The Add button will be enabled always except when a record is on the screen and some data has changed.  It will also be disabled if we are in the process of adding a record.  The initial state of this button will be enabled.
+
+The Save button will normally be disabled.  The only time it should be enabled is when one of the edittext fields has changed and there is a valid key (Name field).  We need to include the key check to prevent an IO errors from occurring. If there are no records in the file, the Save button will be disabled.  The initial state of this button will be disabled (i.e., we assume the file is empty).
+
+The Delete button will be enabled when a record is present on the screen.  If we are in the process of adding a new record, the button name will be changed to Cancel and the delete button logic will only clear the partially entered data. If there are no records in the file, the Delete button will be disabled.  The initial state of this button will be disabled (i.e., we assume the file is empty).
+
+An enabled Previous button will indicate that there is a record preceding the currently displayed record.  This button will be disabled during the addition process and its initial state will be disabled.
+
+An enabled Next button will indicate that there is a record following the currently displayed record.  This button will be disabled during the addition process and its initial state will be disabled.
+
+Initial Button Properties
+-------------------------
+Using the Properties Window, change the Enabled property of the Save, Delete, Previous and Next buttons to False.  Do this by selecting the buttons and double clicking the Enabled property line.  The text of the buttons will change from black to gray.  This is your visual clue that they are disabled. 
+
+You will remember from the code we added for the LoadForm Event, that we attempt to read a record after opening the file.  If we find a record, the edittext objects are updated and enabled.  Additionally, we use the SETPROP instruction to enable the Delete button.
+
+Add Button Code
+---------------
+Let's now add the code for the Add button Click event.  Using the Designer, display the Active Form (F2).  Once the form is displayed, double click on the Add buton and enter the following:
+
+*
+.Save the Current File Position
+.
+	MOVE	   A.NAME,KEY
+*
+.Clear the Record Fields and Edittext Objects
+.
+	CLEAR	   A
+	CALL	   SHOWREC
+*
+.Disable the Add Button and Change the Delete Button to "Cancel"
+.
+	SETPROP  Addr_Add_B,ENABLED=$FALSE
+	SETITEM  Addr_Delete_B,0,"&Cancel"
+
+When the user clicks the Add button, he is indicating that he wishes to add a new record. Our first task is to save the currently displayed record key. Should the user elect to abandon the record addition, this key will be used to restore the file position and display the previously display record. Once the key is saved, we clear all the fields in the record and update the edittext.  This clears the screen for input. Also, we disable the Add and change the title of the Delete button to a more appropriate "Cancel".
+
+Note that the strict button management in this code prevents unexpected events from occurring.  "Next", "Previous" and "Add" have no meaning during record addition and are disabled.
+
+Save Button Code
+----------------
+Clicking on the Save button will indicate that the user is ready to update the information on disk.  Logic in other parts of the form will ensure that before the Save button is enabled, all the required criteria for writing the record has been met.  All we have to do is delete the existing record if it exists, retrieve the values from the edittext objects, perform the write and reset the Add, Save, Next and Previous buttons.  We will exit with the file positioned to the new record and the focus on the Name field. The code for the Save button is as follows:
+
+*
+.Delete any Existing Record
+.
+	COUNT     	RESULT,A.NAME
+	IF	  	NOT ZERO
+	DELETE    	ADDRESS,A.NAME
+	IF	  	OVER
+	ALERT	  	STOP,"Record deletion error.",RESULT,"Error"
+	STOP
+	ENDIF
+	ENDIF
+*
+.Retrieve the Data and Write the Record
+.
+	CALL	  	GETDATA
+	WRITE	  	ADDRESS,A.NAME;A
+*
+.Disable the Save Button, Enable the Add Button
+.
+	SETPROP	Addr_Save_B,ENABLED=$FALSE
+	SETPROP	Addr_Add_B,ENABLED=$TRUE
+*
+.Set the Delete Buttons Title
+.
+	SETITEM	Addr_Delete_B,0,"&Delete"
+*
+.Update the Next and Previous Buttons
+.
+	CALL	  	UPDNP		
+*
+.Set the Focus to the Name Field
+.
+	SETFOCUS  	Addr_Name_ET
+
+Delete Button Code
+------------------
+The purpose of the Delete button is to remove the record from the screen and the file or abandon new record addition. That accomplished, we will attempt to position to the next record in the file.  If there are no more records in the file, we will attempt to move to the previous record.  If the file is empty, the Delete button will be disabled forcing the user to use the Add button.  Note that upon exit we always enable the Add button, disable the Save button and set the focus on the Add button.  It is always good practice to never leave focus on a button that would produce unwanted results if the enter key was accidentally struck (such as Delete).
+
+*
+.Ensure that the Button Title is Delete
+.
+	SETITEM	Addr_Delete_B,0,"&Delete"
+*
+.Delete Requested
+.
+	GETPROP	Addr_Add_B,ENABLED=RESULT // Record Addition ?
+	IF 		ZERO			  	  // If Adding,
+	CALL		SETDATA			  // Restore the Edittext Values
+	ELSE				    		  // If not Adding,
+	DELETE	ADDRESS,A.NAME		  // Delete the Record		
+	IF		OVER			        // Catch Deletion Failure
+	ALERT		STOP,"Record deletion error.",RESULT,"Error"
+	STOP				              // Exit the Program
+	ENDIF				    
+	ENDIF				    
+*
+.Prepare for No More Records
+.
+	CLEAR		A					// The File is Empty
+	SETPROP	ETOBJS,ENABLED=$FALSE		// Disable the Fields
+	SETPROP	Addr_Delete_B,ENABLED=$FALSE	// Disable the Delete Button
+	SETPROP 	Addr_Save_B,ENABLED=$FALSE	// Disable the Save Button
+	SETPROP	Addr_Add_B,ENABLED=$TRUE	// Enable the Add Button
+	SETFOCUS 	Addr_Add_B				// Focus on Add
+*
+.Attempt to Retrieve a Record for the Screen
+.
+	READKS  	ADDRESS;A				// Check Next Record
+	IF		OVER					// No More
+	READKP	ADDRESS;A  				// Check Previous Record
+	ENDIF	
+*
+.Update the Edittext with the Current Field Contents
+.
+	CALL		SETDATA
+*
+.Enable the Delete Button If We Have a Record
+.
+	COUNT		RESULT,A.NAME
+	IF 		NOT ZERO
+	SETPROP	ETOBJS,ENABLED=$TRUE
+	SETPROP	Addr_Delete_B,ENABLED=$TRUE
+	SETFOCUS 	Addr_Name_ET
+	ENDIF
+*
+.Enable or Disable the Next and Previous Buttons
+.
+	CALL		UPDNP
+
+Previous Button Code
+--------------------
+The Previous button allows the user to backup one record.  If there are no preceding records, this button will not be enabled.  Thus we are assured that if a click event occurs for this button there is a preceding record.  The code for the Previous button is as follows:
+
+*
+.Read and Display the Previous Record
+.
+	READ		ADDRESS,A.NAME;;
+	READKP	ADDRESS;A
+	CALL	  	SHOWREC
+
+Next Button Code
+--------------------
+The Next button will function just as the Previous button except that it will retrieve succeeding records.  The code for the Next button is as follows:
+
+*
+.Read and Display the Next Record
+.
+	READ	  	ADDRESS,A.NAME;;
+	READKS	ADDRESS;A
+	CALL	  	SHOWREC
+
+Name Field Code
+---------------
+Once the user has added or modified a screen field, we need logic to enable the Save. Rather than create duplicate code for each field, we will only write code for the Name field Change event and tie the other edittext Change events to this logic. The code for the change event will ensure that we have some text to use as a key.  If we do, the Save button will be enabled. If the Name edittext is empty we can not write the record. Double click on the edittext field adjacent to the "Name:" stattext label, select the Change event from the event combobox and enter the following code:
+
+*
+.If We Have a Key, Enable the Save Button
+.
+	GETITEM	Addr_Name_ET,0,RESULT
+	SETPROP	Addr_Save_B,ENABLED=RESULT
+*
+.Disable Other Buttons, If Modifying Existing Record
+.
+	SETPROP	Addr_Add_B,ENABLED=$FALSE
+	SETPROP	Addr_Find_B,ENABLED=$FALSE
+	SETPROP	Addr_Next_B,ENABLED=$FALSE
+	SETPROP	Addr_Previous_B,ENABLED=$FALSE
+*
+.Change the Delete Button Title to Undo
+.
+	SETITEM   Addr_Delete_B,0,"&Undo"
+	
+
+The code for this section is a little tricky, but worth understanding.  When the user makes any change to this field, the routine is called.  "Any change" means exactly that.  The addition or deletion of a single character will trigger this event. The code starts by retrieving the length of the contents of the edittext object.  We then use that value to enable or disable the Save button.  The ENABLED property specifies that a value of zero (0) will disable the object.  Any non-zero value will enable the object. It is important to both enable and disable the button.  A user could enter some data causing the button to be enabled and then delete the characters.  If we did not disable the button upon a zero length, we would cause an IO error.
+
+Remaining Edittext Fields Code
+------------------------------
+The remaining four edittext fields in this application will perform the same function as the name field change event above. Rather than duplicate that code four times, we will have the each field's change event logic call the name field change event routine.  To implement this, simply add "CALL   Change_Addr_Name_ET" to the Change event Source Code window for each field.  The label generated by the Designer for the Name field Change event is the event name (Change), an underscore, and the object name (Addr_Name_ET). Using this method of coding, you can avoid having redundant code in your program and greatly lessen program maintenance time.
+
+Short Cut Keys
+--------------
+When we created the stattext objects that serve as the labels for our edittext fields, we specified ALT+Key values.  These sequences allow the appropriate edittext object adjacent to the stattext to obtain focus. To implement this function, we need only add a SETFOCUS statement for each of the stattext object.  Double-click on the stattext object containing "Na&me:" and add the following line to the Source Code Window for the Click event:
+
+	SETFOCUS	Addr_Name_ET
+
+Likewise, add SETFOCUS statements for each of the subsequent stattext objects. "C&ompany" should set focus to Addr_Company_ET, "Add&ress" to Addr_Address_ET, "C&ity/State" to Addr_City_ET and "&Phone" to Addr_Phone_ET. 
+
+Compile the Application
+-----------------------
+This concludes the basic Address Book application.  Save your work and compile the host program (ADDRESS.PLS).  Experiment with the application by adding, deleting and modifying records.  Use the Next and Previous records to browse through the file key sequentially.
+
+                          ---------------------
+                              Going Further
+                          ---------------------
+
+Once you have completed the above exercises, you are left with a functional application. However, there are two basic shortcomings of the program. 
+
+1. All Windows programs should have a menu.  The first item in the menu should be the File menu and it should contain an Exit item.
+
+2. No method is provided to locate a record other than scrolling through the file using the Next and Previous buttons.
+
+In this section we will correct these shortcomings.
+
+Adding a Menu
+-------------
+The first step in adding a menu is to define the data items required.  These include both the menu object and the menu initialization data.  Add the following two lines to the data area of the host program (MADDRESS.PLS) after the ETOBJS definition.
+
+MAINMENU	MENU
+MENUDATA    INIT 		")File;E)xit"
+
+The MENUDATA item contains the initialization data for the menu.  In this case, we define a menu item of File. The ")" indicates that the "F" is the quick select character. Once "File" is selected, a menu of subitems will be displayed.  In our example, only "Exit" will appear. The "x" character has also been specified as the items quick select character.
+
+Once defined, we need to add code to the executable area to create and activate the menu.  Beneath the FORMLOAD instruction in the host program, add the following lines of code.
+
+*
+.Create and Activate the Menu
+.
+	CREATE	Address_W;MAINMENU,MENUDATA
+	ACTIVATE    MAINMENU,MENUR,RESULT
+
+The first statement (CREATE) simply does the creation of the menu object. We specify the window (Address_W) to which the menu is to be attached, the menu object and the initialization string. If you fail to specify the window name, the menu will be attached to the main (default) window which is always hidden in this program.  Thus, you will not see your new menu. 
+
+The second statement (ACTIVATE) performs three tasks.  It first makes the menu visible to the user.  Secondly, it tells the runtime the name of the label to be called when the object is selected by the user.  It also specifies a variable (RESULT) into which the selected item number is placed.  In our example, we only have the Exit function.  We can safely assume that if the activation routine (MENUR) is called, that the user wishes to exit.
+
+To complete the addition of the menu, add the following lines to the end of the host program.
+
+*
+.Menu item selected
+.
+MENUR
+	STOP
+
+At this point, you may compile and test the program.
+
+
+Employing a Second Form
+-----------------------
+Our final task will be to implement a Find function.  This will allow a user to locate a record without having to use the Next and Previous buttons to browse the file.  To perform this task, we will generate a new form and load it within the host program.  We will also add a Find button to the existing form and add code to enable or disable it at appropriate times. Initially, the Find form will not be visible.  But, upon clicking the Find button, we will make it visible.  The tasks performed by the Find form will be to accept a string and position the file as requested or inform us if the record cannot be located.
+
+Modify the Main Form
+--------------------
+We will start by adding the Find button to the existing form (ADDRESS.PLF).  Using the Form Designer, copy the existing Delete button to the clipboard using CTRL+C. Paste the copy back to the form (CTRL+V) and position it two grid units below the Delete button. Change the properties of this button as follows:
+
+Object Name=Addr_Find_B
+Title=F&ind
+Enabled=False
+
+In the Source Code Window, select the Find button and the Click event.  Add the following code:
+
+		SETPROP	Find_W,VISIBLE=$TRUE
+		SETFOCUS	Find_Key_ET
+
+The Find button is initially disabled.  Once we know we have at least two records in the file, it will be enabled.  This is done by adding three lines to the UPDNP routine in the host program.  The resulting routine should appear as follows:
+
+*
+.Enable or Disable the Next, Previous and Find Buttons 
+.  Based upon the Current File Position
+.
+UPDNP
+	 	SETPROP	Addr_Next_B,ENABLED=$FALSE
+	 	SETPROP   	Addr_Previous_B,ENABLED=$FALSE
+		SETPROP	Addr_Find_B,Enabled=$FALSE
+.
+	 	COUNT	   	RESULT,A.NAME
+	 	RETURN	IF ZERO
+.
+	 	READ	   	ADDRESS,A.NAME;;
+	 	READKS	ADDRESS;;
+	 	IF	   	NOT OVER
+	 	SETPROP   	Addr_Next_B,ENABLED=$TRUE
+		SETPROP	Addr_Find_B,ENABLED=$TRUE
+	 	ENDIF
+.
+	 	READ	   	ADDRESS,A.NAME;;
+	 	READKP	ADDRESS;;
+	 	IF	   	NOT OVER
+	 	SETPROP   	Addr_Previous_B,ENABLED=$TRUE
+		SETPROP	Addr_Find_B,ENABLED=$TRUE
+	 	ENDIF
+.
+	 	RETURN
+
+These instructions will make the Find form visible and set the focus to the edittext object in the form.
+
+These are all the changes required in this form. Please save this file now.
+
+Create the Find Form
+--------------------
+To create the Find form, select File/New Form from the Designer's menu or press CTRL+N. Once the new form is displayed, change its properties as follows:
+
+Height=100
+Left=142
+Top=194
+Width=400
+Object Name=Find_W
+Object Prefix=Find_
+Title=Find
+Visible=False
+Window Type=Modal Dialog
+
+By setting the Visible property to False, the form will not be seen after the FORMLOAD statement in the host program.  The window type of Modal Dialog means that the user is not allowed to work with other windows until he clicks the "Find" or "Cancel" button and is finished with the Find window.
+
+Once the form has been defined, create a button on the form.  Set the button properties as follows:
+
+Height=20
+Left=292
+Top=24
+Width=80
+Default=True
+Enabled=False
+Object Name=Find_Find_B
+Title=&Find
+
+The Default property indicates that the button should gain control when the Enter key is struck. The Find button will remain disabled until data is entered for the key into the edittext object.
+
+Next, copy (CTRL+C) the Find button to the clipboard and paste (CTRL+V) a copy back to the form. Position the button two grid units below the Find Button and set the properties as follows:
+
+Cancel=True
+Object Name=Find_Cancel_B
+Title=&Cancel
+
+The Cancel property indicates that the button should gain control when the Escape key is struck.
+
+Now that the two buttons are on the form, all we need is an edittext object and a label.  Create an EditText object on the form.  Set its properties as follows:
+
+Height=17
+Left=68
+Top=28
+Width=204
+Object Name=Find_Key_ET
+Max Chars=50
+Text= (delete all text)
+
+Now, create a StatText object on the form and set its properties as follows:
+
+Height=15
+Left=20
+Top=28
+Width=40
+Alignment=Right
+Text=&Name
+
+Finally, set the tab id sequence for the form. Begin with a tab id of one (1) for the edittext object.  Assign the Find button id 2 and the Cancel button id 3.
+
+This completes the design of the Find form.  You should save this file under the name FIND.PLF in the SUNBELT\DEMO directory.
+
+Find Form Code
+--------------
+Most of the code for the Find form will be relatively simple.  Double click the form to open the Source Code Window. 
+ 
+For the form window (Find_W) Close event, enter the following code:
+
+	SETPROP	Find_W,VISIBLE=$FALSE
+
+This will simply make the form invisible.
+
+For the Cancel button's Click event, we need to perform the same instruction as above.  You should use the following code:
+
+	CALL		Close_Find_W
+
+By setting the form object to be invisible, we actually set the form and all it contents to invisible.  This is exactly like the SETPROP we used earlier with the COLLECTION because a form is a COLLECTION.
+
+For the Find_StatText001 object's Click event, enter the following code:
+
+	SETFOCUS	Find_Key_ET
+
+This simply sets the focus to the edittext object.
+
+Select the edittext object (Find_Key_ET) and for the Change event, enter the following code:
+
+*
+.If a Key is Present, Enable the Find Button
+.
+	GETITEM	Find_Key_ET,0,RESULT	
+	SETPROP	Find_Find_B,ENABLED=RESULT
+
+This code will enable or disable the Find button based on the contents of the edittext object.
+
+The last section of code to be added is for the Find button Click event. Add the following code:
+
+*
+.Locate the Specified Record
+.
+	GETITEM	Find_Key_ET,0,KEY		// Retrieve the Key Value
+	READ		ADDRESS,KEY;A		// Does the Record Exist?
+	IF 		OVER				// If Not, Display the Alert
+	ALERT   	NOTE,"Requested Record Not Found.",RESULT,"Error"
+	RETURN					// Allow Another Key
+	ENDIF
+*
+.Display the Located Record
+.
+	SETPROP	Find_W,VISIBLE=$FALSE	// Close the Find Window
+	CALL		SHOWREC			// Display the Record
+
+This concludes the Find form. Please save your work now.
+
+Add the New Form to the Host Program
+------------------------------------
+To add the new Find form to the host program, edit the program (ADDRESS.PLS) and ABOVE the existing PLFORM statement add the following line:
+
+FIND	PLFORM	FIND.PLF
+
+We are required to define the Find form before the Main form since the Main form references labels defined in the Find form.  The PL/B compiler does not allow forward references.  You should keep this in mind when writing code that references other forms.  Generally, rather than reference labels in other forms, it is best to call a subroutine in the host program.
+
+Now that the form is defined in the host program, all that remains is to load it.  The form will always be loaded when the program is executing.  It simply toggles between being visible and invisible when requested. To load the form, add the following line below the existing FORMLOAD statement.
+
+	FORMLOAD	FIND
+
+You should save, compile and test your modified program at this point.
+
+                          ---------------
+                          End of Tutorial
+                          ---------------
+
+Congratulations! This concludes the Form designer tutorial.  If there are items you would like to see explained or additional functions added to the example, please let us know.  E-mail your comments and suggestions to 
+sales@sunbelt-PLB.com.

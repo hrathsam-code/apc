@@ -1,0 +1,157 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Cust.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-21-2019 At 14:26                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00325   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CustVAR
+$CustVAR                         EQUATE         1
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+Cust                             RECORD
+CustomerID                       Dim                10                  1 - 10
+LookupName                       Dim                60                 11 - 70       //11 - 40
+Name                             Dim                60                 71 - 130      //41 - 70
+Addr1                            Dim                30                131 - 160      //71 - 100
+Addr2                            Dim                30                161 - 190      //101 - 130
+Addr3                            Dim                30                191 - 220      //131 - 160
+City                             Dim                30                221 - 250      //161 - 190
+St                               Dim                2                 251 - 252      //191 - 192
+Zip                              Dim                10                253 - 262      //193 - 202
+SeeHistory                       Form               1                 263 - 263      //203 - 203         //HR 5/20/2004
+InvMethod                        Form               1                 264 - 264      //204 - 204         //2=Fax, 1=EMail
+Telephone                        Dim                10                265 - 274      //205 - 214
+Fax                              Dim                10                275 - 284      //215 - 224
+Memo                             Dim                50                285 - 334      //225 - 274
+HomePage                         Dim                40                335 - 374      //275 - 314
+NewField                         Dim                5                 375 - 379      //315 - 319
+MarkupPct                        Form               2.2               380 - 384      //320 - 324         //HR 6/24/2004
+Cust_Type                        Dim                1                 385 - 385      //325 - 325         //Personal or Corporat
+Bus_Desc                         Dim                80                386 - 465      //326 - 405
+Email                            Dim                40                466 - 505      //406 - 445         //Added 7/25/2003
+DefaultGL                        Dim                8                 506 - 513      //446 - 453         //HR 9/20/2007
+DefaultFil                       Dim                2                 514 - 515      //454 - 455         //HR 9/20/2007
+GroupCust                        Dim                6                 516 - 521      //456 - 465
+DUNS_ID                          Dim                20                522 - 541      //466 - 485
+Class                            Dim                4                 542 - 545      //486 - 489
+SIC                              Dim                6                 546 - 551      //490 - 495
+Type                             Dim                4                 552 - 555      //496 - 499
+InsideRep                        Dim                3                 556 - 558      //500 - 502       //Formally Size  HR 2/22
+SalesRep                         Dim                2                 559 - 560      //503 - 504
+SalesRepF                        Dim                2                 561 - 562      //505 - 506
+Source                           Dim                6                 563 - 568      //507 - 512
+Status                           Dim                2                 569 - 570      //513 - 514
+Created                          Dim                8                 571 - 578      //515 - 522         .//Date Field
+Rec_Added                        Dim                8                 579 - 586      //523 - 530
+Rec_Change                       Dim                8                 587 - 594      //531 - 538
+Rec_User                         Dim                10                595 - 604      //539 - 548
+InActive                         Form               1                 605 - 605      //549 - 549
+Contact                          Dim                25                606 - 630      //550 - 574
+TermCode                         Dim                8                 631 - 638      //575 - 582
+CUSTSTTS                         Dim                1                 639 - 639      //583 - 583     //STATUS OF ACCT
+CreditLimit                      Form               7.2               640 - 649      //584 - 593
+CUSTCATG                         Dim                1                 650 - 650      //594 - 594     //PAYMENT CATEGORY
+COMMCODE                         Dim                4                 651 - 654      //595 - 598     //COMMISSION CODE
+POPhone                          Dim                10                655 - 664      //599 - 608     //Account Number
+POFax                            Dim                10                665 - 674      //609 - 618     //Account Number
+POContact                        Dim                20                675 - 694      //619 - 638     //DUNS Number            /
+Country                          Dim                3                 695 - 697      //639 - 641
+ShippingAcct                     Dim                15(2)             698 - 727      //0
+                                 RECORDEND
+;
+;======================================================================================;
+TempCust                            record          like   Cust                            
+OrigCust                            record          like   Cust                            
+SaveCust                            record          like   Cust                            
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+CustTXTNM                          INIT         "Cust"
+CustISI1NM                         INIT               "Cust.ISI"
+CustISI2NM                         INIT               "Cust2.ISI"
+CustISI3NM                         INIT               "Cust3.ISI"
+CustISI4NM                         INIT               "Cust4.ISI"
+CustAAM1NM                         INIT               "Cust.aam"
+CustI1DEF                           init            "-n,z,y,1-10"
+CustI2DEF                           init            "-n,z,y,11-70,1-10"
+CustI3DEF                           init            "-n,z,y,516-521,1-10"
+CustI4DEF                           init            "-n,z,y,265-274,1-10"
+;
+; By CustomerID
+; 1-10
+;
+CustKY                           DIM                10
+;
+; By LookupName, CustomerID
+; 11-70, 1-10
+;
+CustKY2                          DIM                70
+;
+; By GroupCust, CustomerID
+; 516-521, 1-10
+;
+CustKY3                          DIM                16
+;
+; By Telephone, CustomerID
+; 265-274, 1-10
+;
+CustKY4                          DIM                20
+; 
+; Aamdex Key Variables 
+; -------------------------  
+CustAAMKY1                          DIM             63                               //Aamdex Key for LookupName                      
+CustAAMKY2                          DIM             33                               //Aamdex Key for Addr1                           
+CustAAMKY3                          DIM             33                               //Aamdex Key for City                            
+CustAAMKY4                          DIM              5                               //Aamdex Key for St                              
+CustAAMKY5                          DIM             13                               //Aamdex Key for Zip                             
+CustAAMKY6                          DIM             13                               //Aamdex Key for Telephone                       
+CustA1DEF                           init            "-n,z,y,11-70,131-160,221-250,251-252,253-262,265-274"
+;=============================================================================;
+;
+CustFLST                         FILELIST
+CustFL                              IFILE              name="Cust.ISI",FIX=1024,NODUP,NOPATH
+CustFL2                             IFILE              name="Cust2.ISI",FIX=1024,NODUP,NOPATH
+CustFL3                             IFILE              name="Cust3.ISI",FIX=1024,NODUP,NOPATH
+CustFL4                             IFILE              name="Cust4.ISI",FIX=1024,NODUP,NOPATH
+CustA1                              AFILE              name="Cust.AAM",FIX=1024,NOPATH
+                                    FILELISTEND
+ 
+CustFileSize       CONST      "1024"
+ 
+CustProg           INIT       "Cust Program"
+CustDesc           INIT       "Cust Maintenance"
+CustTITLE          INIT       "Cust Record"
+CustHelp           INIT       "Cust.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CustVARIO
+            INCLUDE Cust.IO 
+          %ENDIF          //End of IO Include File

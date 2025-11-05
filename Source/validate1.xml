@@ -1,0 +1,20 @@
+<AddressValidationRequest>
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Your Test Case Summary Description</CustomerContext>
+      <XpciVersion>1.0</XpciVersion>
+    </TransactionReference>
+    <RequestAction>XAV</RequestAction>
+    <RequestOption>3</RequestOption>
+  </Request>
+  <AddressKeyFormat>
+    <AddressLine>6800 S. LINDBERGH STREET      </AddressLine>
+    <AddressLine>METRO PORT GATE# 15           </AddressLine>
+    <AddressLine>
+                              </AddressLine>
+    <PoliticalDivision2>STOCKTON                      </PoliticalDivision2>
+    <PoliticalDivision1>CA</PoliticalDivision1>
+    <PostcodePrimaryLow>95206     </PostcodePrimaryLow>
+    <CountryCode>US</CountryCode>
+  </AddressKeyFormat>
+</AddressValidationRequest>

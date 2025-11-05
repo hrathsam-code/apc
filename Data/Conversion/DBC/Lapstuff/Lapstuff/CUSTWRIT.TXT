@@ -1,0 +1,13 @@
+.........................................................
+.   CUSTOMER MASTER FILE I/O ROUTINES                   .
+.........................................................
+. 
+         WRITE     OUTFILE,SEQ;BIGKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                                    CUSTADR2:
+                                    CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+                                                              CUSTCATG:
+                                    LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+                                    COMMCODE:
+                                    CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+                                    PDOVR90,MTDCASH,MTDCRED,TELEFONE
+. ..........................................

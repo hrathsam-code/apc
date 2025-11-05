@@ -1,0 +1,117 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Phone.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %IFNDEF           $PhoneVAR
+$PhoneVAR          EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+PhoneREC           RECORD
+ContactID          dim               7        1 - 7
+PhoneType          DIM               1        8 - 8     (From PhoneType include)
+Use_Phone          FORM              1        9 - 9     (Use Customer Telephone)
+Number             DIM               10      10 - 19
+Filler2            DIM               1       20 - 20
+Extension          DIM               7       21 - 27
+Created            DIM               8       28 - 35
+Date_Added         DIM               8       36 - 43
+Date_Changed       DIM               8       44 - 51
+User               DIM               10      52 - 61
+AllowTexting       form              1
+                   RECORDEND
+
+TempPhoneREC       RECORD            LIKE       PhoneREC
+OrigPhoneREC       RECORD            LIKE       PhoneREC
+SavePhoneREC       RECORD            LIKE       PhoneREC
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+PhoneK1SIZE        CONST             "8"                                      //Length of the Key variable)
+PhoneK2SIZE        CONST             "18"                                     //Length of the Key variable 2)
+PhoneK3SIZE        CONST             "18"                                     //Length of the Key variable 3)
+.
+PhoneI1DEF         INIT              "-N,1-8"                                  (Index definitions for Key 1)
+PhoneI2DEF         INIT              "-N,10-19,1-8"                            (Index definitions for Key 2)
+PhoneI3DEF         INIT              "-N,8-8,10-19,1-7"                        (Index definitions for Key 2)
+.
+PhoneFileSize      CONST             "80"                                     //Length of each Record)
+
+PhoneKY            DIM               PhoneK1SIZE                              //The Actual 'Key' variable)
+PhoneKY2           DIM               PhoneK2SIZE                              //The Actual 'Key' variable)
+
+PhonePROG          INIT              "Program Name"
+PhoneDESC          init              "Phone description"                      //Description of the Master files
+PhoneTITLE         INIT              "Record Title"                           //Description used later for headers, etc)
+PhoneHELP          INIT              "Phone.HLP"                              //Name of the Help file for later purposes)
+
+PhoneTXTNM         INIT              "$DataDir\","Phone.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+PhoneISI1NM        INIT              "$DataDir\","Phone.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+PhoneISI2NM        INIT              "$DataDir\","Phone2.ISI"                //Actual ISI Filename
+PhoneISI3NM        INIT              "$DataDir\","Phone3.ISI"                //Actual ISI Filename
+
+PhoneFLST          FILELIST
+                   %IFDEF            PhoneKY
+PhoneFL            IFILE             Name=PhoneISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY2
+PhoneFL2           IFILE             Name=PhoneISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY3
+PhoneFL3           IFILE             Name=PhoneISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY4
+PhoneFL4           IFILE             Name=PhoneISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY5
+PhoneFL5           IFILE             Name=PhoneISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY6
+PhoneFL6           IFILE             Name=PhoneISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY7
+PhoneFL7           IFILE             Name=PhoneISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY8
+PhoneFL8           IFILE             Name=PhoneISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            PhoneKY9
+PhoneFL9           IFILE             Name=PhoneISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $PhoneIO
+                     INCLUDE           Phone.IO
+                   %ENDIF

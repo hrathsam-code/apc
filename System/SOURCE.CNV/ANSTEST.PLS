@@ -1,0 +1,245 @@
+. ANSTEST.TXT - SYSTEM MENU LOGIN PROGRAM
+. PL/B ANSWER PROGRAM
+.
+. 
+PORTN    DIM       30
+TODAY    INIT      "mm/dd/yy"          DATE PASSED IN COMMON
+SECURITY FORM      1                   SEE DESCRIPTION BELOW
+DATE6    DIM       6
+ENVS     DIM       4
+INVNUMB  INIT      "     "
+ACCTNUMB INIT      "    "
+VENDNUMB INIT      "   "
+FROMPGM  INIT      "        "
+FIRSTIME INIT      " "
+TESTONE  INIT      " "
+TESTTWO  INIT      " "
+TESTTHRE INIT      " "
+ERRORSW1 INIT      " "
+ERRORSW2 INIT      " "
+ERRORSW3 INIT      " "
+USERLOCN INIT      " "
+IOTEST   INIT      " "
+IOTYPE   INIT      "      "
+IOERFILE INIT      "                   "
+USERCODE INIT      "         "
+USERNAME INIT      "                    "
+APPCODE  INIT      "  "
+APPSECUR FORM      2
+.
+.
+. SCRATCH VARIABLES
+.
+DIMWK9   DIM       9
+PSWRD2   DIM       9
+LOGTIME  DIM       12
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+*................................................................
+.
+USERS    IFILE     KEYLEN=9
+USERID   DIM       9         1 -  9          USER ID
+NAME     DIM       20       10 - 29          USER'S NAME
+USERLOC  DIM       1        30 - 30          USER LOCATION
+.                                            1=NY, 2=SC, 3=NV
+.
+USERKEY  DIM       9
+*................................................................
+.                                      TIME IN 24-HR. FORMAT
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+REPLY    DIM       1
+.
+         INCLUDE   VERIFDEF.TXT
+.
+ALPHWORK DIM       30
+LEN      FORM      3
+DATETXT  DIM       17
+DATETXT1 INIT      "Today is "
+FLD01TXT INIT      "What is your identification number?"
+STATTXT  DIM       30
+STATTXT1 INIT      "You are logged on at "
+STATTXT2 INIT      "Hello, "
+NULLFLD  INIT      "                              "
+TWO      FORM      "2"
+RESULT   FORM      4
+.
+TITLTXT  INIT      "SUPERIOR WASHER INFORMATION NETWORK"
+TITLE    STATTEXT
+PRMT01   STATTEXT
+DATEDSP  STATTEXT
+STATMSG  STATTEXT
+.
+ENTRY01  EDITTEXT
+.
+LogButton  BUTTON
+.
+BLACK    COLOR
+BLUE     COLOR
+TEST1    COLOR
+LTGRAY   COLOR
+YELLOW   COLOR
+.
++................................................................
+. MAINLINE
+.
+         CREATE    BLACK=*BLACK
+         CREATE    BLUE=*BLUE
+         CREATE    TEST1=35:115:65
+         CREATE    LTGRAY=*LTGRAY
+         CREATE    YELLOW=*YELLOW
+         SETMODE   *LTGRAY=ON,*3D=ON,*FULLSCR=ON,*CARET=BLOCK,*SCREEN=OFF:
+                   *BGCOLOR=LTGRAY
+         WINERASE                   
+         CLOCK     DATE TO TODAY
+         PACKKEY   DATETXT WITH DATETXT1,TODAY
+         CREATE    TITLE=4:5:14:66,TITLTXT,"TIMES(12,BOLD)",FGCOLOR=TEST1:
+                                   BORDER,STYLE=3DOUT
+         CREATE    PRMT01=10:11:20:49,FLD01TXT,"HELVETICA",BORDER:
+                                      FGCOLOR=BLUE,STYLE=3DOUT
+         CREATE    PRMT02=19:20:23:42,FLD02TXT,"HELVETICA",BORDER:
+                                      FGCOLOR=BLUE,STYLE=3DOUT
+         CREATE    DATEDSP=7:8:33:48,DATETXT,"HELVETICA",CENTER,BORDER:
+                                     FGCOLOR=BLACK,STYLE=3DFLAT
+         CREATE    ENTRY01=10:11:51:61,FONT="HELVETICA",PASSWORD,BORDER:
+                                       FGCOLOR=BLACK,BGCOLOR=LTGRAY,MAXCHARS=9
+         CREATE    ENTRY02=19:20:44:54,FONT="HELVETICA",PASSWORD,BORDER:
+                                       FGCOLOR=BLACK,BGCOLOR=LTGRAY,MAXCHARS=9
+         CREATE    STATMSG=13:14:26:55,STATTXT,"HELVETICA",CENTER,BORDER:
+                                       FGCOLOR=BLACK,STYLE=3DFLAT
+         CREATE    LogButton=22:23:31:50,"&Logon"
+         CREATE    OKButton=19:20:55:58,"&OK"
+.         
+         GOTO      LOGOPEN
+.
+.         INCLUDE   LOGIO.TXT
+LOGOPEN
+.
+.
+*................................................................
+. SET THE TRAPS SO THAT IF ANYTHING GOES WRONG THE USER STILL
+. CANNOT LOG ON WITHOUT AUTHORIZATION
+. 
+         TRAP      BADANS IF CFAIL
+         TRAP      BADANS IF FORMAT
+         TRAP      BADANS IF RANGE
+         TRAP      BADANS IF PARITY
+. 
+.
+         CLOCK     SYSPORT TO PORTN
+         CLOCK     TIME TO TIME
+         UNPACK    TODAY INTO MM,REPLY,DD,REPLY,YY
+         REPLACE   " 0" IN MM
+         REPLACE   " 0" IN DD
+         REPLACE   " 0" IN YY
+         PACKKEY   DATE6 WITH MM,DD,YY
+.
+*................................................................
+. OPEN THE FILE OF AUTHORIZED USERS
+. 
+         TRAP      NOUSER IF IO
+         OPEN      USERS,"SC\SRESUF.ISI"
+.
+         TRAPCLR   IO
+         GOTO      INIT
+*................................................................
+. FILE CONTAINING AUTHORIZATIONS IS MISSING
+.
+NOUSER   ALERT     STOP,"UNABLE TO OPEN FILE OF AUTHORIZED USERS",RESULT
+         GOTO      HANG
+.
+HANG     GOTO      HANG         
+*................................................................
+. LOG THE USER ONTO THE SYSTEM
+.
+INIT
+         ACTIVATE  TITLE
+         ACTIVATE  PRMT01
+         ACTIVATE  DATEDSP
+         ACTIVATE  STATMSG
+         ACTIVATE  ENTRY01
+         ACTIVATE  LogButton
+         DISABLEITEM  LogButton
+.
+LOOP
+         ACTIVATE  ENTRY01,LOGON,RESULT
+         SETFOCUS  ENTRY01
+         ACTIVATE  LogButton,READID,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+.         STOP
+. 
+.
+*................................................................
+. CHECK TO SEE IF THE USER IS AUTHORIZED
+. 
+LOGON
+         COMPARE   "1" TO RESULT
+         GOTO      RESETB IF EQUAL
+         CLEAR     DIMWK9
+         GETITEM   ENTRY01,0,DIMWK9
+         PACK      USERKEY,DIMWK9,NULLFLD
+         ENABLEITEM  LogButton
+         RETURN
+RESETB   DISABLEITEM  LogButton
+         RETURN         
+*................................................................
+. SEE IF THE USER IS AUTHORIZED
+.
+READID   TRAP      BADID IF IO
+         READ      USERS,USERKEY;USERID,NAME,USERLOC
+         GOTO      BADID IF OVER
+         CALL      VERIFY
+         MOVE      NULLFLD TO STATTXT
+         PACK      STATTXT WITH STATTXT2,NAME
+         MOVELPTR  STATTXT TO LEN
+         SFORMAT   ALPHWORK TO LEN
+         MOVE      STATTXT TO ALPHWORK
+         SETITEM   STATMSG,0,ALPHWORK
+         PAUSE     TWO
+         SETITEM   STATMSG,0,NULLFLD
+         MOVE      NULLFLD TO STATTXT
+         PACK      STATTXT WITH STATTXT1,TIME
+         MOVELPTR  STATTXT TO LEN
+         SFORMAT   ALPHWORK TO LEN
+         MOVE      STATTXT TO ALPHWORK
+         SETITEM   STATMSG,0,ALPHWORK
+         PAUSE     TWO
+         SETITEM   STATMSG,0,NULLFLD
+         MOVE      USERID TO USERCODE
+         MOVE      NAME TO USERNAME
+         MOVE      USERLOC TO USERLOCN
+         MOVE      "00" TO APPSECUR
+         TRAP      BADANS IF IO
+         NORETURN
+         GOTO      LOCATE
+.
+*................................................................
+. UN-AUTHORIZED USER
+.
+BADID    BEEP
+         ALERT     STOP,"You are not an authorized user!",RESULT
+         RETURN
+.
+.
+         INCLUDE   VERIFPWD.TXT
+.
+.................................................................
+.
+LOCATE   MOVE      "SC  " TO ENVS
+         RESET     ENVS
+.
+.
+MSTRCHN  TRAPCLR   CFAIL
+         TRAP      BADANS IF CFAIL
+.
+         CHAIN     "MASTEST.DBC"
+.
+.
+.*................................................................
+. A TRAP HAS OCCURED WHILE IN THE ANSWER PROGRAM.  DO NOT ALLOW
+. A CHAIN TO THE MASTER PROGRAM
+. 
+BADANS   ALERT     STOP,"Unrecoverable system error!",RESULT
+         GOTO      HANG

@@ -1,0 +1,115 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    KitDetail.FD                                                   ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %IFNDEF           $KitDetailVAR
+$KitDetailVAR          EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+KitDetailREC        record
+KitSeqNo            form               9        1 - 9
+PartNumberSeqNo     form               9       10 - 18
+Quantity            form               6.4                     Quantity Per Kit
+AllowChanges        form               1       70 - 70
+AllowQuantityChange form               1
+AllowDeletion       form               1
+Comments            dim                80      71 - 150
+                    recordend
+
+TempKitDetailREC       RECORD            LIKE       KitDetailREC
+OrigKitDetailREC       RECORD            LIKE       KitDetailREC
+SaveKitDetailREC       RECORD            LIKE       KitDetailREC
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+KitDetailK1SIZE        CONST             "18"                                       //Length of the Key variable)
+KitDetailK2SIZE        CONST             "18"                                       //Length of the Key variable 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+KitDetailI1DEF         INIT              "-N,1-9,10-18"                             //Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+KitDetailI2DEF         INIT              "-N,10-18,1-9"                             //Index definitions for Key 2)
+.
+KitDetailFileSize      CONST             "200"                                      //Length of each Record)
+
+KitDetailKY            DIM               KitDetailK1SIZE                            //The Actual 'Key' variable)
+KitDetailKY2           DIM               KitDetailK2SIZE                            //The Actual 'Key' variable)
+
+KitDetailPROG          INIT              "Program Name"
+KitDetailDESC          init              "KitDetail description"                    //Description of the Master files
+KitDetailTITLE         INIT              "Record Title"                             //Description used later for headers, etc)
+KitDetailHELP          INIT              "KitDetail.HLP"                            //Name of the Help file for later purposes)
+
+KitDetailTXTNM         INIT              "$DataDir\","KitDetail.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+KitDetailISI1NM        INIT              "$DataDir\","KitDetail.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+KitDetailISI2NM        INIT              "$DataDir\","KitDetail2.ISI"                //Actual ISI Filename
+
+KitDetailFLST          FILELIST
+                   %IFDEF            KitDetailKY
+KitDetailFL            IFILE             Name=KitDetailISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY2
+KitDetailFL2           IFILE             Name=KitDetailISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY3
+KitDetailFL3           IFILE             Name=KitDetailISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY4
+KitDetailFL4           IFILE             Name=KitDetailISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY5
+KitDetailFL5           IFILE             Name=KitDetailISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY6
+KitDetailFL6           IFILE             Name=KitDetailISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY7
+KitDetailFL7           IFILE             Name=KitDetailISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY8
+KitDetailFL8           IFILE             Name=KitDetailISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitDetailKY9
+KitDetailFL9           IFILE             Name=KitDetailISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $KitDetailIO
+                     INCLUDE           KitDetail.IO
+                   %ENDIF

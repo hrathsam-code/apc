@@ -1,0 +1,161 @@
+.  PRINT ACCOUNTS BY SELECTED STATE
+.
+         INCLUDE   COMMON
+. 
+ACCOUNTS IFILE     KEYL=6,UNCOMPRESSED
+NAME     INIT      "ACCTSTAT.ISI"
+. 
+REPLY    DIM       1
+. 
+         INCLUDE   CUSTMAST
+. 
+. ........WORK AREA FOR SECOND ADDRESS
+. 
+NAME2    DIM       30
+ADDR2    DIM       25
+ADDR22   DIM       25
+CITY2    DIM       20
+STATE2   DIM        2
+ZIP2     FORM       5
+KEY2     DIM        6
+. 
+. 
+KEYCNT   FORM       "0000"
+RECCNT   FORM       "0000"
+. 
+READFLAG DIM       1
+ACCTFLAG DIM       1
+TWOUP    DIM       1
+ALLACCT  DIM       1
+P2FLAG   DIM       1
+. 
+STATE    DIM       2
+STATEKEY DIM       6
+LINES    FORM      2
+
+.
+TIME     INIT      "HH/MM/SS"
++............................................................
+.
+.
+ 	 INCLUDE   CALLERR1
+         MOVE      "CUSTOMER LIST SELECTED STATE" TO TITLTEXT
+         INCLUDE   CALLERR2
+
+
+ 
+         CLOCK     TIME TO TIME
+         MOVE      "58"  TO LINES
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:1,"PRINT CUSTOMER LIST - BY STATE"
+         KEYIN     *P1:23,*EL,"NOTE.... OK TO PRINT ON 80 COLS",REPLY
+
+PROCEED  TRAPCLR   IO
+. 
+         TRAP      NOCUST IF IO
+         OPEN      ACCOUNTS,NAME
+.
+         GOTO      PRINTALL
+NOCUST   BEEP
+         DISPLAY   *P01:12,*EL,"DISK NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         CHAIN     "ACCTMNU1"
+. 
+STARTIT  KEYIN     *P01:12,*EF,*P01:12,"PRINT (1) or (2) LABELS PER CUSTOMER":
+                   " ? ",TWOUP
+         RESET     TWOUP
+         GOTO      STARTIT IF EOS
+         CMATCH    "2" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         CMATCH    "1" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         BEEP
+         GOTO      STARTIT
+.
+ACCTPT   PRINT     *C,*L,*L,*L,*L
+         KEYIN     *P01:12,*EL,"PRINT ACCOUNT NUMBER ON THE LABEL ? ":
+                               "Y or N ",ACCTFLAG
+         RESET     ACCTFLAG
+         GOTO      ACCTPT IF EOS
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         BEEP
+         GOTO      ACCTPT
+.
+PRINTALL KEYIN     *P01:12,*EL,"ENTER THE STATE CODE (ie. NY) ",STATE
+         RESET     STATE
+         GOTO      PRINTALL IF EOS
+.
+SETRANGE CLEAR     STATEKEY
+         APPEND    STATE TO STATEKEY
+         APPEND    "    " TO STATEKEY
+         RESET     STATEKEY TO 1
+         READ      ACCOUNTS,STATEKEY;CUSTKEY
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    ACCOUNTS;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                             CUSTCITY,CUSTSTAT,CUSTZIP
+*............................................................
+. TEST FOR END OF FILE
+         GOTO      EOJRTN IF OVER 
+.
+         MATCH     STATE  TO CUSTSTAT
+         GOTO      EOJRTN IF NOT EQUAL   (SINCE WE PRIMED THE READS!)
+. 
+OKAY   
+         ADD       "1" TO RECCNT
+         DISPLAY   *P1:20,"PRINTING ",RECCNT:
+                   "  OF ",STATE
+.
+         MOVE      CUSTNAME TO NAME2
+         MOVE      CUSTADDR TO ADDR2
+         MOVE      CUSTCITY TO CITY2
+         MOVE      CUSTSTAT TO STATE2
+         MOVE      CUSTZIP  TO ZIP2
+         MOVE      CUSTKEY  TO KEY2
+. 
+PRINTEM  COMPARE   "55" TO LINES
+         CALL      HEADER IF NOT LESS
+.
+         PRINT     *1,CUSTNAME:
+                   *34,CUSTADDR:
+                   *55,CUSTCITY:
+                   *72,CUSTSTAT:
+                   *75,CUSTZIP
+         ADD       "1" TO LINES
+         GOTO      READ
+. 
+EOJRTN   BEEP
+         MOVE      "  " TO STATE
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"PRINT MORE STATES ? (Y/N) ",REPLY
+         DISPLAY   *P1:23,*EL
+         CMATCH    "Y",REPLY
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      EOJRTN IF NOT EQUAL
+.
+         RELEASE
+         CHAIN     "ACCTMNU1"
+.
+HEADER   PRINT     *F,*5,"APC COMPONENTS - CUSTOMER":
+                   " LIST BY SELECTED STATE (":
+                   STATE,")":
+                   *65,"AS OF ",TODAY
+         PRINT     " "
+         PRINT     *1,"NAME":
+                   *34,"ADDRESS":
+                   *55,"CITY":
+                   *72,"ST":
+                   *76,"ZIP"
+                  PRINT     " "
+         MOVE      "4" TO LINES
+         RETURN
+
+.
+*............................................................

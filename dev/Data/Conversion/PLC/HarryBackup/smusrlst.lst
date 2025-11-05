@@ -1,0 +1,173 @@
+
+
+
+PAGE    1      SMUSRLST.PLS IDE                                                                               03-22-04 14:48:26
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "SMUSRLST.PLS","F:\PLC\SMUSRLST.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    6.    INCLUDE  A: ncommon.txt
+   61.    INCLUDE  B: splopnfd.txt
+  133.    INCLUDE  C: splopnpr.txt
+
+   Output: f:\plc\smusrlst.plc                                                                                                                                                                                                                                       
+       379 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:48:26 14:48:26
+  0000155C DATA;  00000558  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      SMUSRLST.PLS IDE                                                                               03-22-04 14:48:26
+                                         
+
+"                                          D     109.  *   131.     167.  
+" on                                       D      40. C*
+"&Cont                                     D     120.  *
+"&Quit                                     D     121.  *
+"Authorized User File NOT FOUND!           D     233.  *
+"HELVETICA                                 D     113.  *   117.  
+"HELVETICA(10,BOLD)                        D     115.  *
+"R                                         D      50. C*
+"Show User ID#                             D     119.  *
+"X                                         D     164.  *   186.  
+1                                          F      12. C*    37. C   162.     193.     213.     222.     223.  
+2                                          F     180.  *
+3                                          F      14. C*
+5                                          F      16. C*
+54                                         F     174.  *
+55                                         F     178.  *   184.     190.     211.  
+ACCTNUMB                                   D      14. A*
+ANSWP                                      D       6. B*
+APPCODE                                    D      31. A*
+APPLOOP                                    X     197.  *   207.     214.  
+APPSECUR                                   F      32. A*
+BLACK                                      O18    56.  *    90.  
+BLUE                                       O18    55.  *    89.     114.     116.     118.  
+CHKID                                      X     186.  *   181.  
+CHKLEN                                     X      31. C*    42. C
+CKPRTID                                    X     159.  *   149.  
+CONTBUTTON                                 O 1    52.  *   120.     129.     150.  
+CURRDATE                                   O16    48.  *   117.     127.  
+DA                                         O 5    74.  *    94.      95.     110.  
+DATE6                                      D      10. A*
+DBDATA                                     D      15. B*     3. C
+DBOX                                       O 5    14. B*     3. C     6. C    21. C    22. C    23. C    24. C    25. C
+                                                     *    52. C
+DDATA                                      D      75.  *    94.  
+DEVNAME                                    D       8. B*    33. C    45. C    48. C    49. C    50. C
+ENDJOB                                     X     261.  *   173.  
+ENVS                                       D      11. A*
+EOJ                                        X     264.  *   151.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EVENTS                                     D      59.  *    92.  
+FIRSTIME                                   D      17. A*
+FROMPGM                                    D      16. A*   107.     234.     245.     256.     264.  
+GETOPT                                     X      12. C*     6. C
+GETPRT                                     X      20. C*    13. C    15. C
+GOTPRT                                     X      36. C*    17. C
+HDGFLAG                                    D      66.  *
+IDFLAG                                     D      65.  *   131.     164.     167.     186.  
+INDXIT                                     X     105.  *   101.  
+INIT                                       X     170.  *   150.  
+INVNUMB                                    D      13. A*
+
+
+
+PAGE    3      SMUSRLST.PLS IDE                                                                               03-22-04 14:48:26
+                                         
+
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+LINECNT                                    F      68.  *   174.     177.     178.     183.     184.     189.     190.  
+                                                     *   210.     211.     223.  
+LOCPRT                                     F      10. B*    24. C    37. C
+LSTSEL                                     X       5. C*    29. C
+MAINLINE                                   X     109.  *   101.  
+MENUOPND                                   X     258.  *   253.  
+MENUSKEY                                   D      36.  *   201.     202.  
+MENUSOPN                                   X     250.  *   137.  
+MENUSYS                                    i      34.  *   202.     251.  
+MENUSYSN                                   D      35.  *   251.  
+MSYSDSC                                    D      39.  *   202.     205.     209.  
+MSYSID                                     D      38.  *   202.     205.     209.  
+MVPTNAM                                    X      48. C*    34. C
+NEWUSER                                    X     172.  *   198.     200.  
+NOMENUS                                    X     255.  *   250.  
+NOUSER                                     X     233.  *   228.  
+NOUSERS                                    X     244.  *   239.  
+NULL                                       X     103.  *   101.  
+NULSPL                                     X      28. C*    41. C
+NWK2                                       F       9. B*    32. C    33. C    44. C    45. C
+ONE                                        F      64.  *   161.  
+PAGENO                                     F      69.  *   217.     218.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PRESULT                                    I      13. B*    21. C    22. C    23. C    24. C
+PROGNAME                                   O16    47.  *   113.     125.  
+PROGNTXT                                   D      44.  *   113.     218.  
+PRT0                                       X     166.  *   163.  
+PRTHDG                                     X     217.  *   170.  
+PRTHDGX                                    X     216.  *   175.     179.     185.     191.     212.  
+PRTID                                      O 2    50.  *   119.     128.     149.     161.  
+PRTLEFT                                    X     205.  *   203.  
+PRTLPT1                                    X      51. C*    38. C
+PRTNAME                                    D       7. B*    22. C    25. C    28. C    31. C    32. C    39. C    40. C
+                                                     *    43. C    44. C    46. C    47. C    48. C
+PRTNAME                                    X     192.  *   187.  
+PRTRITE                                    X     209.  *   203.  
+PRTSIDE                                    F      67.  *   180.     193.     203.     206.     213.     222.  
+QUITBUTTON                                 O 1    53.  *   121.     130.     151.  
+RED                                        O18    57.  *    91.  
+REPLY                                      D      63.  *   109.     195.  
+RESULT                                     F      71.  *    95.     101.       6. C    12. C    14. C    16. C   150.  
+                                                     *   151.     233.     244.     255.  
+RESULT1                                    F      72.  *   149.     160.     161.     162.  
+RESULTR                                    F      73.  *
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. A*
+TESTIT                                     X     101.  *    95.  
+
+
+
+PAGE    4      SMUSRLST.PLS IDE                                                                               03-22-04 14:48:26
+                                         
+
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TITLE                                      O16    46.  *   115.     126.  
+TITLTXT                                    D      43.  *   115.  
+TODAY                                      D       8. A*   117.     219.  
+USER                                       D      15.  *   172.     192.  
+USERCOD                                    D      21.  *
+USERCODE                                   D      29. A*
+USERFIL                                    i      10.  *   172.     229.  
+USERFILN                                   D      11.  *   229.  
+USERID                                     D      14.  *   172.     188.     194.     199.  
+USERKEY                                    D      12.  *
+USERLOC                                    D      16.  *   172.  
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+USERNM                                     D      20.  *
+USEROPEN                                   X     228.  *   141.  
+USEROPND                                   X     236.  *   231.  
+USERREC                                    D      19.  *
+USERSKEY                                   D      26.  *   194.     195.  
+USERSOPN                                   X     239.  *   145.  
+USERSYS                                    i      24.  *   195.     197.     240.  
+USERSYSN                                   D      25.  *   240.  
+USERTABS                                   D      22.  *
+USRSOPND                                   X     247.  *   242.  
+USYSCOD                                    D      29.  *   197.     201.  
+USYSID                                     D      28.  *   197.     199.  
+USYSLVL                                    F      30.  *   197.  
+VENDNUMB                                   D      15. A*
+0                                          I      89.  *    89.      90.      91.  
+255                                        I      89.  *    91.  
+

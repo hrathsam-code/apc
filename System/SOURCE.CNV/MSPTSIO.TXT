@@ -1,0 +1,19 @@
+. ...............................
+. MSPTSIO/TXT INCLUDE MODULE
+. ...............................
+. 
+. 
+MSPTSRD  CALL      CLRTRAPS
+         TRAP      MSPTNOTF IF IO
+         TRAP      STDFMTER IF FORMAT 
+         TRAP      STDPARER IF PARITY
+         TRAP      STDRANGE IF RANGE
+         MOVE      "M" TO IOSW
+         MOVE      "MSPARTFL/ISI" TO IOERFILE
+         MOVE      "READ"         TO IOTYPE
+         READ      MSPARTFL,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+                                     MSXRFPT1,MSXRFPT2
+. 
+         MOVE      "H" TO IOSW
+. 
+. ..............................

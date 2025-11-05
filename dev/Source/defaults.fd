@@ -1,0 +1,104 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Defaults.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-25-2019 At 12:52                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00106   07-23-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $DefaultsVAR
+$DefaultsVAR                     EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+Defaults                         RECORD
+Entity                           Dim                8                   1 - 8
+Primary                          Dim                10                  9 - 18
+Name                             Dim                60                 19 - 78
+Address1                         Dim                30                 79 - 108
+Address2                         Dim                30                109 - 138
+Address3                         Dim                30                139 - 168
+City                             Dim                30                169 - 198
+St                               Dim                2                 199 - 200
+Zip                              Dim                10                201 - 210
+Country                          Dim                3                 211 - 213
+CustTermCode                     Dim                8                 214 - 221
+CustCountry                      Dim                3                 222 - 224
+CustInvMethod                    Form               1                 225 - 225
+VendCountry                      Dim                3                 226 - 228
+VendTermCode                     Dim                8                 229 - 236
+VendType                         Dim                4                 237 - 240
+VendClass                        Dim                4                 241 - 244
+VendContactMethod                Form               2                 245 - 246
+SMTPServer                       Dim                60                247 - 306
+SMTPUserName                     Dim                30                307 - 336
+SMTPPassword                     Dim                30                337 - 366
+SMTPPort                         Form               6                 367 - 372
+IsPrimary                        Form               1                 373 - 373
+                                 RECORDEND
+;
+;======================================================================================;
+TempDefaults                        record          like   Defaults                        
+OrigDefaults                        record          like   Defaults                        
+SaveDefaults                        record          like   Defaults                        
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+DefaultsTXTNM                          INIT         "Defaults"
+DefaultsISI1NM                         INIT               "Defaults.ISI"
+DefaultsISI2NM                         INIT               "Defaults2.ISI"
+DefaultsI1DEF                           init            "-n,z,y,1-8"
+DefaultsI2DEF                           init            "-n,z,y,1-8,9-18"
+.
+. By Entity
+. 1-8
+.
+DefaultsKY                       DIM                 8
+.
+. By Entity, Primary
+. 1-8, 9-18
+.
+DefaultsKY2                      DIM                18
+;=============================================================================;
+;
+DefaultsFLST                         FILELIST
+DefaultsFL                          IFILE              name="Defaults.ISI",FIX=1024,NODUP,NOPATH
+DefaultsFL2                         IFILE              name="Defaults2.ISI",FIX=1024,NODUP,NOPATH
+                                    FILELISTEND
+ 
+DefaultsFileSize       CONST      "1024"
+ 
+DefaultsProg           INIT       "Defaults Program"
+DefaultsDesc           INIT       "Defaults Maintenance"
+DefaultsTITLE          INIT       "Defaults Record"
+DefaultsHelp           INIT       "Defaults.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $DefaultsVARIO
+            INCLUDE Defaults.IO 
+          %ENDIF          //End of IO Include File

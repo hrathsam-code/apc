@@ -1,0 +1,101 @@
+:Base SUNIDE.HLP
+:Title sunide
+1 PL/B IDE Studio
+2 Welcome to the PL/B IDE Studio=welcome
+2 Installing the IDE Studio=installation
+2 Getting Assistance While You Work=assistance
+2 Developing an Application in PL/B
+3 Developing an Application in PL/B=developing
+3 Visual PL/B Concepts=concepts
+3 Starting the IDE=start
+3 IDE Elements=elements
+3 Source Map=source_map
+3 Browse Labels=browse_labels
+3 Using the Editor=editor
+3 Shortcut Keys=shortcut_keys
+3 Writing Code=write_code
+2 Forms, Controls, and Menus
+3 Forms, Controls, and Menus=controls
+3 Understanding Properties, Events, and Methods=understanding
+3 Clicking Buttons to Perform Actions=clicking
+3 Menu Basics=menu_basics
+3 Controls for Displaying and Entering Text
+4 Controls for Displaying and Entering Text=text_controls
+4 Using STATTEXT to Display Data=stattext
+4 Working with EDITTEXT Controls=edittext
+3 Controls That Present Choices to Users
+4 Controls That Present Choices to Users=choices
+4 Selecting Individual Options with Checkboxes=selecting_options
+4 Grouping Options with Radio Buttons=grouping
+4 Using DATALISTs and COMBOBOXes=datalists_comboboxes
+4 Using Scrollbars as Input Devices=scrollbars
+3 Graphics, Dialogs, and Focus
+4 Controls that Display Graphics and Pictures=graphics
+4 Understanding Focus=focus
+4 Setting the Tab Order=tab_order
+4 Prompting the User with Dialog Boxes=dialog_boxes
+2 Managing Projects
+3 Managing Projects=managing_projects
+3 Working with Projects=working_projects
+3 The Structure of a PL/B Project=structure
+3 Creating, Opening, Closing, and Saving Projects=creating_projects
+3 Adding, Saving, and Removing Files=adding_files
+3 Making, Executing, and Debugging a Program=making
+1 Menu Items
+2 File Menu
+3 New Project (File menu)=file_new_project
+3 Open Project (File menu)=file_open_project
+3 Save Project As (File menu)=file_save_project_as
+3 Close Project (File menu)=file_close_project
+3 New File (File menu)=file_new_file
+3 Open File (File menu)=file_open_file
+3 Close File (File menu)=file_close_file
+3 Close All Files (File menu)=file_close_all_files
+3 Save File (File menu)=file_save_file
+3 Save File As (File menu)=file_save_file_as
+3 Save All (File menu)=file_save_all
+3 Recent Projects (File menu)=file_recent_projects
+3 Recent Files (File menu)=file_recent_files
+3 Exit (File menu)=file_exit
+2 Edit Menu
+3 Undo (Edit menu)=edit_undo
+3 Redo (Edit Menu)=edit_redo
+3 Cut (Edit menu)=edit_cut
+3 Copy (Edit menu)=edit_copy
+3 Paste (Edit menu)=edit_paste
+3 Find (Edit menu)=edit_find
+3 Find Next (Edit menu)=edit_find_next
+3 Find Previous (Edit menu)=edit_find_previous
+3 Find in Files (Edit menu)=find_in_files
+3 Replace (Edit menu)=edit_replace
+3 Goto Line (Edit menu)=edit_goto_line
+2 Project Menu
+3 Add Source (Project menu)=project_add_source
+3 Remove Source (Project menu)=project_remove_source
+3 Build (Project menu)=project_build
+3 Force Build (Project menu)=project_force_build
+3 Clean (Project menu)=project_clean
+3 Debug (Project Menu)=project_debug
+3 Execute (Project menu)=project_execute
+3 Build and Debug (Project menu)=project_build_debug
+3 Build and Execute (Project menu)=project_build_execute
+3 Project Options (Project menu)=project_options
+2 Tools Menu
+3 Workshop (Tools menu)=tools_workshop
+3 Designer (Tools menu)=tools_designer
+3 Compiler (Tools menu)=tools_compiler
+3 MenuGen (Tools menu)=tools_menugen
+3 Utilities (Tools menu)=tools_utilities
+3 Editor Properties (Tools menu)=tools_editor_properties
+3 IDE Options (Tools menu)=tools_ide_options
+3 Workshop Options (Tools menu)=tools_workshop_options
+2 Window Menu
+3 Arrange Icons (Window menu)=window_arrange_icon
+3 Cascade (Window menu)=window_cascade
+3 Tile Horizontal (Window menu)=window_tile_horizontal
+3 Tile Vertical (Window menu)=window_tile_vertical
+1 Reference
+2 PL/B Language Reference=contents_plb@plb.hlp
+2 PL/B Utilities=contents_plbutil@plbutil.hlp
+2 PL/B Runtime and Errors=contents_plbrun@plbrun.hlp
+2 PL/B Form Designer=contents_plbdsign@plbdsign.hlp

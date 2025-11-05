@@ -1,0 +1,72 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CheckRunDetail.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-06-2019 At 17:46                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              10001   07-05-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CheckRunDetailVAR
+$CheckRunDetailVAR               EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+CheckRunDetail                   RECORD
+Entity                           Dim                8                   1 - 8        //1 - 8
+SubEntity                        Dim                8                   9 - 16       //9 - 16
+BankCode                         Dim                6                  17 - 22       //17 - 22
+Voucher                          Form               7                  23 - 29       //23 - 29
+Vendor                           Dim                6                  30 - 35       //30 - 35
+CheckNo                          Form               10                 36 - 45       //36 - 45
+SeqMajor                         Form               7                  46 - 52       //46 - 52
+DiscAmt                          Form               5.2                53 - 60       //53 - 60
+GrossAmount                      Form               7.2                61 - 70       //61 - 70
+NetAmount                        Form               7.2                71 - 80       //71 - 80
+                                 RECORDEND
+;
+;======================================================================================;
+TempCheckRunDetail                  record          like   CheckRunDetail                  
+OrigCheckRunDetail                  record          like   CheckRunDetail                  
+SaveCheckRunDetail                  record          like   CheckRunDetail                  
+;======================================================================================;
+CheckRunDetailTXTNM                          INIT         ""
+;=============================================================================;
+;
+CheckRunDetailFLST                         FILELIST
+                                    FILELISTEND
+ 
+CheckRunDetailFileSize       CONST      "210"
+ 
+CheckRunDetailProg           INIT       "CheckRunDetail Program"
+CheckRunDetailDesc           INIT       "CheckRunDetail Maintenance"
+CheckRunDetailTITLE          INIT       "CheckRunDetail Record"
+CheckRunDetailHelp           INIT       "CheckRunDetail.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CheckRunDetailVARIO
+            INCLUDE CheckRunDetail.IO 
+          %ENDIF          //End of IO Include File

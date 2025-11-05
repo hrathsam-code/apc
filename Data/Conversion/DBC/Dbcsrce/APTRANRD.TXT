@@ -1,0 +1,14 @@
+. 
+         READ      APTRANFL,TRNKEY;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT:
+                                   TDESC,TAMT,TLDDAY,TDISA,TDCODE
+. --VERIFY CORRECT INDEX---
+         MOVE      TACCN TO TRNKEY2
+         RESET     TRNKEY2 TO 6
+         APPEND    TYEAR TO TRNKEY2
+         APPEND    TMON TO TRNKEY2
+         APPEND    TDAY TO TRNKEY2
+         APPEND    TINVNO TO TRNKEY2
+         APPEND    TCNT TO TRNKEY2
+         RESET     TRNKEY2 TO 1
+. 
+. -----------

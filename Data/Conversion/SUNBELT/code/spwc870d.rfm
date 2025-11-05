@@ -1,0 +1,404 @@
+Date:  11-24-2003
+ 
+Subject:  Patch RELEASE 8.7D Runtime Files
+ 
+    Included you will find the patch release of:
+ 
+         PLBSERVE        8.7D  24 Nov 2003     8.7.0140
+         PLBCLIENT       8.7D  24 Nov 2003     8.7.0140
+         PLBCLICON       8.7D  24 Nov 2003     8.7.0140
+         PLBWIN          8.7D  24 Nov 2003     8.7.0140
+         PLBDSIGN        8.7D  24 Nov 2003     8.7.0140
+         SUNFYSYS.DLL    8.7D  24 Nov 2003     8.7.0140
+         SUNFHDLL.DLL    8.7D  24 Nov 2003     8.7.0140
+         SUNFHDLL.LIB    8.7D  24 Nov 2003
+         PLBCMP          8.7D  24 Nov 2003
+         PLBDBUG         8.7D  24 Nov 2003
+         SUNIDE          8.7D  24 Nov 2003
+         EDITOR          8.7D  24 Nov 2003
+ 
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+         - There were multiple PL/B statements that could generate
+           I64 and I65 errors.  The following errors have been redefined
+           and should be documented for the 8.7 release.
+ 
+             I64 - Invalid Data Record Number for Isam DELETE.
+             I65 - Invalid record number for Isam WRITE/INSERT.
+                   This error indicates a problem in the ISI file
+                   Deleted Data Record (DDR) sectors.
+ 
+                   Subcode:
+                   30 - Invalid DDR record pointer value.
+                   31 - Invalid number of pointers in current DDR sector.
+                   32 - Invalid number of pointers in next DDR sector.
+ 
+             I33 - Error processing SNDFILE.
+                   Subcode:
+                   40 - Invalid for Sound File.
+                   41 - Not enough memory to play sound.
+ 
+             I34 - Update file position is invalid.
+             I35 - Update of a compressed file is not allowed.
+ 
+*==============================================================================
+The following files have been changed as follows:
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Modified the forced shutdown command 'plbserve -f' to wait a
+           maximum of 60 seconds before terminating the main process.  This
+           prevents the main task from hanging indefinitely in this case.
+ 
+         - Made modifications to allow the Admin Soft Shutdown command
+           to be recognized in a more timely manner.
+ 
+         - Added a new keyword named 'PLBCS_DEFAULTCWD={path}' that can be
+           used to establish the default working directory for the main
+           Application Server process when the PLBSERVE server is started.
+           If this keyword is specified and the 'PLB_CURDIR' keyword is
+           NOT specified, then the PLBCS_DEFAULTCWD {path} is used as
+           the initial setting for the current directory for each
+           child thread/process that is executed for the Application Server.
+ 
+         - Corrected a problem where the runtime did not send keep alive
+           messages to a SUNFM file manager when a program was setting in a
+           KEYIN or a PL/B Modal Dialog for an extended period of time.
+           If the extended time was longer than the timeout identified
+           for the FM_KEEPALIVE, then the SUNFM child would terminate
+           prematurely. This would cause an unexpected I81 error for the next
+           operation on a file opened as a managed file.
+ 
+         - A problem was corrected for an admin ADMCOMMAND Hard Terminate
+           operation that would cause a 'plbserve -t' or a 'plbserve -f'
+           request to fail to terminate the server.  See ADMIN below.
+ 
+-------------------------------------------------------------------------------
+PLBCLIENT- Added a new command line option named '/deb' or '-deb'  for the
+           client.  This option invokes debug logging for PLBCLIENT that
+           can help resolve execution issues at the client workstation. When
+           this option is specified, then a log file is created in the
+           same directory location where the PLBCLIENT module is located.
+           The log file has the same name as the client module being
+           executed with an extension of '.log'.
+ 
+         - Modified the command line option processing to correct a problem
+           where an option was ignored when it did not have a trailing
+           blank character.
+ 
+         - Modified the EVENTWAIT processing to detect server error messages
+           and then exit/abort in a more timely manner.
+ 
+         - Corrected a problem where the rightmost column was not being
+           repainted for displayed data on the MAINWINDOW when the
+           window was being restored.
+ 
+         - Corrected a problem where PLBCLIENT could become non-responsive
+           that would prevent communications with the Application Server.
+           This problem might occur if the client user interface was
+           not used for a long period of time.
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Implemented the logic to allow the client and Windows application
+PLBCLIENT  server to detect errors or a situation where the client/server
+           processes have not communicated for an extended period of time. If
+           one of these cases is detected, then the client and application
+           server tasks close the socket connection that is erring and attempt
+           to reconnect with a new socket connection.  If a new connection is
+           established, then the PL/B program continues to execute without
+           interruption.  Otherwise, the connection and the PL/B program are
+           terminated.  When a reconnection process is initiated and completed,
+           then messages are posted to the log file to identify that a
+           reconnection was performed.
+ 
+           The lack of communications situation is determined based on the
+           period of time that a tasks does not receive a message.  The
+           default timeout periods are set to be 130 seconds for the
+           Application Server and 300 seconds for the Client task.  These
+           default timeout periods can be changed by a keyword named
+           'PLBCS_RECVTIMEOUT={seconds}'.  If the {seconds} value is
+           set to be ZERO, then the receive timeout is disabled and the
+           task waits for an indeterminate time or for an error to be detected.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Corrected a problem where a COPYFILE would give an invalid
+PLBSERVE   error code when a file could not be found or created because
+PLB (UNIX) a SUNFM file manager was not available.
+ 
+         - Corrected a problem where a READLK instruction was not leaving a
+           record lock set if it followed an Isam READ key instruction that
+           did not find a record.  This problem would occur when both
+           the READ and READLK operations used the same IFILE variable
+           that had been opened in a MANUAL record-locking mode.
+ 
+         - Modified the DELETE FILE operation to insure that the OVER
+           flag is always cleared as documented.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the SELECTALL property for an EDITNUMBER to execute
+           in the same manner as the EDITTEXT object.  This means that
+           all of the data in the EDITNUMBER object is selected when
+           a mouse click action to the object is executed and the SELECTALL
+           property is set TRUE.
+ 
+         - Modified the CREATE for an EDITNUMBER object to use the default
+           values of 5 integer digits and 0 decimal digits when the create
+           operation is executed and neither the INTEGERDIGIT nor the
+           DECIMALDIGIT properties are specified.
+ 
+         - Added a new property for the EDITNUMBER object named
+           'DPI=dnumnvar'.  The DPI (Decimal Point Implied) property allows
+           data entry into an EDITNUMBER object that specifies a
+           non-zero value for the DECIMALDIGITS property without requiring
+           the input of a decimal point.
+ 
+         - Modified the value associated with the PLB_BGFG={[l]mn} to support
+           an optional [l] high order digit.  If the [l] digit is
+           non-zero, then the PLBWIN runtime will set the SETMODE
+           *LTGRAY mode to be ON for the MAINWINDOW initialization.
+           This corrects a problem where a DISPLAY *ES was not painting
+           the MAINWINDOW gray when the PLB_BGFG was set to Yellow
+           and the SETMODE *LTGRAY was set to be ON in a program.
+ 
+           Example PLBWIN.INI Keyword:
+ 
+               PLB_BGFG=160
+ 
+           The hex value of 0x100 digit of the hex value of 0x160
+           indicates that the MAINWINDOW is to be initialized with
+           the SETMODE *LTGRAY set to ON.  This will cause a MAINWINDOW
+           to be create with a GRAY background automatically.
+ 
+         - Added a new keyword named 'PLBAS_DEFAULTCWD={path}' that can be
+           used to establish the default working directory for the main
+           Automation Server process.  If the PLBAS_DEFAULTCWD keyword
+           is specified and the 'PLB_CURDIR' keyword is NOT specified,
+           then the PLBCS_DEFAULTCWD {path} is used as the initial
+           setting for the current directory for each child thread
+           that is executed for the Automation Server.
+ 
+         - Corrected a problem where the GetText method for a COMBOBOX
+           object was not supporting an *Index parameter as documented.
+           The GetText method have been changed to support an optional
+           *Index parameter.  Please note the following:
+ 
+           1. If the *Index value is not specified, then the GetText
+              method retrieves the currently selected COMBOBOX item.
+ 
+           2. If the *Index value is specified, then it is a zero based
+              index used to retrieve the text for a COMBOBOX item.
+ 
+         - Corrected a problem where the ALLOWMINUS property was not being
+           set when a CREATE for an EDITNUMBER object was executed.
+ 
+         - Corrected a problem where the locale decimal was not being
+           used for a SETITEM operation when the PLB_LOCALE=ON keyword
+           was being used.
+ 
+         - Corrected a problem where a PrintForm method for a WINDOW
+           object might not work properly.
+ 
+         - Corrected a problem where an ActiveX control was not using a
+           PANEL object as its parent window.  This problem was causing the
+           ActiveX control to be misplaced on a form when it was intended
+           to be placed on top of a PANEL object.
+ 
+         - Corrected a problem where the Windows OS could change the
+           memory location of the UET environment pointer table when
+           a SETMODE *ENV operation was executed.  If the Windows OS
+           changed the UET pointer table, then this would cause a GPF
+           if a program attempted to executed a CLOCK ENV operation.
+ 
+         - Corrected a problem where a SETITEM instruction did not
+           change the focus to a RADIO button in a group when the state
+           of the RADIO button was set to be ON.  This caused unexpected
+           actions when buttons were click in a RADIO button group.
+ 
+         - Corrected a problem where a GETPROP of an AUTOMATION property
+           into a FORM variable might not work.  This problem was
+           intermittent.  This correction corrects a problem where the
+           FONT size for the editor in the SUNIDE was failing.
+ 
+         - Corrected a GPF error that would occur when a TIMER object
+           value was set to be zero.
+ 
+         - Corrected a problem where an IBEAM cursor was not appearing
+           over an EDITTEXT object when its parent was a PANEL object.
+ 
+         - Corrected a problem where an EXECUTE of '!dir' did not work.
+ 
+         - Corrected a problem that started occurring with changes made
+           in release 8.7B where the runtime did not send keepalive messages
+           to a SUNFM file manager when a program was setting in a KEYIN,
+           PAUSE, or a PL/B Modal Dialog for an extended period of time.
+           If the extended time was longer than the timeout identified for the
+           FM_KEEPALIVE, then the SUNFM child would terminate prematurely.
+           This would cause an unexpected I81 error for the next operation
+           on a file opened as a managed file.
+ 
+         - Corrected a problem where the top level menu items for a
+           MDI Client form would have unexpected items appear/disappear
+           when ACTIVATE/DEACTIVATE operations were performed and there
+           was an active MDI Child window that was in a maximized state.
+ 
+         - Corrected a S10 problem for a SPLOPEN using a '-' device name
+           and the mode is set to 'R' raw mode.
+         
+         - Corrected a problem where a COMBOBOX object would not become
+           visible if it existed on a PLFORM and a 'SETPROP {col},VISIBLE=1'
+           was executed with {col} referencing the PLFORM collection label.
+ 
+         - Corrected a problem where the CTRL+TAB key sequence that caused
+           a TABCONTROL tab label change was not generating the user
+           CLICK and CHANGE events.  These events are now being generated
+           as expected.
+ 
+         - Corrected a problem where the data variable for a DATA property
+           used in a CREATE for a DATALIST was causing the PL/B program
+           data variable ';' characters to be changed to NULL characters.
+ 
+         - Corrected a problem where a GPF could occur when a GETPROP
+           for the PASSWORDCHAR property was executed.
+ 
+         - Modified the LISTVIEW line item color support to avoid a
+           buffer conflict with the GETFNAME instruction.  This change
+           is to work around a Windows OS problem for some Windows OS
+           versions that was causing invalid GETFNAME results when
+           a LISTVIEW with a color column was being used.
+
+-------------------------------------------------------------------------------
+PLB (UNIX)- Modified the COMCHECK instruction to provide more reliable 
+            timeout checking.
+ 
+          - Corrected a problem where a KEYIN for a Linux PowerPC runtime
+            would hang.
+ 
+          - Corrected a problem where a program compiled using the '-ZC#3'
+            compatibility option was prematurely terminating when the
+            program included an array variable and it was executed on 
+            a Forward Byte Ordered (Big-Endian) system.
+ 
+-------------------------------------------------------------------------------
+PLBCMP   - Modified the compiler to output the compile command line into
+           the Window Titlebar when using a GUI runtime.
+ 
+         - Modified the compiler to force an *RV control when an *EDIT
+           control is detected in a KEYIN and the program is being compiled
+           with the '-ZC#3' compatibility option.
+ 
+         - Modified the CHECKBOX and RADIO objects to support the VALUE
+           property.  In these cases, the VALUE property is only supported
+           as a GETPROP and SETPROP property.
+ 
+         - Corrected a problem where the compiler did not give a compilation
+           error when a RECORD pointer reference was specified with a
+           record member designation.  The compiler gives an expected syntax
+           error in this case.
+ 
+           Example:
+                   RecPtr   RECORD   ^
+                   X        INIT     "X"
+                   .
+                            DISPLAY  RecPtr.X     //Compiler Error Expected!
+ 
+         - Corrected a problem where the compiler would hang in an 
+           infinite loop.  This problem occurred when the replacement
+           string was the same as the destination string for a DEFINE.
+ 
+-------------------------------------------------------------------------------
+PLBDBUG  - Corrected a problem where the debugger could hang if a DSCNCT,
+           STOP, or SHUTDOWN instruction was encountered while executing
+           a STEPOVER or STEPOUT command.
+ 
+-------------------------------------------------------------------------------
+PLBDSIGN - Added DPI property for EDITNUMBER object. This property is
+           referenced as DecimalImplied in the designer property window.
+ 
+-------------------------------------------------------------------------------
+PXLAT    - Corrected a problem where PXLAT did not properly process a PLC
+           program file when the program contained an array variable and it was
+           compiled with the '-zc#3' compiler option.
+ 
+-------------------------------------------------------------------------------
+SUNIDE   - Fixed a bug where if a file with an unknown extension is opened, the
+           full path to the file may not be used resulting in the potential of
+           opening the same file multiple times.
+
+         - Fixed an untrapped I05 error that could occur while loading a new
+           project.
+
+         - Fixed a problem where the multi-select feature of the open file
+           dialog was not implamented.
+
+         - Corrected an ambiguious error regarding printing.
+
+         - Corrected a bug where the IDE did not remember program spacific INI
+           file settings from the command line prompt.
+
+         - Corrected a problem where the ide was not properly saving the
+           restored windowed posittion if it is closed while maximized.
+
+         - Corrected a problem where warnings and errors are reported twice.
+
+         - Corrected a problem where end of compile errors (undefined execution
+           lables) were reported but not counted as errors.
+
+         - Corrected a problem with processing cross reference listings that
+           had different data alignment as a result of various compiler
+           options.
+
+         - Fixed a problem where a variable was to small to hold the full path
+           and filename on XP systems.
+
+         - Fixed a bug where a temporary variable was not a global and needed
+           to be to be accessed between load instances of this module.
+
+         - Modified Unexpected Error dialog to report IDE version.
+
+         - Addressed an issue where the codesence control did not always fill
+           the window.(added use of the DOCK property).
+
+-------------------------------------------------------------------------------
+SUNFHSYS.DLL- Modified the Isam WRITE and INSERT operations to verify
+              ISI deleted data record sector.  This change has been made
+              to avoid situations where an invalid ISI data file structure
+              could cause indeterminate operations that over write valid
+              text data.  An I65 with an appropriate subcode occurs if
+              a bad DDR sector is detected.
+            
+            - Modified the I64 error to be an I34 error for a DELETE
+              FILE operation.
+ 
+            - Modified the I65 error to be an I35 error for an UPDATE
+              FILE operation.
+ 
+            - Corrected a problem where a READLK instruction was not leaving a
+              record lock set if it followed an Isam READ key instruction that
+              did not find a record.  This problem would occur when both
+              the READ and READLK operations used the same IFILE variable
+              that had been opened in a MANUAL record-locking mode.
+ 
+-------------------------------------------------------------------------------
+ADMIN    - Modified the runtime to execute a SHUTDOWN instruction when
+           an ADMCOMMAND to execute a Soft Terminate command.  This should
+           cause all files and program resources to released and closed.
+ 
+*WARNING*- If the ADMCOMMAND is used to execute a Hard Terminate command,
+           then thread/process resources and files are not released or closed.
+           The resources and files are only released when the main server
+           for PLBSERVE/SUNFM is terminated.  The Hard Terminate command
+           performs an OS operation that directly kills a child 
+           thread/process.  The Hard Terminate command should only be
+           used in special situations where a child thread/process must
+           be terminated immediately and the server Administrator expects
+           to terminate the main server task.
+ 
+         - Corrected a problem where an ADMCOMMAND did not decrement the
+           child task count when a Hard Terminate command was executed.
+           This would cause a 'plbserve -t' or 'plbserve -f' command to
+           hang indefinitely after a Hard Terminate command was used.
+ 
+         - Modified the AIT (Admin Interface Task) to prevent a 100%
+           CPU problem that might occur when received message failures
+           are detected.
+

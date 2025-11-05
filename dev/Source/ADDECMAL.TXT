@@ -1,0 +1,67 @@
++       SUBROUTINE TO INSERT A DECIMAL POINT IN A NUMERIC FIELD
+. 
+. ADDECMAL 3.1
+. 
+. 
+.       ASSUMPTIONS:      1. THE NUMERIC FIELD WILL ALWAYS HAVE 2 DECIMALS
+. 
+.                         2. DIMFLD IS A VALID NUMERIC FIELD.
+. 
+.                         3. THE FIELD TO BE CONVERTED IS IN DIMFLD WHEN
+.                            THE SUBROUTINE IS CALLED.
+. 
+. 
+.       ACTIONS:          1. DIMFLD WILL CONTAIN THE CONVERTED FIELD WHEN
+.                            CONTROL IS RETURNED TO THE CALLING PROGRAM.
+. 
+.                         2. DIMFLD WILL BE RIGHT JUSTIFIED WITH THE 
+.                            FORM POINTER POINTED AT THE FIRST SIGNIFICANT
+.                            DIGIT.
+. 
+.                         3. IF A DECIMAL POINT ALREADY EXIST IN DIMFLD
+.                            WHEN THE SUBROUTINE IS CALLED THEN CONTROL IS
+.                            RETURNED AND NO CHANGE MADE IN DIMFLD.
+. 
+.                         4. IF DIMFLD IS EOS THEN ZERO (0) WILL BE RETURNED
+. 
+. 
+. INCLUDE THE FOLLOWING IN THE CALLING PROGRAM:
+. 
+. DIMFLD    DIM    12
+. FORMFLD   FORM   9.2
+. 
+. -----------------------------------------------------------------------------
+. 
+ADDECMAL MATCH     " " TO DIMFLD
+         GOTO      ADD0 IF NOT EOS
+         MOVE      "0           " TO DIMFLD
+         CLEAR     DIMFLD
+         RESET     DIMFLD TO 1
+. 
+ADD0     TYPE      DIMFLD
+         GOTO      ADD0A IF EQUAL
+         BEEP
+         DISPLAY   *ES,*P20:12,"***ERROR***    ADDECMAL TYPE FAILURE"
+         KEYIN     *P20:15,"RECORD MESSAGE THEN HIT ENTER TO ABORT PROGRAM":
+                   *EOFF,DIMFLD
+         STOP
+. 
+ADD0A    MOVE      DIMFLD TO FORMFLD
+. 
+ADD1     CMATCH    "." TO DIMFLD
+         GOTO      ADD3 IF EQUAL
+         BUMP      DIMFLD BY 1
+         GOTO      ADD2 IF EOS
+         GOTO      ADD1
+. 
+ADD2     RESET     DIMFLD TO 1
+         DIV       "100" INTO FORMFLD
+         MOVE      FORMFLD TO DIMFLD
+ADD3     RESET     DIMFLD
+. 
+ADD4     CMATCH    " " TO DIMFLD
+         GOTO      ADD5 IF NOT EQUAL
+         BUMP      DIMFLD
+         GOTO      ADD4
+. 
+ADD5     RETURN

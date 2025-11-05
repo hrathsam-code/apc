@@ -1,0 +1,165 @@
+........................................................
+. BATCHIO/TEXT - BATCH FILE I/O MODULES                .
+........................................................
+.
+BTCHOPEN TRAPCLR   IO
+         TRAP      NOBATCH IF IO
+         MOVE      "M" TO IOSW
+         OPEN      BATCHFL,BATCHNM
+         MOVE      "H" TO IOSW
+         RETURN
+.
+NOBATCH  BEEP
+         DISPLAY   *P1:23,*EL,*HON,"A/R CASH BATCH FILE NOT ON-LINE! ":
+                    *W4,*HOFF,*P1:23,*EL
+         RETURN
+.
+BTCHREAD TRAPCLR   IO
+         TRAPCLR   RANGE
+         TRAPCLR   PARITY
+         TRAPCLR   FORMAT
+         MOVE      "BATCHFL" TO IOERFILE
+         MOVE      "READ "   TO IOTYPE
+         MOVE      "M"       TO IOSW
+         TRAP      STDIOERR IF IO
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+.
+         READ      BATCHFL,BTCHRDKY;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+                           BTCHDATE:
+                           BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+                           BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+                           BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+                           BACCT19,BACCT20:
+                           BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+                           BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+                           BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+                           BCAMT20
+.
+         GOTO      BTCHRTRN IF OVER
+         MOVE      "H"  TO  IOSW
+.
+BTCHRTRN RETURN
+.
+BTCHWRIT TRAPCLR   IO
+         TRAPCLR   RANGE
+         TRAPCLR   PARITY
+         TRAPCLR   FORMAT
+         MOVE      "BATCHFL" TO IOERFILE
+         MOVE      "WRITE"   TO IOTYPE
+         MOVE      "M"       TO IOSW
+         TRAP      STDIOERR IF IO
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+.
+         WRITE     BATCHFL,BTCHRDKY;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+                           BTCHDATE:
+                           BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+                           BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+                           BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+                           BACCT19,BACCT20:
+                           BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+                           BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+                           BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+                           BCAMT20
+.
+         MOVE      "H"  TO  IOSW
+         RETURN
+.
+BTCHUPDT TRAPCLR   IO
+         TRAPCLR   RANGE
+         TRAPCLR   PARITY
+         TRAPCLR   FORMAT
+         MOVE      "BATCHFL" TO IOERFILE
+         MOVE      "UPDATE"  TO IOTYPE
+         MOVE      "M"       TO IOSW
+         TRAP      STDIOERR IF IO
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+.
+         UPDATE    BATCHFL;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+                           BTCHDATE:
+                           BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+                           BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+                           BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+                           BACCT19,BACCT20:
+                           BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+                           BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+                           BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+                           BCAMT20
+.
+         MOVE      "H"  TO  IOSW
+         RETURN
+.
+.
+BTCHRDKS TRAPCLR   IO
+         TRAPCLR   RANGE
+         TRAPCLR   PARITY
+         TRAPCLR   FORMAT
+         MOVE      "BATCHFL" TO IOERFILE
+         MOVE      "READKS"  TO IOTYPE
+         MOVE      "M"       TO IOSW
+         TRAP      STDIOERR IF IO
+         TRAP      STDRANGE IF RANGE
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+.
+         READKS    BATCHFL;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+                           BTCHDATE:
+                           BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+                           BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+                           BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+                           BACCT19,BACCT20:
+                           BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+                           BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+                           BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+                           BCAMT20
+.
+         GOTO      BTCHRTRN IF OVER
+.
+         MOVE      "H"  TO  IOSW
+         RETURN
+....
+BTCHCLOS TRAPCLR   IO
+         MOVE      "CLOSE"   TO IOTYPE
+         MOVE      "BATCHFL" TO IOERFILE
+         MOVE      "M"       TO IOSW
+         TRAP      STDIOERR  IF IO
+.....        CLOSE     BATCHFL,BATCHNM
+         MOVE      "H"  TO  IOSW
+         RETURN
+.
+....................................................................
+.
+STORBTCH STORE     ACCTARG INTO BTCHINDX OF BACCT1:
+                   BACCT2,BACCT3,BACCT4,BACCT5:
+                   BACCT6,BACCT7,BACCT8,BACCT9,BACCT10:
+                   BACCT11,BACCT12,BACCT13,BACCT14,BACCT15:
+                   BACCT16,BACCT17,BACCT18,BACCT19,BACCT20
+.
+         STORE     CHECKAMT INTO BTCHINDX OF BCAMT1:
+                   BCAMT2,BCAMT3,BCAMT4,BCAMT5:
+                   BCAMT6,BCAMT7,BCAMT8,BCAMT9,BCAMT10:
+                   BCAMT11,BCAMT12,BCAMT13,BCAMT14,BCAMT15:
+                   BCAMT16,BCAMT17,BCAMT18,BCAMT19,BCAMT20
+.
+                   RETURN
+....................................................................
+.
+LOADBTCH LOAD      ACCTARG FROM BTCHINDX OF BACCT1:
+                   BACCT2,BACCT3,BACCT4,BACCT5:
+                   BACCT6,BACCT7,BACCT8,BACCT9,BACCT10:
+                   BACCT11,BACCT12,BACCT13,BACCT14,BACCT15:
+                   BACCT16,BACCT17,BACCT18,BACCT19,BACCT20
+.
+         LOAD      CHECKAMT FROM BTCHINDX OF BCAMT1:
+                   BCAMT2,BCAMT3,BCAMT4,BCAMT5:
+                   BCAMT6,BCAMT7,BCAMT8,BCAMT9,BCAMT10:
+                   BCAMT11,BCAMT12,BCAMT13,BCAMT14,BCAMT15:
+                   BCAMT16,BCAMT17,BCAMT18,BCAMT19,BCAMT20
+         RETURN
+.
+....................................................................

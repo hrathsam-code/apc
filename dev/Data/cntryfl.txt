@@ -1,0 +1,248 @@
+USAUNITED STATES OF AMERICA                0
+CANCANADA                                  0
+ESPSPAIN                                   0
+AREUNITED ARAB EMIRATES                    0
+GBRUNITED KINGDOM                          0
+UMIUNITED STATES MINOR OUTLYING ISLANDS    0
+URYURUGUAY                                 0
+TURTURKEY                                  0
+SWESWEDEN                                  0
+JPNJAPAN                                   0
+FRAFRANCE                                  0
+DZAALGERIA                                 0
+MEXMEXICO                                  0
+ASMAMERICAN SAMOA                          0
+AFGAFGHANISTAN                             0
+HUNHUNGARY                                 0
+CHNCHINA                                   0
+MYSMALAYSIA                                0
+AUSAUSTRALIA                               0
+DEUGERMANY                                 0
+ITAITALY                                   0
+CRICOSTA RICA                              0
+GRCGREECE                                  0
+NLDNETHERLANDS                             0
+TWNTAIWAN                                  0
+IRLIRELAND                                 0
+PRIPUERTO RICO                             0
+SGPSINGAPORE                               0
+ISLISRAEL                                  0
+MLTMALTA                                   0
+INDINDIA                                   0
+KORKOREA, REPUBLIC OF                      0
+THITHAILAND                                0
+BRABRAZIL                                  0
+ZAFSOUTH AFRICA                            0
+AUTAUSTRIA                                 0
+ALAALAND ISLANDS                           0
+NZLNEW ZEALAND                             0
+ARGARGENTINA                               0
+BHSBAHAMAS                                 0
+ALBALBANIA                                 0
+KWTKUWAIT                                  0
+CZECZECH REPUBLIC                          0
+BELBELGIUM                                 0
+SAUSAUDIA ARABIA                           0
+ZMBZAMBIA                                  0
+ANDANDORRA                                 0
+AGOANGOLA                                  0
+AIAANGUILLA                                0
+ATAANTARCTICA                              0
+ATGANTIGUA AND BARBUDA                     0
+ARMARMENIA                                 0
+ABWARUBA                                   0
+AZEAZERBAIJAN                              0
+BHRBAHRAIN                                 0
+BGDBANGLADESH                              0
+BRBBARBADOS                                0
+BLRBELARUS                                 0
+BLZBELIZE                                  0
+BENBENIN                                   0
+BMUBERMUDA                                 0
+BTNBHUTAN                                  0
+BOLBOLIVIA                                 0
+BIHBOSNIA AND HERZEGOVINA                  0
+BWABOTSWANA                                0
+BVTBOUVET ISLAND                           0
+VGBBRITISH VIRGIN ISLANDS                  0
+IOTBRITISH INDIAN OCEAN TERRITORY          0
+BRNBRUNEI DARUSSALAM                       0
+BGRBULGARIA                                0
+BFABURKINA FASO                            0
+BDIBURUNDI                                 0
+KHMCAMBODIA                                0
+CMRCAMEROON                                0
+CPVCAPE VERDE                              0
+CYMCAYMAN ISLANDS                          0
+CAFCENTRAL AFRICAN REPUBLIC                0
+TCDCHAD                                    0
+CHLCHILE                                   0
+HKGHONG KONG, SPECIAL ADMINISTRATIVE REGION0
+MACMACAO, SPECIAL ADMINISTRATIVE REGION OF 0
+CXRCHRISTMAS ISLAND                        0
+CCKCOCOS (KEELING) ISLANDS                 0
+COLCOLOMBIA                                0
+COMCOMOROS                                 0
+COGCONGO (BRAZZAVILLE)                     0
+CODCONGO, DEMOCRATIC REPUBLIC OF THE       0
+COKCOOK ISLANDS                            0
+CIVCÔTE D'IVOIRE                           0
+HRVCROATIA                                 0
+CUBCUBA                                    0
+CYPCYPRUS                                  0
+DNKDENMARK                                 0
+DJIDJIBOUTI                                0
+DMADOMINICA                                0
+DOMDOMINICAN REPUBLIC                      0
+ECUECUADOR                                 0
+EGYEGYPT                                   0
+SLVEL SALVADOR                             0
+GNQEQUATORIAL GUINEA                       0
+ERIERITREA                                 0
+ESTESTONIA                                 0
+ETHETHIOPIA                                0
+FLKFALKLAND ISLANDS (MALVINAS)             0
+FROFAROE ISLANDS                           0
+FJIFIJI                                    0
+FINFINLAND                                 0
+GUFFRENCH GUIANA                           0
+PYFFRENCH POLYNESIA                        0
+ATFFRENCH SOUTHERN TERRITORIES             0
+GABGABON                                   0
+GMBGAMBIA                                  0
+GEOGEORGIA                                 0
+GHAGHANA                                   0
+GIBGIBRALTAR                               0
+GRLGREENLAND                               0
+GRDGRENADA                                 0
+GLPGUADELOUPE                              0
+GUMGUAM                                    0
+GTMGUATEMALA                               0
+GGYGUERNSEY                                0
+GINGUINEA                                  0
+GNBGUINEA-BISSAU                           0
+GUYGUYANA                                  0
+HTIHAITI                                   0
+HMDHEARD ISLAND AND MCDONALD ISLANDS       0
+VATHOLY SEE (VATICAN CITY STATE)           0
+HNDHONDURAS                                0
+IDNINDONESIA                               0
+IRNIRAN, ISLAMIC REPUBLIC OF               0
+IRQIRAQ                                    0
+IMNISLE OF MAN                             0
+ISRISRAEL                                  0
+JAMJAMAICA                                 0
+JEYJERSEY                                  0
+JORJORDAN                                  0
+KAZKAZAKHSTAN                              0
+KENKENYA                                   0
+KIRKIRIBATI                                0
+PRKKOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF  0
+KGZKYRGYZSTAN                              0
+LAOLAO PDR                                 0
+LVALATVIA                                  0
+LBNLEBANON                                 0
+LSOLESOTHO                                 0
+LBRLIBERIA                                 0
+LBYLIBYA                                   0
+LIELIECHTENSTEIN                           0
+LTULITHUANIA                               0
+LUXLUXEMBOURG                              0
+MKDMACEDONIA, REPUBLIC OF                  0
+MDGMADAGASCAR                              0
+MWIMALAWI                                  0
+MDVMALDIVES                                0
+MLIMALI                                    0
+MHLMARSHALL ISLANDS                        0
+MTQMARTINIQUE                              0
+MRTMAURITANIA                              0
+MUSMAURITIUS                               0
+MYTMAYOTTE                                 0
+FSMMICRONESIA, FEDERATED STATES OF         0
+MDAMOLDOVA                                 0
+MCOMONACO                                  0
+MNGMONGOLIA                                0
+MNEMONTENEGRO                              0
+MSRMONTSERRAT                              0
+MARMOROCCO                                 0
+MOZMOZAMBIQUE                              0
+MMRMYANMAR                                 0
+NAMNAMIBIA                                 0
+NRUNAURU                                   0
+NPLNEPAL                                   0
+ANTNETHERLANDS ANTILLES                    0
+NCLNEW CALEDONIA                           0
+NICNICARAGUA                               0
+NERNIGER                                   0
+NGANIGERIA                                 0
+NIUNIUE                                    0
+NFKNORFOLK ISLAND                          0
+MNPNORTHERN MARIANA ISLANDS                0
+NORNORWAY                                  0
+OMNOMAN                                    0
+PAKPAKISTAN                                0
+PLWPALAU                                   0
+PSEPALESTINIAN TERRITORY, OCCUPIED         0
+PANPANAMA                                  0
+PNGPAPUA NEW GUINEA                        0
+PRYPARAGUAY                                0
+PERPERU                                    0
+PHLPHILIPPINES                             0
+PCNPITCAIRN                                0
+POLPOLAND                                  0
+PRTPORTUGAL                                0
+QATQATAR                                   0
+REURÉUNION                                 0
+ROUROMANIA                                 0
+RUSRUSSIAN FEDERATION                      0
+RWARWANDA                                  0
+BLMSAINT-BARTHÉLEMY                        0
+SHNSAINT HELENA                            0
+KNASAINT KITTS AND NEVIS                   0
+LCASAINT LUCIA                             0
+MAFSAINT-MARTIN (FRENCH PART)              0
+SPMSAINT PIERRE AND MIQUELON               0
+VCTSAINT VINCENT AND GRENADINES            0
+WSMSAMOA                                   0
+SMRSAN MARINO                              0
+STPSAO TOME AND PRINCIPE                   0
+SENSENEGAL                                 0
+SRBSERBIA                                  0
+SYCSEYCHELLES                              0
+SLESIERRA LEONE                            0
+SVKSLOVAKIA                                0
+SVNSLOVENIA                                0
+SLBSOLOMON ISLANDS                         0
+SOMSOMALIA                                 0
+SGSSOUTH GEORGIA AND THE SOUTH SANDWICH ISL0
+SSDSOUTH SUDAN                             0
+LKASRI LANKA                               0
+SDNSUDAN                                   0
+SURSURINAME *                              0
+SJMSVALBARD AND JAN MAYEN ISLANDS          0
+SWZSWAZILAND                               0
+CHESWITZERLAND                             0
+SYRSYRIAN ARAB REPUBLIC (SYRIA)            0
+TJKTAJIKISTAN                              0
+TZATANZANIA *, UNITED REPUBLIC OF          0
+THATHAILAND                                0
+TLSTIMOR-LESTE                             0
+TGOTOGO                                    0
+TKLTOKELAU                                 0
+TONTONGA                                   0
+TTOTRINIDAD AND TOBAGO                     0
+TUNTUNISIA                                 0
+TKMTURKMENISTAN                            0
+TCATURKS AND CAICOS ISLANDS                0
+TUVTUVALU                                  0
+UGAUGANDA                                  0
+UKRUKRAINE                                 0
+UZBUZBEKISTAN                              0
+VUTVANUATU                                 0
+VENVENEZUELA (BOLIVARIAN REPUBLIC OF)      0
+VNMVIET NAM                                0
+VIRVIRGIN ISLANDS, US                      0
+WLFWALLIS AND FUTUNA ISLANDS               0
+ESHWESTERN SAHARA                          0
+YEMYEMEN                                   0
+ZWEZIMBABWE                                0

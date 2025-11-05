@@ -1,0 +1,43 @@
+
+
+
+PAGE    1      mspurhst                                                                                       02-11-19 11:35:52
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP mspurhst -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+   15.    INCLUDE  B: common.txt
+   27.    INCLUDE  C: mspartsf.txt
+   29.    INCLUDE  D: mspurchf.txt
+   31.    INCLUDE  E: mssalesf.txt
+   58.    INCLUDE  F: apmastfd.txt
+   60.    INCLUDE  G: custmast.txt
+   70.    INCLUDE  H: callerr1.inc
+   12. H                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   72.    INCLUDE  I: callerr2.inc
+   90.    INCLUDE  J: mspartio.txt
+   92.    INCLUDE  K: mssaleio.txt
+   94.    INCLUDE  L: mspoio.txt
+   96.    INCLUDE  M: stdioerr.txt
+   98.    INCLUDE  N: stdfmter.txt
+  100.    INCLUDE  O: stdparer.txt
+  102.    INCLUDE  P: stdrange.txt
+  104.    INCLUDE  Q: custio.txt
+  144.    INCLUDE  R: msptsio.txt
+  363.                                         GOTO      EOJ  IF F5
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  507.    INCLUDE  S: apmastrd.txt
+  596.                                         GOTO      DATAIN
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\mspurhst.plc                                                                                                                                                                                                                                   
+      1405 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:52 11:35:52
+  000031F4 DATA;  00001500  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

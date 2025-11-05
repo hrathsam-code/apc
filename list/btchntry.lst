@@ -1,0 +1,26 @@
+
+
+
+PAGE    1      btchntry                                                                                       02-11-19 11:35:42
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP btchntry -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.pls
+    9.    INCLUDE  C: batchfd.txt
+   11.    INCLUDE  D: custmast.txt
+  169.    INCLUDE  E: batchio.txt
+  170.    INCLUDE  F: stdioerr.txt
+  171.    INCLUDE  G: stdparer.txt
+  172.    INCLUDE  H: stdfmter.txt
+  173.    INCLUDE  I: stdrange.txt
+  174.    INCLUDE  J: custio.txt
+  439.    INCLUDE  K: modcheck.txt
+
+   Output: c:\apc\plc\btchntry.plc                                                                                                                                                                                                                                   
+       998 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:42 11:35:42
+  00002F9C DATA;  00000CAC  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

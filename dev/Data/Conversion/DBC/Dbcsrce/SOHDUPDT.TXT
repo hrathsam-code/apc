@@ -1,0 +1,12 @@
+......................................................................
+.  UPDATE THE SOHDRFL RECORD
+......................................................................
+         UPDATE    SOHDRFL;SOHDRNO,SOLINES,INVTYPE,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,INVORDNO,INVWGHT,NEWTERM:
+                           CARTONS,INVSHIP,COMPLET:
+                           SHIPNAME,SHIPADDR,SHIPADR2:
+                           SHIPCITY,SHIPSTAT,SHIPZIP:
+                           CALCNET,LIBNET
+.
+......................................................................
+.

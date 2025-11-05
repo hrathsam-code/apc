@@ -1,0 +1,87 @@
+*******************************************************************************
+Runtime : 'Version 9.9A  21 Apr 2017'
+Date : 9-9-19  Time: 21:33:58
+Flags   : 'Http Header not returned'
+Flags   : 'Secure Sockets Layer (SSL) used'
+Flags   : 'Host request-header field used'
+21:33:59  FhHttpConnect: Connected Ok!
+
+21:33:59  Http Send Data Start:
+Sending (7CBh) bytes.
+
+Data Start-->POST /web-services HTTP/1.1
+HOST: ws.fedex.com:443
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 1837
+Connection: close
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://fedex.com/ws/track/v18">
+   <SOAP-ENV:Body>
+      <TrackRequest>
+         <WebAuthenticationDetail>
+            <ParentCredential>
+               <Key>orYgHNFt52Kz7xgd</Key>
+               <Password>oQUX2Ur6I83pzXnU31TrOV9kA</Password>
+            </ParentCredential>
+            <UserCredential>
+               <Key>orYgHNFt52Kz7xgd</Key>
+               <Password>oQUX2Ur6I83pzXnU31TrOV9kA</Password>
+            </UserCredential>
+         </WebAuthenticationDetail>
+         <ClientDetail>
+            <AccountNumber>697696555</AccountNumber>
+            <MeterNumber>250371034</MeterNumber>
+         </ClientDetail>
+         <TransactionDetail>
+            <CustomerTransactionId>TC09_IVR_TRACKBYNUMBER</CustomerTransactionId>
+         </TransactionDetail>
+         <Version>
+            <ServiceId>trck</ServiceId>
+            <Major>18</Major>
+            <Intermediate>0</Intermediate>
+            <Minor>0</Minor>
+         </Version>
+          <SelectionDetails>
+            <CarrierCode>FDXE</CarrierCode>
+            <PackageIdentifier>
+               <Type>TRACKING_NUMBER_OR_DOORTAG</Type>
+               <Value>776124403942</Value>
+            </PackageIdentifier>
+            <ShipmentAccountNumber/>
+            <SecureSpodAccount/>
+            <Destination>
+               <GeographicCoordinates>rates evertitque aequora</GeographicCoordinates>
+            </Destination>
+          </SelectionDetails>
+	  <ProcessingOptions>INCLUDE_DETAILED_SCANS</ProcessingOptions>
+      </TrackRequest>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<--Data End
+21:33:59  Http Send End:
+
+21:33:59  Http Recv Data Start:
+(1DBh) bytes have been received.
+
+Data Start-->HTTP/1.1 200 OK
+Date: Tue, 10 Sep 2019 01:33:57 GMT
+Server: Apache
+Set-Cookie: siteDC=edc; path=/; domain=.fedex.com; expires=Wed, 11-Sep-2019 01:33:57 GMT
+Content-Length: 10909
+Accept: text/xml, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+X-CSR-LOG-TRANSACTION-ID: a029b7e2-214a-40a1-a967-235f134e5e57
+SOAPAction: ""
+X-CSR-ELAPSED_MILLIS: 145
+Vary: Accept-Encoding
+RESPONSESSLProtocol: TLSv1.2
+Connection: close
+Content-Type: text/xml; charset=utf-8
+
+<--Data End
+21:33:59  Http Recv Data End:
+
+21:33:59  Http Disconnect:
+21:33:59  Http Completed: Ok!
+

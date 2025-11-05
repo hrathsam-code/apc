@@ -1,0 +1,79 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;     PROGRAM: PONotes.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06-20-2019 At 08:40                                            ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;         00105   06-20-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF         $PONotesVAR
+$PONotesVAR                      EQUATE         1
+;
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+PONotes                          RECORD
+Entity                           Dim                8                   1 - 8
+SeqMajor                         Form               9                   9 - 17
+SeqMinor                         Form               4                  18 - 21
+Comments                         Dim                1000               22 - 1021
+                                 RECORDEND
+;
+;======================================================================================;
+TempPONotes                         record          like   PONotes                         
+OrigPONotes                         record          like   PONotes                         
+SavePONotes                         record          like   PONotes                         
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+PONotesTXTNM                          INIT         "PONotes"
+PONotesISI1NM                         INIT               "PONotes.ISI"
+PONotesI1DEF                           init            "-n,z,y,1-8,9-17,18-21"
+;
+; By Entity, SeqMajor, SeqMinor
+; 1-8, 9-17, 18-21
+;
+PONotesKY                        DIM                21
+;=============================================================================;
+;
+PONotesFLST                         FILELIST
+PONotesFL                           IFILE              name="PONotes.ISI",FIX=1021,NODUP,NOPATH
+                                    FILELISTEND
+ 
+PONotesFileSize       CONST      "1021"
+ 
+PONotesProg           INIT       "PONotes Program"
+PONotesDesc           INIT       "PONotes Maintenance"
+PONotesTITLE          INIT       "PONotes Record"
+PONotesHelp           INIT       "PONotes.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $PONotesVARIO
+            INCLUDE PONotes.IO 
+          %ENDIF          //End of IO Include File

@@ -1,0 +1,150 @@
+
+
+
+PAGE    1      ACCTPTIS.PLS IDE                                                                               03-22-04 20:06:51
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "ACCTPTIS.PLS","F:\PLC\ACCTPTIS.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    8.    INCLUDE  A: common.pls
+   22.    INCLUDE  B: custmast.pls
+   42.    INCLUDE  C: callerr1.inc
+   46.    INCLUDE  D: callerr2.inc
+   73.    INCLUDE  E: custrdks.pls
+
+   Output: f:\plc\acctptis.plc                                                                                                                                                                                                                                       
+       367 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 20:06:51 20:06:52
+  000011FC DATA;  000002A4  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      ACCTPTIS.PLS IDE                                                                               03-22-04 20:06:52
+                                         
+
+"                                          D      30. D*    61.  
+" 0                                        D     126.  *   134.     149.  
+"ANSWER                                    D      68.  *
+"APP                                       D      56.  *
+"CUSTOMER FILE LISTING                     D      44.  *
+0                                          F     164.  *   165.     180.  
+1                                          F      84.  *    94.     137.     199.  
+2                                          F     202.  *
+50                                         F     145.  *
+ACCTNUMB                                   D      14. A*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+COMMCODE                                   D      26. B*    11. E
+COMP                                       D      34.  *    56.  
+COMPVAR                                    D      37.  *    57.     179.  
+CONT1                                      X      58.  *
+CURNTDUE                                   F      31. B*    12. E
+CUSTADDR                                   D      11. B*     7. E   153.  
+CUSTADR2                                   D      12. B*
+CUSTCATG                                   D      17. B*     9. E
+CUSTCITY                                   D      13. B*     8. E   154.  
+CUSTCRED                                   F      16. B*     8. E
+CUSTFILE                                   i      11.  *    55.       7. E   208.  
+CUSTKEY                                    D       8. B*     7. E   151.  
+CUSTNAME                                   D      10. B*     7. E   152.  
+CUSTSTAT                                   D      14. B*     8. E   155.  
+CUSTSTTS                                   D       9. B*     7. E
+CUSTZIP                                    F      15. B*     8. E   148.  
+D                                          O 5    12. C*    13. D    16. D    31. D
+DATE6                                      D      10. A*
+DDATA                                      D      13. C*    13. D
+DETCALC                                    X     141.  *
+DETOUT                                     X     145.  *
+ENVS                                       D      11. A*
+EOJ                                        X     207.  *   110.  
+EOJR                                       X      79.  *
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+FIRSTIME                                   D      17. A*
+FROMPGM                                    D      16. A*    28. D   210.  
+HEADER                                     X     174.  *    59.     146.  
+INDXIT                                     X      26. D*    22. D
+INREC1                                     D      20.  *
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+LINECT                                     F      15.  *   145.     160.     180.     202.  
+LR                                         F      18.  *    84.     110.     199.  
+LRTOT                                      F      19.  *   141.     201.  
+LSTPAYDT                                   D      22. B*    10. E   128.     129.     130.     131.     132.     133.  
+
+
+
+PAGE    3      ACCTPTIS.PLS IDE                                                                               03-22-04 20:06:52
+                                         
+
+LSTPAYPR                                   F      24. B*    10. E
+LSTSALDT                                   D      21. B*    10. E   120.     121.     122.     123.     124.     125.  
+LSTSALPR                                   F      23. B*    10. E
+MAINLINE                                   X      30. D*    22. D
+MOVEDATA                                   X     119.  *   115.  
+MOVREP                                     X      57.  *
+MTDCASH                                    F      39. B*    13. E
+MTDCRED                                    F      40. B*    13. E
+NAME                                       D      10.  *    55.  
+NOFILE                                     X      65.  *    54.  
+NULL                                       X      24. D*    22. D
+NWFLD1                                     D      33.  *
+PAGE                                       F      16.  *   174.     177.  
+PCUSTZIP                                   D      24.  *   148.     149.     156.  
+PD01TO30                                   F      32. B*    12. E
+PD31TO60                                   F      33. B*    12. E
+PD61TO90                                   F      34. B*    12. E
+PDD                                        D      27.  *   130.  
+PDOVR90                                    F      35. B*    13. E
+PMM                                        D      26.  *   128.     134.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PYY                                        D      28.  *   132.  
+READ                                       X      73.  *    62.     169.  
+READCUST                                   X       5. E*
+REPLY                                      D      12.  *    30. D    61.  
+REPTITL                                    D      36.  *    57.  
+RESULT                                     F      11. C*    16. D    22. D
+RID01                                      F      17.  *    94.     165.  
+RIDON                                      X      94.  *    90.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SDD                                        D      30.  *   122.  
+SECURITY                                   F       9. A*
+SEEMR                                      X     137.  *
+SELMATCH                                   X      90.  *    78.  
+SETLR                                      X      84.  *    79.  
+SMM                                        D      29.  *   120.     126.  
+SW1P                                       F      14.  *    99.     164.  
+SWMR                                       F      13.  *   137.  
+SYY                                        D      31.  *   124.  
+TESTFC                                     X      99.  *
+TESTIT                                     X      22. D*    16. D
+TESTLR                                     X     110.  *    99.  
+TESTOF                                     X     115.  *
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TIME                                       D      39.  *    51.  
+TITLTEXT                                   D       9. C*    44.      15. D
+TODAY                                      D       8. A*   178.  
+TOTCALC                                    X     103.  *    80.  
+
+
+
+PAGE    4      ACCTPTIS.PLS IDE                                                                               03-22-04 20:06:52
+                                         
+
+TOTCLX                                     X     104.  *
+TOTOUT                                     X     198.  *   105.  
+TURNOFF                                    X     164.  *
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+

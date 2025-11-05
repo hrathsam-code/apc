@@ -1,0 +1,245 @@
+. .........
+.  PRINTCSH - PRINT DAILY CASH PROCESSED REPORT
+. 
+.  WRITTEN BY R. BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                            41 TEELE DRIVE
+.                            CORAM, NEW YORK 11727
+. 
+. MODIFIED 10/4/81 TO CHAIN TO PROGRAM "MAKERCVB" AT EOJ
+.                  TO CREATE ACCTS RECEIVABLE FILES
+.                            516-698-5577
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   MONTHTAB
+. 
+DAILYCSH FILE
+CSHNAME  INIT      "SORTCASH/TEXT:BILLING"
+. 
+PAIDTOT  FORM      "0000000.00"
+BIGCASH  FORM      "0000000.00"
+LEFTOT   FORM      "000000.00"
+ACCTOT   FORM      "000000.00"
+. 
+SEQ      FORM      "-1"
+PAGE     FORM      "000"
+SVACCT   DIM       4
+FIRST    INIT      "X"
+DATEPAID DIM       8
+LINES    FORM      "00"
+. 
+. 
+DSPCOMP  INIT      "AMERICAN PRECISION PRODUCTS"
+.
+SVCOMP   INIT      "A"
+.
+. READ I/O AREA
+. 
+. 
+IPACCT   DIM       4
+INVSTAT  DIM       1
+INVTYPE  DIM       1
+INVKEY   DIM       5
+IPCHECK  DIM       6
+IPAID    FORM      6.2
+IDOLSLFT FORM      6.2
+IPCHKAMT FORM      6.2
+IPDTPAY  DIM       6
+WOAMOUNT FORM      5.2
+INVCOMP  INIT      "A"
+OPNCRDTS FORM      7.2
+. 
+CSHFL    FILE      FIX=59,UNCOMPRESSED
+RECNO    FORM      4
+WAITCNT  FORM      "0000"
+ENDFLAG  INIT      " "
+REPLY    DIM       1
+. 
+RECCNT   FORM      6
+LIMIT    FORM      6
+ZERO     FORM      "0"
+DUMMYRD  DIM       55
+.
+ROLLFILE FILE
+ROLLNAME INIT      "ROLLFILE/SYST"
+BLNK10   INIT      "          "
+. 
+EOJTIME  DIM       9
+STARTIME DIM       9
+ENDTIME  DIM       9
+TIMEFILE FILE
+TIMENAME INIT      "TIMEFILE/TEXT:W"
+REC0     FORM      "0000"
+FORM6    FORM      6
+FORM5    FORM      5
+. 
+         TRAPCLR   IO
+         TRAP      NOFILE IF IO
+         OPEN      DAILYCSH,CSHNAME
+         CALL      HEADER
+. 
+. BYPASS THE FIRST RECORD WHICH IS THE ZERO RECORD FROM THE CASH ENTRY PGM
+. 
+         READ      DAILYCSH,SEQ;FORM5,DUMMYRD
+. 
+. 
+         TRAPCLR   IO
+         TRAP      IOERROR IF IO
+RDLOOP   READ      DAILYCSH,SEQ;IPACCT,INVKEY,INVSTAT,INVTYPE,IPAID,IDOLSLFT:
+                                IPCHECK,IPCHKAMT,IPDTPAY,INVCOMP,WOAMOUNT
+         GOTO      ENDLIST IF OVER
+. 
+         CMATCH    "X" TO FIRST
+         GOTO      ARND   IF NOT EQUAL
+         MOVE      IPACCT TO SVACCT
+         MOVE      INVCOMP   TO SVCOMP
+         MOVE      " "    TO FIRST
+. 
+ARND     CMATCH    INVCOMP   TO  SVCOMP
+         CALL      COMPBRK   IF  NOT EQUAL
+         MATCH     IPACCT TO SVACCT
+         CALL      ACCTBRK  IF NOT EQUAL
+.
+. NOW CALCULATE CREDIT AMOUNTS
+.
+         CMATCH    "C",INVTYPE
+         GOTO      CRDBYP IF NOT EQUAL
+.
+. NOW ACCUMULATE THE OPEN CREDITS...
+.
+         CMATCH    "O",INVSTAT
+         GOTO      CRDMLT IF NOT EQUAL
+         ADD       IPAID  TO OPNCRDTS
+         ADD       IPAID  TO PAIDTOT     (TO COMPENSATE FOR DOUBLING ERROR)
+.
+CRDMLT   MULT      "-1" BY IPAID
+.
+CRDBYP   ADD       IPAID TO PAIDTOT
+         ADD       IPAID TO ACCTOT
+         ADD       IDOLSLFT TO LEFTOT
+         MOVE      IPDTPAY  TO MM
+         RESET     IPDTPAY  TO 3
+         MOVE      IPDTPAY  TO DD
+         RESET     IPDTPAY  TO 5
+         MOVE      IPDTPAY  TO YY
+         RESET     IPDTPAY
+DETPRT   PRINT     *1,IPACCT,*9,INVKEY,*16,INVSTAT,*18,IPCHECK,*26,IPCHKAMT:
+                   *38,MM,"/",DD,"/",YY,*50,IDOLSLFT,*60,IPAID
+         ADD       "1"  TO  LINES
+         COMPARE   "54" TO  LINES
+         CALL      OVERFLOW   IF NOT LESS
+         GOTO      RDLOOP
+. 
+. 
+ACCTBRK  PRINT     " "
+         PRINT     *1,"TOTAL FOR ACCOUNT NO. ",SVACCT,*50,LEFTOT,*60,ACCTOT
+         PRINT     *C,*L:
+                   " - - - - - - - - - - - - - - - - - - - - - - - - - - - - ":
+                   "- - - - - - - - - - - -"
+         MOVE      "000000.00"  TO  ACCTOT
+         MOVE      "000000.00"  TO  LEFTOT
+         PRINT     *C,*L
+         ADD       "6"  TO  LINES
+         MOVE      IPACCT       TO  SVACCT
+         RETURN
+. 
+HEADER   ADD       "1"  TO  PAGE
+         PRINT     *F,*15,"DAILY CASH PROCESSED REPORT",*45,"AS OF ",TODAY:
+                          "  PAGE ",PAGE
+.
+PTIT     PRINT     *18,DSPCOMP,*C,*L
+         PRINT     *1,"ACCT  INV NO.    CHK NO.  CHK AMT.   DATE PAID":
+                   *50,"OPEN AMT.  PAID AMT."
+         PRINT     *14,"STAT",*C,*L
+         MOVE      "6"  TO  LINES
+         RETURN
+. 
+COMPTOTS CALL      OVERFLOW
+         PRINT     *L,*L,*L
+         PRINT     *1,DSPCOMP," REPORT TOTALS:"
+         PRINT     " "
+         PRINT     *1,"CASH RECEIVED AND APPLIED TO PAYMENTS = ",PAIDTOT
+         PRINT     *1,"EXCESS CASH APPLIED AS CREDITS =        ",OPNCRDTS
+         PRINT     " "
+         MOVE      PAIDTOT TO BIGCASH
+         ADD       OPNCRDTS TO BIGCASH
+         PRINT     *1,"---- TOTAL CASH APPLIED --------------> ",BIGCASH
+         RETURN
+. 
+IOERROR  DISPLAY   *ES,*P01:10,"I/O ERROR ON CASH FILE READ - ABORTED"
+         BEEP
+         GOTO      IOERROR
+. 
+NOFILE   DISPLAY   *ES,*P01:10,"DAILY CASH FILE IS MISSING! - JOB ABORTED"
+         BEEP
+         GOTO      NOFILE
+. 
+OVERFLOW PRINT     *C,*L,"STATUS LEGEND:  X=PAID IN FULL,  P=PARTIAL PAYMENT,":
+                         " W=OPEN AMT. WRITTEN OFF"
+         PRINT     *17,"O=COMPUTER GENERATED CREDIT: EXCESS CASH PAYMENT ":
+                       "FROM ACCTS RCVBL SYSTEM"
+         CALL      HEADER
+         RETURN
+. 
+COMPBRK  CALL      ACCTBRK
+         CALL      COMPTOTS
+         MOVE      INVCOMP  TO  SVCOMP
+         MOVE      "000000.00"  TO  PAIDTOT
+         MOVE      "000000.00"  TO  ACCTOT
+         MOVE      "000000.00"  TO  LEFTOT
+         CMATCH    "X"  TO  ENDFLAG
+         CALL      HEADER  IF  NOT  EQUAL
+         RETURN
+. 
+. 
+ENDLIST  MOVE      "X"  TO  ENDFLAG
+         CALL      COMPBRK
+         BEEP
+         MOVE      "000"  TO  WAITCNT
+CNTLOOP  ADD       "1"    TO  WAITCNT
+         COMPARE   "1000"  TO  WAITCNT
+         GOTO      CNTLOOP    IF  LESS
+.
+         MOVE      "-1" TO SEQ
+. 
+         TRAPCLR   IO
+         TRAP      BADSET IF IO
+         DISPLAY   *P01:23,*HON,"I WILL NOW SET THE CASH FILE TO ZERO !"
+         PREPARE   CSHFL,"DAILYCSH/TEXT:BILLING"
+         MOVE      "0" TO RECNO
+         WRITE     CSHFL,RECNO;"000000",BLNK10,BLNK10,BLNK10,BLNK10,BLNK10:
+                               "   "
+         MOVE      "1" TO RECNO
+         WEOF      CSHFL,RECNO
+         CLOSE     CSHFL
+         RELEASE
+.
+. 
+.              - ASSUME THAT THE RECEIVABLES FILE IS ALWAYS WRITTEN TO
+.                HENCE NEEDS NO SAPPING FROM AN INVOICE HEADER FILE,
+.                THEREFORE LETS ROLLOUT AND CHAIN THE ARPROC AND 
+.                REORGANIZE, COPY, AND REINDEX APPROPRIATE A/R, AND
+.                A/P FILES
+. 
+.
+         ROLLOUT   "CHAIN APINDX2/CHN",ROLLNAME
+         DISPLAY   *P1:1,*ES
+         DISPLAY   *P1:22,*EL,*HON,"A/P FILES BACKUP AND INDEX COMPLETE":
+                   *HOFF,*W5
+         ROLLOUT   "CHAIN ARINDX/CHN",ROLLNAME
+         DISPLAY   *P1:23,*EL,*HON,"A/R FILES BACKUP AND INDEX COMPLETE":
+                   *HOFF,*W5
+. 
+. 
+. NOW CHAIN TO DARLIST/DBC AND PRINT DAILY INVOICE REPORT
+. 
+BACKAGN  DISPLAY   *P1:1,*ES
+         DISPLAY   *P1:1,*HON,"RETURNING FROM BACKUP AND INDEX":
+                   " OF ALL A/R AND A/P FILES":
+                   *P1:6,"NOW INVOKING THE PRINT OF TODAY'S INVOICES":
+                   *HOFF,*W4
+         CHAIN     "DARLIST"
+. 
+BADSET   BEEP
+         DISPLAY   *P01:23,*HON,"UNABLE TO RESET THE CASH FILE !",*W2
+         GOTO      BADSET

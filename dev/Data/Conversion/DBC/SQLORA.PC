@@ -1,0 +1,294 @@
+/*			      DB/C interpreter					*/
+/*		(c) Copyright  1988  Subject, Wills & Company		*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include "c:\oracle5\pro\orastd.h"
+
+char * dbcsqlm(long code);
+int dbcsqlx(unsigned char * adr1, unsigned char ** adr2, unsigned char ** adr3);
+static int dbctostr(unsigned char dbcvar[], unsigned char str[], int * len);
+static void build(unsigned char *, unsigned char **);
+static void todbcvar(unsigned char *, unsigned char *, long);
+
+/* external FUNCTION PROTOTYPES */
+extern void death(int);
+extern int nvtoi(unsigned char *nvar);
+extern void ftonv(double x, unsigned char *nvar);
+extern struct SQLDA * sqlald(int, int, int);
+extern void sqlclu(struct SQLDA *);
+
+EXEC SQL BEGIN DECLARE SECTION;
+	VARCHAR uid[20]; /* pseudo variable containing user id */
+	VARCHAR pwd[20]; /* pseudo variable containing user password */
+	VARCHAR cmd[500];  /* string containing ORACLE statement */
+EXEC SQL END DECLARE SECTION;
+
+EXEC SQL INCLUDE SQLCA;
+EXEC SQL INCLUDE SQLDA;
+
+SQLDA *selectda = NULL;
+static connectflag = 0;
+static int sdSize;
+static int svSize;
+
+
+int dbcsqlx(adr1, adr2, adr3)  /* sqlexec verb */
+unsigned char * adr1;
+unsigned char ** adr2;
+unsigned char ** adr3;
+{
+	int	cmdstart,i;
+	int cmdlen;
+	int len, notfoundflg;
+	unsigned char prec;
+	char scale;
+
+	notfoundflg = FALSE;
+
+	cmdstart = dbctostr(adr1, cmd.arr, &cmdlen);
+
+	if(memicmp(cmd.arr, "CONNECT" ,7) == 0) {
+		dbctostr(adr2[0], uid.arr,&len);
+		uid.len=strlen(uid.arr);
+		dbctostr(adr2[1],pwd.arr,&len);
+		pwd.len=strlen(pwd.arr);
+
+		EXEC SQL CONNECT :uid IDENTIFIED BY :pwd;
+		connectflag = (sqlca.sqlcode == 0);
+	}
+	else if(memicmp(cmd.arr, "DISCONNECT" ,10) == 0) {
+		if (!connectflag) return(-1012);
+		uid.len=strlen(uid.arr);
+		pwd.len=strlen(pwd.arr);
+
+		EXEC SQL COMMIT WORK RELEASE;
+	}
+	else if (memicmp(cmd.arr, "COMMIT", 6) == 0) {
+		EXEC SQL COMMIT WORK ;
+	}
+	else if (memicmp(cmd.arr, "ROLLBACK", 8) == 0) {
+		EXEC SQL ROLLBACK WORK ;
+	}
+	else if (memicmp(cmd.arr, "FETCH", 5) != 0) {
+		if (!connectflag) return(-1012);
+		if (selectda != NULL) {
+			for (i = 0; i < selectda->N; i++) {
+				free(selectda->V[i]) ;
+				free(selectda->I[i]) ;
+			}
+			sqlclu(selectda) ;
+		}
+		sdSize = 5;
+		svSize = 80;
+		selectda = sqlald (sdSize, svSize, 0);
+		if (selectda == NULL) death(999);
+		selectda->N = 0;
+		build(cmd.arr, adr2);
+		cmd.len=strlen(cmd.arr);
+		EXEC SQL PREPARE S1 FROM :cmd;
+		EXEC SQL DECLARE C1 CURSOR FOR S1;
+		if (sqlca.sqlcode < 0) return ((int) sqlca.sqlcode);
+		EXEC SQL OPEN C1;
+		selectda->N = sdSize;
+		EXEC SQL DESCRIBE SELECT LIST FOR S1 INTO selectda;
+		if (selectda->F < 0) {
+			sdSize = -(selectda->F);
+			sqlclu(selectda);
+			selectda = sqlald (sdSize, 10, 0);
+			EXEC SQL DESCRIBE SELECT LIST FOR S1 INTO selectda;
+		}
+		selectda->N = selectda->F;
+		for (i = 0; i < selectda->N; i++) {
+			selectda->T[i] = (selectda->T[i] & ~0x8000);
+			if (selectda->T[i] == 2) {
+				prec = (unsigned char) (selectda->L[i] >> 8);
+				scale = (char) selectda->L[i];
+				if (prec == 0)
+					prec = 26;
+				selectda->L[i] = prec;
+				if (scale < 0) 
+					selectda->L[i] += -scale;
+				selectda->L[i] += 2;
+			}
+			else if (selectda->T[i] == 12) 
+				selectda->L[i] = 9;
+			selectda->T[i] = 1;
+			selectda->L[i] = min(selectda->L[i], 240);
+			selectda->V[i] = malloc((int) selectda->L[i]);
+			selectda->I[i] = (short *) malloc(sizeof(short));
+		}
+	}
+	else { /* Perform a single row fetch */
+		int i;
+		short *ip;
+
+		if (!connectflag) return(-1012);
+		notfoundflg = TRUE;
+		EXEC SQL WHENEVER NOT FOUND GOTO notfound;
+		EXEC SQL FETCH C1 USING DESCRIPTOR selectda;
+
+		for (i = 0; i < selectda->N; i++) {
+			ip = selectda->I[i];
+			if (adr3[i] != NULL) {
+				if (*ip < 0) memset(selectda->V[i], 0x20, selectda->L[i]);
+				todbcvar(adr3[i], selectda->V[i], selectda->L[i]);
+			}
+		}
+		notfoundflg = FALSE;
+	}
+notfound:
+	if (notfoundflg) {
+		EXEC SQL WHENEVER NOT FOUND CONTINUE;
+		EXEC SQL CLOSE C1;
+		sqlclu(selectda);
+	}
+	return(((notfoundflg) ? 100 : (int)sqlca.sqlcode));
+}
+
+char * dbcsqlm(code)  /* sqlmsg verb */
+long code;
+{
+	static char returnstr[100];
+	memset(returnstr, ' ', 100);
+	strcpy(returnstr, sqlca.sqlerrm.sqlerrmc);
+	if (code == sqlca.sqlcode) return(returnstr);
+	return(NULL);
+}
+
+static void build(cmdline, arglist)
+unsigned char * cmdline;
+unsigned char *arglist[];
+{
+	char work[500];
+	int i, j, num, len;
+
+	num = i = j = 0;
+	while(cmdline[i] != NULL) {
+		if(cmdline[i] == ':') {
+			i++;	
+			while(isdigit(cmdline[i])) i++;
+			dbctostr(arglist[num], &work[j], &len);
+			j += strlen(&work[j]);
+			num++;
+		}
+		else {
+			work[j] = cmdline[i];
+			j++;
+			i++;
+		}
+	}
+	work[j] = NULL;
+	strcpy(cmdline, work);
+}
+
+
+static void todbcvar( dbcvar, src, len)
+unsigned char * dbcvar, * src;
+long len;
+{
+	long i,j,start;
+
+	start = 0L;
+
+	if (dbcvar[0] < 0x80) { /* DIM -> pl < 128 */
+		dbcvar[0] = 1;
+		start = 3L;
+
+		if (len > (long) dbcvar[2])
+			len = (long) dbcvar[2];
+
+		for (i = 0, j = start; i < len; i++, j++)
+			dbcvar[j] = src[i];
+		dbcvar[1] = (unsigned char) len; /* set lp */
+	}
+	else if (dbcvar[0] == 0xf0) { /* large DIM */
+		start = 7;
+		dbcvar[1] = 1;
+		dbcvar[2] = 0;
+		if (len > (long) (dbcvar[5] + (dbcvar[6] * 0x100)))
+			len = (long) (dbcvar[5] + (dbcvar[6] * 0x100));
+
+		for (i = 0, j = start; i < (int) len; i++, j++)
+			dbcvar[j] = src[i];
+		dbcvar[3] = (unsigned char) len & 0xff; /* set lp */
+		dbcvar[4] = (unsigned char) ((len & 0xff00) / 0x100);
+	}
+	else if ((dbcvar[0] & 0xe0) == 0x80) { /* FORM */
+		ftonv(atof(src), dbcvar);
+	}
+	else if (dbcvar[0] == 0xfc) { /* INT */
+		ftonv(atof(src), dbcvar);
+	}
+	else if ((dbcvar[0] & 0xfc) == 0xf8) { /* FLOAT */
+		ftonv(atof(src), dbcvar);
+	}
+	else death(5); /* unsupported type */
+}
+
+static int dbctostr(dbcvar, str, len)
+unsigned char dbcvar[], str[];
+int * len;
+{
+	int i,j,start, lp, left, right, total, dec, sign;
+	unsigned char * ptr;
+	double fvar;
+
+	start = 0;
+
+	if (dbcvar[0] < 0x80) { /* DIM -> pl < 128 */
+		start = dbcvar[0] + 2;
+		for (j = 0,i = start; i < dbcvar[1] + 3; i++, j++) {
+			str[j] = dbcvar[i]; 
+		}
+		str[j] = 0;
+	}
+	else if (dbcvar[0] == 0xf0) { /* large DIM */
+		start = dbcvar[1] + (dbcvar[2] << 8) + 6;
+		lp = dbcvar[3] + (dbcvar[4] << 8);
+		for (j = 0,i = start; j < lp; i++, j++) {
+			str[j] = dbcvar[i]; 
+		}
+		str[j] = 0;
+	}
+	else if ((dbcvar[0] & 0xe0) == 0x80) { /* FORM */
+		lp = dbcvar[0] & 0x1f;
+		start = 1;
+		for (j = 0,i = start; j < lp; i++, j++) {
+			str[j] = dbcvar[i]; 
+		}
+		str[j] = 0;
+	}
+	else if (dbcvar[0] == 0xfc) { /* INT */
+		itoa(nvtoi(dbcvar), str,10);
+	}
+	else if ((dbcvar[0] & 0xfc) == 0xf8) { /* FLOAT */
+		left = (((dbcvar[0] & 0x3) << 3) + (dbcvar[1] >> 5));
+		right = dbcvar[1] & 0x1f;
+		if (right) total = left + right + 1;
+		else total = left;
+
+		memcpy ( (unsigned char *) fvar, &dbcvar[2], 8);
+		ptr = (unsigned char *) fcvt(fvar, right, &dec, &sign);
+		if (dec >= left) memcpy (str, &ptr[dec - left], left);
+		else {
+			memset(str, ' ', left - dec);
+			memcpy(&str[left - dec], ptr, dec);
+		}
+		if (right) {
+			str[left] = '.';
+			memcpy(&str[left + 1], &ptr[dec], right);
+		}
+		if (sign) {
+			for (i = 0; str[i] == ' '; i++);
+			if (i != 0) str[i - 1] = '-';
+		}
+	}
+	else death(10);
+
+	*len = j - start;
+	return(start);
+}
+

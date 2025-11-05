@@ -1,0 +1,94 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $GLMastVAR
+$GLMastVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+GLMast     RECORD
+Account    DIM               8       1 - 8         xx
+Desc       DIM               30      9 - 38        xx
+FSDesc     DIM               30     39 - 68        xx
+GLCategory FORM              2      69 - 70        xx
+Type       FORM              1      71 - 71        xx
+Indicator  FORM              1      72 - 72        xx
+FSCategory DIM               2      73 - 74        xx
+Allowable  DIM               1(6)   75 - 80
+Active     FORM              1      81 - 81        xx         //1 = Inactive, 0=Active
+           RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+GLMastK1SIZE CONST            "8"                                    (Length of the Key variable)
+GLMastK2SIZE CONST            "38"                                   (Length of the Key variable 2)
+.
+. By Account
+.
+GLMastI1DEF  INIT             "1-8"                                  (Index definitions for Key 1)
+.
+. By Description, by G/L Account
+.
+GLMastI2DEF  INIT             "9-38,1-8"                             (Index definitions for Key 2)
+.
+GLMastFSIZE  CONST            "100"                                   (Length of each Record)
+
+GLMastKY    DIM               GLMastK1SIZE                            (The Actual 'Key' variable)
+GLMastKY2   DIM               GLMastK2SIZE                            (The Actual 'Key' variable)
+
+GLMastPROG  INIT              "G/L Account Master"
+GLMastTITLE INIT              "G/L Account"                          (Description used later for headers, etc)
+GLMastHELP  INIT              "GLMast.HLP"                            (Name of the Help file for later purposes)
+
+GLMastTXTNM  INIT             "$APDATA\","GLMstFL.TXT"               .Actual Text Filename  (i.e. CUSTFL.TXT)
+GLMastISI1NM INIT             "$APDATA\","GLMstFL.ISI"               .Actual ISI Filename   (i.e. CUSTFL.ISI)
+GLMastISI2NM INIT             "$APDATA\","GLMstFL2.ISI"              .Actual ISI Filename
+
+GLMastFLST  FILELIST
+           %IFDEF            GLMastKY
+GLMastFL    IFILE             Name=GLMastISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY2
+GLMastFL2   IFILE             Name=GLMastISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY3
+GLMastFL3   IFILE             Name=GLMastISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY4
+GLMastFL4   IFILE             Name=GLMastISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY5
+GLMastFL5   IFILE             Name=GLMastISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY6
+GLMastFL6   IFILE             Name=GLMastISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY7
+GLMastFL7   IFILE             Name=GLMastISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY8
+GLMastFL8   IFILE             Name=GLMastISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            GLMastKY9
+GLMastFL9   IFILE             Name=GLMastISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $GLMastIO
+           INCLUDE           GLMast.IO
+         %ENDIF
+#end

@@ -1,0 +1,48 @@
+. 
+..............................................................
+.          MSPARTSF/TXT - MILSPEC PART NUMBER FILE           .
+.                                                            .
+. RECORD LENGTH = 121 CHARACTERS                             .
+. STATUS CODE   = MSSTATUS: A (ACTIVE), I (INACTIVE)         .
+. PRIMARY KEY   = MSPARTNO     (POS 2-21/LENGTH 20)          .
+..............................................................
+. 
+MSPARTFL IFILE     KEYL=20,UNCOMPRESSED
+MSPARTNM INIT      "MSPARTFL/ISAM"
+. 
+MSSTATUS DIM        1
+MSPARTNO DIM       20
+MSSIZE   DIM       30
+MSDESC   DIM       30
+MSXRFPT1 DIM       20
+MSXRFPT2 DIM       20
+. 
+MSPARTKY DIM       20     (KEY FOR RETRIEVAL)
+MSPARTSV DIM       20     (SAVE AREA FOR PART NUMBER)
+. 
+........................................................................
+. 
+. THE MSPTXREF/ISI FILE PROVIDES A CROSS-REFERENCE WHICH IS 
+. USED TO INDICATE WHEN A PART ENTERED ON THE MILSPEC PART FILE
+. HAS AN EQUIVALENCY TO THE PART NUMBER OF ANOTHER SUPPLIER 
+. 
+. FOR ALL REPORTS AND INQUIRIES, THE MSXREFCD (CROSS REFERENCE CODE)
+. LOCATED ON THE MSPARTFL/ISI MASTER RECORD, WILL BE INTERROGATED TO
+. DETERMINE IF A CROSS-REFERENCE EXISTS....
+. 
+.      IF SO....THEN THE CROSS-REFERENCE PART NUMBER(S) WILL BE 
+.      RETRIEVED, AND DISPLAYED AS INFORMATION RELATING TO THE 
+.      ORIGINALLY KEYED MILSPEC PART NUMBER
+...........................................................................
+. 
+.....MSPTXREF IFILE           (CROSS REFERENCE FILE FOR MS PART NUMBERS)
+MSPTXREF IFILE     KEYL=20,UNCOMPRESSED
+MSPTXRNM INIT      "MSPTXREF/ISAM"
+. 
+. NOTE THE ACTUAL KEY VALUE IS 40 POSITIONS IN LENGTH, BEGINNING AT POS 1.
+. 
+MSPTXKY1 DIM       20   (PRIMARY PART NUMBER   - POS 01-20)
+MSPTXKY2 DIM       20   (SECONDARY PART NUMBER - POS 21-40)
+. 
+MSXRFKEY DIM       40    (READ KEY CONSISTING OF XKY1, XKY2)
+...........................................................................

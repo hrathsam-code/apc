@@ -1,0 +1,5 @@
+SUNINDEX Cust.txt,Cust.isi,L1024 -n,z,y,1-10 
+SUNINDEX Cust.txt,Cust2.isi,L1024 -n,z,y,11-70,1-10 
+SUNINDEX Cust.txt,Cust3.isi,L1024 -n,z,y,516-521,1-10 
+SUNINDEX Cust.txt,Cust4.isi,L1024 -n,z,y,265-274,1-10 
+SUNAAMDX Cust.txt,Cust.aam,L1024 -z,,11-70131-160,221-250,251-252,253-262,265-274 

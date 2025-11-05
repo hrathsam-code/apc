@@ -1,0 +1,49 @@
+*******************************************************************************
+Runtime : 'Version 9.9A  21 Apr 2017'
+Date : 11-14-19  Time: 15:22:33
+Flags   : 'Http Header not returned'
+Flags   : 'Secure Sockets Layer (SSL) used'
+Flags   : 'Host request-header field used'
+15:22:33  FhHttpConnect: Connected Ok!
+
+15:22:33  Http Send Data Start:
+Sending (6E07h) bytes.
+
+Data Start-->POST /ups.app/xml/ShipAccept HTTP/1.1
+HOST: wwwcie.ups.com:443
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 27996
+Connection: close
+
+<?xml version="1.0"?>
+<AccessRequest><AccessLicenseNumber>1D6901A8E67FA1D5</AccessLicenseNumber><UserId>HarryStar56</UserId><Password>Taylor1156!</Password></AccessRequest>
+<?xml version="1.0"?>
+<ShipmentAcceptRequest><Request><TransactionReference><CustomerContext>Your Test Case Summary Description</CustomerContext></TransactionReference><RequestAction>ShipAccept</RequestAction><RequestOption>1</RequestOption></Request><ShipmentDigest>rO0ABXNyACpjb20udXBzLmVjaXMuY29yZS5zaGlwbWVudHMuU2hpcG1lbnREaWdlc3QkgGLWnNSyzAIANFoAF2lzQUJSUmV0dXJuZWRpblJlc3BvbnNlWgARaXNBQlJVc2VyRWxpZ2libGVaAAVpc0FJQVoAGGlzQWx0ZXJuYXRlUGF5bWVudE1ldGhvZFoAE2lzQ04yMk51bWJlclByZXNlbnRaAA9pc0NOMjJSZXF1ZXN0ZWRaAB1pc0NvbWJpbmVkTUlhbmRMYWJlbEluZGljYXRvcloAEmlzRW5jcnlwdGlvbkZhaWxlZFoAGmlzSXRlbWl6ZWRDaGFyZ2VzUmVxdWVzdGVkWgAfaXNMYWJlbExhbmRpbmdQYWdlTGl2ZUZvck5vblBEUloAJGlzTGFiZWxSZXF1ZXN0ZWRGb3JTaW1wbGlmaWVkUmV0dXJuc1oAImlzTUlEdWFsUmV0dXJuQWNjZXNzb3JpYWxSZXF1ZXN0ZWRaABppc01JUmV0dXJuU2VydmljZVJlcXVlc3RlZFoAGWlzTWFpbElubm92YXRpb25zU2hpcG1lbnRaAA1pc01pc3NpblNEU0lkWgAWaXNNaXNzaW5nU0RTTWF0Y2hMZXZlbFoAI2lzTWlzc2luZ1NEU05lZ290aWF0ZWRSYXRlSW5kaWNhdG9yWgARaXNQYXlQYWxSZXF1ZXN0ZWRaABtpc1ByZUF1dGhvcml6ZWRBUE1SZXF1ZXN0ZWRaACJpc1ByZUF1dGhvcml6ZWRDcmVkaXRDYXJkUmVxdWVzdGVkWgAeaXNQcmVBdXRob3JpemVkUGF5UGFsUmVxdWVzdGVkWgAQaXNSZWNlaXB0VGhlcm1hbFoADmlzU0RTUmVxdWVzdGVkWgAZaXNTaGlwcGVyQXV0aG9yaXplZEJ5VFBGQ1oAG2lzU2ltcGxpZmllZFJldHVybnNTaGlwbWVudFoAEmlzU3VyZVBvc3RTaGlwbWVudFoAFGlzVFBGQ1JhdGVzUmVxdWVzdGVkWgAhaXNUUEZDUmF0ZXNSZXF1ZXN0ZWRBbmRBdXRob3JpemVkWgAZaXNUYXhJbmZvcm1hdGlvblJlcXVlc3RlZFoAJGlzVVBTUHJlbWl1bUNhcmVBY2Nlc3NvcmlhbFJlcXVlc3RlZFoAHGlzVXNlckRpc2NvdW50UmF0aW5nRWxpZ2libGVaABJsYWJlbExpbmtJbmRpY2F0b3JaABJyYXRlQ2hhcnRJbmRpY2F0b3JaABVyYXRpbmdNZXRob2RSZXF1ZXN0ZWRMABhJbnRlcm5hdGlvbmFsRm9ybXNEZXRhaWx0ACtMY29tL3Vwcy9pZmMvY29yZS9JbnRlcm5hdGlvbmFsRm9ybXNEZXRhaWw7TAAGTG9jYWxldAASTGphdmEvbGFuZy9TdHJpbmc7TAALU
+<--Data End
+15:22:33  Http Send End:
+
+15:22:33  Http Recv Data Start:
+(1C8h) bytes have been received.
+
+Data Start-->HTTP/1.1 200 OK
+Date: Thu, 14 Nov 2019 20:22:15 GMT
+Server: Apache
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Cache-Control: no-cache, no-store, must-revalidate, max-age=0, no-cache=Set-Cookie, Set-Cookie2
+Pragma: no-cache
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Pragma: no-cache
+Content-Length: 7303
+APIHttpStatus: 200
+Connection: close
+Content-Type: application/xml
+
+<--Data End
+15:22:34  Http Recv Data End:
+
+15:22:34  Http Disconnect:
+15:22:34  Http Completed: Ok!
+

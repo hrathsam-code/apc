@@ -1,0 +1,110 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    XXXXX.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %ifndef           $xxxxxVAR
+$xxxxxVAR          equate            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+xxxxx              record
+PrimaryField       dim               8          1 - 8
+SecondaryField	   dim               10
+                   recordend
+
+Tempxxxxx          record            like       xxxxx
+Origxxxxx          record            like       xxxxx
+Savexxxxx          record            like       xxxxx
+.
+.
+. File Keys and file labels
+. -------------------------
+.
+xxxxxK1SIZE        const             "1"                                       //Length of the Key variable)
+xxxxxK2SIZE        const             "1"                                       //Length of the Key variable 2)
+.
+. By Entity, Seq major, seq minor
+.
+xxxxxI1DEF         init              "1-8,54-60,61-63"                        //Index definitions for Key 1)
+.
+. By Entity, Year, period, seq Major, Seq Minor
+.
+xxxxxI2DEF         init              "1-8,38-41,42-43,54-60,61-63"            //Index definitions for Key 2)
+.
+xxxxxFileSize      const             "1"                                       //Length of each Record)
+
+xxxxxKY 	   dim               xxxxxK1SIZE                              //The Actual 'Key' variable)
+xxxxxKY2           dim               xxxxxK2SIZE                              //The Actual 'Key' variable)
+
+xxxxxPROG          init              "Program Name"
+xxxxxDESC          init              "xxxxx description"                      //Description of the Master files
+xxxxxTITLE         init              "Record Title"                           //Description used later for headers, etc)
+xxxxxHELP          init              "xxxxx.HLP"                              //Name of the Help file for later purposes)
+
+xxxxxTXTNM         init              "$DataDir\","xxxxx.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+xxxxxISI1NM        init              "$DataDir\","xxxxx.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+xxxxxISI2NM        init              "$DataDir\","xxxxx2.ISI"                //Actual ISI Filename
+
+xxxxxFLST          filelist
+                   %ifdef            xxxxxKY
+xxxxxFL            ifile             Name=xxxxxISI1NM,DUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY2
+xxxxxFL2           ifile             Name=xxxxxISI2NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY3
+xxxxxFL3           ifile             Name=xxxxxISI3NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY4
+xxxxxFL4           ifile             Name=xxxxxISI4NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY5
+xxxxxFL5           ifile             Name=xxxxxISI5NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY6
+xxxxxFL6           ifile             Name=xxxxxISI6NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY7
+xxxxxFL7           ifile             Name=xxxxxISI7NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY8
+xxxxxFL8           ifile             Name=xxxxxISI8NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            xxxxxKY9
+xxxxxFL9           ifile             Name=xxxxxISI9NM,NODUP,NOPATH,UPPER
+                   %endif
+                   filelistend
+                   %endif
+
+                   %ifndef           $xxxxxIO
+                     include           xxxxx.IO
+                   %endif

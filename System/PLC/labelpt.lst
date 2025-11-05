@@ -1,0 +1,134 @@
+
+
+
+PAGE    1      LABELPT.DBS IDE                                                                                03-22-04 20:07:07
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "LABELPT.DBS","F:\PLC\LABELPT.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    7.    INCLUDE  A: common.pls
+   14.    INCLUDE  B: custmast.pls
+   43.    INCLUDE  C: callerr1.pls
+   47.    INCLUDE  D: callerr2.pls
+  111.                                         KEYIN     *P01:12,*EL,"PRINT ALL THE ACCOUNTS (within company) ",REPLY
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\labelpt.plc                                                                                                                                                                                                                                        
+       338 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 20:07:07 20:07:07
+  00001750 DATA;  00000312  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      LABELPT.DBS IDE                                                                                03-22-04 20:07:07
+                                         
+
+"                                          D      30. D*   183.     184.  
+"ACCTMNU1                                  D      88.  *   197.  
+"CUSTOMER LABEL PRINT                      D      45.  *
+"Q                                         D     191.  *
+"X                                         D     140.  *   160.  
+0                                          F     142.  *
+ACCOUNTS                                   i       9.  *    82.     129.  
+ACCTFLAG                                   D      33.  *   101.     102.     104.     106.     173.  
+ACCTNUMB                                   D      14. A*
+ACCTPT                                     X     100.  *    95.      97.     103.     109.  
+ADDR2                                      D      19.  *   150.     165.  
+ADDR22                                     D      20.  *
+ALLACCT                                    D      35.  *
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+CITY2                                      D      21.  *   151.     172.  
+COMMCODE                                   D      26. B*
+CURNTDUE                                   F      31. B*
+CUSTADDR                                   D      11. B*   129.     150.     165.  
+CUSTADR2                                   D      12. B*
+CUSTCATG                                   D      17. B*
+CUSTCITY                                   D      13. B*   130.     151.     171.  
+CUSTCRED                                   F      16. B*
+CUSTKEY                                    D       8. B*   129.     154.     175.  
+CUSTNAME                                   D      10. B*   129.     149.     164.  
+CUSTSTAT                                   D      14. B*   130.     152.     171.  
+CUSTSTTS                                   D       9. B*   129.     137.  
+CUSTZIP                                    F      15. B*   130.     153.     171.  
+D                                          O 5    12. C*    13. D    16. D    31. D
+DATE6                                      D      10. A*
+DDATA                                      D      13. C*    13. D
+ENVS                                       D      11. A*
+EOJRTN                                     X     193.  *   186.     190.  
+EOJSET                                     X     189.  *   133.     145.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+FIRSTIME                                   D      17. A*
+FROMPGM                                    D      16. A*    28. D
+INDXIT                                     X      26. D*    22. D
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+KEY2                                       D      24.  *   154.     175.  
+KEYCNT                                     F      27.  *   120.     142.     144.  
+LSTPAYDT                                   D      22. B*
+LSTPAYPR                                   F      24. B*
+LSTSALDT                                   D      21. B*
+LSTSALPR                                   F      23. B*
+MAINLINE                                   X      30. D*    22. D
+MATCHX                                     X     146.  *   143.  
+
+
+
+PAGE    3      LABELPT.DBS IDE                                                                                03-22-04 20:07:07
+                                         
+
+MTDCASH                                    F      39. B*
+MTDCRED                                    F      40. B*
+NAME                                       D      10.  *    82.  
+NAME2                                      D      18.  *   149.     164.  
+NOCUST                                     X      85.  *    81.  
+NULL                                       X      24. D*    22. D
+NUMKEY                                     F      31.  *
+NXT1                                       X     121.  *   110.     115.  
+OKAY                                       X     140.  *
+P2FLAG                                     D      36.  *   146.     160.     183.  
+PD01TO30                                   F      32. B*
+PD31TO60                                   F      33. B*
+PD61TO90                                   F      34. B*
+PDOVR90                                    F      35. B*
+PKEY                                       X     120.  *   117.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PRINTALL                                   X     110.  *   105.     107.     113.     119.  
+PRINTEM                                    X     164.  *   147.     159.     192.  
+PROCEED                                    X      79.  *
+READ                                       X     129.  *   138.     161.     187.  
+READFLAG                                   D      32.  *   140.     184.     185.     189.     191.  
+RECCNT                                     F      28.  *   141.     144.  
+REPLY                                      D      12.  *    30. D    67.      77.      78.     111.     112.     114.  
+                                                     *   116.  
+RESULT                                     F      11. C*    16. D    22. D
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. A*
+SPACE1                                     X     178.  *   174.  
+SPACEOUT                                   X     180.  *   177.  
+STARTIT                                    X      90.  *    84.      93.      99.  
+STATE2                                     D      22.  *   152.     172.  
+TESTIT                                     X      22. D*    16. D
+TESTONE                                    D      18. A*
+TESTS                                      X     183.  *   182.  
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TIME                                       D      39.  *    50.  
+TITLTEXT                                   D       9. C*    45.      15. D
+TODAY                                      D       8. A*
+TWOUP                                      D      34.  *    91.      92.      94.      96.     158.  
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+ZIP2                                       F      23.  *   153.     172.  
+

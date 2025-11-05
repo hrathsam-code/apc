@@ -1,0 +1,140 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APTRN.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/06/2005 AT 12:35PM                                          ;
+;                                                                             ;
+;  PURPOSE:    AP Header Transaction Record                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   06/01/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+           %IFNDEF   $APTRNVAR
+$APTRNVAR  EQUATE            1
+..
+..
+. Field Definitions
+. -----------------
+..
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APTRN               RECORD
+Entity              DIM                8         1 - 8                                      *
+SubEntity           DIM                8         9 - 16
+Vendor              DIM                6        17 - 22                                     *
+SeqMajor            FORM               7        23 - 29                                     *
+ClosedFlag          DIM                1        30 - 30            //O=Open, C=Closed       *
+Invoice             DIM                20       31 - 50                                     *
+Form1099            FORM               1        51 - 51                                     *
+Voucher             FORM               7        52 - 58            //HR 6.1.2005            *
+EntryDate           DIM                8        59 - 66            CCYYMMDD format          *
+TransDate           DIM                8        67 - 74            CCYYMMDD format          *    //Invoice Date
+DiscDate            DIM                8       119 - 126           CCYYMMDD format          *
+DiscPct             FORM               3.2     127 - 132                                    *
+DiscAmt             FORM               5.2     133 - 142                                    *
+DueDate             DIM                8        81 - 88            CCYYMMDD format          *
+APAccount           DIM                8       163 - 170                                    *
+OrigAmt             FORM               7.2      89 - 98                                     *
+Balance             FORM               7.2      99 - 108                                    *
+NonDiscAmt          FORM               7.2     109 - 118           EQUATE                          *
+Memo                DIM                20      143 - 162                                    *
+HoldFlag            FORM               1                      //1 = OnHold, 0 = Released$   *
+PO                  DIM                20                                                   *
+Receipt             DIM                20                                                   *
+ReceiptDate         DIM                8                                                    *
+Release             FORM               2
+FromVendor          DIM                6                          //From Vendor (i.e. PO Vendor)
+DeletedFlag         form               1
+              RECORDEND
+..
+..
+. File Keys and File Labels
+. -------------------------
+..
+APTRNK1SIZE CONST            "34"                                 (Length of the Key variable 1)
+APTRNK2SIZE CONST            "15"                                 (Length of the Key variable 2)
+APTRNK3SIZE CONST            "42"                                 (Length of the Key variable 3)
+APTRNK4SIZE CONST            "30"                                 (Length of the Key variable 4)
+APTRNK5SIZE CONST            "34"                                 (Length of the Key variable 5)        //Added new Index
+
+.
+. By Entity, Vendor, Reference (Invoice No)
+.
+APTRNI1DEF  INIT             "D,1-8,17-22,31-50"                .Index Size of Key 1
+.
+. By Entity, Seq Major (Provides a 'Unique' Number for each Transaction
+.
+APTRNI2DEF  INIT             "1-8,23-29"                          .Index Size of Key 2
+.
+. By Entity, Vendor, Open/Closed, Invoice Number
+.
+APTRNI3DEF  INIT             "1-8,17-22,30-30,31-50,23-29"          .Index Size of Key 3
+.
+. By Entity, Vendor, Open/Closed, Trans Date, Seq Major
+.
+APTRNI4DEF  INIT             "1-8,17-22,30-30,67-74,23-29"        .Index Size of Key 4
+.
+APTRNFSIZE  CONST            "229"                                (Length of each Record)
+
+APTRNKY    DIM               APTRNK1SIZE                          (The Actual 'Key' variable)
+APTRNKY2   DIM               APTRNK2SIZE                          (The Actual 'Key' variable)
+APTRNKY3   DIM               APTRNK3SIZE                          (The Actual 'Key' variable)
+APTRNKY4   DIM               APTRNK4SIZE                          (The Actual 'Key' variable)
+
+
+APTRNPROG  INIT              "A/P Transaction Detail"
+APTRNTITLE INIT              "A/P Transaction Record"             (Description used later for headers, etc)
+APTRNHELP  INIT              "APTRN.HLP"              (Name of the Help file for later purposes)
+
+APTRNTXTNM  INIT             "$APDATA\","APTRNFL.TXT"             .Actual Text Filename  (i.e. CUSTFL.TXT)
+APTRNISI1NM INIT             "$APDATA\","APTRNFL.ISI"             .Actual ISI Filename   (i.e. CUSTFL.ISI)
+APTRNISI2NM INIT             "$APDATA\","APTRNFL2.ISI"            .Actual ISI Filename
+APTRNISI3NM INIT             "$APDATA\","APTRNFL3.ISI"            .Actual ISI Filename
+APTRNISI4NM INIT             "$APDATA\","APTRNFL4.ISI"            .Actual ISI Filename
+
+APTRNFLST  FILELIST
+           %IFDEF            APTRNKY
+APTRNFL    IFILE             Name=APTRNISI1NM,DUPLICATES,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY2
+APTRNFL2   IFILE             Name=APTRNISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY3
+APTRNFL3   IFILE             Name=APTRNISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY4
+APTRNFL4   IFILE             Name=APTRNISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY5
+APTRNFL5   IFILE             Name=APTRNISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY6
+APTRNFL6   IFILE             Name=APTRNISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY7
+APTRNFL7   IFILE             Name=APTRNISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY8
+APTRNFL8   IFILE             Name=APTRNISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTRNKY9
+APTRNFL9   IFILE             Name=APTRNISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+
+         goto              #End
+         %ENDIF
+
+         %IFNDEF           $APTRNIO
+           INCLUDE           APTRN.IO
+         %ENDIF
+#end

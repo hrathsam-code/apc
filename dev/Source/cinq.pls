@@ -1,0 +1,1590 @@
+
+; Automatic Delivery flag
+
+;  Sorting of Customer Info
+;  Auto Ticket Program
+;  Ticket Manager allows Updates
+;  Create Ticket Tickler File
+;  Seaching by Last Name!!!!!!
+; IDIOT!!!!  Add Address Line!!!!!
+; Color Coded with Cancelled
+; Inability to enter a Cancelled account
+; Cnotract Report detailing Fuel Summary for Contract range
+
+; Robert Section 3F Marker 2395 Robert Ulino   E_Mail Address MY2bys9799@bellsouth.net
+; Meredith
+;
+; ;  Hand Notes for Drivers
+;    Get Contact Info from Ciro
+
+
+
+;
+; Albanese, Salvatore         Grave 33, Marker 380
+;
+
+;/****** Script for SelectTopNRows command from SSMS  ******/`
+;SELECT TOP 1000 [check_id]
+;      ,[check_number]
+;      ,[gross_amount]
+
+;      ,[discount_amount]
+;      ,[net_amount]
+;      ,[CheckDate]
+;      ,[Check_Type]
+;      ,[Bank_Code]
+;      ,[VoidDate]
+;      ,[VoidUser]
+;      ,[check_creation_date]
+;  FROM [superior_washers].[dbo].[T501_check_master]
+;  inner join [superior_washers].[dbo].[T015_Vendor] on T015_Vendor.Vendor_id = T501_Check_Master.Vendor_id
+;  where CheckDate >= '2018/01/07'  and Vendor_Acc_No
+
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    cinq                Use Same Address                           ;
+;                                  Except instead of PO Box                   ;
+;   author:    harry rathsam       use Craig Rathsam with your phone number   ;
+;                                                                             ;
+;     date:    12/26/2017 at 3:27pm                                           ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   12/26/2017   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+                    include            NCommon.txt
+           INCLUDE           WORKVAR.INC
+#RESULT    FORM              1
+NodeNum    FORM              6
+
+           INCLUDE           Cust.FD
+
+CustBalance   FORM              10.2
+CustBalanceD  DIM               13
+
+WrkAmt1            dim               15
+WrkAmt2            dim               15
+WrkAmt3            dim               15
+
+UseStamps     DIM               10
+
+InvType       dim               30
+CustomerIDSave dim                     10
+.....CustomerIDSave like             Cust.CustomerID
+X          integer           1
+ChildNum   FORM              6
+SeqNum     FORM              7
+DataLine2           dim                200
+int2       FORM              4
+MonthName  DIM               10
+CurrentYear DIM                 4
+SelectedYear DIM                4
+DueDate10     DIM               10
+TransDate10   DIM               10
+ViewByOption  FORM              2
+TransAmt      dim               12(3)
+Dim10         dim               10
+SearchBy      FORM              1
+InvoiceKey    DIM               10
+InvoiceKeyF   FORM              10
+Invoice5      FORM              5
+OldInvoiceNumber FORM           5
+OldInvoiceNumber10 FORM         10
+OldInvoiceNumberD DIM           5
+BalanceD      DIM               12
+OrigAmtD      DIM               12
+RangeToDate   DIM               8
+TotalRows     FORM              8
+MemoField     DIM               40
+FreightAmt    FORM              4.2
+PaymentType   DIM               17
+FromCustomer  DIM               10
+DIM13         DIM               13
+Days       FORM              10
+RES2          FORM              6                 //Was 2   HR 2019.11.11
+IOSW     DIM       1       I/O INDICATOR
+
+
+#RES1      FORM              1
+#DIM1      DIM               1
+#DIM2      DIM               2
+#RES2      FORM              2
+#LEN1      FORM              3
+#MenuObj   Automation
+#MenuItem  DIM               25
+
+
+           GOTO              STARTPGM
+
+           include           Sequence.FD
+
+           include                     Parts.FD
+           include              CustD.FD
+           INCLUDE           ARTRM.FD
+           INCLUDE           CMPNY.FD
+           INCLUDE           CHST.FD
+           INCLUDE           GLMAST.FD
+           INCLUDE           CLASS.FD
+           INCLUDE           TYPE.FD
+           INCLUDE           CNTRY.FD
+           INCLUDE           STATE.FD
+           INCLUDE           ARTRN.FD
+           INCLUDE           ARDET.FD
+           include           Invoices.FD
+.
+WindowsCOl    COLLECTION
+CloseColl     collection
+
+
+CINQ4         PLFORM            CINQ4
+FStamps       PLFORM            StampST.PLF
+
+MAIN       PLFORM            CinqAll.PLF
+ToolBars   PLFORM            DataMenu.PLF
+
+
+...About      PLFORM            About.PLF
+
+
+FileMenuTxt init      "&File;":
+                      "&Print;":
+                      "-;":
+                      "E&xit"
+
+ChngMenuTxt init      "&Edit;":
+                      "&New record;":
+                      "&Change Record;":
+                      "&Delete Record;":
+                      "&Save Record"
+
+HelpMenuTxt init      "&Help;":
+                      "F1 - Help with A//P Terms;":
+                      "-;":
+                      "&About Chiron Software"
+.
+STARTPGM   ROUTINE
+           INCLUDE           SECURITY.INC
+           MOVE              "1",ProgLoaded
+.
+. If we're unable to find the Help file, then we're going to simply just not make
+. the F1 Function key available to the Users
+.
+           MOVE              "AppDir;HELPDIR",EnvData
+           CLOCK             INI,EnvData
+           IF                NOT OVER
+             PACK              EnvData,EnvData,CustHelp
+             TRAP              NOHELP IF OBJECT
+             SETMODE           *HELPLIB=EnvData
+             SETMODE           *F1HELP=ON
+             TRAPCLR           OBJECT
+             GOTO              OPENFILES
+NOHELP
+             NORETURN
+           ENDIF
+.
+OPENFILES
+           CALL              OPENCust
+           CALL              OPENCustD
+                    call               OpenSequence
+
+           CALL              OPENCust
+           call              OpenInvoices
+           CALL              OPENARTRM
+           CALL              OPENGLMast
+..           CALL              OPENCLASS
+..           CALL              OPENTYPE
+...           CALL              OPENCMPNY
+           CALL              OPENARTRN
+           CALL              OPENARDET
+           CALL              OPENCNTRY
+           CALL              OPENCHST
+              CLOCK             TIMESTAMP,CurrentYear
+
+CustColl   COLLECTION
+CustEdt    COLLECTION
+CustBoxes  COLLECTION
+CustStat   COLLECTION
+
+..HR 2017.12.28           LISTINS           WindowsCOL,CINQ1,CINQ2
+
+              listins           CloseColl,DTFromDate,DTToDate,SFromDate,SToDate
+
+              LISTINS           CustStat,STCustCountry
+              LISTINS           CustCOLL,ECustCode,ECustName,ECustAddr1,ECustAddr2,ECustAddr3:
+                                        ECustCity,ECustSt,ECustZip,ECustCountry,ECustContact:
+                                        ECustLookupName,ECustAcctNo,ECustMemo,ECustHomePage:
+                                        ECustTerm,ECustStatus,ECustPhone,ECustFax:
+                                        ECustType,ECustClass,ECustDUNS,ECustEIN,ECustSIC:
+                                        ECustGLAcct
+.
+              LISTINS           CustEDT,ECustCode,ECustName,ECustAddr1,ECustAddr2,ECustAddr3:
+                                       ECustCity,ECustSt,ECustZip,ECustCountry,ECustContact:
+                                       ECustLookupName,ECustAcctNo,ECustMemo,ECustHomePage:
+                                       ECustTerm,ECustStatus,ECustPhone,ECustFax:
+                                       ECustType,ECustClass,ECustDUNS,ECustEIN,ECustSIC:
+                                       ECustGLAcct
+.
+              LISTINS           CustBOXES,CBCustActive
+
+              INCLUDE           Temporary.inc
+.           winhide
+
+                    MOVE              "1",SortHeader             //HR 4.20.2016
+
+                    MOVE              "3",SortHeader(4)
+                    MOVE              "3",SortHeader(5)
+                    MOVE              "5",SortHeader(6)
+
+              FORMLOAD          MAIN
+              FORMLOAD          ToolBars,WMain
+              FORMLOAD          CINQ4,WMain
+              FORMLOAD          FStamps
+
+              setprop           MenuToolBar.Buttons("ID_New"),visible=0
+              setprop           MenuToolBar.Buttons("ID_Change"),visible=0
+              setprop           MenuToolBar.Buttons("ID_Delete"),visible=0
+
+              MenuDatabase.RemoveItem using *Key="MNewRecord"
+              MenuDatabase.RemoveItem using *Key="MModifyRecord"
+              MenuDatabase.RemoveItem using *Key="MDeleteRecord"
+              MenuDatabase.RemoveItem using *Key="MSaveRecord"
+
+              setprop           MenuToolBar.Buttons("ID_Cancel"),visible=0
+              setprop           MenuToolBar.Buttons("ID_Save"),visible=0
+              setprop           MenuToolBar.Buttons("TBRecDivide"),visible=0
+
+              setprop           MenuToolBar.Buttons("TBRecDivide2"),visible=1
+              setprop           MenuToolBar.Buttons("ID_Comments"),visible=1
+              setprop           MenuToolBar.Buttons("ID_Statements"),visible=1
+              setprop           MenuToolBar.Buttons("ID_Reprint_Invoices"),visible=1
+
+
+..HR 2017.12.28           FORMLOAD          CINQ1,WMain
+..HR 2017.12.28           FORMLOAD          CINQ2,WMain
+..HR 2017.12.28           FORMLOAD          CINQ3,WMain
+.           FORMLOAD           StatusWin,WMain
+
+..HR 2017.12.28           DEACTIVATE        CINQ2
+..HR 2017.12.28           DEACTIVATE        CINQ3
+..HR 2017.12.28           SETPROP           CINQ1,visible=1
+
+
+           LOOP
+             WAITEVENT
+           REPEAT
+.
+. We never get here!!   Just in case though.... :-)
+.
+           RETURN
+.           STOP
+
+BROWSEFILE ROUTINE
+SEARCH     PLFORM            SEARCH3.PLF
+           FORMLOAD          SEARCH
+
+INITSRCH
+           PACK              SearchTitle,CustTitle," Search Window"
+           SETPROP           WSearch,*Title=SearchTitle
+
+
+
+           CTADDCOL          "Customer ID",75,"Customer Name",125:
+                             "Address",100:
+                             "City",100:
+                             "State",40:
+                             "Zip",60:
+                             "Country",50
+
+.
+. Routines that operate the Main program
+.
+.=============================================================================
+LoadSearchWindow
+              GETITEM           ESearchName,0,CustKY2
+
+              SETMODE           *mcursor=*wait
+
+              COUNT             result,CustKY2
+              IF                (result = 0)
+                SETMODE           *mcursor=*Arrow
+                setprop                BSearchSearch,default=1
+                setfocus                 ESearchName
+
+                RETURN
+              ENDIF
+
+              clear             SearchCounter
+              Uppercase         CustKY2
+              LVSearchPLB.DeleteAllItems
+              CALL              RDCust2
+              LOOP
+                CALL              KSCust2
+              UNTIL             (ReturnFl = 1)
+                uppercase         Cust.Name
+                MATCH             CustKY2,Cust.Name
+                IF                not equal
+                  SETMODE           *mcursor=*Arrow
+                  BREAK
+                ENDIF
+                incr              SearchCounter
+                CTLoadRecord2     Cust2,Cust,Cust.CustomerID,Cust.CustomerID,Cust.Name:
+                                  Cust.Addr1,Cust.City,Cust.St
+              REPEAT
+              SETMODE           *mcursor=*Arrow
+              if                (SearchCounter = 0)
+                beep
+                alert                    stop,"No Custs Found that match the Search Criteria",result,"NO CustS FOUND"
+                ESearchName.SelectAll
+                ESearchName.Clear
+                setprop                BSearchSearch,default=1
+                setfocus                 ESearchName
+              else
+                LVSearchPLB.SetItemState using *Index=0,*State=03,*StateMask=03
+                setprop                BSearchSelect,default=1
+                setfocus               LVSearchPLB
+              endif
+              RETURN
+;==========================================================================================================
+ItemSelected
+                      LVSearchPLB.GetNextItem giving RowSelected using *Flags=02,*Start=FirstRow
+                    if                 (RowSelected != -1)
+                      LVSearchPLB.GetItemText giving $SearchKey using *Index=RowSelected,*SubItem=0
+                      MOVE               "Y",PassedVar
+                      DESTROY            WSearch
+                    endif
+
+                    RETURN
+;==========================================================================================================
+MaintMenuOption
+
+              CALL                 GetMenuName
+              RETURN
+;==========================================================================================================
+Change_ECustCode
+              READAHEAD         ECustCode,Cust,CustomerID
+              return
+;==========================================================================================================
+KeyPress_ECustCode
+              F2SEARCH          ECustCode,Cust
+              IF                 (PassedVar = "Y")
+              CALL               MainValid
+              ENDIF
+              RETURN
+;==========================================================================================================
+
+
+MainValid
+.           IF                (Status = 0)
+              GETITEM           CBSearchBy,0,SearchBy
+              IF                (SearchBy = 2)           //By Invoice Number
+                GETCOUNT          ECustCODE
+                RETURN            IF (CharCount = 0)      //Nothing to do
+
+.                FILL              Blank,InvoiceKey
+                RESETVAR          InvoiceKey
+                MOVE            "0",InvoiceKeyF                       //HR 4/26/2005
+
+                GETITEM           ECustCODE,0,InvoiceKey
+                SETLPTR           InvoiceKey
+
+                PACKKEY           ARTRNKY5 FROM $Entity,"I",InvoiceKey,"999999"
+                CALL              RDARTRN5
+
+                CALL              KPARTRN5
+                IF                (ReturnFl = 1 or ARTrn.Reference != InvoiceKey)
+                  BEEP
+                  ALERT           note,"Invoice Number does not exist",result
+                  RETURN
+                ENDIF
+                SETITEM           ECustCode,0,ARTrn.CustomerID
+                CLEAREVENTS
+              ENDIF
+
+             GETCOUNT          ECustCODE
+             IF                (CharCount > 0)
+               RESETVAR          CustKY
+               GETITEM           ECustCODE,0,CustKY
+               setlptr           CustKY,10
+
+                CALL              RDCust
+               IF               (RETURNFL = 1)
+                 PARAMTEXT        CustTITLE,CustKY,"",""
+                 ALERT            CAUTION,"^0: ^1 Not Found",#RES2,"Record does not exist"
+                 CALL             MAINRESET
+                 RETURN
+               ENDIF
+.
+. OK, we've been able to read the record and now let's show it on the screen.
+.
+.               CALL              MainReset
+               CALL              SETMAIN
+.
+. HR 8/5/2003
+.
+           CLOCK             TIMESTAMP,Date8
+           CALL              ConvDateToDays using DATE8,Days         //HR 5/30/2005 Added back to system
+           SUBTRACT          "365",Days                              //HR 5/30/2005 Added back to system
+           CALL              ConvDaysToDate using Days,DATE8         //HR 5/30/2005 Added back to system
+
+           unpack            DATE8,CC,YY,MM,DD
+           SETPROP           DTFromDate,text=Date8
+
+           CLOCK             TIMESTAMP,Date8
+           setprop              DTToDate,text=Date8
+Harry1
+           SETITEM           CBViewBy,0,1
+
+
+              CALL              ViewHistoryByOptions
+
+           MOVE              "3",Status                   .We've found a record
+               ENABLETOOL        ID_Change
+               ENABLETOOL        ID_Delete
+               DISABLEITEM       Fill1
+               CALL              SetCustomerHistoryYears
+             ENDIF
+.           ENDIF
+           RETURN
+
+.=============================================================================
+. Initialize MAIN Form and setup the Menu's, Fields, Objects, Buttons, etc
+.
+MAININIT
+.X           CREATE            WMAIN;HelpMenu,HelpMenuTxt
+.X           CREATE            WMAIN;ChangeMenu,ChngMenuTxt
+.X           CREATE            WMAIN;FileMenu,FileMenuTxt
+.
+.X           ACTIVATE          HelpMenu,onClickMainWinHelpMenu,result
+.X           ACTIVATE          ChangeMenu,onClickMainWinChangeMenu,result
+.X           ACTIVATE          FileMenu,onClickMainWinFileMenu,result
+.
+. Set the SELECTALL property for the COLLECTION and then take care of
+. any ActiveX controls.
+.
+           SETPROP           CustEDT,SELECTALL=$SelectAll
+.
+           SETPROP            StatusBar001.Panels(0),Text=$Entity
+           CALL              MAINRESET
+           call              SetInitialCustomerIDStatistics
+
+           CLOCK             TIMESTAMP,Date8
+.           CALL              ConvDateToDays using DATE8,Days
+.           SUBTRACT          "365",Days
+.           CALL              ConvDaysToDate using Days,DATE8
+
+..HR 2018.01.08           unpack            DATE8,CC,YY,MM,DD
+...           PACKKEY           DATE8,MM,slash,DD,slash,YY
+..HR 2018.01.08           PACKKEY           DATE8,"01",slash,"01",slash,YY
+           SETPROP           DTFromDate,text=DATE8
+
+           RETURN
+.=============================================================================
+. New Button is pressed
+.
+MAINNEW
+           IF                (Status = 2)      //Let's 'Save' this NEW Record
+             CALL              VALIDATE1     //Validate the data first
+.
+. Something's not right...Let's just return and wait until all the fields
+. have been validated
+.
+             IF                (ValidFlag = 1)
+               RETURN
+             ENDIF
+.
+. Get all of the fields from the Form into the proper RECORD
+.
+             CALL              GETMAIN
+.
+. Let's see if SOMEBODY else has entered/used this code before or let's just
+. see if this Code already exists in the system
+.
+             GETITEM           ECustCode,0,CustKY
+
+             CALL              TSTCust
+             IF                (RETURNFL = 1)
+.               CALL              WRTCust
+               CALL              MAINRESET
+               RETURN
+             ELSE
+               PARAMTEXT       CustTITLE,CustKY,"",""
+               BEEP
+               ALERT           Note,"^0 with code ^1 already exists. Please enter another code",result:
+                                    "Record already exists"
+               SETFOCUS        ECustCode
+             ENDIF                                //Valid record exists???
+           ELSE
+             CALL              MainReset
+             MOVE              "2",Status
+             CALL              DisableRecordButtons
+.
+. Enable all of the EditText fields and set the EditText fields
+. to Non Read-Only
+.
+             ENABLEITEM        CustEDT
+             DISABLEITEM       Fill1
+             %IFDEF            CBCustActive
+             ENABLEITEM        CBCustActive
+             %ENDIF
+
+             SETPROP           CustEDT,READONLY=0
+             SETPROP           CustEDT,BGCOLOR=$WINDOW
+.
+. We also need to set any ActiveX controls to the same properties
+.
+               ENABLEITEM      CustBoxes
+.
+. Setup any DEFAULT values
+.
+.             SETITEM           ECustDISCDAYS,0,"0"
+.
+. Disable & Enable the proper Buttons along with changing
+. the description of the Button's (i.e. Exit --> Change)
+.
+.INQ             DISABLEITEM       BMainCHANGE
+             DISABLETOOL       ID_Change
+
+.INQ             DISABLEITEM       BMainDELETE
+             DISABLETOOL       ID_Delete
+
+.INQ             SETITEM           BMainNEW,0,SaveTitle
+             ENABLETOOL        ID_Save
+
+.INQ             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+             DISABLETOOL       ID_New
+.
+. Disable the Menu Items except for the 'Save' button
+.
+.1             DISABLEITEM       ChangeMenu,1
+.1             DISABLEITEM       ChangeMenu,2
+.1             DISABLEITEM       ChangeMenu,3
+.1             ENABLEITEM        ChangeMenu,4
+.
+. Set the Focus to the first field that we're going to be Entering
+.
+             SETFOCUS          ECustCode
+           ENDIF
+           RETURN
+.=============================================================================
+. Change/Save Button has been pressed
+.
+MAINCHANGE
+.
+. I'm only getting here if the Change Button has been selected.  Soooooo....Either the
+. Change Button has been pressed, or this button now reads 'Save'.  If it reads Save,
+. the Status flag will have been set to 1 the first time that this routine has been
+. reached.
+           IF                (Status = 1)                //'Save' button has been pressed
+             CALL              VALIDATE1
+             IF                (ValidFlag = 0)           //Great..All fields ARE valid!!!
+               CALL              GETMAIN                 //Get all of the fields
+.               CALL              UPDCust                //Update the record
+               CALL              MAINRESET               //Reset the objects & fields
+             ENDIF
+             RETURN                                      //Voila...Either way, we're RETURNING
+           ENDIF
+           GETCOUNT          ECustCODE
+           IF                (Charcount > 0)
+             GETITEM           ECustCODE,0,CustKY      //Read the Primary field ito the Key
+
+             CALL              RDCustLK               //Lock the record so that nobody uses it
+.
+. Just for arguments sake, let's just make sure that the record hasn't been deleted
+. by another user, AND...Let's make sure that it's not being used by another user
+. as well!!
+.
+             IF                (RETURNFL = 1)          //WHAT!!! Somebody deleted this record
+               BEEP
+               ALERT             STOP,"Record deleted by another User!!",RESULT
+               CALL              MAINRESET
+               RETURN
+             ENDIF
+.
+. Record is locked...Try again later
+.
+             IF                (RETURNFL = 2)          //WHAT!!! Somebody's locked the record
+               BEEP
+               ALERT             NOTE,"Record locked by another User..."::
+                                       "Try again later",RESULT,LOCKTITLE
+               RETURN
+             ENDIF
+.
+. OK, OK...We've gotten this far...The record is now locked and we
+. can safely change the Status to "Modify"
+.
+             MOVE              "1",Status                  //We've selected the Modify/Change Button
+             CALL              DisableRecordButtons
+.
+. Not only do we have a good record, but we've been able to 'Lock' the record
+. and now we're ready to proceed
+.
+. Enable the Entire Collection of EditText fields as well as setting the
+. background colors and making them Non Read-Only
+.
+             ENABLEITEM        CustCOLL
+             ENABLEITEM        CustStat
+             DISABLEITEM       Fill1
+             %IFDEF            CBCustActive
+             ENABLEITEM        CBCustActive
+             %ENDIF
+.
+             SETPROP           CustCOLL,READONLY=0
+             SETPROP           CustCOLL,BGCOLOR=$WINDOW
+.
+. OK, OK...What do we do with any ActiveX components. We've got to handle
+. them as well.  Let's change these to Non Read-Only and change the
+. Background colors as well
+.
+               ENABLEITEM      CustBoxes
+
+.
+. Change the Cancel button button to 'Save' and the 'Exit' button to Cancel
+.
+.INQ             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+.INQ             SETITEM           BMainCHANGE,0,SaveTitle
+             ENABLETOOL        ID_Save
+.
+             ENABLETOOL        ID_Undo
+             DISABLETOOL       ID_Change
+.
+             DISABLETOOL       ID_New
+.INQ             DISABLEITEM       BMainNew
+.
+             SETFOCUS          ECustName               //Set the cursor to the next field
+.             DISABLEITEM       ECustCODE               //and Disable the Primary Code
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainUndo
+. If I've click on the Undo/Reset button, I've already got the 'Key' based on
+. the fact that I'm changing a record that already exists and I loaded the
+. key the first time.  Soooooo....Simply 'Re-read' the record, Calll the
+. SetMain routine and Voila!!!!
+.
+           BEEP
+           ALERT             PLAIN,"Revert back to the 'Original' record",RESULT:
+                                   SureTitle
+           IF                (RESULT = 1)
+             CALL              RDCustLK
+             CALL              SetMain
+           ENDIF
+           RETURN
+.=============================================================================
+MainFind
+...HR            FindSearch        ECustCode            //07/07/2003
+           FindSearch        ECustCode,Cust
+
+           IF                (PassedVar = "Y")
+             GETITEM           ECustCode,0,CustKY
+             MOVE              $SearchKey,CustKY
+             CALL              RDCust
+.
+. We've got a record thanks to our Trusy Search/Browse window. Let's
+. continue now by setting up the proper Code field and calling the
+. MainValid subroutine, that will take care of it for us.
+.
+             MOVE              "0",Status
+             SETITEM           ECustCode,0,Cust.CustomerID
+             CALL              MainValid
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainFirst
+           CLEAR             CustKY
+           FILL              FirstASCII,CustKY
+           CALL              RDCust
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KSCust         . Try the 'next' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      FirstTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           ECustCode,0,Cust.CustomerID
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Last record and display it
+.
+MainLast
+           CLEAR             CustKY
+           FILL              LastASCII,CustKY
+           CALL              RDCust
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KPCust         . Try the 'Previous' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      LastTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKP.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           ECustCode,0,Cust.CustomerID
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Next record and display it
+.
+MainNext
+. We can't just do a simple READKS/READKP because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          ECustCode
+           IF                (CharCount <> 0)
+             GETITEM           ECustCode,0,CustKY
+
+             CALL              RDCust
+           ENDIF
+.
+           CALL              KSCust         . Try the 'next' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"End of file has been reached.",RESULT:
+                                    NextTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           ECustCode,0,Cust.CustomerID
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Previous record and display it
+.
+MainPrevious
+. We can't just do a simple 'READKS' because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          ECustCode
+           IF                (CharCount <> 0)
+             GETITEM           ECustCode,0,CustKY
+
+             CALL              RDCust
+           ENDIF
+.
+           CALL              KPCust         . Try the 'Previous' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"Beginning of file has been reached...",RESULT:
+                                    PrevTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           ECustCode,0,Cust.CustomerID
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Save has been selected from the MENU vs. the Button
+.
+SAVEMODE
+.
+. OK...The 'Save' has been selected from the Menu rather than from the Save Button.
+. What to do, What to do??  Is this a Save to a 'NEW' record or is it a Save to a
+. 'CHANGED' record....
+. Let's check the 'Status' flag...1 is a Change record, 2 is a New Record
+.
+           BRANCH            Status,MainChange,MainNew
+           RETURN
+.=============================================================================
+. Routine to Validate the data from the Form
+.
+VALIDATE1
+           MOVE              "0",ValidFlag
+
+.X           GETITEM           ECustCode,0,TestChars
+.X           COUNT             CharCount,TestChars
+.X           IF                (CharCount = 0)
+.X             MOVE            "1",ValidFlag
+.X             BEEP
+.X             ALERT             CAUTION,"A Code must be entered into the system",RETURNFL,"Error in Field"
+.X             SETFOCUS          ECustCode
+.X             RETURN
+.X           ENDIF
+
+.
+. Everything's OK...Let's just return because the ValidFlag will be set to
+. Zero from the top of this routine.
+.
+           MOVE              "0",ValidFlag
+           RETURN
+.=============================================================================
+. Routine to 'Reset' everything which includes the Button's, Objects,
+. fields, etc.
+.
+MAINRESET
+..HR 7/28/2003           CINQTree.ClearNodes
+           LVTransactions.DeleteAllItems
+
+           MOVE              "0",Status     //Reset the status to Not updating
+           UNLOCK            CustFL
+.
+. Reset the fields to 'Blank' and DISABLE all of those fields as well
+           DELETEITEM        CustCOLL,0
+           DELETEITEM        CustStat,0
+           SETITEM           CBCustActive,0,0
+           DISABLEITEM       CBCustActive
+
+           DISABLEITEM       CustCOLL
+           DisableItem       CustStat
+           SETPROP           CustCOLL,READONLY=1
+           SETPROP           CustCOLL,BGCOLOR=$BTNFACE
+           SETPROP           CustStat,BGCOLOR=$BTNFACE
+           ENABLEITEM        Fill1
+.
+. Reset the Buttons for the Next record
+.
+.INQ           DISABLEITEM       BMainChange
+           DISABLETOOL       ID_Change
+
+.INQ           DISABLEITEM       BMainDELETE
+           DISABLETOOL       ID_Delete
+
+.INQ           SETITEM           BMainCHANGE,0,ChangeTitle
+
+.INQ           SETITEM           BMainNEW,0,NewTitle
+           ENABLETOOL        ID_New
+
+.INQ           ENABLEITEM        BMainNEW
+.INQ           SETITEM           BMainCancel,0,ExitTitle
+
+           DISABLETOOL       ID_Save
+           DISABLETOOL       ID_Undo
+           DISABLETOOL       ID_Cancel
+
+           CALL              EnableRecordButtons
+.
+. Enable & Disable the proper Menu options
+.
+.X           ENABLEITEM        FileMenu,1
+.X           ENABLEITEM        ChangeMenu,1
+.X           DISABLEITEM       ChangeMenu,2
+.X           DISABLEITEM       ChangeMenu,3
+.X           DISABLEITEM       ChangeMenu,4
+.
+. Setup any ActiveX control fields to what they should be
+.
+.           SETPROP           ECustDiscPerc,*Text="0"
+.           SETPROP           ECustDiscPerc,*Enabled=0
+.           SETPROP           ECustDiscPerc,*BackColor=$BTNFACE
+.
+. Setup the Primary field that is used for Entry purposes
+.
+           %IFDEF            CBCustActive
+           SETITEM           CBCustActive,0,0
+           DISABLEITEM       CBCustActive
+           %ENDIF
+
+           SETITEM           CBViewBy,0,1
+
+           SETPROP           ECustCODE,READONLY=0
+           SETPROP           ECustCode,BGCOLOR=$WINDOW
+           ENABLEITEM        ECustCODE
+           SETFOCUS          ECustCODE
+           RETURN
+.=============================================================================
+. Cancel Button has been Clicked
+.
+MAINCLOSE
+.
+. Only display this message if I'm in either the Modify or New mode.  If not,
+. simply exit the program and proceed as normal
+.
+           IF                (Status <> 0)
+             BEEP
+             ALERT              PLAIN,"By Exiting the program now, your operation will be Cancelled?",RESULT:
+                                      "Are you sure?"
+             IF                 (RESULT = 1)
+               DESTROY         WMAIN      . Get rid of the Bank Window
+              winshow
+              CHAIN             FROMPGM
+             ELSE
+               RETURN                     . Contine with standard operations
+             ENDIF
+           ENDIF
+           DESTROY         WMAIN          . Get rid of the Bank Window
+              winshow
+              CHAIN             FROMPGM
+
+.=============================================================================
+. Cancel button has been pressed
+.
+MainCancel
+           IF                (Status = 0)      . They want to exit the program
+             DESTROY         WMAIN             . Get rid of the Main Window
+              winshow
+              CHAIN             FROMPGM
+
+           ELSE
+             IF                (Status = 1 OR Status = 2)  . Change/New Mode
+               BEEP
+               ALERT              PLAIN,"Do you wish to cancel this operation?",RETURNFL:
+                                        "Are you sure?"
+               IF                 (RETURNFL = 1)
+                 CALL               MAINRESET
+                 RETURN
+               ELSE
+                 RETURN
+               ENDIF
+             ELSE
+               CALL              MAINRESET
+             ENDIF
+             RETURN
+           ENDIF
+.=============================================================================
+. Delete Button has been Pressed
+.
+MainDelete
+           PARAMTEXT        Cust.CustomerID,CustTitle,"",""
+           BEEP
+           ALERT            PLAIN,"Do you wish to Delete the ^1: ^0 ?",#RES1,DelTitle
+           IF               (#RES1 = 1)
+             CALL             DELCust
+             ALERT            NOTE,"A/P Term Code ^0 has been deleted",#RES1,DelOKTitle
+             CALL             MAINRESET
+           ENDIF
+           RETURN
+.=============================================================================
+.
+. Setup all of the fields in the Form based upon the data record
+SETMAIN
+           SETITEM           ECustCode,0,Cust.CustomerID
+SETMAIN2
+           SETITEM           ECustName,0,Cust.NAME
+           SETITEM           ECustLookupName,0,Cust.LookupName
+           SETITEM           ECustAddr1,0,Cust.Addr1
+           SETITEM           ECustAddr2,0,Cust.Addr2
+           SETITEM           ECustAddr3,0,Cust.Addr3
+           SETITEM           ECustCity,0,Cust.City
+           SETITEM           ECustSt,0,Cust.St
+           SETITEM           ECustZip,0,Cust.Zip
+           SETITEM           ECustCountry,0,Cust.Country
+           SETITEM           ECustContact,0,Cust.Contact
+..HR 3/2/2005           SETITEM           ECustAcctNo,0,Cust.AcctNo
+           SETPROP           ECustPhone,Text=Cust.Telephone
+           SETPROP           ECustFax,Text=Cust.Fax
+           SETITEM           ECustMemo,0,Cust.Memo
+           SETITEM           ECustHomePage,0,Cust.HomePage
+           SETITEM           ECustTerm,0,Cust.TermCode
+           SETITEM           ECustStatus,0,Cust.Status
+           SETITEM           ECustType,0,Cust.Type
+           SETITEM           ECustClass,0,Cust.Class
+..HR 3/2/2005           SETITEM           ECustDUNS,0,Cust.DUNS
+..HR 10/30/2007           SETITEM           ECustEIN,0,Cust.EIN
+           SETITEM           ECustSIC,0,Cust.SIC
+           SETITEM           CBCustActive,0,Cust.InActive
+           CANDISP           ECustCountry,CNTRY,STCustCountry,Name
+
+           PACKKEY           CustDKY FROM $Entity,Cust.CustomerID
+           CALL              RDCustD
+
+           UNPACK            CustD.LastPayDt,CC,YY,MM,DD
+           PACKKEY           CustD.LastPayDt,MM,slash,DD,slash,YY
+           SETPROP           EVInqPaymentDate,*Text=CustD.LastPayDt
+
+.           setprop           NCompany,value=Cust.Company
+           UNPACK            CustD.LastInvoiceDt,CC,YY,MM,DD
+           PACK              CustD.LastInvoiceDt,MM,slash,DD,slash,YY
+           SETPROP           EVinqInvoiceDate,*Text=CustD.LastInvoiceDt
+
+           SETITEM           EVInqInvoice,0,CustD.LastInvoice
+
+           MOVE              CustD.LastPayAmt,DIM10
+           SETITEM           ECINQPaymentAmt,0,DIM10
+
+           RETURN
+.=============================================================================
+. Retrieve all of the fields in the Form based upon the data record
+.
+GETMAIN
+           GETITEM           ECustCode,0,Cust.CustomerID
+           GETITEM           ECustName,0,Cust.Name
+           GETITEM           ECustLookupName,0,Cust.LookupName
+           GETITEM           ECustAddr1,0,Cust.Addr1
+           GETITEM           ECustAddr2,0,Cust.Addr2
+           GETITEM           ECustAddr3,0,Cust.Addr3
+           GETITEM           ECustCity,0,Cust.City
+           GETITEM           ECustSt,0,Cust.St
+           GETITEM           ECustZip,0,Cust.Zip
+           GETITEM           ECustCountry,0,Cust.Country
+           GETITEM           ECustContact,0,Cust.Contact
+..HR 3/2/2005           GETITEM           ECustAcctNo,0,Cust.AcctNo
+           GETPROP           ECustPhone,Text=Cust.Telephone
+           GETPROP           ECustFax,Text=Cust.Fax
+           GETITEM           ECustMemo,0,Cust.Memo
+           GETITEM           ECustHomePage,0,Cust.HomePage
+           GETITEM           ECustTerm,0,Cust.TermCode
+           GETITEM           ECustStatus,0,Cust.Status
+           GETITEM           ECustType,0,Cust.Type
+           GETITEM           ECustClass,0,Cust.Class
+           GETITEM           ECustSIC,0,Cust.SIC
+           GETITEM           CBCustActive,0,Cust.InActive
+
+.           getprop           NCompany,value=Cust.Company
+
+           RETURN
+.=============================================================================
+.Help Menu selection if required
+.
+MAINHELP
+          RETURN
+
+onClickMainWinChangeMenu
+           PERFORM           RESULT OF  MAINNEW,MAINCHANGE,MainDelete,SAVEMODE
+           RETURN
+.=============================================================================.
+onClickMainWinExitButton
+.
+. check to see if this is masquerading as a CANCEL button
+.
+           CALL              MainCancel
+           RETURN
+.=============================================================================.
+onClickMainWinFileMenu
+.
+. process a click on the file menu
+.
+           PERFORM           result of MainPrint,,MAINCLOSE
+           RETURN
+.=============================================================================.
+onClickMainWinHelpMenu
+           PERFORM           result of MAINHELP,MAINHELP,MAINAbout
+           RETURN
+.=============================================================================.
+. Display the Standard "About Box"
+.
+MAINAbout
+.
+. display an alert box describing the program
+.
+                   getmode           *ProgName=ProgramName
+                   getmode           *ProgStamp=ProgramStamp
+                   getmode           *ProgVer=ProgramVer
+
+                   CALL              About using ProgramName,ProgramStamp,ProgramVer
+                   SETFOCUS          WMain
+                   RETURN
+;==========================================================================================================
+. Print Report option
+.
+MainPrint
+.X           CALL              PRTREPORT
+           RETURN
+MainToolBar
+           RETURN
+
+.=============================================================================
+. Disable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+DisableRecordButtons
+           DISABLETOOL       ID_First
+           DISABLETOOL       ID_Next
+           DISABLETOOL       ID_Previous
+           DISABLETOOL       ID_Last
+           DISABLETOOL       ID_Find
+           RETURN
+.=============================================================================
+. Enable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+EnableRecordButtons
+           ENABLETOOL        ID_First
+           ENABLETOOL        ID_Next
+           ENABLETOOL        ID_Previous
+           ENABLETOOL        ID_Last
+           ENABLETOOL        ID_Find
+           RETURN
+.=============================================================================
+OnDoubleClickTransaction
+              eventinfo         0,Result=Int2
+              LVTransactions.GetItemParam giving SeqNum using *Index=Int2
+              SETPROP           CINQ4,visible=1
+              RETURN
+
+.=============================================================================
+.
+OnExpandCINQTree
+              LVDetails.DeleteAllItems
+              LVTransactions.GetItemText giving ARTrn.Reference using *Index=int2,*SubItem=1
+              LVTransactions.GetItemText giving OrigAmtD using *Index=int2,*SubItem=3
+              LVTransactions.GetItemText giving BalanceD using *Index=int2,*SubItem=4
+              LVTransactions.GetItemText giving Date10 using *Index=int2,*SubItem=5
+
+              SETITEM           CInq4Invoice,0,ARTrn.Reference
+              SETITEM           CInq4Amt,0,OrigAmtD
+              SETITEM           CInq4Balance,0,BalanceD
+              SETPROP           CInq4InvoiceDate,Text=DATE10
+
+           PACKKEY           ARDETKY,$Entity,SeqNum,"   "
+              SETLPTR             ARDETky
+           CALL              RDARDET
+..HR 7/28/2003           SETPROP           CINQTree,*NodeSelect(NodeNum)=1
+           LOOP
+             CALL              KSARDET
+           UNTIL             (RETURNFL = 1 OR SeqNum <> ARDet.SeqMajor)            CC YY MM DD
+             UNPACK            ARDet.TransDate,CC,YY,MM,DD                         20 04 06 13
+             PACK              TransDate10,MM,"-",DD,"-",YY                           06/13/04
+
+             UNPACK            ARTrn.DueDate,CC,YY,MM,DD
+             PACK              DueDate10,MM,"-",DD,"-",YY
+
+             IF                (ARDet.TransCode = 1)
+             PACK              DATALINE FROM "Inv: ;",ARDet.Reference,";":
+                                                     ARDet.Amount,";":
+                                                     DueDate10,";",TransDate10,";":
+                                                     ARDet.Memo
+             ENDIF
+             IF                (ARDet.TransCode = 5)
+
+               SWITCH            ARDet.TransSubCode
+               CASE              1
+                 MOVE              "Check:",PaymentType
+               CASE              2
+                 MOVE              "Cash:",PaymentType
+               CASE              3
+                 MOVE              "Credit Card:",PaymentType
+               CASE              4
+                 MOVE              "Wire Transfer:",PaymentType
+               CASE              5
+                 MOVE              "Letter of Credit:",PaymentType
+               CASE              6
+                 MOVE              "Toucher Details:",PaymentType
+               CASE              7
+                 MOVE              "Money Order:",PaymentType
+               CASE              8
+                 MOVE              "Electronic Wire:",PaymentType
+               DEFAULT
+                 MOVE              "Check:",PaymentType
+               ENDSWITCH
+
+               PACK              DATALINE FROM PaymentType,";",ARDet.Reference,";":
+                                               TransDate10," ;":
+                                               ARDet.Amount,";":
+                                               ARDet.DiscAmt,";":
+                                               ARDet.Memo
+
+
+.               PACK              DATALINE FROM "Check ;",ARDet.Reference,";":
+.                                               TransDate10," ;":
+.                                               ARDet.Amount
+             ENDIF
+
+             IF                (ARDet.TransCode = 2)
+             PACK              DATALINE FROM "Credit;",ARDet.Reference,";":
+                                                     TransDate10,";":
+                                                     ARDet.Amount,";":
+                                                     ARDet.DiscAmt,";":
+                                                     ARDet.Memo
+             ENDIF
+
+
+             IF                (ARDet.TransCode = 3)
+             PACK              DATALINE FROM "Debit Memo;",ARDet.Reference,";":
+                                                     TransDate10,";":
+                                                     ARDet.Amount,";":
+                                                     ARDet.DiscAmt,";":
+                                                     ARDet.Memo
+             ENDIF
+.
+. Write-Off Transaction
+.
+             IF                (ARDet.TransCode = 8)
+             PACK              DATALINE FROM "Write-Off;",ARDet.Reference,";":
+                                                     TransDate10," ;":
+                                                     ARDet.Amount,";":
+                                                     ARDet.DiscAmt,";":
+                                                     ARDet.Memo
+             ENDIF
+
+             IF                (ARDet.TransSubCode = 8)
+             PACK              DATALINE FROM "Internet Voucher;",ARDet.Reference,";":
+                                                     TransDate10," ;":
+                                                     ARDet.Amount,";":
+                                                     ARDet.DiscAmt,";":
+                                                     ARDet.Memo
+             ENDIF
+
+
+             LVDetails.SetItemTextAll using *Text=DataLine,*Index=0,*Delimiter=";"
+..HR 2018.01.05             SetProp           DtDetails,*ListCargo(X)=ARDet.Memo
+
+
+..HR 7/28/2003           CINQTree.AddNode  giving int2 using dataline,2,2
+.           SETPROP           CINQTree,*NodeIsParent(int2)="1"
+
+              SWITCH            ARDet.TransSubCode
+
+              CASE              "1"                            //Check
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=5
+              CASE              "2"                            //Cash
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=1
+              CASE              "3"                            //Credit Card
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=6
+              CASE              "4"                            //Wire Transfer
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=6
+              CASE              "5"                            //Letter of Credit
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=6
+              CASE              "6"                            //Voucher Details
+..HR 7/28/2003                setprop           CINQTree,*NodePicture(int2)=6
+              CASE              "9"                            //Write-Off Amount
+.                setprop           CINQTree,*NodePicture(int2)=6
+              ENDSWITCH
+              repeat
+..hr 7/28/2003           endif
+              RETURN
+.=============================================================================
+OnClickDisplayDetails
+..HR 2018.01.05              eventinfo         0,ARG1=NodeNum
+..HR 2018.01.05              eventinfo         0,result=NodNum
+              eventinfo         0,result=NodeNum
+              ResetVar          MemoField                    //HR 7/28/2009
+              LVDetails.GetItemText giving MemoField using *Index=NodeNum,*SubItem=3
+..HR 2018.01.05              GetProp           DtDetails,*ListCargo(NodeNum)=MemoField
+              SETITEM           ECinq4Memo,0,MemoField
+              RETURN
+
+.=============================================================================
+
+SetInitialCustomerIDStatistics
+           LVTransactionsStatistics.DeleteAllItems
+
+           LVTransactionsStatistics.InsertItemEx using *Text="January",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=0
+           LVTransactionsStatistics.InsertItemEx using *Text="February",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=1
+           LVTransactionsStatistics.InsertItemEx using *Text="March",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=2
+           LVTransactionsStatistics.InsertItemEx using *Text="April",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=3
+           LVTransactionsStatistics.InsertItemEx using *Text="May",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=4
+           LVTransactionsStatistics.InsertItemEx using *Text="June",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=5
+           LVTransactionsStatistics.InsertItemEx using *Text="July",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=6
+           LVTransactionsStatistics.InsertItemEx using *Text="August",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=7
+           LVTransactionsStatistics.InsertItemEx using *Text="September",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=8
+           LVTransactionsStatistics.InsertItemEx using *Text="October",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=9
+           LVTransactionsStatistics.InsertItemEx using *Text="November",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=10
+           LVTransactionsStatistics.InsertItemEx using *Text="December",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=11
+           LVTransactionsStatistics.InsertItemEx using *Text="YTD Totals",*SubItem1="0.00",*SubItem2="0.00",*SubItem3="0.00",*Index=12
+
+           RETURN
+
+;==========================================================================================================
+SetCustomerHistoryYears
+              DeleteItem        CBCInqYear,0
+              MOVE              "0",result
+              PACKKEY           CHSTKY,$Entity,Cust.CustomerID,"9999"
+              CALL              RDCHST
+              LOOP
+..HR 10/14/2003                CALL            KPCHST
+                CALL            KPCHST
+              UNTIL             (ReturnFL = 1 or CHST.CustomerID != Cust.CustomerID)
+                IF                (Result = 0)        //No year has been selected yet
+                  MOVE              CHST.Year,SelectedYear
+                ENDIF
+                InsertItem        CBCInqYear,99,CHST.Year
+                ADD               "1",result
+              REPEAT
+..HR 10/15/2003              SETITEM           CBCINQYear,0,999
+              SETITEM           CBCINQYear,0,result
+           GETITEM           CBCinqYear,0,result
+           RETURN            if (result = 0)                    //HR 1/24/2006
+
+           GETITEM           CBCInqYear,result,SelectedYear
+           PACKKEY           CHSTKY,$Entity,Cust.CustomerID,SelectedYear
+           CALL              RDCHST
+           FOR                X FROM "0" TO "12" USING "1"
+             IF                (ReturnFL = 0)
+               move                  CHST.PurchAmt(X+1),WrkAmt1
+               move                  CHST.PaidAmt(X+1),WrkAmt2
+               move                  CHST.DiscAmt(X+1),WrkAmt3
+               squeeze               WrkAmt1,WrkAmt1
+               squeeze               WrkAmt2,WrkAmt2
+               squeeze               WrkAmt3,WrkAmt3
+
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=1,*Text=WrkAmt1
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=2,*Text=WrkAmt2
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=3,*Text=WrkAmt3
+
+             ELSE
+               LVTransactionsStatistics.SetItemText using *Index=(X + 1),*SubItem=1,*Text="-"
+               LVTransactionsStatistics.SetItemText using *Index=(X + 1),*SubItem=2,*Text="-"
+               LVTransactionsStatistics.SetItemText using *Index=(X + 1),*SubItem=3,*Text="-"
+
+..HR 1.19.2016               SETPROP           LVTransactionsStatistics,*ListColumnText(X,2)="-"
+..HR 1.19.2016               SETPROP           LVTransactionsStatistics,*ListColumnText(X,3)="-"
+..HR 1.19.2016               SETPROP           LVTransactionsStatistics,*ListColumnText(X,4)="-"
+             ENDIF
+           REPEAT
+              RETURN
+;==========================================================================================================
+SetCustomerHistoryStatistics
+           GETITEM           CBCinqYear,0,result
+           RETURN            if (result = 0)                    //HR 1/24/2006
+
+           GETITEM           CBCInqYear,result,SelectedYear
+           PACKKEY           CHSTKY,$Entity,Cust.CustomerID,SelectedYear
+           CALL              RDCHST
+           FOR                X FROM "0" TO "12" USING "1"
+             IF                (ReturnFL = 0)
+               move                  CHST.PurchAmt(X+1),WrkAmt1
+               move                  CHST.PaidAmt(X+1),WrkAmt2
+               move                  CHST.DiscAmt(X+1),WrkAmt3
+               squeeze               WrkAmt1,WrkAmt1
+               squeeze               WrkAmt2,WrkAmt2
+               squeeze               WrkAmt3,WrkAmt3
+
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=1,*Text=WrkAmt1
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=2,*Text=WrkAmt2
+               LVTransactionsStatistics.SetItemText using *Index=X,*SubItem=3,*Text=WrkAmt3
+             ENDIF
+           REPEAT
+
+           SETPROP           LVTransactionsStatistics,Visible=0
+           SETPROP           LVTransactionsStatistics,Visible=1
+           RETURN
+;==========================================================================================================
+.=============================================================================
+ViewHistoryByOptions
+              LVTransactions.DeleteAllItems
+
+              GETITEM           CBViewBy,0,ViewByOption
+
+              switch            ViewByOption
+              case              1
+                PACKKEY           ARTRNKY3,$Entity,CustKY,"O"
+                setprop           CloseColl,visible=0
+              case              2
+                setprop           CloseColl,visible=1
+                GETPROP           DTFromDate,text=DATE8
+                PACKKEY           ARTRNKY3,$Entity,CustKY,"C",DATE8
+                GETPROP           DTToDate,text=DATE8
+                move              DATE8,RangeToDate
+              case              3
+                setprop           CloseColl,visible=1
+                GETPROP           DTFromDate,text=DATE8
+                PACKKEY           ARTRNKY3,$Entity,CustKY,"C"
+                GETPROP           DTToDate,text=DATE8
+                move              DATE8,RangeToDate
+              default
+              endswitch
+
+              MOVE              Cust.CustomerID,CustomerIDSave
+..              SETLPTR           CustKY
+              MOVE              "0",CustBalance
+
+              CALL              RDARTRN3
+              LOOP
+                CALL              KSARTRN3
+              UNTIL             (RETURNFL = 1 or (ARTrn.CustomerID <> CustomerIDSave) or:
+                                (ViewByOption = 2 and ARTrn.ClosedFlag != "C") or:
+                                (ViewByOption = 2 and ARTrn.TransDate > RangeToDate))        //HR 8/5/2003
+
+                UNPACK            ARTrn.DueDate,CC,YY,MM,DD
+                PACK              DueDate10,MM,"-",DD,"-",YY
+
+                UNPACK            ARTrn.TransDate,CC,YY,MM,DD         //HR 7/29/2003
+                PACK              TransDate10,MM,"-",DD,"-",YY
+
+                CHOP              ARTrn.Reference,ARTrn.Reference
+                CHOP              ARTrn.CustomerPO,ARTrn.CustomerPO
+                CHOP              ARTrn.OrderNumber,ARTrn.OrderNumber
+
+                CALC              FreightAmt = ARTrn.OrigAmt - ARTrn.SalesAmt
+
+              switch            ARTrn.InvCredit
+              case              "I"
+                move              "Invoice",InvType
+              case              "C"
+                move              "Credit Memo",InvType
+              case              "D"
+                move              "Debit Memo",InvType
+              endswitch
+
+
+                PACK              DATALINE FROM InvType,";":
+                                              ARTrn.Reference,";":
+                                             ARTrn.CustomerPO,";":             //Changed from Order Number
+                                             ARTrn.OrigAmt,";":
+                                             ARTrn.Balance,";":
+                                             TransDate10,"; ;":
+                                             FreightAmt
+
+              ADD               ARTrn.Balance,CustBalance
+
+             LVTransactions.SetItemTextAll using *Text=DataLine,*Delimiter=";",*Param=ARTrn.SeqMajor,*Index=0
+..HR 2018.01.02             CTInq.AddItem     giving int2 using DataLine
+..HR 2018.01.02
+..HR 2018.01.05             SETPROP           CTInq,*ListData(int2)=ARTrn.SeqMajor
+
+           REPEAT
+              MOVE              CustBalance,CustBalanceD
+              SETITEM           EVInqBalance,0,CustBalanceD
+
+
+              IF (ViewByOption = 1)   //Open Items Only
+              ENDIF
+
+              IF (ViewByOption = 2 or ViewByOption = 3)   //Closed Items Only
+..HR 2018.01.05                SETPROP         CTInq,*SortColumn="-1"
+..HR 2018.01.05                SETPROP         CTInq,*SortDirection="1"
+..HR 2018.01.05                CTInq.SortList
+              LVTransactions.SortColumn using *Column=1,*Type=3
+              ENDIF
+              RETURN                                                                    ; Kim    Queen
+;==========================================================================================================
+OnClickChange1
+                    return
+
+;==========================================================================================================
+.=============================================================================
+PrintStatement
+              move                     Cust.CustomerID,FromCustomer
+..              GETITEM           ECustCode,0,FromCustomer
+.              MOVE              "           ",UseStamps
+.              SETITEM           EStampCodes,0,UseStamps
+.              SETFOCUS          EStampCodes
+.              SETPROP           WStamps,visible=1
+.              GETITEM           EStampCodes,0,UseStamps
+              CALL              PrintStatemnt using FromCustomer,FromCustomer,RunType,UseStamps
+              RETURN
+.=============================================================================
+ReprintInvoices
+#Document     FORM              9
+DocumentD     DIM               9
+
+..HR 2018.01.05              GETPROP           CTInq,*ListCount=TotalRows
+
+              MOVE              FirstRow,StartingRow                           //HR 4.4.2016
+              LOOP
+                LVTransactions.GetNextItem giving RES2 using *Flags=2,*Start=StartingRow
+              UNTIL               (res2 = -1)
+                LVTransactions.GetItemParam giving SeqNum using *Index=Res2
+                MOVE              RES2,StartingRow
+
+                PACKKEY           ARTRNKY2,$Entity,SeqNum
+                CALL              RDARTRN2
+
+                squeeze           ARTrn.Reference,DocumentD
+..HR 2019.7.10                chop              DocumentD
+                MOVE              DocumentD,#Document
+
+.                CALL              PrintInvoice using ARTrn.Reference,ARTrn.OrderNumber if (ARTrn.InvCredit = "I":
+.                                                                                             and #Document < 100000)
+
+                CALLS             "OrderEntry;PrintInvoicesLoadMod" using #Document
+              REPEAT
+
+              RETURN
+;==========================================================================================================
+SortColumn
+              EventInfo         0,Result=SortColumn
+              MOVE              FirstRow,StartingRow
+
+              LVTransactions.GetNextItem giving SelectedRow using *Flags=2,*Start=StartingRow
+              LVTransactions.GetItemParam giving ItemParam using *Index=SelectedRow
+
+              IF                (((SortHeader(SortColumn) / 2) * 2) = SortHeader(SortColumn))
+                SUBTRACT        "1",SortHeader(SortColumn)
+              ELSE
+                ADD             "1",SortHeader(SortColumn)
+              ENDIF
+
+              SWITCH            SortHeader(SortColumn)
+
+              CASE              5
+                MOVE              "mm-dd-yy",SortMask
+              CASE              6
+                MOVE              "mm-dd-yy",SortMask
+              DEFAULT
+                MOVE              "",SortMask
+              ENDSWITCH
+
+              LVTransactions.SortColumn using *Column=SortColumn,*Type=SortHeader(SortColumn),*Mask=SortMask
+              LVTransactions.FindItem giving SelectedRow using *Start=StartingRow,*Param=ItemParam
+              LVTransactions.EnsureVisible using *Index=SelectedRow,*Partial=0
+              LVTransactions.SetItemState using *Index=SelectedRow,*State=03,*StateMask=03
+              RETURN
+;==========================================================================================================
+TestTrack
+TestInvoice        dim               10
+                   debug
+                   eventinfo         0,Result=Int2
+                   LVTransactions.GetNextItem giving Int2 using *Flags=02,*Start=FirstRow
+;
+; Get the Item Parameter, lookup the Invoice Number and determine if it's either Fedex or UPS
+;
+                LVTransactions.GetItemParam giving SeqNum using *Index=Int2
+                PACKKEY           ARTRNKY2,$Entity,SeqNum
+                CALL              RDARTRN2
+                if                (ReturnFl = 1)
+                  alert                note,"Unable to locate the appropriate A/R Record",result,"ERROR: UNABLE TO LOCATE"
+                  return
+                endif
+
+                squeeze           ARTrn.Reference,DocumentD
+                MOVE              DocumentD,Invoices.Reference
+                packkey              InvoicesKY from $Entity,Invoices.Reference
+                call                 RDInvoices
+                if                (ReturnFl = 1)
+                  alert                note,"Unable to locate the appropriate Invoice Record",result,"ERROR: UNABLE TO LOCATE"
+                  return
+                endif
+
+                uppercase            Invoices.ShipVia,Invoices.ShipVia
+                scan                 "UPS",Invoices.ShipVia
+                if                   (equal)
+                   LVTransactions.GetItemText giving TestInvoice using *Index=Int2,*SubItem=2   //Was 1  HR 2019.9.6
+                   call              ViewUPS using TestInvoice
+                   return
+                endif
+
+                scan                 "FEDEX",Invoices.ShipVia
+                if                   (equal)
+                   LVTransactions.GetItemText giving TestInvoice using *Index=Int2,*SubItem=2   //Was 1  HR 2019.9.6
+                   call              ViewFedex using TestInvoice
+                   return
+                endif
+                return
+.=============================================================================
+ViewComments2
+              CALL                  CommentInq using Cust.CustomerID
+              RETURN
+;==========================================================================================================
+              include           MenuDefs.INC

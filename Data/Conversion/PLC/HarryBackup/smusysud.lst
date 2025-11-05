@@ -1,0 +1,300 @@
+
+
+
+PAGE    1      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:02
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "SMUSYSUD.PLS","F:\PLC\SMUSYSUD.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    8.    INCLUDE  A: ncommon.txt
+
+   Output: f:\plc\smusysud.plc                                                                                                                                                                                                                                       
+       780 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:48:02 14:48:03
+  00001FAC DATA;  00000E50  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:03
+                                         
+
+"                                          D     172.  *   587.     588.     589.     644.     649.     650.     651.  
+                                                     *   663.     720.     721.  
+"&Add                                      D     208.  *
+"&Change                                   D     209.  *
+"&GetUser                                  D     212.  *
+"&NewUser                                  D     211.  *
+"&Quit                                     D     214.  *
+"&Remove                                   D     210.  *
+"&Save                                     D     213.  *
+"A                                         D     388.  *   577.     701.     737.  
+"Authorized User File NOT FOUND!           D     604.  *
+"Ca&ncel                                   D     215.  *
+"ERROR ON APPLICATION FILE!                D     632.  *
+"HELVETICA                                 D     176.  *   180.     182.     184.     186.     188.     190.     192.  
+                                                     *   195.     197.     199.     201.     203.     205.     234.     287.  
+                                                     *   368.     437.  
+"HELVETICA(10,BOLD)                        D     178.  *
+"LOCATION OUT OF RANGE                     D     555.  *
+"THAT USER IS ALREADY ON FILE!             D     359.  *
+"THIS IS A NEW USER RECORD                 D     338.  *
+"U                                         D     432.  *   703.     739.  
+"X                                         D     389.  *   543.     558.     573.     579.     591.     636.     645.  
+                                                     *   647.     653.     689.     708.     726.  
+"You didn't change anything!               D     596.  *
+0                                          F     239.  *   292.     414.     567.  
+1                                          F     238.  *   291.     413.  
+2                                          F     530.  *   539.     549.     564.  
+999                                        F     245.  *   298.     425.     493.  
+ACCTNUMB                                   D      14. A*
+ADDAPPS                                    X     486.  *   380.     455.  
+ADDBUTTON                                  O 1    82.  *   208.     380.     385.     455.     459.     477.     496.  
+                                                     *   681.  
+ADDKEY                                     X     334.  *   267.     684.  
+ADDLOOP                                    X     367.  *
+ADDOK                                      X     363.  *   358.  
+AFTRITM                                    F      69.  *   239.     244.     245.     292.     297.     298.     414.  
+                                                     *   424.     425.     493.     494.  
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+AWK2                                       D      15.  *   568.     569.     571.  
+BDMNUIO                                    X     631.  *   582.     639.  
+BLACK                                      O18   119.  *   153.     195.     197.     199.     201.     203.     205.  
+BLUE                                       O18   118.  *   152.     177.     179.     181.     183.     185.     187.  
+                                                     *   189.     191.     193.  
+BYPINS                                     X     245.  *
+CHGAPPS                                    X     502.  *   381.     456.  
+CHGBUTTON                                  O 1    83.  *   209.     381.     386.     406.     456.     460.     510.  
+                                                     *   523.     682.  
+CHGFLAG                                    D      71.  *   389.     543.     558.     573.     579.     587.     636.  
+                                                     *   644.     649.     663.     689.     720.     726.  
+CHKADD                                     X     354.  *   535.  
+CHKSAV                                     X     689.  *   277.     334.  
+CLRADDS                                    X     659.  *   269.     360.     652.  
+
+
+
+PAGE    3      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:03
+                                         
+
+CLRENTRY                                   X     662.  *   590.  
+CNCLBUTTON                                 O 1    78.  *   215.     269.  
+CURRDATE                                   O16    99.  *   180.     258.  
+DA                                         O 5   126.  *   157.     158.     173.  
+DATE6                                      D      10. A*
+DDATA                                      D     127.  *   157.  
+DIM2                                       D      12.  *
+DIM3                                       D      13.  *   412.  
+DIM9                                       D      14.  *   357.     487.  
+DISPVAR                                    X     436.  *
+DOSAVE                                     X     737.  *   733.  
+DOUPDT                                     X     713.  *   704.  
+DOWRIT                                     X     708.  *   702.  
+DUMPIT                                     X     717.  *   697.  
+ENDADD                                     X     496.  *   488.  
+ENDCHG                                     X     510.  *   505.  
+ENDLOOP                                    X     248.  *   242.  
+ENDLOOPS                                   X     428.  *   417.     419.  
+ENDLOOPU                                   X     301.  *   295.  
+ENDREM                                     X     523.  *   520.  
+ENDUP                                      X     587.  *
+ENDWT                                      X     649.  *   646.     648.  
+ENTRY01                                    O 6   107.  *   195.     263.     343.     347.     348.     364.     369.  
+                                                     *   439.     447.     533.     664.  
+ENTRY02                                    O 6   108.  *   197.     264.     344.     370.     384.     440.     448.  
+                                                     *   542.     665.  
+ENTRY02A                                   O 6   109.  *   199.     265.     345.     371.     441.     449.     552.  
+                                                     *   556.     666.  
+ENTRY03                                    O 6   110.  *   201.     377.     401.     452.     473.     667.     678.  
+ENTRY04                                    O 6   111.  *   203.     378.     402.     453.     474.     668.     679.  
+ENTRY05                                    O 6   112.  *   205.     379.     403.     404.     405.     454.     475.  
+                                                     *   476.     568.     669.     680.  
+ENVS                                       D      11. A*
+EOJ                                        X     726.  *   266.  
+EOJFLAG                                    D      73.  *   591.     645.     653.  
+EOJOK                                      X     741.  *   594.     656.     727.     733.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EVENTS                                     D     122.  *   155.  
+EXITPNT                                    X     670.  *   597.  
+EXITSV1                                    X     719.  *   706.     711.     715.  
+FIRSTIME                                   D      17. A*
+FLD01TXT                                   D      90.  *   182.  
+FLD02TXT                                   D      91.  *   184.  
+FLD03TXT                                   D      93.  *   188.  
+FLD04TXT                                   D      94.  *   190.  
+FLD05TXT                                   D      95.  *   192.  
+FLD2ATXT                                   D      92.  *   186.  
+FROMPGM                                    D      16. A*   170.     605.     616.     627.     633.     743.  
+GETAPPS                                    X     471.  *   372.     450.  
+GETBUTTON                                  O 1    81.  *   212.     268.     279.     335.     685.  
+
+
+
+PAGE    4      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:03
+                                         
+
+GETKEY                                     X     277.  *   268.     330.     685.  
+GETUSER                                    X     314.  *   305.  
+INDXIT                                     X     168.  *   164.  
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOSW                                       D      11.  *
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+K01                                        X     530.  *   347.  
+K01A                                       X     532.  *
+K02                                        X     539.  *   370.     448.  
+K02A                                       X     549.  *   371.     449.  
+K05                                        X     564.  *   405.     476.  
+K05A                                       X     566.  *
+LOADAPPS                                   X     410.  *   438.  
+LOCIDX                                     F      42.  *   553.  
+LOCLIMIT                                   F      41.  *   553.  
+LOCOK                                      X     558.  *   554.  
+LOCS                                       D      43.  *   553.  
+LOOP                                       X     254.  *
+MAINLINE                                   X     172.  *   164.  
+MENUCOD                                    D      61.  *
+MENULST                                    O 4   114.  *   234.     244.     372.     450.     471.     674.  
+MENUOPND                                   X     629.  *   624.  
+MENUREC                                    D      59.  *   243.     244.     471.     472.  
+MENUSKEY                                   D      54.  *   420.     421.  
+MENUSOPN                                   X     621.  *   222.  
+MENUSYS                                    i      52.  *   241.     421.     622.  
+MENUSYSN                                   D      53.  *   622.  
+MNUDESC                                    D      60.  *
+MODIFY                                     X     431.  *   327.  
+MODIFYIT                                   X     322.  *
+MOV05                                      X     572.  *   570.  
+MSYSDSC                                    D      57.  *   241.     243.     421.     422.  
+MSYSID                                     D      56.  *   241.     243.     421.  
+NAMFLAG                                    D      72.  *   589.     650.  
+NDX                                        F      67.  *
+NEWBUTTON                                  O 1    84.  *   211.     267.     278.     336.     684.  
+NEWONE                                     X     338.  *
+NOCHG                                      X     596.  *   580.     637.  
+NOMENUS                                    X     626.  *   621.  
+NOUSER                                     X     604.  *   599.  
+NOUSERS                                    X     615.  *   610.  
+NULL                                       X     166.  *   164.  
+NULLFLD                                    D      76.  *   340.     341.     342.     343.     344.     345.     659.  
+                                                     *   660.     661.     664.     665.     666.     667.     668.     669.  
+NULLSAV                                    X     735.  *   733.  
+NULLSV1                                    X     699.  *   697.  
+NWK2                                       F      16.  *   567.     571.     572.  
+OPMODE                                     D      75.  *   388.     432.     577.     588.     701.     703.     737.  
+                                                     *   739.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+
+
+
+PAGE    5      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:03
+                                         
+
+PRMT01                                     O16   100.  *   182.     259.  
+PRMT02                                     O16   101.  *   184.     260.  
+PRMT02A                                    O16   102.  *   186.     261.  
+PRMT03                                     O16   103.  *   188.     374.     442.     675.  
+PRMT04                                     O16   104.  *   190.     375.     443.     676.  
+PRMT05                                     O16   105.  *   192.     376.     444.     677.  
+PROCAPPS                                   X     398.  *   373.     451.  
+PROGNAME                                   O16    98.  *   176.     257.  
+PROGNTXT                                   D      89.  *   176.  
+QUITBUTTON                                 O 1    79.  *   214.     266.  
+RED                                        O18   120.  *   154.  
+REMAPPS                                    X     517.  *   382.     457.  
+REMBUTTON                                  O 1    85.  *   210.     382.     387.     407.     457.     461.     511.  
+                                                     *   524.     683.  
+REPLY                                      D      10.  *   172.     400.     472.  
+RESULT                                     F     124.  *   158.     164.     266.     267.     268.     269.     305.  
+                                                     *   316.     329.     338.     347.     359.     370.     371.     372.  
+                                                     *   380.     381.     382.     383.     405.     448.     449.     450.  
+                                                     *   455.     456.     457.     458.     471.     476.     530.     539.  
+                                                     *   549.     555.     564.     596.     604.     615.     626.     632.  
+                                                     *   684.     685.     691.     697.     728.     733.  
+RESULTR                                    F     125.  *   373.     399.     451.     507.     509.     522.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVE                                       X     577.  *   383.     458.  
+SAVEBOX                                    O 5   138.  *   216.     691.     719.     728.  
+SAVEIT                                     X     701.  *   697.  
+SDATA                                      D     139.  *   216.  
+SECURITY                                   F       9. A*
+SP1                                        D      63.  *   317.  
+SPACE                                      D      62.  *
+START                                      X     251.  *
+TAB                                        D      64.  *   243.     296.     423.     492.     508.  
+TABSETS                                    D      65.  *   234.  
+TESTIT                                     X     164.  *   158.  
+TESTONE                                    D      18. A*
+TESTSAV                                    X     733.  *   728.  
+TESTSV1                                    X     697.  *   691.  
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TITLE                                      O16    97.  *   178.     256.  
+TITLTXT                                    D      88.  *   178.  
+TODAY                                      D       8. A*   180.  
+UPDAT                                      X     579.  *   713.     740.  
+USER                                       D      24.  *   294.     296.     325.     341.     440.     541.     542.  
+                                                     *   583.     640.     660.  
+USERCOD                                    D      30.  *   317.     319.  
+USERCODE                                   D      29. A*
+USERFIL                                    i      19.  *   294.     325.     357.     583.     600.     640.  
+USERFILN                                   D      20.  *   600.  
+USERID                                     D      23.  *   294.     296.     325.     340.     355.     364.     411.  
+                                                     *   418.     439.     486.     489.     503.     518.     532.     533.  
+
+
+
+PAGE    6      SMUSYSUD.PLS IDE                                                                               03-22-04 14:48:03
+                                         
+
+                                                     *   583.     640.     659.  
+USERKEY                                    D      21.  *   319.     325.     355.     357.     640.  
+USERLOC                                    D      25.  *   294.     325.     342.     441.     551.     552.     553.  
+                                                     *   583.     640.     661.  
+USERLOCN                                   D      25. A*
+USERLST                                    O 4   115.  *   287.     297.     305.     315.     316.     320.  
+USERNAME                                   D      30. A*
+USERNM                                     D      29.  *   317.  
+USEROPEN                                   X     599.  *   226.     283.  
+USEROPND                                   X     607.  *   602.  
+USERREC                                    D      28.  *   296.     297.     316.     317.  
+USERSKEY                                   D      35.  *   411.     412.     486.     487.     491.     503.     504.  
+                                                     *   518.     519.     521.  
+USERSOPN                                   X     610.  *   230.  
+USERSYS                                    i      33.  *   412.     416.     487.     491.     504.     506.     519.  
+                                                     *   521.     611.  
+USERSYSN                                   D      34.  *   611.  
+USERTABS                                   D      31.  *   287.  
+USRAPPS                                    O 4   116.  *   368.     373.     399.     424.     437.     451.     494.  
+                                                     *   507.     509.     522.     672.     673.  
+USRSOPND                                   X     618.  *   613.  
+USYSCD                                     D      47.  *   400.     401.     472.     473.     486.     490.     503.  
+                                                     *   508.     518.  
+USYSCOD                                    D      38.  *   416.     420.     423.     490.     491.     492.     504.  
+                                                     *   506.     519.  
+USYSDSC                                    D      46.  *   400.     402.     422.     423.     472.     474.     492.  
+                                                     *   508.  
+USYSID                                     D      37.  *   416.     418.     489.     491.     504.     506.     519.  
+USYSLV                                     D      48.  *   400.     403.     504.     519.  
+USYSLVL                                    F      39.  *   416.     423.     491.     492.     506.     508.     566.  
+                                                     *   572.  
+USYSREC                                    D      45.  *   399.     400.     423.     424.     492.     494.     508.  
+                                                     *   509.  
+UTABSETS                                   D      49.  *   368.     437.  
+VENDNUMB                                   D      15. A*
+WRITBUTTON                                 O 1    80.  *   213.     383.     458.     671.  
+WRITE                                      X     636.  *   578.     709.     738.  
+XDX                                        F      68.  *   238.     246.     291.     299.     413.     426.     495.  
+XITFLAG                                    D      74.  *   647.     651.     708.     721.  
+0                                          I     152.  *   152.     153.     154.     385.     386.     387.     406.  
+                                                     *   407.     459.     460.     461.     477.     496.     510.     511.  
+                                                     *   523.     524.  
+255                                        I     152.  *   154.  
+

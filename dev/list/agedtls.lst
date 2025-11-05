@@ -1,0 +1,37 @@
+
+
+
+PAGE    1      agedtls                                                                                        02-11-19 11:35:20
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP agedtls -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   23.    INCLUDE  A: common.pls
+   25.    INCLUDE  B: rcvbles.txt
+   30.    INCLUDE  C: date.685
+   32.    INCLUDE  D: apcalndr.txt
+   38.    INCLUDE  E: custmast.txt
+   40.    INCLUDE  F: balfwdfl.txt
+   79.    INCLUDE  G: callerr1.inc
+   12. G                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   83.    INCLUDE  H: callerr2.inc
+  325.                                                   *100,AMTOV90P,*115,NETBAL,*FLUSH 
+                                                                                         *WARNING*
+Warning: I/O control not implemented.
+  354.    INCLUDE  I: custio.txt
+  356.    INCLUDE  J: rcvblsio.txt
+  358.    INCLUDE  K: datecalc.txt
+  359.    INCLUDE  L: apdates.txt
+  379.                                         PRINT     *1,ASTER45,ASTER45,ASTER45,*FLUSH 
+                                                                                          *WARNING*
+Warning: I/O control not implemented.
+  382.    INCLUDE  M: balfwdio.txt
+
+   Output: c:\apc\plc\agedtls.plc                                                                                                                                                                                                                                    
+      1177 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:20 11:35:20
+  000028A4 DATA;  00000E74  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

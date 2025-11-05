@@ -1,0 +1,283 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Vendor.FD                                                      ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %ifndef           $VendorVAR
+$VendorVAR          equate            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+Vendor        RECORD
+AccountNumber DIM               6           1 - 6
+Name          DIM               25          7 - 31
+Address1      DIM               20         32 - 51
+Address2      DIM               20         52 - 71
+Address3      DIM               20         72 - 91
+BlankCity     DIM               14         92 - 105
+State         DIM               2         106 - 107
+Zip           DIM               10        108 - 117
+Telephone     DIM               10        118 - 127
+APFax         DIM               10        128 - 137
+POFax         DIM               10        138 - 147
+POPhone       DIM               10        148 - 157
+OutputMethod  FORM              1         158 - 158
+Memo          DIM               50        159 - 208
+HomePage      DIM               40        209 - 248
+TermCode      DIM               8         249 - 256
+Form1099      FORM              1         257 - 257
+POEMail       DIM               40        258 - 297
+EIN_SSNo      DIM               10        298 - 307
+Rec_Added     DIM               8         308 - 315
+Rec_Change    DIM               8         316 - 323
+Rec_User      DIM               10        324 - 333
+Active        FORM              1         334 - 334
+Country       DIM               3         335 - 337
+APContact     DIM               25        338 - 362
+POContact     DIM               25        363 - 387
+VendorAccount DIM               20        388 - 407
+PrintAcctNo   FORM              1         408 - 408
+Priority      DIM               1         409 - 409
+Class         DIM               4         410 - 413
+Type          DIM               4         414 - 417
+Buyer         DIM               4         418 - 421
+AutoDisburse  FORM              1         422 - 422
+UseMain       FORM              1         423 - 423
+RemitName     DIM               25        424 - 448
+RemitAddress1 DIM               20        449 - 468
+RemitAddress2 DIM               20        469 - 488
+RemitAddress3 DIM               20        489 - 508
+RemitBlank    DIM               14        509 - 522
+RemitState    DIM               2         523 - 524
+RemitZip      DIM               10        525 - 534
+RemitCountry  DIM               3         535 - 537
+City          DIM               20        538 - 557
+RemitCity     DIM               20        558 - 577
+              RECORDEND
+
+VendorHeader        RECORD
+AccountNumber       DIM                6                ACCOUNT NUMBER
+NAME                DIM                25               ACCOUNT NAME
+Address1            DIM                20               ADDRESS LINE 1
+Address2            DIM                20               ADDRESS LINE 2
+CITY                DIM                14               CITY
+STATE               DIM                2                STATE
+ZIP                 DIM                5                ZIP CODE
+TAXC                DIM                1                TAX CODE
+ACCST               DIM                1                ACCOUNT STATUS
+CRDRAT              DIM                1                CREDIT RATING
+OVR90               FORM               7.2              AMOUNT DUE OVER 90 DAYS
+OVR60               FORM               7.2              AMOUNT DUE OVER 60 DAYS
+OVR30               FORM               7.2              AMOUNT DUE OVER 30 DAYS
+CURR                FORM               7.2              AMOUNT CURRENTLY DUE
+MTDD                FORM               7.2              MONTH TO DATE DEBITS
+MTDC                FORM               7.2              MONTH TO DATE CREDITS
+TOTDUE              FORM               7.2              TOTAL AMOUNT DUE
+MMON                DIM                2                MONTH      -|  LAST
+MDAY                DIM                2                DAY         |  PURCHASE
+MYEAR               DIM                2                YEAR       -|  DATE
+LPAT                FORM               6.2              LAST PURCHASE AMOUNT
+EXT                 DIM                5                EXPANSION AREA
+DIVNO               DIM                2                DIVISION NUMBER
+CONT                DIM                3                CONTACT PERSON
+AutoPay             DIM                1                EXPANSION AREA
+                    recordend
+
+
+.Vendor           record
+.ACCNO    DIM       6                ACCOUNT NUMBER
+.NAME     DIM       25               ACCOUNT NAME
+.ADD1     DIM       20               ADDRESS LINE 1
+.ADD2     DIM       20               ADDRESS LINE 2
+.CITY     DIM       14               CITY
+.STATE    DIM       2                STATE
+.ZIP      DIM       5                ZIP CODE
+.TAXC     DIM       1                TAX CODE
+.ACCST    DIM       1                ACCOUNT STATUS
+.CRDRAT   DIM       1                CREDIT RATING
+.OVR90    FORM      7.2              AMOUNT DUE OVER 90 DAYS
+.OVR60    FORM      7.2              AMOUNT DUE OVER 60 DAYS
+.OVR30    FORM      7.2              AMOUNT DUE OVER 30 DAYS
+.CURR     FORM      7.2              AMOUNT CURRENTLY DUE
+.MTDD     FORM      7.2              MONTH TO DATE DEBITS
+.MTDC     FORM      7.2              MONTH TO DATE CREDITS
+.TOTDUE   FORM      7.2              TOTAL AMOUNT DUE
+.MMON     DIM       2                MONTH      -|  LAST
+.MDAY     DIM       2                DAY         |  PURCHASE
+.MYEAR    DIM       2                YEAR       -|  DATE
+.LPAT     FORM      6.2              LAST PURCHASE AMOUNT
+.EXT      DIM       5                EXPANSION AREA
+.DIVNO    DIM       2                DIVISION NUMBER
+.CONT     DIM       3                CONTACT PERSON
+.TELEFONE DIM       12               TELEFONE NUMBER
+.FUT      DIM       1                EXPANSION AREA
+.                   recordend
+
+TempVendor       record            like       Vendor
+OrigVendor       record            like       Vendor
+SaveVendor       record            like       Vendor
+.
+.
+. File Keys and file labels
+. -------------------------
+.
+VendorK1SIZE CONST            "6"                                     (Length of the Key variable)
+VendorK2SIZE CONST            "31"                                    (Length of the Key variable 2)
+.
+. By Account Number
+.
+VendorI1DEF  INIT             "1-6"                                   (Index definitions for Key 1)
+.
+. By Name, by Account Number
+.
+VendorI2DEF  INIT             "7-31,1-6"                              (Index definitions for Key 2)
+.
+VendorFSIZE  CONST            "600"                                   (Length of each Record)
+
+VendorKY    DIM               VendorK1SIZE                            (The Actual 'Key' variable)
+VendorKY2   DIM               VendorK2SIZE                            (The Actual 'Key' variable)
+
+VendorPROG  INIT              "Program Name"
+VendorTITLE INIT              "Record Title"                          (Description used later for headers, etc)
+VendorHELP  INIT              "Vendor.HLP"                            (Name of the Help file for later purposes)
+
+VendorTXTNM  INIT             "VENDOR.TXT"                 .Actual Text Filename  (i.e. CUSTFL.TXT)
+VendorISI1NM INIT             "VENDOR.ISI"                     .Actual ISI Filename   (i.e. CUSTFL.ISI)
+VendorISI2NM INIT             "VENDOR2.ISI"                    .Actual ISI Filename
+
+;==========================================================================================================
+
+VendorFLST          filelist
+                   %ifdef            VendorKY
+VendorFL            ifile             Name=VendorISI1NM,DUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY2
+VendorFL2           ifile             Name=VendorISI2NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY3
+VendorFL3           ifile             Name=VendorISI3NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY4
+VendorFL4           ifile             Name=VendorISI4NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY5
+VendorFL5           ifile             Name=VendorISI5NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY6
+VendorFL6           ifile             Name=VendorISI6NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY7
+VendorFL7           ifile             Name=VendorISI7NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY8
+VendorFL8           ifile             Name=VendorISI8NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            VendorKY9
+VendorFL9           ifile             Name=VendorISI9NM,NODUP,NOPATH,UPPER
+                   %endif
+                   filelistend
+
+
+. Field Definitions
+. -----------------
+.
+. Field        Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+VendorGL      RECORD
+AccountNumber DIM               6           1 - 6       //VendorGL Account Number
+GLCode        DIM               8           7 - 14      //GL Code
+Line          FORM              2          15 - 16      //Line Number within ListView
+SubEntity     DIM               8          17 - 24
+              RECORDEND
+.
+. File Keys and File Labels
+. -------------------------
+.
+VendorGLK1SIZE CONST            "8"                                     (Length of the Key variable)
+.VendorGLK2SIZE CONST            "31"                                    (Length of the Key variable 2)
+.
+. By Vendor, Line No
+.
+VendorGLI1DEF  INIT             "-N,1-6,15-16"                          (Index definitions for Key 1)
+.
+. By Name, by Account Number
+.
+.VendorGLI2DEF  INIT             "7-25,1-6"                             (Index definitions for Key 2)
+.
+VendorGLFSIZE  CONST            "30"                                    (Length of each Record)
+
+VendorGLKY    DIM               VendorGLK1SIZE                            (The Actual 'Key' variable)
+.VendorGLKY2   DIM               VendorGLK2SIZE                            (The Actual 'Key' variable)
+
+VendorGLPROG  INIT              "Program Name"
+VendorGLTITLE INIT              "Record Title"                          (Description used later for headers, etc)
+VendorGLHELP  INIT              "VendorGL.HLP"                            (Name of the Help file for later purposes)
+
+VendorGLTXTNM  INIT             "$APDATA\","VendGL.TXT"                 .Actual Text Filename  (i.e. CUSTFL.TXT)
+VendorGLISI1NM INIT             "$APDATA\","VendGL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+VendorGLISI2NM INIT             "$APDATA\","VendGL2.ISI"               .Actual ISI Filename
+
+VendorGLFLST  FILELIST
+           %IFDEF            VendorGLKY
+VendorGLFL    IFILE             Name=VendorGLISI1NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY2
+VendorGLFL2   IFILE             Name=VendorGLISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY3
+VendorGLFL3   IFILE             Name=VendorGLISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY4
+VendorGLFL4   IFILE             Name=VendorGLISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY5
+VendorGLFL5   IFILE             Name=VendorGLISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY6
+VendorGLFL6   IFILE             Name=VendorGLISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY7
+VendorGLFL7   IFILE             Name=VendorGLISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY8
+VendorGLFL8   IFILE             Name=VendorGLISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VendorGLKY9
+VendorGLFL9   IFILE             Name=VendorGLISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+
+                   %endif
+
+
+                   %ifndef           $VendorIO
+                     include           Vendor.IO
+                   %endif

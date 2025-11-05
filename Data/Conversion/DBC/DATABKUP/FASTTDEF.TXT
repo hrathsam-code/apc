@@ -1,0 +1,17 @@
+.
+. file definition for fast DB/C data type definition file
+.
+
+fdbct.record	list
+fdbct.type	char 8
+fdbct.atype	char 8
+fdbct.desc	char 40
+fdbct.size	char 5
+fdbct.repeatcnt	char 2
+		listend
+
+fdbct		list
+		ifile fix=63, keylen=8
+		varlist fastdbc.syscode, "FASTT"
+		varlist fdbct.type
+		listend

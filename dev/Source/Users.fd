@@ -1,0 +1,87 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $UsersVAR
+$UsersVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+UsersREC           RECORD
+UserID             DIM               20            1 - 20                   xxx
+Password           DIM               20           21 - 40                   xxx
+LoginName          DIM               20           41 - 60                   xxx
+RealName           DIM               30           61 - 90                   xxx
+GroupID            DIM               6            91 - 96
+Dept               DIM               6            97 - 102
+Security           DIM               2           103 - 104                  xxx
+Active             FORM              1           105 - 105                  xxx
+SelectAll          FORM              1           106 - 106                  xxx
+ReadAhead          FORM              1           107 - 107                  xxx
+EMailAddress       dim               40
+                   RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+UsersK1SIZE CONST            "20"                                    (Length of the Key variable)
+.
+. By UserID
+.
+UsersI1DEF         INIT             "-n,g=300,1-20"                          (Index definitions for Key 1)
+.
+UsersFileSize      CONST            "300"                                    (Length of each Record)
+
+UsersKY            DIM               UsersK1SIZE                              (The Actual 'Key' variable)
+
+UsersPROG          INIT              "User Maintenance"
+UsersTITLE         INIT              "User Record"                            (Description used later for headers, etc)
+UsersHELP          INIT              "Users.HLP"                              (Name of the Help file for later purposes)
+
+UsersTXTNM         INIT             "$DataDir\Users.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+UsersISI1NM        INIT             "$DataDir\Users.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+UsersFLST          FILELIST
+                   %IFDEF            UsersKY
+UsersFL            IFILE             Name=UsersISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY2
+UsersFL2           IFILE             Name=UsersISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY3
+UsersFL3           IFILE             Name=UsersISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY4
+UsersFL4           IFILE             Name=UsersISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY5
+UsersFL5           IFILE             Name=UsersISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY6
+UsersFL6           IFILE             Name=UsersISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY7
+UsersFL7           IFILE             Name=UsersISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY8
+UsersFL8           IFILE             Name=UsersISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   %IFDEF            UsersKY9
+UsersFL9           IFILE             Name=UsersISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $UsersIO
+                     INCLUDE           Users.IO
+                   %ENDIF

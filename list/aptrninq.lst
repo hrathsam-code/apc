@@ -1,0 +1,22 @@
+
+
+
+PAGE    1      aptrninq                                                                                       02-11-19 11:35:36
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP aptrninq -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.pls
+    7.    INCLUDE  C: aptranfd.pls
+    9.    INCLUDE  D: apmastfd.pls
+   40.    INCLUDE  E: apmastrd.pls
+   60.    INCLUDE  F: aptranrd.pls
+   66.    INCLUDE  G: aptranks.pls
+
+   Output: c:\apc\plc\aptrninq.plc                                                                                                                                                                                                                                   
+       260 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:36 11:35:36
+  00001414 DATA;  0000023A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

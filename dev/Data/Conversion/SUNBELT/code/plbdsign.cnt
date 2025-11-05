@@ -1,0 +1,15 @@
+:Base PLBDSIGN.HLP
+:Title PL/B Designer User's Guide
+1 Building a PL/B application using Forms
+2 Creating the Interface=interface
+2 Assigning Object Properties=set_props
+2 Attaching Event Code=attach_code
+2 Using Forms in Programs=using_forms
+1 Reference
+2 Objects=objects_overview@plb.hlp
+2 Properties=object_properties@plb.hlp
+2 Events=object_events@plb.hlp
+2 Programming Environment=environment
+2 PL/B Programming Language=*mk:@MSITStore:plb.chm::/contents_plb.htm@plb.hlp
+2 PL/B Utilities=contents_plbutil@plbutil.hlp
+2 PL/B Runtime and Errors=contents_plbrun@plbrun.hlp

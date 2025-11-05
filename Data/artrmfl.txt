@@ -1,0 +1,6 @@
+COD     COD              0  0  .00       .00 
+NET30   Net 30 Days     30  0  .00       .00 
+2%15NT302% 15 Net 30    30 15 2.00       .00 
+CC      CREDIT CARD      0  0  .00       .00 
+WIRET   WIRE TRANSFER    0  0  .00       .00 
+ACH     ACH              0  0  .00       .00 

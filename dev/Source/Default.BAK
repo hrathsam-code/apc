@@ -1,0 +1,81 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Default.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    02-22-2019 At 08:38                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00104   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $DefaultVAR
+$DefaultVAR                      EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+Default                          RECORD
+Entity                           Dim                8                   1 - 8
+TempType                         Form               1                   9 - 9        //// 0=Fahrenheit, 1=Celsius
+BaseTemp                         Form               3.1                10 - 14       //// Normally 65 degrees Fahrenheit
+Country                          Dim                3                  15 - 17       //3
+LockingType                      Form               1                  18 - 18
+UnlockType                       Form               1                  19 - 19
+WaitType                         Form               1                  20 - 20
+WaitTime                         Form               3                  21 - 23
+ARAcct                           Dim                8                  24 - 31
+                                 RECORDEND
+;
+;======================================================================================;
+TempDefault                         record          like   Default                         
+OrigDefault                         record          like   Default                         
+SaveDefault                         record          like   Default                         
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+DefaultTXTNM                          INIT         "Default"
+DefaultISI1NM                         INIT               "Default.ISI"
+DefaultI1DEF                           init            "-n,z,y,1-8"
+.
+. By Entity
+.
+DefaultKY                        DIM                 8
+;=============================================================================;
+;
+DefaultFLST                         FILELIST
+DefaultFL                           IFILE              name="Default.ISI",FIX=300,NODUP,NOPATH
+                                    FILELISTEND
+ 
+DefaultFileSize       CONST      "300"
+ 
+DefaultProg           INIT       "Default Program"
+DefaultDesc           INIT       "Default Maintenance"
+DefaultTITLE          INIT       "Default Record"
+DefaultHelp           INIT       "Default.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $DefaultVARIO
+            INCLUDE Default.IO 
+          %ENDIF          //End of IO Include File

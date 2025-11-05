@@ -1,0 +1,15 @@
+.............................................................
+.           STDIOERR ROUTINE   3/15/80 R. BACHARACH         .
+.                                                           .
+. THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+. TO FACILITATE STANDARD I/O ERROR DETECTION AND MESSAGES   .
+.............................................................
+. 
+STDIOERR BEEP
+         FILEPI    0
+         DISPLAY   *ES,*P01:10,"I/O ERROR ON ",IOTYPE," OF ",IOERFILE:
+                       *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+         BEEP
+         GOTO      STDIOERR
+. 
+. 

@@ -1,0 +1,109 @@
+
+
+
+PAGE    1      APDISACC.PLS IDE                                                                               03-22-04 14:49:52
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APDISACC.PLS","F:\PLC\APDISACC.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    1.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.pls
+   10.    INCLUDE  C: apmastfd.pls
+   15.    INCLUDE  D: callerr1.inc
+   19.    INCLUDE  E: callerr2.inc
+   45.    INCLUDE  F: apmastrd.pls
+
+   Output: f:\plc\apdisacc.plc                                                                                                                                                                                                                                       
+       221 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:49:51 14:49:52
+  0000124C DATA;  0000010C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APDISACC.PLS IDE                                                                               03-22-04 14:49:52
+                                         
+
+"                                          D      30. E*
+"A/P VENDOR REVIEW                         D      17.  *
+"APMASTER.ISI                              D      21.  *
+"N                                         D      59.  *
+"Y                                         D      57.  *
+A1                                         X      24.  *    46.      58.  
+A2                                         X      56.  *    62.  
+ACCKEY                                     D       9. C*    39.      43.       2. F
+ACCNO                                      D      13. C*     2. F
+ACCST                                      D      21. C*     3. F
+ACCTNUMB                                   D      14. B*
+ADD1                                       D      15. C*     2. F    47.  
+ADD2                                       D      16. C*     2. F    47.  
+APCONTRL                                   F      43. C*
+APMASTER                                   i      12.  *    21.       2. F    63.  
+APOVRFLG                                   D      10. C*
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+CITY                                       D      17. C*     2. F    48.  
+CONT                                       D      36. C*     5. F    50.  
+CRDRAT                                     D      22. C*     3. F
+CURR                                       F      26. C*     4. F    54.  
+D                                          O 5    12. D*    13. E    16. E    31. E
+DATE6                                      D      10. B*
+DDATA                                      D      13. D*    13. E
+DIVNO                                      D      35. C*     5. F
+ENVS                                       D      11. B*
+EOJ                                        X      63.  *    41.      44.      60.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+EXT                                        D      34. C*     5. F
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*    28. E    64.  
+FUT                                        D      38. C*     5. F
+INDXIT                                     X      26. E*    22. E
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LPAGE                                      F      44. C*
+LPAT                                       F      33. C*     5. F
+MAINLINE                                   X      30. E*    22. E
+MDAY                                       D      31. C*     4. F
+MMON                                       D      30. C*     4. F
+MTDC                                       F      28. C*     4. F    53.  
+MTDD                                       F      27. C*     4. F    52.  
+MYEAR                                      D      32. C*     4. F
+NAME                                       D      14. C*     2. F    47.  
+NULL                                       X      24. E*    22. E
+OVR30                                      F      25. C*     3. F    53.  
+OVR60                                      F      24. C*     3. F    52.  
+
+
+
+PAGE    3      APDISACC.PLS IDE                                                                               03-22-04 14:49:52
+                                         
+
+OVR90                                      F      23. C*     3. F    51.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+REPLY                                      D      13.  *    30. E    56.      57.      59.  
+RESULT                                     F      11. D*    16. E    22. E
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+STATE                                      D      18. C*     2. F    48.  
+TAXC                                       D      20. C*     3. F
+TELEFONE                                   D      37. C*    49.  
+TESTIT                                     X      22. E*    16. E
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TITLTEXT                                   D       9. D*    17.      15. E
+TODAY                                      D       8. B*
+TOTDUE                                     F      29. C*     4. F    55.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+ZIP                                        D      19. C*     2. F    48.  
+

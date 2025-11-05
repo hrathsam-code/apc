@@ -1,0 +1,105 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Class.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %IFNDEF           $ClassVAR
+$ClassVAR          EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+ClassREC           RECORD
+Code       DIM               4            1 - 4
+Desc       DIM               15           5 - 19
+Active     FORM              1           20 - 20
+           RECORDEND
+
+TempClassREC       RECORD            LIKE       ClassREC
+OrigClassREC       RECORD            LIKE       ClassREC
+SaveClassREC       RECORD            LIKE       ClassREC
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+ClassK1SIZE        CONST             "4"                                      //Length of the Key variable)
+.
+. By Entity, Seq Major, Seq Minor
+.
+ClassI1DEF         INIT              "-N,1-4"                                 //Index definitions for Key 1)
+.
+ClassFileSize      CONST             "20"                                     //Length of each Record)
+
+ClassKY            DIM               ClassK1SIZE                              //The Actual 'Key' variable)
+
+ClassPROG          INIT              "Program Name"
+ClassDESC          init              "Class description"                      //Description of the Master files
+ClassTITLE         INIT              "Record Title"                           //Description used later for headers, etc)
+ClassHELP          INIT              "Class.HLP"                              //Name of the Help file for later purposes)
+
+ClassTXTNM         INIT              "$DataDir\","Class.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+ClassISI1NM        INIT              "$DataDir\","Class.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+ClassISI2NM        INIT              "$DataDir\","Class2.ISI"                //Actual ISI Filename
+
+ClassFLST          FILELIST
+                   %IFDEF            ClassKY
+ClassFL            IFILE             Name=ClassISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY2
+ClassFL2           IFILE             Name=ClassISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY3
+ClassFL3           IFILE             Name=ClassISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY4
+ClassFL4           IFILE             Name=ClassISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY5
+ClassFL5           IFILE             Name=ClassISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY6
+ClassFL6           IFILE             Name=ClassISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY7
+ClassFL7           IFILE             Name=ClassISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY8
+ClassFL8           IFILE             Name=ClassISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            ClassKY9
+ClassFL9           IFILE             Name=ClassISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $ClassIO
+                     INCLUDE           Class.IO
+                   %ENDIF

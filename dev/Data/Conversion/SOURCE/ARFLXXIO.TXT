@@ -1,0 +1,91 @@
+. 
+...............................................................
+.      RECEIVABLES FILE INPUT/OUTPUT ROUTINES
+...............................................................
+. 
+OPENRCVB TRAPCLR   IO
+         TRAP      NORCVBHD IF IO
+         OPEN      ARFILES,RCVBNAME
+         RETURN
+. 
+NORCVBHD BEEP
+         DISPLAY   *ES,*P01:12,"RECEIVABLES FILE NOT ON LINE - ":
+                               "JOB ABORTING ",*W,*W,*W
+         BEEP
+         CHAIN     "ARMENU1"
+. 
+RCVIOERR BEEP
+         DISPLAY   *ES,*P01:12,"WARNING! RECEIVABLES FILE I/O ERROR":
+                       *P01:13,"NOTIFY MICRO SYSTEMS CONSULTANTS - 751-6076"
+         BEEP
+         GOTO      RCVIOERR
+. 
+GETRCVB  TRAPCLR   IO
+         TRAP      RCVNTFD IF IO
+         MOVE      "M"  TO  IOSW
+         READ      ARFILES,STARTKEY;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                                   INVDATE,INVTOTL,IPMNTS:
+                                   IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                                   ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                                   IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                                   IDOLSLFT,IPRGDTE
+. 
+         GOTO      RCVNTFD IF OVER
+         MOVE      "H"  TO IOSW
+         RETURN
+. 
+. 
+ADDRCVB  TRAPCLR   IO
+         TRAP      RCVDUPE IF IO
+         MOVE      "M" TO IOSW
+         WRITE     ARFILES,STARTKEY;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                                   INVDATE,INVTOTL,IPMNTS:
+                                   IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                                   ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                                   IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                                   IDOLSLFT,IPRGDTE
+. 
+         MOVE      "H"  TO IOSW
+. 
+RCVBRTRN RETURN
+. 
+RCVNTFD  MOVE      "M"  TO IOSW
+         GOTO      RCVBRTRN
+. 
+RCVDUPE  BEEP
+         DISPLAY   *P01:23,*HON,"INVOICE NUMBER ALREADY EXISTS!",*W3:
+                   *P01:23,*EL
+         GOTO      RCVNTFD
+. 
+PUTRCVB  TRAPCLR   IO
+         TRAP      RCVIOERR IF IO
+         UPDATE    ARFILES;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,IPMNTS:
+                            IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                            ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                            IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                            IDOLSLFT,IPRGDTE
+. 
+         MOVE      "H" TO IOSW
+         RETURN
+. 
+RCVBSKS  TRAPCLR   IO
+         TRAP      RCVIOERR IF IO
+         READKS    ARFILES;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,IPMNTS:
+                            IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                            ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                            IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                            IDOLSLFT,IPRGDTE
+. 
+         GOTO      EOFRCVB IF OVER
+         MOVE      "H" TO IOSW
+         RETURN
+. 
+EOFRCVB  MOVE      "E" TO IOSW
+         RETURN
+. 
+. END OF RECEIVABLES I/O ROUTINES
+. 
+.......................................................................
+. 

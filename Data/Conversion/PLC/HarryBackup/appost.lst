@@ -1,0 +1,439 @@
+
+
+
+PAGE    1      APPOST.PLS IDE                                                                                 03-22-04 14:50:59
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APPOST.PLS","F:\PLC\APPOST.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    1.    INCLUDE  A: common.pls
+    2.    INCLUDE  B: apmastfd.pls
+    3.    INCLUDE  C: aptranfd.pls
+  183.    INCLUDE  D: apmasthr.pls
+  204.    INCLUDE  E: apmasthu.pls
+  243.    INCLUDE  F: apmastrd.pls
+  345.                                         CMATCH    "?",DAMT
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  360.                                         MOVE      "LAST DISCT DAY" TO DATEDESC
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  401.                                         MOVE      "       ",AMTDISA
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  410.      00000698                           ADD       FRG,TFRG
+                                                  *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  483.    INCLUDE  G: aptranrt.pls
+  504.    INCLUDE  H: apmastup.pls
+  583.                                         CMATCH    "0",IDEB
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  655.    INCLUDE  I: apmasthr.pls
+  663.    INCLUDE  J: apmasthu.pls
+  665.                                         MOVE      "033401",DCODE
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  700.                                         BEEP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  735.    INCLUDE  K: getdate.pls
+  736.    INCLUDE  L: apmastvk.pls
+
+   Output: f:\plc\appost.plc                                                                                                                                                                                                                                         
+       972 LINES;      0 ERRORS;      7 WARNINGS; Start/Stop: 14:50:58 14:51:00
+  00002C84 DATA;  00000F3C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+"                                          D     137.  *
+"                                          D     236.  *
+"                                          D     307.  *
+"                                          D     338.  *
+"                                          D     401.  *   247.     308.     353.     443.     698.      24. K    25. K
+                                                     *    40. K    67. K
+"     #                                    D     312.  *
+"   0.00                                   D     396.  *
+" 0                                        D     270.  *   279.     290.     291.  
+"/                                         D     369.  *   371.  
+"0                                         D     305.  *   306.     387.  
+"000000                                    D     182.  *   654.  
+"033401                                    D     665.  *
+"056400                                    D     683.  *
+#                                          D      28. K*
+"1                                         D     321.  *   385.     503.  
+"2                                         D     712.  *
+"4101                                      D     421.  *
+"9012                                      D     674.  *
+"APDISTFL                                  D     151.  *
+"APMASTER                                  D     150.  *
+"APMENU1                                   D     720.  *   724.     728.     731.  
+"APTRANFL                                  D     154.  *
+"APTRNLST                                  D     714.  *
+"CM                                        D     319.  *
+"E                                         D     162.  *    33. K    36. K    39. K    50. K    53. K    56. K    59. K
+"LAST DISCT DAY                            D     360.  *
+"MATERIAL PURCHASE                         D     330.  *
+"X                                         D     169.  *    74. K
+0                                          F     337.  *   383.     416.     554.     555.     580.     585.     588.  
+                                                     *   620.  
+1                                          F      48. K*    54. K
+11                                         F     226.  *
+13                                         F      51. K*
+2                                          F     508.  *
+20                                         F     593.  *
+21                                         F     262.  *
+32                                         F      57. K*
+4                                          F     233.  *
+5                                          F     265.  *
+55                                         F     505.  *
+A10                                        X     330.  *   302.     347.  
+A1000                                      X     726.  *   149.  
+A1001                                      X     729.  *   184.     656.  
+A10A                                       X     337.  *   346.     349.     363.  
+A10B                                       X     353.  *   343.     405.  
+A10XYZ                                     X     375.  *   356.  
+A10Z                                       X     383.  *
+A11                                        X     387.  *   384.  
+A12                                        X     396.  *   386.     388.     404.     407.  
+A12A                                       X     389.  *   392.  
+A12B                                       X     416.  *   398.     409.     438.     449.  
+A12BB                                      X     455.  *   447.  
+
+
+
+PAGE    3      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+A12F                                       X     390.  *   394.  
+A12F1                                      X     464.  *   471.  
+A12F2                                      X     472.  *   465.     467.     469.  
+A12G                                       X     478.  *   461.  
+A13                                        X     488.  *   485.  
+A14                                        X     490.  *   487.  
+A14A                                       X     492.  *   489.  
+A15                                        X     496.  *   491.  
+A16                                        X     511.  *   227.     506.  
+A16A                                       X     520.  *   530.  
+A16AB                                      X     524.  *   521.  
+A17                                        X     527.  *   518.  
+A18                                        X     532.  *   528.  
+A18A                                       X     536.  *   533.  
+A19                                        X     538.  *   525.  
+A190                                       X     553.  *   592.  
+A19A                                       X     554.  *   621.  
+A19AA                                      X     545.  *   539.  
+A2                                         X     157.  *   153.  
+A20                                        X     557.  *   562.     566.     594.  
+A20A                                       X     588.  *   584.  
+A20B                                       X     590.  *   587.  
+A20C                                       X     593.  *   582.     586.     589.  
+A21                                        X     596.  *   581.     618.  
+A22                                        X     600.  *   598.  
+A23                                        X     620.  *   599.  
+A24                                        X     624.  *   238.     242.  
+A24A                                       X     641.  *   625.  
+A24AA                                      X     650.  *   642.  
+A25                                        X     671.  *   667.  
+A32                                        X     674.  *   670.  
+A35                                        X     679.  *   676.  
+A4                                         X     162.  *   156.     164.     167.  
+A40                                        X     688.  *   685.  
+A5                                         X     168.  *   165.  
+A50                                        X     683.  *
+A6                                         X     193.  *   196.  
+A60                                        X     691.  *   158.     664.     678.     682.     687.  
+A6BYPASS                                   X     202.  *   191.  
+A7                                         X     213.  *   197.     509.  
+A8                                         X     229.  *   227.     241.     244.     250.     254.     559.     563.  
+                                                     *   622.     734.  
+A8A                                        X     305.  *   263.     266.     336.  
+A8AA                                       X     251.  *   453.     548.  
+A8B                                        X     314.  *   317.  
+A8C                                        X     319.  *   315.  
+A8Z                                        X     270.  *   313.     326.  
+A9A                                        X     322.  *   318.     320.  
+ACCKEY                                     D       9. B*   182.       2. D   231.     240.       2. F   654.       2. I
+                                                     *     6. L
+ACCNO                                      D      13. B*     2. D     2. E     2. F   375.     468.     482.       2. H
+                                                     *   514.       2. I     2. J     6. L
+ACCST                                      D      21. B*     3. F   503.       3. H
+
+
+
+PAGE    4      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+ACCTNUMB                                   D      14. A*
+ADD1                                       D      15. B*     2. D     2. E     2. F     2. H     2. I     2. J
+ADD2                                       D      16. B*     2. D     2. E     2. F     2. H     2. I     2. J
+ADJUST                                     F     120.  *   650.     651.  
+AMT                                        F      19.  *   411.     413.     570.     575.     578.     603.     608.  
+                                                     *   615.  
+AMTDISA                                    D      87.  *   401.     402.     403.     406.     408.  
+AMTFRG                                     D      24.  *   390.     391.     393.     395.  
+AMTREM                                     F      93.  *   553.     578.     579.     580.     585.     588.     620.  
+ANS                                        D      99.  *
+APADJUST                                   f     119.  *
+APCONTRL                                   F      43. B*     3. D   186.       3. E   644.     650.       3. I   661.  
+                                                     *   662.       3. J
+APDISTFL                                   i       6.  *   151.     429.     456.     565.     606.     609.     666.  
+                                                     *   672.     675.     680.     684.     689.     693.  
+APMASTER                                   i       5.  *   150.       2. D     2. E     2. F     2. H     2. I     2. J
+                                                     *   692.  
+APMASTVK                                   X       6. L*   185.     245.     657.  
+APOVRFLG                                   D      10. B*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+APTRANFL                                   i       4.  *   154.     460.     464.       2. G   691.  
+BKUPFLG                                    D     113.  *   169.     353.      72. K
+CHAINMNU                                   X     717.  *   699.     708.  
+CHAINTRN                                   X     712.  *   706.  
+CITY                                       D      17. B*     2. D     2. E     2. F     2. H     2. I     2. J
+CKINV                                      D      94.  *
+CNT                                        F      92.  *   555.     596.     597.     600.     603.  
+CONT                                       D      36. B*     5. F     5. H
+CRDRAT                                     D      22. B*     3. F     3. H
+CURR                                       F      26. B*     4. D     4. E     4. F     4. H     4. I     4. J
+DAMT                                       D      21.  *   338.     345.     348.     350.  
+DATE6                                      D      10. A*
+DATEDESC                                   D     103.  *   360.      26. K
+DATERROR                                   D     104.  *    24. K    33. K    36. K    39. K    40. K    50. K    53. K
+                                                     *    56. K    59. K    67. K
+DATFLG                                     D     114.  *   362.      25. K    74. K
+DCOD1                                      D      46.  *   572.     600.  
+DCOD10                                     D      55.  *   573.     601.  
+DCOD11                                     D      56.  *   573.     601.  
+DCOD12                                     D      57.  *   573.     601.  
+DCOD13                                     D      58.  *   573.     601.  
+DCOD14                                     D      59.  *   573.     601.  
+DCOD15                                     D      60.  *   574.     602.  
+DCOD16                                     D      61.  *   574.     602.  
+DCOD17                                     D      62.  *   574.     602.  
+DCOD18                                     D      63.  *   574.     602.  
+DCOD19                                     D      64.  *   574.     602.  
+DCOD2                                      D      47.  *   572.     600.  
+DCOD20                                     D      65.  *   574.     602.  
+DCOD3                                      D      48.  *   572.     600.  
+DCOD4                                      D      49.  *   572.     600.  
+DCOD5                                      D      50.  *   572.     600.  
+
+
+
+PAGE    5      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+DCOD6                                      D      51.  *   572.     600.  
+DCOD7                                      D      52.  *   573.     601.  
+DCOD8                                      D      53.  *   573.     601.  
+DCOD9                                      D      54.  *   573.     601.  
+DCODE                                      D       8.  *   429.     456.     557.     561.     565.     572.     600.  
+                                                     *   606.     609.     615.     665.     666.     669.     672.     673.  
+                                                     *   674.     675.     677.     680.     681.     683.     684.     686.  
+                                                     *   689.     690.  
+DCSL                                       F      11.  *   429.     456.     606.     609.     666.     672.     675.  
+                                                     *   680.     684.     689.  
+DD                                         D     106.  *   174.     180.     271.     282.     283.     284.     285.  
+                                                     *   287.     297.     298.     301.     365.      30. K    34. K    46. K
+DDAY                                       D      27.  *   365.     370.  
+DDAYZ                                      X     301.  *
+DESC                                       D      18.  *   236.     330.     331.     333.     334.     335.     478.  
+                                                     *   515.  
+DESC2                                      D       9.  *   429.     440.     456.     565.     568.     606.     609.  
+                                                     *   666.     672.     675.     680.     684.     689.  
+DISA                                       D      90.  *   396.     408.     481.     543.  
+DIVNO                                      D      35. B*     5. D     5. E     5. F     5. H     5. I     5. J
+DMON                                       D      26.  *   364.     367.  
+DROW                                       F     116.  *   233.     258.     262.     265.     271.     273.     283.  
+                                                     *   301.     309.     310.     311.     331.     333.     334.     341.  
+                                                     *   342.     422.     424.     425.     440.     451.     452.  
+DSAL                                       F      10.  *   429.     455.     456.     606.     608.     609.     666.  
+                                                     *   671.     672.     675.     679.     680.     684.     688.     689.  
+DSAL1                                      F      66.  *   575.     603.  
+DSAL10                                     F      75.  *   576.     604.  
+DSAL11                                     F      76.  *   576.     604.  
+DSAL12                                     F      77.  *   576.     604.  
+DSAL13                                     F      78.  *   576.     604.  
+DSAL14                                     F      79.  *   576.     604.  
+DSAL15                                     F      80.  *   577.     605.  
+DSAL16                                     F      81.  *   577.     605.  
+DSAL17                                     F      82.  *   577.     605.  
+DSAL18                                     F      83.  *   577.     605.  
+DSAL19                                     F      84.  *   577.     605.  
+DSAL2                                      F      67.  *   575.     603.  
+DSAL20                                     F      85.  *   577.     605.  
+DSAL3                                      F      68.  *   575.     603.  
+DSAL4                                      F      69.  *   575.     603.  
+DSAL5                                      F      70.  *   575.     603.  
+DSAL6                                      F      71.  *   575.     603.  
+DSAL7                                      F      72.  *   576.     604.  
+DSAL8                                      F      73.  *   576.     604.  
+DSAL9                                      F      74.  *   576.     604.  
+DSTDIV                                     D      16.  *   430.     457.     607.     610.  
+DUP                                        X     732.  *
+DYEAR                                      D      28.  *   366.     372.  
+ENVS                                       D      11. A*
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+
+
+
+PAGE    6      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+ERRORSW4                                   D      24. A*
+EXT                                        D      34. B*     5. D     5. E     5. F     5. H     5. I     5. J
+FD                                         F     110.  *    46. K    54. K    57. K
+FIRSTIME                                   D      17. A*
+FM                                         F     109.  *    45. K    48. K    51. K
+FRG                                        F      23.  *   395.     410.     413.  
+FROMPGM                                    D      16. A*
+FUT                                        D      38. B*     5. F     5. H
+FY                                         F     111.  *    47. K
+GD1                                        X      34. K*    32. K
+GD10                                       X      72. K*    29. K
+GD2                                        X      37. K*    35. K
+GD3                                        X      40. K*    38. K
+GD3A                                       X      45. K*    41. K
+GD4                                        X      51. K*    49. K
+GD5                                        X      54. K*    52. K
+GD6                                        X      57. K*    55. K
+GD7                                        X      61. K*    58. K
+GD9                                        X      67. K*
+GETDATE                                    X      24. K*   361.      44. K    71. K    73. K
+HDFLG                                      F      40.  *   227.     508.  
+HDNAME                                     D      41.  *   187.     216.  
+IADJ                                       D      43.  *   305.     321.     484.     517.  
+ICR                                        D      44.  *   306.     527.  
+IDEB                                       D      45.  *   385.     387.     486.     529.     583.  
+INVNO                                      D      34.  *   308.     310.     311.     312.     314.     316.     319.  
+                                                     *   322.     323.     324.     325.  
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+KEEPDATE                                   X     289.  *   275.  
+KEYDAYZ                                    X     282.  *   286.  
+LDDAY                                      D      25.  *   354.     367.     368.     369.     370.     371.     372.  
+                                                     *   373.     480.     541.  
+LINES                                      F      42.  *   226.     505.     545.     617.  
+LPAGE                                      F      44. B*     5. D   193.     198.     202.     203.       5. E   217.  
+                                                     *   507.       5. I     5. J
+LPAT                                       F      33. B*     5. D     5. E     5. F   495.       5. H     5. I     5. J
+MAMT                                       F      20.  *   337.     341.     342.     350.     383.     455.     479.  
+                                                     *   488.     490.     495.     496.     502.     522.     524.     534.  
+                                                     *   536.     542.     551.     552.  
+MDAY                                       D      31. B*     4. D     4. E     4. F   493.       4. H     4. I     4. J
+MM                                         D     105.  *   172.     179.     270.     271.     280.     289.     301.  
+                                                     *   364.      27. K    28. K    31. K    45. K
+MMON                                       D      30. B*     4. D     4. E     4. F   492.       4. H     4. I     4. J
+MOVE11                                     X     226.  *   214.  
+MTCH16                                     X     517.  *   512.  
+MTDC                                       F      28. B*     4. D     4. E     4. F   490.       4. H     4. I     4. J
+MTDC2                                      F      13.  *   429.     456.     606.     609.     666.     672.     675.  
+                                                     *   680.     684.     689.  
+MTDD                                       F      27. B*     4. D     4. E     4. F   488.       4. H     4. I     4. J
+MTDS                                       F      12.  *   429.     456.     606.     609.     666.     672.     675.  
+
+
+
+PAGE    7      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+                                                     *   680.     684.     689.  
+MX                                         D     117.  *   273.     274.     279.     280.  
+MYEAR                                      D      32. B*     4. D     4. E     4. F   494.       4. H     4. I     4. J
+NACCNO                                     F     102.  *
+NAME                                       D      14. B*     2. D   187.       2. E     2. F   246.       2. H     2. I
+                                                     *     2. J
+NAPCNTRL                                   F      38.  *   186.     502.     645.     651.     661.  
+NCODE                                      F      98.  *
+NINVNO                                     D      17.  *   462.     466.  
+NO                                         F      86.  *   554.     571.     572.     575.     593.     597.  
+NOTFND                                     X     435.  *   428.     432.  
+NPAGE                                      D      39.  *   194.     195.     198.     203.  
+NYY                                        F     118.  *   293.  
+OK                                         X     149.  *   143.     145.  
+OVR30                                      F      25. B*     3. D     3. E     3. F     3. H     3. I     3. J
+OVR60                                      F      24. B*     3. D     3. E     3. F     3. H     3. I     3. J
+OVR90                                      F      23. B*     3. F     3. H
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PRINTLST                                   X     137.  *   146.  
+PRINTSW                                    D     123.  *   141.     213.     511.     520.     532.     538.     612.  
+                                                     *   624.     641.     717.  
+PRTBYP1                                    X     617.  *   613.  
+REC0                                       F     121.  *
+RELSPTR                                    X     723.  *   718.  
+REPLY                                      D     124.  *   137.     140.     141.     142.     144.     162.     163.  
+                                                     *   166.     247.     248.     249.     252.     443.     445.     446.  
+                                                     *   448.     547.     698.     704.     705.     707.      12. L
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. A*
+SEQ                                        F       7.  *
+STATE                                      D      18. B*     2. D     2. E     2. F     2. H     2. I     2. J
+SVACCNO                                    D      30.  *   460.     464.     468.  
+SVAMT                                      F      97.  *   552.     553.  
+SVCNT                                      F      33.  *   460.     470.     472.     475.     477.  
+SVDATE                                     D      31.  *   460.     464.  
+SVINVNO                                    D      32.  *   460.     464.     466.  
+TACCN                                      D      12. C*   482.       2. G
+TADD                                       D      29.  *   381.  
+TAMT                                       F      19. C*   479.       3. G
+TAXC                                       D      20. B*     3. F     3. H
+TCDDISPL                                   X     440.  *   433.  
+TCNT                                       F      17. C*   416.     464.     470.     477.       2. G   514.  
+TDAY                                       D      15. C*   298.     379.       2. G   493.     514.  
+TDCODE                                     D      22. C*   421.     422.     424.     425.     429.     436.       3. G
+TDESC                                      D      18. C*   478.       3. G
+TDISA                                      F      21. C*   481.       3. G   677.     679.     681.  
+TELEFONE                                   D      37. B*
+TESTONE                                    D      18. A*   712.  
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+
+
+
+PAGE    8      APPOST.PLS IDE                                                                                 03-22-04 14:51:00
+                                         
+
+TFRG                                       F      22.  *   410.     686.     688.     690.  
+TIME                                       D     115.  *   127.     130.  
+TINVNO                                     D      16. C*   307.     325.     380.     462.     474.       2. G   514.  
+TLDDAY                                     D      20. C*   480.       3. G
+TMON                                       D      14. C*   289.     290.     378.       2. G   492.     514.  
+TODAY                                      D       8. A*   130.     172.     173.     174.     175.     176.     177.  
+                                                     *   354.  
+TODDAY                                     D      36.  *   180.     218.  
+TODMON                                     D      35.  *   179.     218.  
+TODYEAR                                    D      37.  *   181.     218.  
+TOTCRD                                     F      96.  *   536.     628.  
+TOTDEB                                     F      95.  *   524.     628.  
+TOTDUE                                     F      29. B*     4. D     4. E     4. F   496.       4. H   541.       4. I
+                                                     *   662.       4. J
+TRNKEY                                     D       9. C*   375.     376.     377.     378.     379.     380.     381.  
+                                                     *   382.     460.     473.     474.     475.     476.       2. G
+TRNKEY2                                    D      10. C*
+TXAMT                                      F     100.  *   389.     411.     412.  
+TXTAX                                      F     101.  *   412.     671.     673.  
+TYEAR                                      D      13. C*   299.     377.       2. G   494.     514.  
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+WHATNEXT                                   X     698.  *   710.  
+YTDC                                       F      15.  *   430.     457.     606.     609.     666.     672.     675.  
+                                                     *   680.     684.     689.  
+YTDS                                       F      14.  *   430.     457.     606.     609.     666.     672.     675.  
+                                                     *   680.     684.     689.  
+YY                                         D     107.  *   176.     181.     271.     283.     291.     293.     299.  
+                                                     *   301.     366.      30. K    37. K    47. K
+ZIP                                        D      19. B*     2. D     2. E     2. F     2. H     2. I     2. J
+

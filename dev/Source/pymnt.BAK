@@ -1,0 +1,98 @@
+       %IFNDEF   $PYMNTVAR
+$PYMNTVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+PYMNTREC      RECORD            LIKE ARDETREC
+.
+. File Keys and File Labels
+. -------------------------
+.
+PYMNTK1SIZE CONST            "18"                                   .Index Size of Key 1
+PYMNTK2SIZE CONST            "24"                                   .Index Size of Key 2
+PYMNTK3SIZE CONST            "27"                                   .Index Size of Key 3
+PYMNTK4SIZE CONST            "47"                                   .Index Size of Key 4
+
+.
+. By Entity, Seq Major, Seq Minor
+.
+PYMNTI1DEF  INIT             "-N,1-8,212-221"                                  .Index definitions for Key 1
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+PYMNTI2DEF  INIT             "-N,1-8,96-99,100-101,212-221"                    .Index definitions for Key 2
+.
+. By Entity, Trans Code, Entry Date, Seq Major, Seq Minor
+.
+PYMNTI3DEF  INIT             "-N,1-8,35-35,72-79,212-221"                      .Index definitions for Key 4
+.
+. By Entity, Trans Code, Entry Date, CustomerID, Referenceeq Major, Seq Minor
+.
+PYMNTI4DEF  INIT             "-N,1-8,35-35,72-79,17-26,36-45,212-221"          .Index definitions for Key 4
+.
+PYMNTFSIZE  CONST            "300"                                   .Length of Text Record
+PYMNTFileSIZE  CONST            "300"                                   .Length of Text Record
+
+PYMNTKY    DIM               PYMNTK1SIZE
+PYMNTKY2   DIM               PYMNTK2SIZE
+PYMNTKY3   DIM               PYMNTK3SIZE
+PYMNTKY4   DIM               PYMNTK4SIZE
+
+
+PYMNTTITLE INIT              "Payment Journal Record"
+PYMNTHLP   INIT              "PYMNTER.HLP"
+
+PYMNTTXTNM  INIT        "PYMNTFL.TXT"         .Actual Text Filename
+PYMNTISI1NM INIT        "PYMNTFL.ISI"         .Actual ISI Filename
+PYMNTISI2NM INIT        "PYMNTFL2.ISI"        .Actual ISI Filename
+PYMNTISI3NM INIT        "PYMNTFL3.ISI"        .Actual ISI Filename
+PYMNTISI4NM INIT        "PYMNTFL4.ISI"        .Actual ISI Filename
+
+PYMNTFLST  FILELIST
+           %IFDEF            PYMNTKY
+PYMNTFL    IFILE             Name=PYMNTISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            PYMNTKY2
+PYMNTFL2   IFILE             Name=PYMNTISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            PYMNTKY3
+PYMNTFL3   IFILE             Name=PYMNTISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            PYMNTKY4
+PYMNTFL4   IFILE             Name=PYMNTISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PYMNTKY5
+
+PYMNTFL5   IFILE             Name=PYMNTISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PYMNTKY6
+
+PYMNTFL6   IFILE             Name=PYMNTISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PYMNTKY7
+
+PYMNTFL7   IFILE             Name=PYMNTISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            PYMNTKY8
+
+PYMNTFL8   IFILE             Name=PYMNTISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            PYMNTKY9
+PYMNTFL9   IFILE             Name=PYMNTISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $PYMNTIO
+           INCLUDE           PYMNT.IO
+         %ENDIF
+#end

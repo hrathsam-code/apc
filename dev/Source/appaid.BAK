@@ -1,0 +1,105 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APPaid.FD                                                      ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:    Accounts Payable History File Definitions                      ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $APPaidVAR
+$APPaidVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APPaid        RECORD
+AccountNumber DIM               6
+TransYear     DIM               2
+TransMonth    DIM               2
+TransDay      DIM               2
+Invoice       DIM               6
+Counter       FORM              1
+Description   DIM               20
+Amount        FORM              6.2
+LastDiscDay   DIM               8
+DiscountAmt   FORM              4.2
+CheckNumber   DIM               6
+PaidDate      DIM               8
+GLCode        DIM               6
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APPaidK1SIZE CONST            "19"                                     (Length of the Key variable)
+.APPaidK2SIZE CONST            ""                                      (Length of the Key variable 2)
+.
+. By Vendor, Year, Month, Day, Invoice Number, Counter
+.
+APPaidI1DEF  INIT             "1-19"                                   (Index definitions for Key 1)
+.
+APPaidFSIZE  CONST            "83"                                     (Length of each Record)
+
+APPaidKY    DIM               APPaidK1SIZE                             (The Actual 'Key' variable)
+
+APPaidPROG  INIT              "AP Paid History Inquiry"
+APPaidTITLE INIT              "AP History Record"                      (Description used later for headers, etc)
+APPaidHELP  INIT              "APPaid.HLP"                             (Name of the Help file for later purposes)
+
+APPaidTXTNM  INIT             "$SC\","APPaidFL.TXT"                    .Actual Text Filename  (i.e. CUSTFL.TXT)
+APPaidISI1NM INIT             "$SC\","APPAIDFL.ISI"                   .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+APPaidFLST  FILELIST
+           %IFDEF            APPaidKY
+APPaidFL    IFILE             Name=APPaidISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY2
+APPaidFL2   IFILE             Name=APPaidISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY3
+APPaidFL3   IFILE             Name=APPaidISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY4
+APPaidFL4   IFILE             Name=APPaidISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY5
+APPaidFL5   IFILE             Name=APPaidISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY6
+APPaidFL6   IFILE             Name=APPaidISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY7
+APPaidFL7   IFILE             Name=APPaidISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY8
+APPaidFL8   IFILE             Name=APPaidISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APPaidKY9
+APPaidFL9   IFILE             Name=APPaidISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $APPaidIO
+           GOTO                 #S
+           INCLUDE           APPaid.IO
+#S
+         %ENDIF
+

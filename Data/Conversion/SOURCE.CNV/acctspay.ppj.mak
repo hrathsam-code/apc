@@ -1,0 +1,39 @@
+CMPLR=PLBCON.EXE PLBCMP
+OPTIONS=-ZG,ZT,S,ZH,E,X,P "IDE"
+.SUFFIXES: .PLC .PLS .DBS .INC .MNU .PLF                                                                            
+
+
+OBJS=	APCASHRQ.PLC 
+
+.PLS.PLC:
+	$(CMPLR) "$<","$@" $(OPTIONS)
+
+.DBS.PLC:
+	$(CMPLR) "$<","$@" $(OPTIONS)
+
+ACCTSPAY:	$(OBJS)
+
+APCASHRQ.PLC:	APCASHRQ.PLS\
+		COMMON.PLS \
+		APMASTFD.PLS \
+		APTRANFD.PLS \
+		APCALNDR.PLS \
+		APMASTHR.PLS \
+		APMASTKS.PLS \
+		APMASTUP.PLS \
+		APMASTHR.PLS \
+		APTRANRD.PLS \
+		APTRANKS.PLS \
+		APMASTRD.PLS \
+		APMASTRD.PLS \
+		APMASTUP.PLS \
+		APDATES.PLS \
+		APMASTVK.PLS \
+		APMASTHR.PLS \
+		APMASTHU.PLS \
+		GETDATE.PLS 
+
+clean:
+	del *.plc
+	del *.sdb
+	del *.lst

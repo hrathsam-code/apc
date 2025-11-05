@@ -1,0 +1,76 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Class.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-25-2019 At 12:52                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00103   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $ClassVAR
+$ClassVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+Class                            RECORD
+Code                             Dim                4                   1 - 4        //1 - 4
+Desc                             Dim                15                  5 - 19       //5 - 19
+Active                           Form               1                  20 - 20       //20 - 20
+                                 RECORDEND
+;
+;======================================================================================;
+TempClass                           record          like   Class                           
+OrigClass                           record          like   Class                           
+SaveClass                           record          like   Class                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+ClassTXTNM                          INIT         "ClassFL"
+ClassISI1NM                         INIT               "Class.ISI"
+ClassI1DEF                           init            "-n,z,y,1-4"
+.
+. By Code
+. 1-4
+.
+ClassKY                          DIM                 4
+;=============================================================================;
+;
+ClassFLST                         FILELIST
+ClassFL                             IFILE              name="Class.ISI",FIX=20,NODUP,NOPATH
+                                    FILELISTEND
+ 
+ClassFileSize       CONST      "20"
+ 
+ClassProg           INIT       "Class Program"
+ClassDesc           INIT       "Class Maintenance"
+ClassTITLE          INIT       "Class Record"
+ClassHelp           INIT       "Class.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $ClassVARIO
+            INCLUDE Class.IO 
+          %ENDIF          //End of IO Include File

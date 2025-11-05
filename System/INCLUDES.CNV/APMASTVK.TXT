@@ -1,0 +1,13 @@
+. =============================================================================
+.  THIS SUBROUTINE VERIFIES THAT THE RECORD READ MATCHES THE SPECIFIED KEY
+.  IN A APMASTER READ INSTRUCTION.
+. =============================================================================
+. 
+APMASTVK MATCH     ACCKEY TO ACCNO
+         RETURN    IF EQUAL 
+. 
+         BEEP
+         DISPLAY   *R,*P1:24,"THE APMASTER DATA FILE DOES NOT MATCH THE INDEX"
+         DISPLAY   *R,*P1:24,"RE-INDEX THE APMASTER.TXT FILE ON POSITIONS 1-6"
+         KEYIN     REPLY
+         STOP

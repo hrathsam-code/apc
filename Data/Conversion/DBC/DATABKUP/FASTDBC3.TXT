@@ -1,0 +1,661 @@
+.
+. FAST DB/C routines for user verbs
+. REPORT, REPORTLINE
+.
+. tab settings 7,13,19,...
+.
+
+noextdef3	equate 1
+	inc fastdbc
+.
+. variables
+.
+keyword		char @
+var1			var @
+var2			var @
+parmindex		int 5
+.
+. report variables
+rep.xbeforereport	define 1
+rep.xafterreport	define 2
+rep.xbeforepage		define 3
+rep.xafterpage		define 4
+rep.xbeforeget		define 5
+rep.xbeforeline		define 6
+rep.xafterline		define 7
+
+rep.record		list @
+rep.table		list @
+rep.pagecnt	num 4
+rep.colcnt	int 2
+rep.pagewidth	int 3
+rep.pagelength	int 3
+rep.topmargin	int 2
+rep.botmargin	int 2
+rep.lftmargin	int 2
+rep.rgtmargin	int 2
+rep.ctitle	char @
+rep.ltitle	char @
+rep.rtitle	char @
+rep.ctitleflag	int 1
+rep.ltitleflag	int 1
+rep.rtitleflag	int 1
+rep.dateflag	int 1
+rep.pageflag	int 1
+rep.exitflag	int 1[7]
+rep.defaultha	int 2
+rep.colh	int 3[50]
+rep.colwidth	int 3[50]
+rep.coldesc	char [50]@
+rep.coldescflag	int 1
+rep.colvar	var [50]@
+rep.bgroupexit	int 1[50]
+rep.agroupexit	int 1[50]
+rep.bgroupnum	int 2
+rep.agroupnum	int 2
+rep.groupcval	char 100[50]
+rep.groupnval	num 21[50]
+rep.grouptot	num 21[50]
+rep.grandtot	num 21[50]
+rep.grouptotflag	int 1[50]
+rep.grandtotflag	int 1[50]
+rep.char6	char 6
+rep.charvar	char @
+rep.numvar	int @
+rep.line	char 132
+rep.workline	char 132
+rep.printline	char @
+rep.lineout	char @
+rep.firstlinflag	int 1
+rep.firstrecflag	int 1
+rep.overflag	int 1
+rep.displayflag	int 1
+rep.linecnt	int 3
+rep.index	int 3
+rep.worknum	int 3
+rep.worknum2	int 3
+rep.blank	init " "
+rep.lblbegin		label @
+rep.lblend		label @
+rep.lblbeforereport	label @
+rep.lblafterreport	label @
+rep.lblbeforepage	label @
+rep.lblafterpage	label @
+rep.lblbeforeget	label @
+rep.lblbeforeline	label @
+rep.lblafterline	label @
+rep.lblix	int 2
+rep.lbl01	label @
+rep.lbl02	label @
+rep.lbl03	label @
+rep.lbl04	label @
+rep.lbl05	label @
+rep.lbl06	label @
+rep.lbl07	label @
+rep.lbl08	label @
+rep.lbl09	label @
+rep.lbl10	label @
+rep.lbl11	label @
+rep.lbl12	label @
+rep.lbl13	label @
+rep.lbl14	label @
+rep.lbl15	label @
+rep.lbl16	label @
+rep.lbl17	label @
+rep.lbl18	label @
+rep.lbl19	label @
+rep.lbl20	label @
+rep.lbl21	label @
+rep.lbl22	label @
+rep.lbl23	label @
+rep.lbl24	label @
+rep.lbl25	label @
+rep.lbl26	label @
+rep.lbl27	label @
+rep.lbl28	label @
+rep.lbl29	label @
+rep.lbl30	label @
+rep.lbl31	label @
+rep.lbl32	label @
+rep.lbl33	label @
+rep.lbl34	label @
+rep.lbl35	label @
+rep.lbl36	label @
+rep.lbl37	label @
+rep.lbl38	label @
+rep.lbl39	label @
+rep.lbl40	label @
+rep.lbl41	label @
+rep.lbl42	label @
+rep.lbl43	label @
+rep.lbl44	label @
+rep.lbl45	label @
+rep.lbl46	label @
+rep.lbl47	label @
+rep.lbl48	label @
+rep.lbl49	label @
+rep.lbl50	label @
+.
+tempint	int	@
+routine		label @
+errormsg		char 20
+.
+. REPORT verb
+.
+. REPORT RECORD=<listvar>, TABLE=<list>:
+.        PAGEWIDTH=<nvarlit>, PAGELENGTH=<nvarlit>:
+.        TOPMARGIN=<nvarlit>, BOTTOMMARGIN=<nvarlit>, LEFTMARGIN=<nvarlit>:
+.        RIGHTMARGIN=<nvarlit>
+.        TITLE=<cvarlit>, LTITLE=<cvarlit>, RTITLE=<cvarlit>:
+.        NODATE, NOPAGE, DISPLAY:
+.        BEGIN=<label>, END=<label>, BEFOREREPORT=<label>, AFTERREPORT=<label>:
+.        BEFOREPAGE=<label>, AFTERPAGE=<label>:
+.        DEFAULTHA=<nvarlit>, H=<nvarlit>, HA=<nvarlit>:
+.        COL=<varlit>, COLWIDTH=<nvarlit>, DESC=<cvarlit>:
+.        BEFOREGET=<label>, BEFORELINE=<label>, AFTERLINE=<label>:
+.        BEFOREGROUP=<label>, AFTERGROUP=<label>, GROUPTOTAL, GRANDTOTAL
+.
+REPORT routine
+	clear rep.pagewidth, rep.pagelength, rep.pagecnt, rep.colcnt, rep.lblix
+	clear rep.bgroupexit, rep.agroupexit, rep.grouptotflag, rep.grandtotflag
+	clear rep.coldescflag, rep.displayflag, rep.colh
+	clear rep.ctitleflag, rep.ltitleflag, rep.rtitleflag
+	set rep.dateflag, rep.pageflag, rep.colh[1]
+	move 2 to rep.defaultha
+	move 3 to rep.topmargin
+	move 3 to rep.botmargin
+	move 10 to rep.lftmargin
+	move 10 to rep.rgtmargin
+	move 66 to rep.pagelength
+	move 80 to rep.pagewidth
+	loop
+		getparm keyword, var1
+		break if over
+		switch keyword
+		case "RECORD"
+			moveadr var1 to rep.record
+		case "TABLE"
+			moveadr var1 to rep.table
+		case "PAGEWIDTH"
+			moveadr var1 to tempint
+			move tempint to rep.pagewidth
+		case "PAGELENGTH"
+			moveadr var1 to tempint
+			move tempint to rep.pagelength
+		case "TOPMARGIN"
+			moveadr var1 to tempint
+			move tempint to rep.topmargin
+		case "BOTTOMMARGIN"
+			moveadr var1 to tempint
+			move tempint to rep.botmargin
+		case "LEFTMARGIN"
+			moveadr var1 to tempint
+			move tempint to rep.lftmargin
+		case "RIGHTMARGIN"
+			moveadr var1 to tempint
+			move tempint to rep.rgtmargin
+		case "TITLE"
+			moveadr var1 to rep.ctitle
+			set rep.ctitleflag
+		case "LTITLE"
+			moveadr var1 to rep.ltitle
+			set rep.ltitleflag
+		case "RTITLE"
+			moveadr var1 to rep.rtitle
+			set rep.rtitleflag
+		case "NODATE"
+			clear rep.dateflag
+		case "NOPAGE"
+			clear rep.pageflag
+		case "DISPLAY"
+			set rep.displayflag
+		case "BEFOREREPORT"
+			set rep.exitflag[rep.xbeforereport]
+			movevl var1 to rep.lblbeforereport
+		case "AFTERREPORT"
+			set rep.exitflag[rep.xafterreport]
+			movevl var1 to rep.lblafterreport
+		case "BEFOREPAGE"
+			set rep.exitflag[rep.xbeforepage]
+			movevl var1 to rep.lblbeforepage
+		case "AFTERPAGE"
+			set rep.exitflag[rep.xafterpage]
+			movevl var1 to rep.lblafterpage
+		case "BEFOREGET"
+			set rep.exitflag[rep.xbeforeget]
+			movevl var1 to rep.lblbeforeget
+		case "BEFORELINE"
+			set rep.exitflag[rep.xbeforeline]
+			movevl var1 to rep.lblbeforeline
+		case "AFTERLINE"
+			set rep.exitflag[rep.xafterline]
+			movevl var1 to rep.lblafterline
+		case "DEFAULTHA"
+			moveadr var1 to tempint
+			move tempint to rep.defaultha
+.
+		case "COL"
+			add 1 to rep.colcnt
+			moveadr var1 to rep.colvar[rep.colcnt]
+			type var1 into rep.index
+			if (rep.index = 1)
+				moveadr var1 into rep.charvar
+				movelength rep.charvar to rep.colwidth[rep.colcnt]
+			else
+				moveadr var1 into rep.numvar
+				movesize rep.numvar to rep.colwidth[rep.colcnt]
+				move rep.colwidth[rep.colcnt] to rep.worknum
+				clear rep.index
+				move rep.numvar to rep.line
+				scan "." in rep.line
+				if equal
+					bump rep.line by -1
+					if not eos
+						lenset rep.line
+						reset rep.line
+						move (rep.worknum - size rep.line - 1) to rep.index
+						move (rep.worknum - rep.index -1 ) to rep.worknum
+					else
+						move (rep.worknum - 1) to rep.index
+						clear rep.worknum
+					endif
+				endif
+				nformat rep.grouptot[rep.colcnt] to rep.worknum, rep.index
+				nformat rep.grandtot[rep.colcnt] to rep.worknum, rep.index
+				nformat rep.groupnval[rep.colcnt] to rep.worknum, rep.index
+			endif
+			moveadr rep.blank to rep.coldesc[rep.colcnt]
+		case "H"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			moveadr var1 to tempint
+			move tempint to rep.colh[rep.colcnt]
+		case "HA"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			moveadr var1 to tempint
+			move (-1 * tempint) to rep.colh[rep.colcnt]
+		case "COLWIDTH"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			moveadr var1 to tempint
+			move tempint to rep.colwidth[rep.colcnt]
+		case "DESC"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			moveadr var1 to rep.coldesc[rep.colcnt]
+			set rep.coldescflag
+		case "BEFOREGROUP"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			add 1 to rep.lblix
+			move rep.lblix to rep.bgroupexit[rep.colcnt]
+			movevl var1 to routine
+			call reportstore
+		case "AFTERGROUP"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			add 1 to rep.lblix
+			move rep.lblix to rep.agroupexit[rep.colcnt]
+			movevl var1 to routine
+			call reportstore
+		case "GROUPTOTAL"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			set rep.grouptotflag[rep.colcnt]
+		case "GRANDTOTAL"
+			if (not rep.colcnt)
+				goto reporterr1
+			endif
+			set rep.grandtotflag[rep.colcnt]
+		default
+			goto reporterr2
+		endswitch
+	repeat
+.
+	if (rep.pagewidth > 132)
+		goto reporterr3
+	endif
+	for rep.index from 1 to rep.colcnt
+		if (not rep.colh[rep.index])
+			move (rep.colh[rep.index - 1] + rep.colwidth[rep.index - 1] + rep.defaultha) to rep.colh[rep.index]
+		else if (rep.colh[rep.index] < 0)
+			move (rep.colh[rep.index - 1] + rep.colwidth[rep.index - 1] + (-1 * rep.colh[rep.index])) to rep.colh[rep.index]
+		else
+			move (rep.colh[rep.index] + rep.lftmargin) to rep.colh[rep.index]
+		endif
+	repeat
+	move (rep.colh[rep.colcnt] + rep.colwidth[rep.colcnt] + rep.rgtmargin) to rep.worknum
+	if (rep.worknum > rep.pagewidth)
+		move rep.worknum to rep.pagewidth
+	endif
+	if (rep.topmargin + rep.botmargin + 3 > rep.pagelength)
+		goto reporterr4
+	endif
+	if (rep.lftmargin + rep.rgtmargin > rep.pagewidth)
+		goto reporterr4
+	endif
+
+	if (rep.exitflag[rep.xbeforereport])
+		call rep.lblbeforereport
+		return if eos
+	endif
+	fastopen rep.table
+	if over
+		error text="UNABLE TO OPEN FILE"
+		return
+	endif
+
+	clear rep.linecnt, rep.groupcval, rep.groupnval, rep.overflag
+	set rep.firstrecflag, rep.firstlinflag
+	loop
+		if (rep.exitflag[rep.xbeforeget])
+			call rep.lblbeforeget
+			break if eos
+		endif
+		fastreadnext rep.table, rep.record
+		if over
+			set rep.overflag, rep.agroupnum
+		else
+			clear rep.bgroupnum, rep.agroupnum
+			for rep.index from rep.colcnt to 1 by -1
+				continue if (not rep.bgroupexit[rep.index] and not rep.agroupexit[rep.index])
+				type rep.colvar[rep.index] to rep.worknum
+				if (rep.worknum = 1)
+					moveadr rep.colvar[rep.index] to rep.charvar
+					if (rep.charvar <> rep.groupcval[rep.index])
+						move rep.charvar to rep.groupcval[rep.index]
+						if (rep.bgroupexit[rep.index])
+							move rep.index to rep.bgroupnum
+						else
+							move rep.index to rep.agroupnum
+						endif
+					endif
+				else
+					moveadr rep.colvar[rep.index] to rep.numvar
+					if (rep.numvar <> rep.groupnval[rep.index])
+						move rep.numvar to rep.groupnval[rep.index]
+						if (rep.bgroupexit[rep.index])
+							move rep.index to rep.bgroupnum
+						else
+							move rep.index to rep.agroupnum
+						endif
+					endif
+				endif
+			repeat
+		endif
+		if (rep.firstrecflag)
+			clear rep.firstrecflag
+		else if (rep.agroupnum or rep.bgroupnum)
+			fill " " into rep.line
+			for rep.index from 1 to rep.colcnt
+				continue if (not rep.grouptotflag[rep.index])
+				continue if ((not rep.agroupnum or rep.index < rep.agroupnum) and (not rep.bgroupnum or rep.index < rep.bgroupnum))
+				reset rep.line to rep.colh[rep.index]
+				move (rep.colh[rep.index] + rep.colwidth[rep.index] - 1) to rep.worknum
+				setlptr rep.line to rep.worknum
+				replace " -" in rep.line
+			repeat
+			if (formptr rep.line > 1)
+				reset rep.line
+				reportline rep.line
+				fill " " into rep.line
+				for rep.index from 1 to rep.colcnt
+					continue if (not rep.grouptotflag[rep.index])
+					continue if ((not rep.agroupnum or rep.index < rep.agroupnum) and (not rep.bgroupnum or rep.index < rep.bgroupnum))
+					reset rep.line to rep.colh[rep.index]
+					bump rep.line by -1
+					append rep.grouptot[rep.index] to rep.line
+					add rep.grouptot[rep.index] to rep.grandtot[rep.index]
+					clear rep.grouptot[rep.index]
+				repeat
+				reset rep.line
+				reportline rep.line
+			endif
+			if (rep.agroupnum)
+				for rep.index from rep.colcnt to rep.agroupnum by -1
+					if (rep.agroupexit[rep.index])
+						move rep.agroupexit[rep.index] to rep.lblix
+						call reportexit
+					endif
+				repeat
+			endif
+		endif
+		break if (rep.overflag)
+		for rep.index from 1 to rep.colcnt
+			if (rep.grouptotflag[rep.index] or rep.grandtotflag[rep.index])
+				moveadr rep.colvar[rep.index] to rep.numvar
+				add rep.numvar to rep.grouptot[rep.index]
+			endif
+		repeat
+		if (rep.bgroupnum)
+			for rep.index from rep.bgroupnum to rep.colcnt
+				if (rep.bgroupexit[rep.index])
+					move rep.bgroupexit[rep.index] to rep.lblix
+					call reportexit
+				endif
+			repeat
+		endif
+		fill " " into rep.line
+		for rep.index from 1 to rep.colcnt
+			reset rep.line to rep.colh[rep.index]
+			bump rep.line by -1
+			lenset rep.line
+			type rep.colvar[rep.index] to rep.worknum
+			if (rep.worknum = 1)
+				moveadr rep.colvar[rep.index] to rep.charvar
+				append rep.charvar to rep.line
+			else
+				moveadr rep.colvar[rep.index] to rep.numvar
+				append rep.numvar to rep.line
+			endif
+		repeat
+		reset rep.line
+		setlptr rep.line to rep.pagewidth
+		reportline rep.line
+	repeat
+	fill " " into rep.line
+	for rep.index from 1 to rep.colcnt
+		continue if (not rep.grandtotflag[rep.index])
+		reset rep.line to rep.colh[rep.index]
+		move (rep.colh[rep.index] + rep.colwidth[rep.index] - 1) to rep.worknum
+		setlptr rep.line to rep.worknum
+		replace " -" in rep.line
+	repeat
+	if (formptr rep.line > 1)
+		reset rep.line
+		reportline rep.line
+		fill " " into rep.line
+		for rep.index from 1 to rep.colcnt
+			continue if (not rep.grandtotflag[rep.index])
+			add rep.grouptot[rep.index] to rep.grandtot[rep.index]
+			reset rep.line to rep.colh[rep.index]
+			bump rep.line by -1
+			append rep.grandtot[rep.index] to rep.line
+		repeat
+		reset rep.line
+		setlptr rep.line to rep.pagewidth
+		reportline rep.line
+	endif
+
+	if (rep.exitflag[rep.xafterreport])
+		call rep.lblafterreport
+		return if eos
+	endif
+	return
+.
+. print the line in rep.line
+REPORTLINE routine rep.printline
+	if (not rep.linecnt)
+		move (rep.pagelength - rep.topmargin - rep.botmargin) to rep.linecnt
+		call reportpage
+	else
+		sub 1 from rep.linecnt
+	endif
+	if (rep.exitflag[rep.xbeforeline])
+		call rep.lblbeforeline
+		return if eos
+	endif
+	call reportout with rep.printline
+	if (rep.exitflag[rep.xafterline])
+		call rep.lblafterline
+	endif
+	return
+.
+. print top of page info
+reportpage lroutine
+	add 1 to rep.pagecnt
+	move " " to rep.workline
+	if (rep.firstlinflag)
+		clear rep.firstlinflag
+	else
+		if (rep.exitflag[rep.xafterpage])
+			call rep.lblafterpage
+			return if eos
+		endif
+		for rep.worknum from 1 to rep.botmargin
+			call reportout with rep.workline
+		repeat
+	endif
+	for rep.worknum from 1 to rep.topmargin
+		call reportout with rep.workline
+	repeat
+	if (rep.exitflag[rep.xbeforepage])
+		call rep.lblbeforepage
+		return if eos
+	endif
+	if (rep.dateflag or rep.pageflag)
+		fill " " into rep.workline
+		if (rep.dateflag)
+			clock date into rep.char6
+			reset rep.workline to rep.lftmargin
+			bump rep.workline by -1
+			append "99/99/99" to rep.workline
+			reset rep.workline to rep.lftmargin
+			bump rep.workline by -1
+			edit rep.char6 to rep.workline
+		endif
+		if (rep.pageflag)
+			move (rep.pagewidth - rep.rgtmargin - 9) to rep.worknum
+			reset rep.workline to rep.worknum
+			append "Page " to rep.workline
+			append rep.pagecnt to rep.workline
+		endif
+		reset rep.workline
+		setlptr rep.workline to rep.pagewidth
+		call reportout with rep.workline
+		sub 1 from rep.linecnt
+	endif
+	fill " " into rep.workline
+	clear rep.workline
+	if (rep.ltitleflag)
+		reset rep.workline to rep.lftmargin
+		bump rep.workline by -1
+		append rep.ltitle to rep.workline
+	endif
+	if (rep.ctitleflag)
+		move ((rep.pagewidth - rep.lftmargin - rep.rgtmargin - length rep.ctitle) / 2 + rep.lftmargin - 1) to rep.worknum
+		reset rep.workline to rep.worknum
+		append rep.ctitle to rep.workline
+	endif
+	if (rep.rtitleflag)
+		move (rep.pagewidth - rep.rgtmargin - length rep.rtitle + 1) to rep.worknum
+		reset rep.workline to rep.worknum
+		append rep.rtitle to rep.workline
+	endif
+	if (formptr rep.workline)
+		call reportout with rep.workline
+		move " " to rep.workline
+		call reportout with rep.workline
+		sub 2 from rep.linecnt
+	else if (rep.dateflag or rep.pageflag)
+		move " " to rep.workline
+		call reportout with rep.workline
+		sub 1 from rep.linecnt
+	endif
+	if (rep.coldescflag)
+		fill " " into rep.workline
+		for rep.worknum2 from 1 to rep.colcnt
+			move ((rep.colwidth[rep.worknum2] - length rep.coldesc[rep.worknum2]) / 2 + rep.colh[rep.worknum2] - 1) to rep.worknum
+			reset rep.workline to rep.worknum
+			append rep.coldesc[rep.worknum2] to rep.workline
+		repeat
+		reset rep.workline
+		setlptr rep.workline to rep.pagewidth
+		call reportout with rep.workline
+
+		fill " " into rep.workline
+		for rep.worknum2 from 1 to rep.colcnt
+			reset rep.workline to rep.colh[rep.worknum2]
+			move (rep.colh[rep.worknum2] + rep.colwidth[rep.worknum2] - 1) to rep.worknum
+			setlptr rep.workline to rep.worknum
+			replace " =" in rep.workline
+		repeat
+		reset rep.workline
+		setlptr rep.workline to rep.pagewidth
+		call reportout with rep.workline
+		sub 2 from rep.linecnt
+	endif
+	return
+.
+. print or display a line
+reportout lroutine rep.lineout
+	if (rep.displayflag)
+		display rep.lineout
+	else
+		print rep.lineout
+	endif
+	return
+.
+reportstore lroutine
+	storelabel routine from rep.lblix of rep.lbl01, rep.lbl02, rep.lbl03:
+		rep.lbl04, rep.lbl05, rep.lbl06, rep.lbl07, rep.lbl08:
+		rep.lbl09, rep.lbl10, rep.lbl11, rep.lbl12, rep.lbl13:
+		rep.lbl14, rep.lbl15, rep.lbl16, rep.lbl17, rep.lbl18:
+		rep.lbl19, rep.lbl20, rep.lbl21, rep.lbl22, rep.lbl23:
+		rep.lbl24, rep.lbl25, rep.lbl26, rep.lbl27, rep.lbl28:
+		rep.lbl29, rep.lbl30, rep.lbl31, rep.lbl32, rep.lbl33:
+		rep.lbl34, rep.lbl35, rep.lbl36, rep.lbl37, rep.lbl38:
+		rep.lbl39, rep.lbl40, rep.lbl41, rep.lbl42, rep.lbl43:
+		rep.lbl44, rep.lbl45, rep.lbl46, rep.lbl47, rep.lbl48:
+		rep.lbl49, rep.lbl50
+	return
+.
+reportexit lroutine
+	perform rep.lblix of rep.lbl01, rep.lbl02, rep.lbl03:
+		rep.lbl04, rep.lbl05, rep.lbl06, rep.lbl07, rep.lbl08:
+		rep.lbl09, rep.lbl10, rep.lbl11, rep.lbl12, rep.lbl13:
+		rep.lbl14, rep.lbl15, rep.lbl16, rep.lbl17, rep.lbl18:
+		rep.lbl19, rep.lbl20, rep.lbl21, rep.lbl22, rep.lbl23:
+		rep.lbl24, rep.lbl25, rep.lbl26, rep.lbl27, rep.lbl28:
+		rep.lbl29, rep.lbl30, rep.lbl31, rep.lbl32, rep.lbl33:
+		rep.lbl34, rep.lbl35, rep.lbl36, rep.lbl37, rep.lbl38:
+		rep.lbl39, rep.lbl40, rep.lbl41, rep.lbl42, rep.lbl43:
+		rep.lbl44, rep.lbl45, rep.lbl46, rep.lbl47, rep.lbl48:
+		rep.lbl49, rep.lbl50
+	return
+.
+.
+. errors
+.
+reporterr1
+	move "REPORT 1" to errormsg
+	goto errorexit
+reporterr2
+	move "REPORT 2" to errormsg
+	goto errorexit
+reporterr3
+	move "REPORT 3" to errormsg
+	goto errorexit
+reporterr4
+	move "REPORT 4" to errormsg
+errorexit
+	display *resetsw, *hu, "*** ERROR - ", *ll, errormsg;
+	stop

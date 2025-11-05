@@ -1,0 +1,163 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;     PROGRAM: POHeader.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    05-02-2018 At 13:49                                            ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;         00111   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF         $POHeaderVAR
+$POHeaderVAR                     EQUATE         1
+;
+                     include         Vendor.fd             //Required for LIKE fields
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+POHeader                         RECORD
+Entity                           Dim                8                   1 - 8        //8
+Reference                        Form               9                   9 - 17       //9
+OrderNumber                      Form               9                  18 - 26       //495 - 504           //HR 3/28/2005
+TicketNumber                     Form               9                  27 - 35       //488 - 494
+SeqMajor                         Form               9                  36 - 44       //9
+BillVendor                       Like             Vendor.AccountNumber    //20 - 25                                 
+ShipToVendor                     Like             Vendor.AccountNumber    //30 - 35                                 
+CustomerPO                       Dim                20                 57 - 76       //40 - 59
+EntryDate                        Dim                8                  77 - 84       //60 - 67         CCYYMMDD format
+TransDate                        Dim                8                  85 - 92       //68 - 75         CCYYMMDD format
+BillDate                         Dim                8                  93 - 100      //76 - 83         CCYYMMDD format
+ShipDate                         Dim                8                 101 - 108      //84 - 91         CCYYMMDD format
+OrderDate                        Dim                8                 109 - 116      //374 - 381           //for calculating Tu
+InvCredit                        Dim                1                 117 - 117      //92 - 92
+Freight                          Form               6.2               118 - 126      //93 - 101
+InvoiceAmt                       Form               7.2               127 - 136      //102 - 111
+TaxableAmt                       Form               7.2               137 - 146      //112 - 121
+SalesAmt                         Form               7.2               147 - 156      //2
+FuelAmt                          Form               7.2               157 - 166      //2
+OtherAmt                         Form               7.2               167 - 176      //2
+ShipToName                       Dim                30                177 - 206      //132 - 161
+ShipToAddress1                   Dim                30                207 - 236      //162 - 191
+ShipToAddress2                   Dim                30                237 - 266      //192 - 221
+ShipToAddress3                   Dim                30                267 - 296
+ShipToCity                       Dim                30                297 - 326      //252 - 281
+ShipToSt                         Dim                2                 327 - 328      //282 - 283
+ShipToZip                        Dim                10                329 - 338      //284 - 293
+ShipToCountry                    Dim                3                 339 - 341      //294 - 296
+BillToName                       Dim                30                342 - 371      //132 - 161
+BillToAddress1                   Dim                30                372 - 401      //162 - 191
+BillToAddress2                   Dim                30                402 - 431      //192 - 221
+BillToAddress3                   Dim                30                432 - 461      //222 - 251
+BillToCity                       Dim                30                462 - 491      //252 - 281
+BillToSt                         Dim                2                 492 - 493      //282 - 283
+BillToZip                        Dim                10                494 - 503      //284 - 293
+BillToCountry                    Dim                3                 504 - 506      //294 - 296
+SalesRep                         Dim                4                 507 - 510      //299 - 300
+DiscountAmt                      Form               7.2               511 - 520      //222 - 251
+CommCode                         Dim                4                 521 - 524      //301 - 304
+Year                             Dim                4                 525 - 528      //341 - 344
+Period                           Dim                2                 529 - 530      //345 - 346
+SpecialIns                       Dim                30                531 - 560      //505 - 534           //HR 3/28/2005
+ShipFromLocation                 Dim                8                 561 - 568      //8
+TaxCode                          Dim                6                 569 - 574      //347 - 352
+InternalMemo                     Dim                80                575 - 654      //0
+Printed                          Dim                1                 655 - 655      //477 - 477
+TermCode                         Dim                8                 656 - 663      //462 - 469
+CommissionPct                    Form               3.2               664 - 669      //535 - 540           //HR 3/28/2005
+Source                           Dim                6                 670 - 675      //359 - 364
+Lines                            Form               3                 676 - 678
+ShipVia                          Dim                20                679 - 698
+Completed                        Form               1                 699 - 699
+Weight                           Form               3.2               700 - 705
+Cartons                          Form               3                 706 - 708
+Buyer                            Dim                20                709 - 728
+                                 RECORDEND
+;
+;======================================================================================;
+TempPOHeader                        record          like   POHeader                        
+OrigPOHeader                        record          like   POHeader                        
+SavePOHeader                        record          like   POHeader                        
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+POHeaderTXTNM                          INIT         "POHeader"
+POHeaderISI1NM                         INIT               "POHeader.ISI"
+POHeaderISI2NM                         INIT               "POHeader2.ISI"
+POHeaderISI3NM                         INIT               "POHeader3.ISI"
+POHeaderISI4NM                         INIT               "POHeader4.ISI"
+POHeaderISI5NM                         INIT               "POHeader5.ISI"
+POHeaderI1DEF                           init            "-n,z,y,1-8,9-17"
+POHeaderI2DEF                           init            "-n,w,z,y,1-8,85-92,9-17"
+POHeaderI3DEF                           init            "-n,w,z,y,1-8,655-655,9-17"
+POHeaderI4DEF                           init            "-n,z,y,1-8,45-50,85-92,9-17"
+POHeaderI5DEF                           init            "-n,z,y,1-8,57-76,9-17"
+;
+; By Entity, Reference
+; 1-8, 9-17
+;
+POHeaderKY                       DIM                17
+;
+; By Entity, TransDate, Reference
+; 1-8, 85-92, 9-17
+;
+POHeaderKY2                      DIM                25
+;
+; By Entity, Printed, Reference
+; 1-8, 655-655, 9-17
+;
+POHeaderKY3                      DIM                18
+;
+; By Entity, BillVendor, TransDate, Reference
+; 1-8, 45-50, 85-92, 9-17
+;
+POHeaderKY4                      DIM                31
+;
+; By Entity, CustomerPO, Reference
+; 1-8, 57-76, 9-17
+;
+POHeaderKY5                      DIM                37
+;=============================================================================;
+;
+POHeaderFLST                         FILELIST
+POHeaderFL                          IFILE              name="POHeader.ISI",FIX=800,NODUP,NOPATH
+POHeaderFL2                         IFILE              name="POHeader2.ISI",FIX=800,NODUP,WEOF,NOPATH
+POHeaderFL3                         IFILE              name="POHeader3.ISI",FIX=800,NODUP,WEOF,NOPATH
+POHeaderFL4                         IFILE              name="POHeader4.ISI",FIX=800,NODUP,NOPATH
+POHeaderFL5                         IFILE              name="POHeader5.ISI",FIX=800,NODUP,NOPATH
+                                    FILELISTEND
+ 
+POHeaderFileSize       CONST      "800"
+ 
+POHeaderProg           INIT       "POHeader Program"
+POHeaderDesc           INIT       "POHeader Maintenance"
+POHeaderTITLE          INIT       "POHeader Record"
+POHeaderHelp           INIT       "POHeader.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $POHeaderVARIO
+            INCLUDE POHeader.IO 
+          %ENDIF          //End of IO Include File

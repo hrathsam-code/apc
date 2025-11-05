@@ -1,0 +1,45 @@
+
+
+
+PAGE    1      msptupdt                                                                                       02-11-19 11:35:51
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP msptupdt -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    8.    INCLUDE  B: common.pls
+   17.    INCLUDE  C: mspartsf.txt
+   19.    INCLUDE  D: mspurchf.txt
+   21.    INCLUDE  E: mssalesf.txt
+   23.    INCLUDE  F: datetblz.txt
+   64.    INCLUDE  G: apmastfd.txt
+   66.    INCLUDE  H: custmast.txt
+   73.    INCLUDE  I: callerr1.inc
+   12. I                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   75.    INCLUDE  J: callerr2.inc
+   89.    INCLUDE  K: mspartio.txt
+   91.    INCLUDE  L: mspoio.txt
+   93.    INCLUDE  M: custio.txt
+   96.    INCLUDE  N: mssaleio.txt
+   98.    INCLUDE  O: stdioerr.txt
+  100.    INCLUDE  P: stdfmter.txt
+  102.    INCLUDE  Q: stdparer.txt
+  104.    INCLUDE  R: stdrange.txt
+  111.                                         TRAP      STDIOERR IF IO
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  229.    INCLUDE  S: msptsio.txt
+  486.    INCLUDE  T: apmastrd.txt
+  575.                                         GOTO      DATAIN
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  591.    INCLUDE  U: msporecs.txt
+
+   Output: c:\apc\plc\msptupdt.plc                                                                                                                                                                                                                                   
+      1515 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:51 11:35:51
+  000035FC DATA;  00001672  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

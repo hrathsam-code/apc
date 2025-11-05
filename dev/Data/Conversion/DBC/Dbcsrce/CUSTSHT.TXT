@@ -1,0 +1,51 @@
+         INCLUDE   COMMON
+. 
+COUNTER  FORM      4
+LIMIT    FORM      4
+START    FORM      4
+INCRMENT FORM      3
+PSTART   DIM       4
+LINES    FORM      "00"
+PAGES    FORM      "00"
+. 
+         DISPLAY   *ES,"PRINT CUSTOMER INPUT SHEETS"
+. 
+START    KEYIN     *P01:04,"ENTER BEGINNING CUSTOMER NUMBER ",START
+. 
+INCR     KEYIN     *P01:05,"INCREMENT BY ",INCRMENT
+. 
+LIMIT    KEYIN     *P01:06,"HOW MANY CUSTOMERS WILL BE ENTERED ? ":
+                   LIMIT
+. 
+         MOVE      START TO COUNTER
+         SUB       INCRMENT FROM COUNTER
+         MOVE      COUNTER  TO START
+         MOVE      "0" TO COUNTER
+         CALL      HEADER
+. 
+LOOP     ADD       INCRMENT TO START
+         ADD       "1" TO COUNTER
+         COMPARE   COUNTER TO LIMIT
+         GOTO      EOJ IF LESS
+         MOVE      START    TO PSTART
+         REP       " 0" IN PSTART
+         COMPARE   "55" TO LINES
+         CALL      HEADER IF NOT LESS
+         PRINT     *L
+         PRINT     *1,PSTART:
+                   *8,"NAME (30): ______________________________":
+                   *70,"ADDRESS (25): _________________________"              
+         PRINT     *1,"CITY (20): ____________________     ":
+                      "STATE (2): __   ZIP (5): _____   CREDIT LIMIT ":
+                      "(6): ______"
+         ADD       "4" TO LINES
+         GOTO      LOOP
+. 
+EOJ      DISPLAY   *P01:24,"END OF JOB"
+         STOP
+. 
+HEADER   ADD       "1" TO PAGES
+         PRINT     *F,*10,"CUSTOMER FILE INPUT DATA SHEETS ":
+                          "          PAGE ",PAGES
+         MOVE      "4" TO LINES
+         RETURN

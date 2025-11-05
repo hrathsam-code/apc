@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>4D69C28BC8B614F5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+<?xml version="1.0"?>
+
+<TrackRequest xml:lang="en-US">
+  <ShipperNumber>156620</ShipperNumber>
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Your Test Case Summary
+Description</CustomerContext>
+       <XpciVersion>1.0</XpciVersion>
+    </TransactionReference>
+    <RequestAction>Track</RequestAction>
+    <RequestOption>activity</RequestOption>
+  </Request>
+  <ReferenceNumber>
+    <Code>01</Code>
+    <Value>1460312</Value>
+  </ReferenceNumber>
+</TrackRequest>

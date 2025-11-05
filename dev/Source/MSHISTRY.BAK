@@ -1,0 +1,247 @@
+. MSHISTRY - INVENTORY PURCHASE/SALES HISTORY
+.
+	 INCLUDE   MSCBRAG.TXT
+.
+	 INCLUDE   COMMON.TXT
+.
+INDEX	 FORM	   2		       USER SELECTION VARIABLE
+TIME	 INIT	   "hh:mm:ss"	       hours:minutes:seconds
+INDEXX	 DIM	   2
+. 
+. 
+DPORT	 DIM	   8
+ROLLNAME INIT	   "C:\DBC\ROLLFILL.SYS"
+PORTNUMB DIM	   2
+REPLY	 DIM	   1
+. 
+LOGTYPE	 DIM	   15
+LOGINFO	 DIM	   15
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY	CLEARANCE OF AT	LEAST 1
+.
+*................................................................
+. DISPLAY THE MENU
+.
+START	 DISPLAY   *ES:
+		   *HON:
+		   "**":
+		   "INVENTORY PURCHASE/SALES HISTORY":
+		   *HOFF:
+		   *P51:1,"Today is ",TODAY:
+		   *P01:03,"( 1) ":
+		   "CREATE PARTS/SALES/PURCHASE	FILES":
+		   *P01:04,"( 2) ":
+		   "MODIFY PART	FILE":
+		   *P01:05,"( 3) ":
+		   "ENTER PURCHASE/SALES HISTORY":
+		   *P01:06,"( 4) ":
+		   "MODIFY PURCHASE/SALES HISTORY FILE":
+		   *P01:07,"( 5) ":
+		   "INDEX CURRENT INVENTORY  FILES":
+		   *HON:
+		   *P01:08,"( 6) ":
+		   "DISPLAY 87-CURRENT SALES/PURCHASES":
+		   *HOFF:
+		   *P01:09,"( 7) ":
+		   "DISPLAY 87-CURRENT SALES HISTORY":
+		   *P01:10,"( 8) ":
+		   "DISPLAY 87-CURRENT PURCHASE	HISTORY":
+		   *P01:11,"( 9) ":
+		   "END	OF DAY PROCEDURE FOR HISTORY":
+		   *P01:12,"(10) ":
+		   "PRINT PARTS	FILE MASTER LISTING":
+		   *P01:13,"(11) ":
+		   "SELECT NEW PROCESSING SYSTEM":
+		   *EL
+.
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN	   *P1:20,*EL,"Selection by number":
+		   *P41:20,"Enter (99) to leave	this menu.":
+		   *P25:20,"__",*P25:20,*JR,*DE,INDEXX
+	 DISPLAY   *P25:20,INDEXX
+	 MOVE	   INDEXX TO INDEX
+.
+	 COMPARE   "1" TO INDEX
+	 GOTO	   GETINDEX IF LESS
+	 COMPARE   "99"	TO INDEX
+	 STOP	   IF EQUAL
+	 COMPARE   "12"	TO INDEX
+	 GOTO	   GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE	ROUTINE	INDICATED BY THE INDEX
+.
+	 TRAP	   BADCHAIN IF CFAIL
+	 CLOCK	   TIME	TO TIME
+	 BRANCH	   INDEX OF MSPARTDE:  CREATE PARTS/SALES/PURCHAS
+			    MSPTUPDT:  MODIFY PART FILE
+			    MSHSTADD:  ADD MORE	PO/SALES HISTORY
+			    MSSLUPDT:  MODIFY SALES    HISTORY FI
+			    MSSLINDX:  INDEX ALL INVENTORY HISTOR
+			    MSSHOW:    DISPLAY 87 TO CURRENT SALES/POS
+			    MSALHST:   DISPLAY 87 TO CURRENT SALES
+			    MPURHST:   DISPLAY 87 TO CURRENT PURCHASES
+			    MSEOD:
+			    MSPARTLS:  PRINT PARTS FILE	MASTER LI
+			    APPMENU   SELECT NEW PROCESSING SYSTE
+.
+	 GOTO	   GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN	INSTRUCTIONS
+*................................................................
+. CREATE PARTS/SALES/PURCHASE FILES
+.
+MSPARTDE MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPARTDE" TO LOGINFO
+	 CHAIN	   "MSPARTDE"
+	 GOTO	   GETINDEX
+*................................................................
+. MODIFY PART FILE
+.
+MSPTUPDT MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPTUPDT" TO LOGINFO
+	 CHAIN	   "MSPTUPDT"
+	 GOTO	   GETINDEX
+*................................................................
+MSHSTADD MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSHSTADD"	TO  LOGINFO
+	 CHAIN	   "MSHSTADD"  
+	 GOTO	   GETINDEX
+. 
+. MODIFY PURCHASE HISTORY FILE
+.
+MSPOUPDT MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPOUPDT" TO LOGINFO
+	 CHAIN	   "MSPOUPDT"
+	 GOTO	   GETINDEX
+*................................................................
+. MODIFY SALES	  HISTORY FILE
+.
+MSSLUPDT MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSLUPDT" TO LOGINFO
+	 CHAIN	   "MSSLUPDT"
+	 GOTO	   GETINDEX
+*................................................................
+. INDEX	ALL INVENTORY HISTORY FILES
+.
+MSSLINDX MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSLINDX" TO LOGINFO
+	 RESET	   PORTN TO 2
+	 MOVE	   PORTN TO DPORT
+ 	 RESET	   PORTN TO 1
+....         MATCH     "TERM0" TO DPORT
+....         GOTO      CANT IF NOT EQUAL
+.
+	 ROLLOUT   "MSINDEXS.BAT"
+	 GOTO	   START
+*................................................................
+. DISPLAY INVENTORY HISTORY
+.
+MSSHOW	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSHOW  " TO LOGINFO
+	 CHAIN	   "MSSHOW"
+	 GOTO	   GETINDEX
+*................................................................
+. DISPLAY SALES	HISTORY	ONLY
+.
+MSALHST	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSALHST" TO	LOGINFO
+	 CHAIN	   "MSALHST" 
+	 GOTO	   GETINDEX
+*................................................................
+. DISPLAY PURCHASE HISTORY ONLY
+.
+MPURHST	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPURHST" TO LOGINFO
+	 CHAIN	   "MSPURHST"
+	 GOTO	   GETINDEX
+*................................................................
+. END OF DAY PROCEDURE FOR HISTORY
+.
+MSEOD	 MOVE	   "PROGRAM" TO	LOGTYPE
+.
+	 BEEP
+	 KEYIN	   *P1:23,*EL,*HON,"DO YOU REALLY WANT TO RUN END-OF-DAY? ":
+		   "(Y/N) ",*HOFF,REPLY
+	 DISPLAY   *P1:23,*EL
+	 CMATCH	   "Y",REPLY
+	 GOTO	   GETINDEX IF NOT EQUAL
+.
+	 RESET	   PORTN TO 2
+	 MOVE	   PORTN TO DPORT
+	 RESET	   PORTN TO 1
+	 MATCH	   "TERM0" TO DPORT
+	 GOTO	   CANT	IF NOT EQUAL
+	 ROLLOUT   "CHAIN MSEODCHN.CHN"
+	 GOTO	   GETINDEX
+...................................................................
+CANT	 BEEP
+	 DISPLAY   *P1:23,*EL,"ONLY THE	CONSOLE	MAY CALL END-OF-DAY ":
+			      "OR INDEX":
+		   *W4,*P1:23,*EL
+	 GOTO	   GETINDEX
+.
+*................................................................
+. PRINT	PARTS FILE MASTER LISTING
+.
+MSPARTLS MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPARTLS" TO LOGINFO
+	 CHAIN	   "MSPARTLS"
+	 GOTO	   GETINDEX
+*................................................................
+. DISPLAY 84/85	INVENTORY HISTORY
+.
+MSSHOW84 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSHOW84" TO LOGINFO
+	 CHAIN	   "MSSHOW84"
+	 GOTO	   GETINDEX
+*................................................................
+MSSHOW86 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSHOW86" TO LOGINFO
+	 CHAIN	   "MSSHOW86"
+	 GOTO	   GETINDEX
+*...............................................................
+. DISPLAY 84/85	SALES HISTORY
+.
+MSSAL84	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSSALH84" TO LOGINFO
+	 CHAIN	   "MSSALH84"
+	 GOTO	   GETINDEX
+*................................................................
+MSSAL86	 CHAIN	   "MSSALH86"
+	 GOTO	   GETINDEX
+*................................................................
+. DISPLAY 84/85	PURCHASING HISTORY
+.
+MSPUR84	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "MSPURH84" TO LOGINFO
+	 CHAIN	   "MSPURH84"
+	 GOTO	   GETINDEX
+*.................................................................
+MSPUR86	 CHAIN	   "MSPURH86"
+	 GOTO	   GETINDEX
+*.................................................................
+MSALLPR	 CHAIN	   "MSALLPR"
+	 GOTO	   GETINDEX
+..................................................................
+MSALLSL	 CHAIN	   "MSALLSL"
+	 GOTO	   GETINDEX
+..................................................................
+MSALLHS	 CHAIN	   "MSALLHS"
+	 GOTO	   GETINDEX
+..................................................................
+*.................................................................
+. SELECT NEW PROCESSING	SYSTEM
+.
+APPMENU	 MOVE	   "PROGRAM" TO	LOGTYPE
+	 MOVE	   "APPMENU " TO LOGINFO
+	 CHAIN	   "APPMENU1"
+	 GOTO	   GETINDEX

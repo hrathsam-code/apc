@@ -1,0 +1,26 @@
+ 1Customer Functions          
+ 2Sales Order Processing      
+ 3Accounts Receivable         
+ 4Accounts Payable            
+ 5Raw Material Purchasing     
+ 6Standards Inventory         
+ 7Corporate EDP Controls      
+ 8User Access Control         
+ 9Outside Rep Functions       
+10Shipping Functions          
+11Management Functions        
+12Supervisor Functions        
+13Merchandise Purchasing      
+14Machine Shop Functions      
+15Warehouse Functions         
+16Inside Rep Functions        
+17Inactive Accounts Processing
+18Special Stock Inventory     
+19Mat'l Certification System  
+20Business Source Codes       
+21Shipments Processing        
+22Die Database Functions      
+23Sales Reporting Functions   
+24Standard Parts Menu         
+25End-of-Day                  
+26INVENTORY HISTORY           

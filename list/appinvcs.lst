@@ -1,0 +1,51 @@
+
+
+
+PAGE    1      appinvcs                                                                                       02-11-19 11:35:33
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP appinvcs -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    8.    INCLUDE  A: common.txt
+   58.    INCLUDE  B: part.txt
+   62.    INCLUDE  C: contfile.txt
+  104.    INCLUDE  D: custmast.txt
+  114.    INCLUDE  E: rcvbles.txt
+  229.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+  233.    INCLUDE  G: callerr2.inc
+  415.                                         KEYIN     *ES,*P01:12,"ARE YOU ENTERING OLD INVOICES? ":
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  628.                                         KEYIN     *P20:10,INVBLNO
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  766.                                         CMATCH    "S",INVTYPE
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+ 1113.    INCLUDE  H: rcvblsio.txt
+ 1125.                                         KEYIN     *P54:ROW,"__",*P54:ROW,PRODCODE
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+ 1505.    INCLUDE  I: appupdsq.txt
+ 1952.    INCLUDE  J: contrlio.txt
+   57. J                                       RETURN 
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+ 1955.    INCLUDE  K: custio.txt
+ 1957.    INCLUDE  L: stdioerr.txt
+ 1959.    INCLUDE  M: stdfmter.txt
+ 1961.    INCLUDE  N: stdrange.txt
+ 1963.    INCLUDE  O: stdparer.txt
+ 1965.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\appinvcs.plc                                                                                                                                                                                                                                   
+      2734 LINES;      0 ERRORS;      7 WARNINGS; Start/Stop: 11:35:33 11:35:33
+  0000666C DATA;  00002502  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,75 @@
++........................................................................
+.          D A T E T B L Z     MODULE       9/7/81 R. BACHARACH
+.........................................................................
+. 
+. THIS WORK AREA IS UTILIZED BY THE   D A T E C A L C  ROUTINE
+. 
+.........................................................................
+. 
+. 
+. THE FOLLOWING TABLE REPRESENTS ACCUMULATED CALENDAR DAYS
+.   P R I O R   TO THE MONTH SHOWN ON THE LINE ITEM LABELS
+. 
+. (ie.  IF THIS IS DECEMBER, THEN TO DATE 334 DAYS HAVE GONE BY IN
+.       PRIOR MONTHS)
+. 
+JAN      FORM      "000"
+FEB      FORM      "031"
+MAR      FORM      "059"
+APR      FORM      "090"
+MAY      FORM      "120"
+JUN      FORM      "151"
+JUL      FORM      "181"
+AUG      FORM      "212"
+SEP      FORM      "243"
+OCT      FORM      "273"
+NOV      FORM      "304"
+DEC      FORM      "334"
+XXDEC    FORM      "365"
+. 
+YRFORM   FORM      2
+MONFORM  FORM      2
+DAYFORM  FORM      2
+WKFORM5  FORM      5
+MONWORK  FORM      3
+. 
+DIM3     DIM       3
+COLUMNSW DIM       1
+. 
+WKDATE6  DIM       6
+WKDATE   DIM       8
+. 
+CCMON    DIM       2
+CCDAY    DIM       2
+CCYR     DIM       2
+. 
+CCDATE   DIM       6
+CURDATE  DIM       6
+. 
+DAYSOLD  FORM      "0000"
+CINDX1   FORM      "000"
+CINDX2   FORM      "000"
+. 
+CURDAYS  FORM      "00000"
+CMPDAYS  FORM      "00000"
+DIFDAYS  FORM      "00000"
+. 
+DTTODAY  FORM      5
+DTCURNT  FORM      5
+DT130PD  FORM      5
+DT3160PD FORM      5
+DT6190PD FORM      5
+DTOV90PD FORM      5
+. 
+WKAMT    FORM      7.2
+AMTCURNT FORM      7.2
+AMT130P  FORM      7.2
+AMT3160P FORM      7.2
+AMT6190P FORM      7.2
+AMTOV90P FORM      7.2
+. 
+EOMSW    INIT      "N"
+SVCURRYR FORM      2
+. 
+. END OF   D A T E T B L Z  .......
+....................................................................

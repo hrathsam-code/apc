@@ -1,0 +1,212 @@
+.  ACCOUNT MASTER LISTING  -  ACCOUNT NUMBER ORDER
+. 
+. WRITTEN BY R BACHARACH, MICRO	SYSTEMS	CONSULTANTS
+.			  41 TEELE DRIVE
+.			  CORAM, NY 11727
+.			  (516)	698-5577
+. 
+	 INCLUDE   COMMON
+. 
+NAME	 INIT	   "ACCOUNTS.ISI"
+CUSTFILE IFILE	   KEYL=4,UNCOMPRESSED
+REPLY	 DIM	   1
+SWMR	 FORM	   "0"	       '1'=MATCHING RECORD
+SW1P	 FORM	   "1"	       '1'=FIRST CYCLE
+LINECT	 FORM	   3	       LINE COUNTER
+PAGE	 FORM	   3	       PAGE NUMBER
+RID01	 FORM	   "0"	       RECORD TYPE 01
+LR	 FORM	   "0"	       '1'=LAST	RECORD PENDING
+LRTOT	 FORM	   5	      GRAND TOTAL
+INREC1	 DIM	   127	   INPUT WORK AREA
+*............................................................
+	 INCLUDE   CUSTMAST
+.
+PCUSTZIP DIM	   5
+.
+PMM	 DIM	   2
+PDD	 DIM	   2
+PYY	 DIM	   2
+SMM	 DIM	   2
+SDD	 DIM	   2
+SYY	 DIM	   2
+.
+NWFLD1	 DIM	    1	      5	-  5   ACCOUNT STATUS CODE	  1.0
+COMP	 DIM	   3	      INPUT COMPANY TO BE PRINTED
+. 
+REPTITL  INIT      "  ** APC COMPONENTS INC   **  " 
+COMPVAR	 DIM	   27
+. 
+TIME	 INIT	   "hh/mm/s"
+. 
+ 
+         INCLUDE   CALLERR1.INC
+.
+         MOVE      "CUSTOMER FILE LISTING"  TO  TITLTEXT
+.
+         INCLUDE   CALLERR2.INC
+
++............................................................
+. MAINLINE FOLLOWS
+.
+	 CLOCK	   TIME	TO TIME
+. 
+. FILE OPENING SEQUENCE
+	 TRAP	   NOFILE    IF	IO
+	 OPEN	   CUSTFILE,NAME
+	 MOVE	   "APP"  TO  COMP
+MOVREP	 MOVE	   REPTITL TO COMPVAR
+CONT1	 TRAPCLR   PARITY	 (NOP)
+	 CALL	   HEADER
+.
+	 MOVE	   " " TO REPLY
+	 GOTO	   READ
+	 TABPAGE   *****
+. 
+NOFILE	 BEEP
+	 DISPLAY   *ES,"ACCOUNT	FILE IS	NOT ON-LINE - JOB ABORTING",*W,*W
+	 BEEP
+	 CHAIN	   "ANSWER"
+*............................................................
+. READ A RECORD	FROM THE FILE JUST PROC'D
+. AT START: READ RECORD	FROM EACH FILE
+.
+READ	  INCLUDE   CUSTRDKS
+*............................................................
+. TEST FOR END OF FILE
+. IF END OF FILE: TURN ON LR AND L1-L9
+.
+	 GOTO	   SELMATCH IF NOT OVER
+EOJR	 CALL	   SETLR
+	 GOTO	   TOTCALC
+*............................................................
+. TURN ON LEVEL-INDICATOR SWITCHES
+.
+SETLR	 MOVE	   "1" TO LR
+	 RETURN
+*............................................................
+. SEE IF MATCHING FIELDS SPECIFIED
+. IF SO: SELECT	RECORD WITH HIGH PRIORITY
+.
+SELMATCH GOTO	   RIDON  (NOP)
+*............................................................
+. TURN ON RECORD-IDENTIFYING INDICATOR
+.
+RIDON	 MOVE	   "1" TO RID01
+*............................................................
+. SEE IF FIRST CYCLE
+. IF SO: BYPASS	TOTAL CALCS / OUPTUT
+.
+TESTFC	 BRANCH	   SW1P	OF TESTLR
++............................................................
+. TOTAL	CALCULATIONS
+.
+TOTCALC	 TRAPCLR   PARITY  (NOP)
+TOTCLX	 TRAPCLR   PARITY  (NOP)
+	 CALL	   TOTOUT
+*............................................................
+. SEE IF LR INDICATOR IS ON
+. IF SO: END JOB
+.
+TESTLR	 BRANCH	   LR OF EOJ
+*............................................................
+. SEE IF OVERFLOW IS ON
+. IF SO: PERFORM OVERFLOW OUTPUT
+.
+TESTOF	 GOTO	   MOVEDATA  (NOP)
+*............................................................
+. MOVE DATA FROM INPUT AREA TO FIELDS
+.
+MOVEDATA TRAPCLR   PARITY  (NOP)
+	 MOVE	   LSTSALDT TO SMM
+	 RESET	   LSTSALDT TO 3
+	 MOVE	   LSTSALDT TO SDD
+	 RESET	   LSTSALDT TO 5
+	 MOVE	   LSTSALDT TO SYY
+	 RESET	   LSTSALDT TO 1
+	 REP	   " 0"	IN SMM
+.
+	 MOVE	   LSTPAYDT TO PMM
+	 RESET	   LSTPAYDT TO 3
+	 MOVE	   LSTPAYDT TO PDD
+	 RESET	   LSTPAYDT TO 5
+	 MOVE	   LSTPAYDT TO PYY
+	 RESET	   LSTPAYDT TO 1
+	 REP	   " 0"	IN PMM
+.
+.
+SEEMR	 MOVE	   "1" TO SWMR
+*............................................................
+. DETAIL CALCULATIONS
+.
+DETCALC	 ADD	   "1" TO LRTOT
+*............................................................
+. HEADING AND DETAIL OUTPUT
+.
+DETOUT	 COMPARE   "50"	TO LINECT
+	 CALL	   HEADER IF NOT LESS
+.
+	 MOVE	   CUSTZIP TO PCUSTZIP
+	 REP	   " 0"	IN PCUSTZIP
+*............................................................
+	 PRINT	     *1,CUSTKEY:   ACCOUNT NUMBER	      4.0
+		     *8,CUSTNAME:
+		    *45,CUSTADDR:
+		    *73,CUSTCITY:
+	       	    *98,CUSTSTAT:
+		    *104,PCUSTZIP
+.........		   *114,SMM,"/",SDD,"/",SYY:
+.........		   *124,PMM,"/",PDD,"/",PYY
+.
+	 ADD	   "1" TO LINECT
+*............................................................
+. TURN OFF R.I.D. & ALL	L-INDICATORS
+.
+TURNOFF	 MOVE	   "0" TO SW1P
+	 MOVE	   "0" TO RID01
+*............................................................
+. GO READ ANOTHER RECORD
+.
+	 GOTO	   READ
+. 
+*............................................................
+. PAGE HEADING ROUTINE
+.
+HEADER	 ADD	   "1" TO PAGE
+	 PRINT	   *F,*C,*L,*L:
+		   *38,"ACCOUNT	FILE MASTER LISTING":
+		   *100,"PAGE ",PAGE:
+		   *117,"AS OF ",TODAY
+	 PRINT	   *37,COMPVAR,*C,*L,*L
+	 MOVE	   "0" TO LINECT
+	 PRINT	   *1,"ACCT.":
+		   *10,"NAME":
+		   *45,"ADDRESS":
+		   *73,"CITY":
+		   *98,"ST":
+		   *105,"ZIP"
+.......			 *116,"LAST":
+.......			 *126,"LAST"
+	 PRINT	   *2,"NO.",*105,"CODE":
+		   *C,*L
+.......			 *116,"SALE":
+.......			 *124,"PAYMENT":
+.
+	 RETURN
+*............................................................
+. TOTAL	OUTPUT
+.
+TOTOUT	 TRAPCLR   PARITY  (NOP)
+	 COMPARE   "1" TO LR
+	 RETURN	   IF NOT EQUAL
+	 PRINT	  *C,*L,*L,*20,"TOTAL CUSTOMERS	ON FILE	 ",LRTOT,*C,*L
+	 ADD	   "2" TO LINECT
+	 RETURN
+*............................................................
+. END OF JOB
+.
+EOJ	 PRINT	   *F
+	 CLOSE	   CUSTFILE
+	 RELEASE
+	 CHAIN	   FROMPGM
+. 
+. 

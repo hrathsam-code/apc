@@ -1,0 +1,80 @@
+.................................................................
+. MSEOD/TXT - PROGRAM PROCESSES END-OF-DAY FOR DATA ENTRY FILES
+.................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   MSPARTSF/TEXT
+. 
+PAGES    FORM      3
+. 
+NPARTSFL IFILE     KEYL=20,UNCOMPRESSED
+NPARTSNM INIT      "NEWPARTS/ISAM"
+. 
+TERMINAL DIM       2
+TIME     INIT      "HH/MM/SSS"
+LINES    FORM      2
+REPLY    DIM       1
+WHO      DIM       20
+WHOCNT   FORM      4
+ROLLNAME INIT      "ROLLFILE/SYST"
+. 
+START    DISPLAY   *ES,*P1:1,*HON,"INVENTORY HISTORY END-OF-DAY PROCESSING":
+                             *HOFF
+. 
+         MOVE      "000" TO PAGES
+         CLOCK     TIME  TO TIME
+         CLOCK     DATE  TO TODAY
+         CALL      HEADER
+. 
+         OPEN      NPARTSFL,NPARTSNM
+         MOVE      "0"   TO WHOCNT
+         CALL      LOOP01
+. 
+         ROLLOUT   "CHAIN SORTHIST/PROC",ROLLNAME
+.
+         DISPLAY   *P1:16,*EL,*HON,"SALES AND PURCHASING DATA SORTED ":
+                   "FOR LISTING",*HOFF,*W4
+.
+         CHAIN     "MSEODPRT"
+.
+.....        ROLLOUT   "CHAIN MSFLBILD",ROLLNAME
+. 
+.....        BEEP
+....        DISPLAY   *ES,*P1:4,*HON,"NEW PARTS DATA ENTRY FILE PREPARED ",*W5:
+....                  *HOFF
+.
+BYPASS   CHAIN     "MSHISTRY"
+. 
+LOOP01   READKS    NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+         GOTO      LOOPEND IF OVER
+.
+         CMATCH    "X",MSSTATUS
+         GOTO      LOOP01 IF EQUAL
+.
+         PRINT     *1,MSPARTNO,*22,MSSIZE,*55,MSDESC,*88,MSXRFPT1:
+                   *110,MSXRFPT2
+         ADD       "1"  TO  WHOCNT
+         ADD       "1"  TO  LINES
+         COMPARE   "53",LINES
+         CALL      HEADER  IF  EQUAL
+         GOTO      LOOP01
+         RETURN
+. 
+LOOPEND  PRINT     *C,*L,*L,"** END OF DATA ENTRY ":
+                   "FOR ",WHO," ** TOTAL RECORDS ENTERED = ":
+                   WHOCNT," ** "
+         RETURN
+. 
+HEADER   ADD       "1"  TO  PAGES
+         PRINT     *F,*25,"INVENTORY DATA ENTRY VALIDATION LIST":
+                   *80," AS OF ",TODAY,"  TIME ",TIME,"  PAGE ",PAGES
+. 
+         PRINT     " "
+         PRINT     *1,"PART NUMBER",*22,"SIZE",*55,"DESCRIPTION":
+                   *88,"CROSS-REFERENCE 1",*110,"CROSS-REFERENCE 2"
+         PRINT     " "
+         MOVE      "4"  TO  LINES
+         RETURN
+. 
+. 

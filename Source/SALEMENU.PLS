@@ -1,0 +1,157 @@
+.
+. APMENU1 - ACCOUNTS PAYABLE SYSTEM MASTER MENU
+.
+. WRITTEN BY R.	BACHARACH
+.
+	 INCLUDE   MSCBRAG.TXT
+.
+	 INCLUDE   COMMON.TXT
+.
+PROG	 FORM	   2
+PROG1                INIT                 "PONTRY"
+PROG2                INIT                 "QUOTNTRY"
+PROG3                INIT                 "A1"
+PROG4                INIT                 "A1"
+PROG5                INIT                 "A1"
+PROG6                INIT                 "A1"
+PROG7                INIT                 "A1"
+PROG8                INIT                 "A1"
+PROG9                INIT                 "A1"
+PROG10               INIT                 "A1"
+PROG11               INIT                 "A1"
+PROG12               INIT                 "A1"
+PROG13               INIT                 "A1"
+PROG14               INIT                 "A1"
+PROG15               INIT                 "A1"
+PROG16               INIT                 "A1"
+PROG17               INIT                 "A1"
+PROG18               INIT                 "A1"
+PROG19               INIT                 "A1"
+PROG20               INIT                 "A1"
+PROG21               INIT                 "A1"
+PROG22               INIT                 "A1"
+PROG23               INIT                 "A1"
+PROG24               INIT                 "A1"
+PROG25               INIT                 "A1"
+PROG26               INIT                 "A1"
+PROG27               INIT                 "A1"
+PROG29               INIT                 "A1"
+PROG30               INIT                 "A1"
+PROG31               INIT                 "A1"
+PROG32               INIT                 "A1"
+.
+ROLLNAME INIT	   "C:\DBC\ROLLFILE.SYS"
+.
+TIME	 INIT	   "HH/MM/SS "
+REPLY	 DIM	   1
+.
+DATE8               DIM                8
+                    CLOCK              DATE,DATE8
+	 CLOCK	   TIME	TO TIME
+
+DISP                 DISPLAY   *ES,*P20:2,*HON,"A P C  COMPENENTS - SYSTEM FUNCTIONS":
+                                   *P22:3,"DATE : ",DATE8,"  TIME : ",Time:
+		   *HOFF
+                     DISPLAY   *P1:5,"( 1)  ENTER/PRINT PURCHASE ORDERS":
+                               *P1:6,"( 2)  ENTER/PRINT Q U O T A T I O N S":
+                               *P1:7,"( 3)  EXIT THIS MENU"
+.
+S1                   KEYIN                *P28:23,*EL,"ENTER SELECTION  ",PROG
+.
+                     TRAP                 CHNFAIL IF CFAIL
+.
+                     COMPARE   "33"     TO PROG
+                     GOTO                 BRANCHIT IF LESS
+.
+                     BEEP
+CHNFAIL              DISPLAY   *P01:23,"INVALID SELECTION ",*W2,*P1:23,*EL
+                     GOTO                 S1
+BRANCHIT BRANCH        PROG            OF A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15:
+                                           A16,A17,A18,A19,A20,A21,A22,A23,A24,A25,A26,A27,A28:
+                                           A29,A30,A31,A32
+                     GOTO                 S2
+A1                   CHAIN                PROG1
+                     GOTO                 CHNFAIL
+A2                   CHAIN                PROG2
+                     GOTO                 CHNFAIL
+A3
+                     STOP
+.                     CHAIN                PROG3
+.                     GOTO                 CHNFAIL
+A4                   CHAIN                PROG4
+                     GOTO                 CHNFAIL
+A5                   CHAIN                PROG5
+                     GOTO                 CHNFAIL
+A6                   CHAIN                PROG6
+                     GOTO                 CHNFAIL
+A7                   CHAIN                PROG7
+                     GOTO                 CHNFAIL
+A8                   CHAIN                PROG8
+                     GOTO                 CHNFAIL
+A9                   CHAIN                PROG9
+                     GOTO                 CHNFAIL
+A10                  CHAIN                PROG10
+                     GOTO                 CHNFAIL
+A11                  CHAIN                PROG11
+                     GOTO                 CHNFAIL
+A12                  CHAIN                PROG12
+                     GOTO                 CHNFAIL
+A13                  CHAIN                PROG13
+                     GOTO                 CHNFAIL
+A14                  CHAIN                PROG14
+                     GOTO                 CHNFAIL
+A15                  CHAIN                PROG15
+                     GOTO                 CHNFAIL
+A16                  CHAIN                PROG16
+                     GOTO                 CHNFAIL
+A17                  CHAIN                PROG17
+                     GOTO                 CHNFAIL
+A18                  CHAIN                PROG18
+                     GOTO                 CHNFAIL
+A19                  CHAIN                PROG19
+                     GOTO                 CHNFAIL
+A20                  CHAIN                PROG20
+                     GOTO                 CHNFAIL
+A21                  CHAIN                PROG21
+                     GOTO                 CHNFAIL
+A22                  CHAIN                PROG22
+                     GOTO                 CHNFAIL
+A23                  CHAIN                PROG23
+                     GOTO                 CHNFAIL
+A24                  CHAIN                PROG24
+                     GOTO                 CHNFAIL
+A25                  CHAIN                PROG25
+                     GOTO                 CHNFAIL
+A26                  CHAIN                PROG26
+                     GOTO                 CHNFAIL
+A27                  CHAIN                PROG27
+                     GOTO                 CHNFAIL
+.
+A28                  BEEP
+         MOVE          " " TO REPLY
+                     KEYIN                *P01:23,*EL,*HON,"ARE YOU  S U R E  THAT YOU WANT TO ":
+                                          "BACKUP AND INDEX THE A/P FILES? (Y/N) ",REPLY
+                     CMATCH               "Y",REPLY
+                     GOTO                 A28A  IF  EQUAL
+                     GOTO                 CHNFAIL
+.
+A28A                 ROLLOUT   "F:\UTILS.CNV\APINDX2.BAT"
+                     GOTO                 DISP
+.
+A29                  CHAIN                PROG29
+                     GOTO                 CHNFAIL
+.
+A30                  CHAIN                PROG30
+                     GOTO                 CHNFAIL
+.
+A31                  CHAIN                PROG31
+                     GOTO                 CHNFAIL
+.
+A32                  CHAIN                PROG32
+                     GOTO                 CHNFAIL
+.
+S2                   BEEP
+                     DISPLAY   *P14:23,*EF,"INVALID SELECTION - PLEASE RETRY",*W,*W
+                     GOTO                 S1
+
+

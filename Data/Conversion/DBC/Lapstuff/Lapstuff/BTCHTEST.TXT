@@ -1,0 +1,264 @@
+...................................................................
+.    BTCHPRNT/TEXT - PRINT CASH BATCH DATA - A/R CHECK BATCHES    .
+.    BY USE OF AN INPUT DATE RANGE                                .
+.    JAN 5, 1991 - MICRO SYSTEMS CONSULTANTS                      .
+...................................................................
+.
+         INCLUDE   COMMON
+.
+         INCLUDE   BATCHFD2/TEXT
+.
+         INCLUDE   CUSTMAST/TEXT
+.
+CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS/ISAM"
+.
+REPLY    DIM       1
+ROW      FORM      2
+DROW     FORM      2
+COL      FORM      2
+COLSW    DIM       1
+CHKSUM   FORM      6.2
+NEWBATCH FORM      5
+DATE8    DIM       8
+IOSW     DIM       1
+ACCTIN   DIM       4
+KEYLINE  DIM       2
+LINENO   FORM      2
+CAMTIN   FORM      6.2
+ERRTYPE  DIM       10
+CHKCNT   FORM      2
+LASTROW  FORM      2
+DATE1    DIM       8
+DATE1X   DIM       6
+DATE1N   FORM      6
+DATE2    DIM       8
+DATE2X   DIM       6
+DATE2N   FORM      6
+FORM6    FORM      6
+PTIME    DIM       9
+PAGES    FORM      3
+LINES    FORM      2
+DASH44   INIT      "--------------------------------------------"
+BTCHDONE INIT      "N"
+MONTHTOT FORM      7.2
+.
+         DISPLAY   *ES,*HON,*P01:01,"ACCOUNTS RECEIVABLE":
+                               " SYSTEM - PRINT CASH LEDGER BY DATE RANGE":
+                       *P01:06,"IF YOU ENTERED THIS PROGRAM ERRONEOUSLY ":
+                               "YOU MAY EXIT BY PRESSING F5 NOW",*HOFF
+.
+         BEEP
+         KEYIN     *P01:10,"PRESS ENTER TO PRINT CASH LEDGER ",REPLY
+         GOTO      EOJ  IF  F5
+.
+         CALL      OPENCUST
+         CLOCK     TIME  TO  PTIME
+         MOVE      " "   TO  COLSW
+         GOTO      START
+.
+NOZERO   BEEP
+         DISPLAY   *P1:23,*EL,*HON,"NO BATCH CONTROL RECORD - ABORTING!":
+                   *W2,*HOFF
+         CHAIN     "CASHLDGR"
+.
+START    CALL      BTCHOPEN
+.
+         DISPLAY   *P1:6,*EF
+.
+WHCHBTCH CALL      CLRBATCH
+.
+DATE1    DISPLAY   *P1:14,*EF
+         KEYIN     *P1:14,*HON,"ENTER  START DATE FOR CASH LEDGER (MM/DD/YY) ":
+                   DATE1,*HOFF
+         KEYIN     *P1:16,*HON,"ENTER ENDING DATE FOR CASH LEDGER (MM/DD/YY) ":
+                   DATE2,*HOFF
+.
+         MOVE      " " TO REPLY
+         KEYIN     *P1:20,"DATES CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      PRINTIT IF EQUAL
+         BEEP
+         GOTO      DATE1
+.
+PRINTIT  CLEAR     DATE1X
+         RESET     DATE1  TO  7
+         APPEND    DATE1  TO  DATE1X   (YY)
+         RESET     DATE1  TO  1
+         APPEND    DATE1  TO  DATE1X   (MM)
+         RESET     DATE1  TO  4
+         RESET     DATE1X TO  4
+         APPEND    DATE1  TO  DATE1X
+         RESET     DATE1  TO  1
+         RESET     DATE1X TO  1
+         MOVE      DATE1X TO  DATE1N
+         DISPLAY   *P1:20,*EF,"DATE1X: ",DATE1X
+.
+         CLEAR     DATE2X
+         RESET     DATE2  TO  7
+         APPEND    DATE2  TO  DATE2X   (YY)
+         RESET     DATE2  TO  1
+         APPEND    DATE2  TO  DATE2X   (MM)
+         RESET     DATE2  TO  4
+         RESET     DATE2X TO  4
+         APPEND    DATE2  TO  DATE2X
+         RESET     DATE2  TO  1
+         RESET     DATE2X TO  1
+         MOVE      DATE2X TO DATE2N
+         DISPLAY   *P1:21,"DATE2X: ",DATE2X
+.
+SETKEY   CLEAR     BTCHRDKY
+         APPEND    "91010100000" TO BTCHRDKY
+         RESET     BTCHRDKY    TO  1
+.
+         READ      BATCHFL,BTCHRDKY;THISBTCH,BSTATUS
+         DISPLAY   *P1:22,*EF,*HON,"BATCHKEY=",THISBTCH,*HOFF,*W3
+.
+RDLOOP   CALL      BTCHRDKS
+         DISPLAY   *P1:23,*EL,*HON,"READKS: ",BATCHKEY," ",BSTATUS," ",BCHECKS:
+                   *HOFF,*W2
+         GOTO      EOJ   IF  OVER
+.
+CHKDATE1 MOVE      BTCHDATE TO  FORM6
+.
+         COMPARE   DATE1N   TO  FORM6
+         GOTO      TAKEIT   IF  EQUAL
+         GOTO      RDLOOP   IF  LESS    (CAN'T REALLY HAPPEN!)
+.
+CHKDATE2 COMPARE   DATE2N   TO  FORM6
+         GOTO      TAKEIT   IF  EQUAL
+         GOTO      RDLOOP   IF  NOT LESS
+.
+TAKEIT   COMPARE   "55",LINES
+         CALL      HDR  IF  EQUAL
+.
+         GOTO      MAKEDTLS
+.
+         INCLUDE   BATCHIO/TEXT
+         INCLUDE   STDIOERR/TEXT
+         INCLUDE   STDPARER/TEXT
+         INCLUDE   STDFMTER/TEXT
+         INCLUDE   STDRANGE/TEXT
+         INCLUDE   CUSTIO/TEXT
+.
+MAKEDTLS MOVE      BCHECKS  TO  NEWBATCH
+         MOVE      "0"      TO  BTCHINDX
+         MOVE      "N"      TO  BTCHDONE
+.
+MKDTL1   CALL      LOADDATA
+.
+         MATCH     "Y",BTCHDONE
+         GOTO      RDLOOP IF EQUAL
+.
+         CALL      PRINTDTL
+.
+         CMATCH    "Y",BTCHDONE
+         CALL      BTCHBRK IF EQUAL
+.
+         GOTO      MKDTL1      (CHECK IF WHOLE BATCH IS PRINTED)
+.
+.................................................................
+BTCHBRK  RETURN
+         PRINT     DASH44,DASH44,DASH44
+         PRINT     *80,"BATCH ",BATCHKEY," TOTALS: FOR ",BTCHDATE:
+                   *121,BATCHTOT
+         PRINT     DASH44,DASH44,DASH44
+         PRINT     " "
+.
+         ADD       BATCHTOT  TO  MONTHTOT
+.
+         ADD       "5",LINES
+.
+         COMPARE   "55",LINES
+         CALL      HDR IF NOT LESS
+         RETURN
+................................................................
+LOADDATA ADD       "1"  TO  BTCHINDX
+.
+         COMPARE   BTCHINDX TO NEWBATCH
+         GOTO      BTCHFINI IF LESS
+.
+         CALL      LOADBTCH
+         RETURN
+.
+BTCHFINI MOVE      "Y" TO BTCHDONE
+         RETURN
+.
+................................................................
+.
+PRINTDTL RETURN
+         GOTO      CHKBLK IF NOT EQUAL
+.
+         PRINT     " ",*FLUSH   (THIS FLUSHES OUT THE FULL 3 COLUMN LINE)
+         ADD       "1" TO LINES
+.
+         COMPARE   "59",LINES
+         CALL      HDR IF NOT LESS
+.
+         MOVE      " " TO COLSW
+.
+CHKBLK   CMATCH    " " TO COLSW
+         GOTO      CHKC2  IF NOT EQUAL
+.
+         PRINT     *1,ACCTARG,*6,CUSTNAME,*35,CHECKAMT,*FLUSH;
+         MOVE      "1" TO COLSW
+         RETURN
+.
+CHKC2    CMATCH    "1",COLSW
+         GOTO      PRNTCL3 IF NOT EQUAL
+         PRINT     *45,ACCTARG,*50,CUSTNAME,*79,CHECKAMT,*FLUSH;
+         MOVE      "2" TO COLSW
+         RETURN
+.
+PRNTCL3  PRINT     *89,ACCTARG,*94,CUSTNAME,*123,CHECKAMT;
+         MOVE      "3" TO COLSW
+.
+.
+         ADD       CHECKAMT  TO  CHKSUM
+.
+.............................................................
+.
+CLRBATCH TRAPCLR   PARITY
+         MOVE      "0" TO BTCHINDX
+.
+CLR1     ADD       "1"   TO  BTCHINDX
+         COMPARE   "21"  TO  BTCHINDX
+.
+         GOTO      CLREXIT   IF  EQUAL
+.
+. BLANK THE ACCOUNT AND ZERO THE AMOUNT FIELDS
+.
+         MOVE      "0.00"  TO  CHECKAMT
+         MOVE      "    "  TO  ACCTARG
+         CALL      STORBTCH
+         GOTO      CLR1
+.
+CLREXIT  MOVE      "00"    TO  BTCHINDX
+         MOVE      "03"    TO  LASTROW
+         RETURN
+.........................................
+.
+HDR      ADD       "1"  TO  PAGES
+         PRINT     *F,*46,"      AMERICAN PRECISION COMPONENTS"
+.
+         PRINT     *46,"ACCOUNTS RECEIVABLE SYSTEM - CASH LEDGER":
+                      *100,"AS OF ',TODAY,"  AT ",PTIME,*122,TODAY
+.
+         PRINT     *44,"FOR REPORTING PERIOD OF ",DATE1," TO ",DATE2:
+                   *122,"PAGE ",PAGES
+.
+         PRINT     *1,"ACCT   NAME":
+                   *35,"CHK. AMT.":
+                   *45,"ACCT   NAME":
+                   *79,",CHK. AMT.":
+                   *89,",ACCT   NAME":
+                   *123,"CHK. AMT."
+         MOVE      "4"  TO  LINES
+         RETURN
+.
+.................
+EOJ      CALL      BTCHBRK
+.
+         RELEASE
+         CHAIN     "CASHLDGR"
+.

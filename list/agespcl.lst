@@ -1,0 +1,34 @@
+
+
+
+PAGE    1      agespcl.pls                                                                                    02-11-19 15:51:57
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP agespcl.pls 
+
+   26.    INCLUDE  A: common.txt
+   28.    INCLUDE  B: rcvbles.txt
+   33.    INCLUDE  C: date.685
+   35.    INCLUDE  D: apcalndr.txt
+   41.    INCLUDE  E: custmast.txt
+  129.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+  133.    INCLUDE  G: callerr2.inc
+  400.                                                   *100,AMTOV90P,*115,NETBAL,*FLUSH 
+                                                                                         *WARNING*
+Warning: I/O control not implemented.
+  422.    INCLUDE  H: custio.txt
+  424.    INCLUDE  I: rcvblsio.txt
+  426.    INCLUDE  J: datecalc.txt
+  428.    INCLUDE  K: apdates.txt
+  451.                                         PRINT     *1,ASTER45,ASTER45,ASTER45,*FLUSH 
+                                                                                          *WARNING*
+Warning: I/O control not implemented.
+
+   Output: c:\apc\plc\agespcl.plc                                                                                                                                                                                                                                    
+      1177 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 15:51:57 15:51:57
+  00002AE4 DATA;  00000D74  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

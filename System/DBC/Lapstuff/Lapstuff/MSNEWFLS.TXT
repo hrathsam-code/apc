@@ -1,0 +1,221 @@
+         INCLUDE   COMMON
+.
+         INCLUDE   MSSALESF/T84
+.
+         INCLUDE   MSPURCHF/T84
+.
+.
+ICNTS83  FORM      5
+ICNTP83  FORM      5
+.
+ICNTS84  FORM      5
+OCNTS84  FORM      5
+.
+ICNTS85  FORM      5
+.
+ICNTS86  FORM      5
+OCNTS86  FORM      5
+.
+ICNTP84  FORM      5
+OCNTP84  FORM      5
+.
+ICNTP85  FORM      5
+.
+ICNTP86  FORM      5
+OCNTP86  FORM      5
+.
+MSSALEI  FILE
+MSSALEO  FILE      UNCOMPRESSED
+MSSALEN  FILE      UNCOMPRESSED
+.
+SEQ      FORM      "-1"
+.
+MSPURCHI FILE
+MSPURCHO FILE      UNCOMPRESSED
+MSPURCHN FILE      UNCOMPRESSED
+.
+TIME     DIM       10
+COMBINE  FORM      5
+TESTYEAR DIM       2
+.
+TESTRUN  INIT      "Y"
+REPLY    DIM       1
+.
+.
+DISPLAY  DISPLAY  *ES,*P01:01,"CREATE NEW HISTORY FILES"
+.
+         CLOCK     TIME TO TIME
+         PRINT     *F 
+         PRINT     "CREATE NEW SALES/PO HISTORY FILES - STARTED AT ",TIME
+         KEYIN     *P01:10,"TEST RUN? (Y/N) ",REPLY
+         MOVE      REPLY TO TESTRUN
+.
+         OPEN      MSSALEI,"MSSALES/TEXT:W"
+..........        OPEN      MSSALEO,"MSSAL84/TEXT:OLDSALES"
+         OPEN      MSSALEN,"MSSALES/TEXN:OLDSALES"
+.
+         OPEN      MSPURCHI,"MSPURCHS/TEXT:W"
+         OPEN      MSPURCHO,"MSPUR84/TEXT:OLDSALES"
+         OPEN      MSPURCHN,"MSPURCHS/TEXN:OLDSALES"
+.
+SALELOOP TRAPCLR   IO
+         TRAP      BADSFL IF IO
+.
+         READ      MSSALEI,SEQ;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                               MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                               MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+         GOTO      ENDSLOOP IF OVER
+.
+....................................
+         CMATCH    "Y",TESTRUN
+         GOTO      OK IF NOT EQUAL
+.
+         COMPARE   "50" TO ICNTS84
+         GOTO      EOJ IF EQUAL
+.
+...................................
+.
+OK       MOVE      MSSLJULD TO TESTYEAR
+.
+         MATCH     "83" TO TESTYEAR
+         GOTO      S83BYP IF EQUAL
+.
+         MATCH     "84" TO TESTYEAR
+         GOTO      INCRS84 IF EQUAL
+.
+         MATCH     "85" TO TESTYEAR
+         GOTO      INCRS85 IF EQUAL
+.
+.
+         TRAPCLR   IO
+         TRAP      BADSWRIT IF IO
+         WRITE     MSSALEN,SEQ;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                                  MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                                  MSSLCUST,MSSLPRC,MSSLCNAM
+.
+         ADD       "1" TO OCNTS86
+         ADD       "1" TO ICNTS86
+         GOTO      SALELOOP
+.
+S83BYP   ADD       "1" TO ICNTS83
+         GOTO      SALELOOP
+.
+INCRS84  ADD       "1" TO ICNTS84
+         ADD       "1" TO OCNTS84
+         GOTO      WSALES
+.
+INCRS85  ADD       "1" TO ICNTS85
+         ADD       "1" TO OCNTS84
+.
+WSALES   TRAPCLR   IO
+         TRAP      BADSWRIT IF IO
+.         WRITE     MSSALEO,SEQ;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+.                               MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+.                               MSSLCUST,MSSLPRC,MSSLCNAM
+.
+         GOTO      SALELOOP
+.
+BADSWRIT BEEP
+         DISPLAY   *P1:23,"UNABLE TO WRITE THE SALES OUTPUT FILES":
+                   *W4
+         GOTO      BADSWRIT
+.
+BADSFL   BEEP
+         DISPLAY   *P1:23,"UNABLE TO READ THE SALE INPUT FILE",*W4
+         GOTO      BADSFL
+.
+BADPFL   BEEP
+         DISPLAY   *P1:23,"UNABLE TO READ THE PURCHASE INPUT FILE",*W4
+         GOTO      BADPFL
+.
+BADPWRIT BEEP
+         DISPLAY   *P1:23,"UNABLE TO WRITE THE PURCHASE OUTPUT FILE",*W4
+         GOTO      BADPWRIT
+ENDSLOOP TRAPCLR   IO
+.
+POLOOP   TRAPCLR   IO
+         TRAP      BADPFL IF IO
+.
+         READ      MSPURCHI,SEQ;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                                MSPONUMB,MSPOUOP,MSPODATE,MSPOVEND:
+                                MSPOPRC,MSPOVNAM
+.
+         GOTO      EOJ IF OVER
+.
+         MOVE      MSPOJULD TO TESTYEAR
+.
+         MATCH     "83" TO TESTYEAR
+         GOTO      PBYP83 IF EQUAL
+.
+         MATCH     "84" TO TESTYEAR
+         GOTO      PINCR84 IF EQUAL
+.
+         MATCH     "85" TO TESTYEAR
+         GOTO      PINCR85 IF EQUAL
+.
+         ADD       "1" TO  ICNTP86
+.
+         TRAPCLR   IO
+         TRAP      BADPWRIT IF IO
+         WRITE     MSPURCHN,SEQ;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                             MSPONUMB,MSPOUOP,MSPODATE,MSPOVEND:
+                             MSPOPRC,MSPOVNAM
+.
+         ADD       "1" TO OCNTP86
+         GOTO      POLOOP
+.
+PBYP83   ADD       "1" TO ICNTP83
+         GOTO      POLOOP
+.
+PINCR84  ADD       "1" TO ICNTP84
+         ADD       "1" TO OCNTP84
+         GOTO      PWRITE
+.
+PINCR85  ADD       "1" TO ICNTP85
+         ADD       "1" TO ICNTP84
+.
+PWRITE   TRAPCLR   IO
+         TRAP      BADPWRIT IF IO
+         WRITE     MSPURCHO,SEQ;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                           MSPONUMB,MSPOUOP,MSPODATE,MSPOVEND:
+                           MSPOPRC,MSPOVNAM
+         GOTO      POLOOP
+.
+........EOJ      WEOF      MSSALEO,SEQ
+EOJ     WEOF      MSSALEN,SEQ
+         WEOF      MSPURCHO,SEQ
+         WEOF      MSPURCHN,SEQ
+.
+         PRINT     *C,*L,*L,*L
+         PRINT     "RESULTS OF NEW SALES/PO HISTORY FILE CREATION"
+         PRINT     *1,"SALES RECORDS INPUT"
+         PRINT     *1,"1983 COUNT = ",ICNTS83
+         PRINT     *1,"1984 COUNT = ",ICNTS84
+         PRINT     *1,"1985 COUNT = ",ICNTS85
+         PRINT     *1,"1986 COUNT = ",ICNTS86
+         PRINT     " "
+         PRINT     *1,"SALES RECORDS OUTPUT"
+         MOVE      ICNTS84 TO COMBINE
+         ADD       ICNTS85 TO COMBINE
+         PRINT     *1,"84/85 COUNT = ",COMBINE
+         PRINT     *1,"1986  COUNT = ",OCNTS86
+.
+         PRINT     *C,*L,*L
+         PRINT     *1,"PURCHASE RECORDS INPUT"
+         PRINT     *1,"1983 COUNT = ",ICNTP83
+         PRINT     *1,"1984 COUNT = ",ICNTP84
+         PRINT     *1,"1985 COUNT = ",ICNTP85
+         PRINT     *1,"1986 COUNT = ",ICNTP86
+         PRINT     " "
+         PRINT     *1,"PURCHASE RECORDS OUTPUT"
+         MOVE      ICNTP84 TO COMBINE
+         ADD       ICNTP85 TO COMBINE
+         PRINT     *1,"84/85 COUNT = ",COMBINE
+         PRINT     *1,"1986  COUNT = ",OCNTP86
+.
+         CLOCK     TIME TO TIME
+         PRINT     *C,*L,*L
+         PRINT     "JOB COMPLETED AT ",TIME
+         KEYIN     *P15:23,"PRESS ENTER TO END RUN",REPLY
+         CHAIN     "MSHISTRY"

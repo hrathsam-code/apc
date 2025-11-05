@@ -1,0 +1,1030 @@
+***********************************
+PL/B Runtime......: 9.9   PLBWIN   18
+                  : Version 9.9   28 Oct 2016
+Ported Machine....: WIN32
+Date..............: 1-25-2019
+Time..............: 14:23:18.695
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x00425b11
+Logic State Flag..: 0
+
+PL/B Program Name.: plbdbug.plc
+PL/B Data:
+  Database........: 0x04ae0000
+  CodeBase........: 0x04b26398
+  CodePtr.........: 0x04b26b80
+  pLastOpCode.....: 0x04b26b72
+  memLgt..........: 0x000b8520
+  Current IP......: 0x000007da
+  Current OPCODE..: 0x6812
+  Next IP.........: 0x000007e8
+  Next OPCODE.....: 0x4801
+  Call Stack Count: 0x00000003
+
+Call Return Stack:
+  FuncStack:  CodeBase:   CodePtr:    Program IP:   Program Name:
+  0x00000000  0x04b26398  0x04b26a2a  0x00000692    plbdbug.plc
+  0x00000000  0x04b26398  0x04b26a00  0x00000668    plbdbug.plc
+  0x00000000  0x04b82f8c  0x04b863ae  0x00003422    chkentry.plc
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x04b34248  0x0004ed44  chkentry.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 2
+  OS Build Version: 9200
+  OS Platform ID..: 2
+  OS Service Pack.: 
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A2000  9.9.0.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x77020000      0x00190000  6.2.17134.471             C:\WINDOWS\SYSTEM32\ntdll.dll
+0x74470000      0x000E0000  6.2.17134.1               C:\WINDOWS\System32\KERNEL32.DLL
+0x74280000      0x001E4000  6.2.17134.441             C:\WINDOWS\System32\KERNELBASE.dll
+0x76B10000      0x00045000  6.2.17134.1               C:\WINDOWS\System32\SHLWAPI.dll
+0x75260000      0x000BF000  7.0.17134.1               C:\WINDOWS\System32\msvcrt.dll
+0x768B0000      0x0025C000  6.2.17134.523             C:\WINDOWS\System32\combase.dll
+0x700E0000      0x0007C000  6.2.17134.1               C:\WINDOWS\SYSTEM32\UxTheme.dll
+0x74EE0000      0x0011E000  6.2.17134.319             C:\WINDOWS\System32\ucrtbase.dll
+0x73ED0000      0x00022000  6.2.17134.285             C:\WINDOWS\System32\GDI32.dll
+0x76CD0000      0x000C0000  6.2.17134.471             C:\WINDOWS\System32\RPCRT4.dll
+0x74900000      0x00164000  6.2.17134.471             C:\WINDOWS\System32\gdi32full.dll
+0x738E0000      0x00020000  6.2.17134.376             C:\WINDOWS\System32\SspiCli.dll
+0x76B60000      0x0007D000  6.2.17134.1               C:\WINDOWS\System32\msvcp_win.dll
+0x738D0000      0x0000A000  6.2.17134.1               C:\WINDOWS\System32\CRYPTBASE.dll
+0x75130000      0x00058000  6.2.17134.471             C:\WINDOWS\System32\bcryptPrimitives.dll
+0x766C0000      0x0018D000  6.2.17134.376             C:\WINDOWS\System32\USER32.dll
+0x74880000      0x00017000  6.2.17134.1               C:\WINDOWS\System32\win32u.dll
+0x76BE0000      0x00044000  6.2.17134.319             C:\WINDOWS\System32\sechost.dll
+0x74810000      0x00067000  6.2.17134.1               C:\WINDOWS\System32\WS2_32.dll
+0x75050000      0x000D6000  6.2.17134.1               C:\WINDOWS\System32\COMDLG32.dll
+0x740F0000      0x00088000  6.2.17134.112             C:\WINDOWS\System32\shcore.dll
+0x6C770000      0x00019000  6.2.17134.1               C:\WINDOWS\SYSTEM32\OLEPRO32.DLL
+0x10000000      0x0000D000  9.9.0.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x75370000      0x0134A000  6.2.17134.441             C:\WINDOWS\System32\SHELL32.dll
+0x76C30000      0x00096000  6.2.17134.48              C:\WINDOWS\System32\OLEAUT32.dll
+0x62E30000      0x00029000  6.2.17134.1               C:\WINDOWS\SYSTEM32\oledlg.dll
+0x751F0000      0x00039000  6.2.17134.1               C:\WINDOWS\System32\cfgmgr32.dll
+0x00F20000      0x00078000  6.2.17134.471             C:\WINDOWS\System32\ADVAPI32.dll
+0x73900000      0x005BA000  6.2.17134.471             C:\WINDOWS\System32\windows.storage.dll
+0x75250000      0x0000F000  6.2.17134.112             C:\WINDOWS\System32\kernel.appcore.dll
+0x74180000      0x000FC000  6.2.17134.407             C:\WINDOWS\System32\ole32.dll
+0x6B400000      0x00204000  6.10.17134.523            C:\WINDOWS\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.17134.523_none_42edd4b044e3535c\COMCTL32.dll
+0x74A90000      0x00018000  6.2.17134.1               C:\WINDOWS\System32\profapi.dll
+0x75320000      0x00045000  6.2.17134.1               C:\WINDOWS\System32\powrprof.dll
+0x75240000      0x00008000  6.2.17134.1               C:\WINDOWS\System32\FLTLIB.DLL
+0x72230000      0x00018000  6.2.17134.1               C:\WINDOWS\SYSTEM32\MPR.dll
+0x6C870000      0x00024000  6.2.17134.1               C:\WINDOWS\SYSTEM32\WINMM.dll
+0x72D50000      0x00013000  6.2.17134.1               C:\WINDOWS\SYSTEM32\NETAPI32.dll
+0x62260000      0x0006D000  6.2.17134.319             C:\WINDOWS\SYSTEM32\WINSPOOL.DRV
+0x6C840000      0x00023000  6.2.17134.1               C:\WINDOWS\SYSTEM32\winmmbase.dll
+0x6EC70000      0x00180000  7.0.17134.112             C:\WINDOWS\SYSTEM32\PROPSYS.dll
+0x72C00000      0x00030000  6.2.17134.1               C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL
+0x72D10000      0x00019000  6.2.17134.112             C:\WINDOWS\SYSTEM32\bcrypt.dll
+0x74550000      0x00026000  6.2.17134.1               C:\WINDOWS\System32\IMM32.DLL
+0x72BF0000      0x00008000  6.2.17134.1               C:\WINDOWS\SYSTEM32\VERSION.DLL
+0x73F90000      0x00143000  6.2.17134.376             C:\WINDOWS\System32\MSCTF.dll
+0x70970000      0x00023000  6.2.17134.1               C:\WINDOWS\SYSTEM32\dwmapi.dll
+0x75230000      0x00006000  6.2.17134.1               C:\WINDOWS\System32\psapi.DLL
+0x69FA0000      0x0007D000  6.2.17134.376             C:\WINDOWS\System32\TextInputFramework.dll
+0x69E80000      0x0008B000  6.2.17134.471             C:\WINDOWS\System32\CoreMessaging.dll
+0x69C20000      0x0025D000  6.2.17134.376             C:\WINDOWS\System32\CoreUIComponents.dll
+0x71C50000      0x00029000  6.2.17134.1               C:\WINDOWS\SYSTEM32\ntmarta.dll
+0x69A90000      0x000D6000  6.2.17134.523             C:\WINDOWS\SYSTEM32\wintypes.dll
+0x62DB0000      0x00056000  7.2.17134.1               C:\WINDOWS\system32\Oleacc.dll
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 11:18:42.454
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x029b4280
+  CodeBase........: 0x029b8708
+  CodePtr.........: 0x029b8876
+  pLastOpCode.....: 0x029b886c
+  memLgt..........: 0x00068880
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x  14
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x029b4280  0x00004488  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 11:19:39.57
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02914280
+  CodeBase........: 0x02918708
+  CodePtr.........: 0x02918876
+  pLastOpCode.....: 0x0291886c
+  memLgt..........: 0x00068880
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x  14
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02914280  0x00004488  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 11:20:57.737
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02714280
+  CodeBase........: 0x02718718
+  CodePtr.........: 0x02718886
+  pLastOpCode.....: 0x0271887c
+  memLgt..........: 0x00068890
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x  14
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02714280  0x00004498  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 11:55:27.280
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02944280
+  CodeBase........: 0x02948944
+  CodePtr.........: 0x02948ada
+  pLastOpCode.....: 0x02948ad0
+  memLgt..........: 0x00068ae0
+  Current IP......: 0x0000018c
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x00000196
+  Next OPCODE.....: 0x  14
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02944280  0x000046c4  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 12:16:24.941
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049cf54
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02904280
+  CodeBase........: 0x02908944
+  CodePtr.........: 0x02908ab2
+  pLastOpCode.....: 0x02908aa8
+  memLgt..........: 0x00068ae0
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02904280  0x000046c4  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 13:03:46.624
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x027a4280
+  CodeBase........: 0x027a88cc
+  CodePtr.........: 0x027a8a44
+  pLastOpCode.....: 0x027a8a3a
+  memLgt..........: 0x00068a68
+  Current IP......: 0x0000016e
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x00000178
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x027a4280  0x0000464c  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 13:04:18.305
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02ae4280
+  CodeBase........: 0x02ae88cc
+  CodePtr.........: 0x02ae8a44
+  pLastOpCode.....: 0x02ae8a3a
+  memLgt..........: 0x00068a68
+  Current IP......: 0x0000016e
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x00000178
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02ae4280  0x0000464c  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 13:07:17.843
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049cf54
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x028e4280
+  CodeBase........: 0x028e89a0
+  CodePtr.........: 0x028e8b0e
+  pLastOpCode.....: 0x028e8b04
+  memLgt..........: 0x00068b48
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x028e4280  0x00004720  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 13:34:59.18
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049cf54
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x02a24280
+  CodeBase........: 0x02a289ec
+  CodePtr.........: 0x02a28b5a
+  pLastOpCode.....: 0x02a28b50
+  memLgt..........: 0x00068ba0
+  Current IP......: 0x00000164
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x0000016e
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02a24280  0x0000476c  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-20-2019
+Time..............: 14:54:47.551
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: createxdata.plc
+PL/B Data:
+  Database........: 0x029b4280
+  CodeBase........: 0x029b8b80
+  CodePtr.........: 0x029b8d2a
+  pLastOpCode.....: 0x029b8d20
+  memLgt..........: 0x00068d58
+  Current IP......: 0x000001a0
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x000001aa
+  Next OPCODE.....: 0x4888
+  Call Stack Count: 0x00000000
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x029b4280  0x00004900  createxdata.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+
+***********************************
+PL/B Runtime......: 9.9A  PLBWIN   18
+                  : Version 9.9A  21 Apr 2017
+Ported Machine....: WIN32
+Date..............: 9-23-2019
+Time..............: 20:18:39.739
+Serial Number.....: N004085
+Exception Code....: 0xc0000005
+Exception Address.: 0x0049b761
+Logic State Flag..: 0
+
+PL/B Program Name.: shipups3.plc
+PL/B Data:
+  Database........: 0x02a94280
+  CodeBase........: 0x02ae04cc
+  CodePtr.........: 0x02ae148a
+  pLastOpCode.....: 0x02ae1480
+  memLgt..........: 0x000b1490
+  Current IP......: 0x00000fb4
+  Current OPCODE..: 0x4888
+  Next IP.........: 0x00000fbe
+  Next OPCODE.....: 0x  14
+  Call Stack Count: 0x00000001
+
+Call Return Stack:
+  FuncStack:  CodeBase:   CodePtr:    Program IP:   Program Name:
+  0x00000000  0x02ae04cc  0x02ae0ba6  0x000006da    shipups3.plc
+
+Loaded PL/B Modules:
+  DataBase:   DataLength: Program Name:
+  0x02a94280  0x0004c24c  shipups3.plc
+
+Windows OS Version
+
+  OS Major Version: 6
+  OS Minor Version: 1
+  OS Build Version: 7601
+  OS Platform ID..: 2
+  OS Service Pack.: Service Pack 1
+
+DLL Memory Map
+
+Base Address    Size        Version                   Name
+
+0x00400000*     0x003A3000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwin.exe
+0x76DF0000      0x00141000  6.1.7601.18839            C:\Windows\SYSTEM32\ntdll.dll
+0x769F0000      0x000D4000  6.1.7601.18409            C:\Windows\system32\kernel32.dll
+0x750C0000      0x0004B000  6.1.7601.18409            C:\Windows\system32\KERNELBASE.dll
+0x738D0000      0x00040000  6.1.7600.16385            C:\Windows\system32\UxTheme.dll
+0x76630000      0x000AC000  7.0.7601.17744            C:\Windows\system32\msvcrt.dll
+0x76780000      0x000C9000  6.1.7601.17514            C:\Windows\system32\USER32.dll
+0x766E0000      0x0004E000  6.1.7601.18778            C:\Windows\system32\GDI32.dll
+0x75880000      0x0000A000  6.1.7601.18768            C:\Windows\system32\LPK.dll
+0x76570000      0x0009D000  1.626.7601.18454          C:\Windows\system32\USP10.dll
+0x75110000      0x00057000  6.1.7601.17514            C:\Windows\system32\SHLWAPI.dll
+0x75840000      0x00035000  6.1.7601.17514            C:\Windows\system32\WS2_32.dll
+0x75520000      0x000A2000  6.1.7601.18532            C:\Windows\system32\RPCRT4.dll
+0x76F50000      0x00006000  6.1.7600.16385            C:\Windows\system32\NSI.dll
+0x10000000      0x0000D000  9.9.1.500                 c:\Sunbelt\Plbwin99\code\plbwsec.dll
+0x5D7E0000      0x00019000  6.1.7601.17514            C:\Windows\system32\OLEPRO32.DLL
+0x76AD0000      0x0008F000  6.1.7601.18679            C:\Windows\system32\OLEAUT32.dll
+0x75170000      0x0015C000  6.1.7601.17514            C:\Windows\system32\ole32.dll
+0x76D40000      0x000A1000  6.1.7601.18839            C:\Windows\system32\ADVAPI32.dll
+0x76610000      0x00019000  6.1.7601.18839            C:\Windows\SYSTEM32\sechost.dll
+0x713D0000      0x0001C000  6.1.7600.16385            C:\Windows\system32\oledlg.dll
+0x73CE0000      0x0019E000  6.10.7601.18807           C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18807_none_41e554362bd82458\COMCTL32.dll
+0x70030000      0x00012000  6.1.7600.16385            C:\Windows\system32\MPR.dll
+0x73890000      0x00032000  6.1.7601.17514            C:\Windows\system32\WINMM.dll
+0x72C70000      0x00011000  6.1.7601.17887            C:\Windows\system32\NETAPI32.dll
+0x72B90000      0x00009000  6.1.7601.17514            C:\Windows\system32\netutils.dll
+0x74A20000      0x00019000  6.1.7601.17514            C:\Windows\system32\srvcli.dll
+0x72B80000      0x0000F000  6.1.7601.17514            C:\Windows\system32\wkscli.dll
+0x70640000      0x00051000  6.1.7601.17514            C:\Windows\system32\WINSPOOL.DRV
+0x76FC0000      0x0007B000  6.1.7601.17514            C:\Windows\system32\COMDLG32.dll
+0x75920000      0x00C4B000  6.1.7601.18762            C:\Windows\system32\SHELL32.dll
+0x756A0000      0x0001F000  6.1.7601.17514            C:\Windows\system32\IMM32.DLL
+0x755D0000      0x000CC000  6.1.7601.18731            C:\Windows\system32\MSCTF.dll
+0x74250000      0x00009000  6.1.7600.16385            C:\Windows\system32\VERSION.DLL
+0x74CD0000      0x0000C000  6.1.7600.16385            C:\Windows\system32\CRYPTBASE.dll
+0x73460000      0x00013000  6.1.7600.16385            C:\Windows\system32\dwmapi.dll
+0x74C60000      0x0001B000  6.1.7601.18839            C:\Windows\system32\SspiCli.dll
+0x75510000      0x00005000  6.1.7600.16385            C:\Windows\system32\psapi.DLL
+0x75890000      0x00083000  2001.12.8530.16385        C:\Windows\system32\CLBCatQ.DLL
+0x6C700000      0x00007000  5.0.7600.16385            C:\Windows\system32\msiltcfg.dll
+0x6EEB0000      0x00245000  5.0.7601.18637            C:\Windows\system32\msi.dll
+0x6F8D0000      0x00003000  6.1.7600.16385            C:\Windows\system32\SFC.DLL
+0x6F8C0000      0x0000D000  6.1.7600.16385            C:\Windows\system32\sfc_os.DLL
+

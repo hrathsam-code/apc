@@ -1,0 +1,139 @@
+. 
+.................................................................
+.  ACCOUNTS RECEIVABLE INQUIRY - MODULE NAME ARINQ/TXT
+. 
+. WRITTEN 9/27/81 BY R. BACHARACH
+.                 MICRO SYSTEMS CONSULTANTS
+.                 41 TEELE DRIVE
+.                 CORAM, NEW YORK 11727
+.                 516-698-5577
+. 
+. 
+. THIS PROGRAM ACCESSES THE CUSTOMER MASTER FILE (CUSTMAST)
+. DIRECTLY VIA SUPPLIED KEY AND DISPLAYS ALL AGED RECEIVABLES DATA
+. AS RECORDED IN THE CUSTMAST RECORD.
+.....................................................................
+. 
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   CUSTMAST
+. 
+CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS/ISAM"
+. 
+GETKEY   DIM       4
+CREDFLD  FORM      6.2
+ACCTBAL  FORM      7.2
+SUBTOTL  FORM      7.2
+STATUS   INIT      "ACTIVE "
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+REPLY    DIM       1
+IOSW     DIM       1
+. 
+TELEFONE INIT      "___-___-____"
+. 
+         CALL      OPENCUST
+. 
+DISPLAY  DISPLAY   *ES,*HON,*P27:01,"ACCOUNTS RECEIVABLE INQUIRY":
+                   *HOFF:
+                   *P03:03,"ACCT NO.",*P20:03,"NAME AND ADDRESS":
+                   *P55:03,"TELEPHONE":
+                   *P69:03,"CREDIT LIMIT",*P03:05,"STATUS":
+                   *P69:06,"CATEGORY":
+                   *P03:08,"LAST SALE DATE",*P41:08,"LAST PAYMENT DATE":
+                   *P03:09,"LAST SALE AMT.",*P41:09,"LAST PAYMENT AMT.":
+                   *P29:11,"AGED RECEIVABLE AMOUNTS":
+                   *P20:13,"CURRENT DUE":
+                   *P20:14,"PAST DUE  1-30 DAYS":
+                   *P20:15,"PAST DUE 31-60 DAYS":
+                   *P20:16,"PAST DUE 61-90 DAYS":
+                   *P20:17,"PAST DUE OVER 90 DAYS":
+                   *P20:18,"  *** SUBTOTAL ***":
+                   *P20:19,"LESS CURRENT CREDITS":
+                   *P20:20,"LESS CURRENT REMITTANCES":
+                   *P20:21,"****************************************":
+                   *P20:22,"ACCOUNT BALANCE":
+                   *P03:23,"ENTER ACCOUNT NUMBER "
+GETACCT  KEYIN     *P25:23,*DE,*JR,GETKEY
+         DISPLAY   *P25:23,GETKEY
+         RESET     GETKEY  TO  4
+         GOTO      OKAY IF NOT EOS
+         BEEP
+         GOTO      GETACCT
+. 
+OKAY     RESET     GETKEY  TO  1
+         MOVE      GETKEY  TO  CUSTKEY
+         CALL      GETCUST
+         CMATCH    "H",IOSW
+         GOTO      SHOWVAR IF EQUAL
+         BEEP
+         DISPLAY   *P01:23,*EL,"INVALID ACCOUNT - TRY AGAIN!",*W2:
+                   *P01:23,*EL,*P03:23,"ENTER ACCOUNT NUMBER"
+         GOTO      GETACCT
+. 
+. 
+SHOWVAR  TRAPCLR   IO
+         CMATCH    "D",CUSTSTTS
+         GOTO      DISP1  IF  NOT EQUAL
+         MOVE      "DELETED"  TO  STATUS
+.
+DISP1    DISPLAY   *P12:03,CUSTKEY,*P20:04,CUSTNAME,*P55:04,TELEFONE:
+                   *P72:04,CUSTCRED:
+                   *P12:05,STATUS,*P20:05,CUSTADDR:
+                                  *P20:06,CUSTCITY:
+                   *P41:07,CUSTSTAT,*P44:07,CUSTZIP,*P73:07,CUSTCATG
+         MOVE      LSTSALDT  TO  MM
+         RESET     LSTSALDT  TO  3
+         MOVE      LSTSALDT  TO  DD
+         RESET     LSTSALDT  TO  5
+         MOVE      LSTSALDT  TO  YY
+         DISPLAY   *P19:08,MM,"/",DD,"/",YY,*P19:09,LSTSALPR
+         MOVE      LSTPAYDT  TO  MM
+         RESET     LSTPAYDT  TO  3
+         MOVE      LSTPAYDT  TO  DD
+         RESET     LSTPAYDT  TO  5
+         MOVE      LSTPAYDT  TO  YY
+. 
+. SET UP THE DOLLAR AMOUNT FIELDS FOR DISPLAY
+. 
+         MOVE      CURNTDUE  TO  ACCTBAL
+         ADD       PD01TO30  TO  ACCTBAL
+         ADD       PD31TO60  TO  ACCTBAL
+         ADD       PD61TO90  TO  ACCTBAL
+         ADD       PDOVR90   TO  ACCTBAL
+         MOVE      ACCTBAL   TO  SUBTOTL
+         SUBTRACT  MTDCASH FROM  ACCTBAL
+         SUBTRACT  MTDCRED FROM  ACCTBAL
+         MOVE      MTDCRED   TO  CREDFLD
+         MULTIPLY  "-1"      BY  CREDFLD
+         MULTIPLY  "-1"      BY  MTDCASH
+. 
+. DISPLAY IT ALL
+. 
+         DISPLAY   *P60:08,MM,"/",DD,"/",YY,*P60:09,LSTPAYPR:
+                   *P51:13,CURNTDUE:
+                   *P51:14,PD01TO30:
+                   *P51:15,PD31TO60:
+                   *P51:16,PD61TO90:
+                   *P51:17,PDOVR90:
+                   *P50:18,SUBTOTL:
+                   *P51:19,CREDFLD:
+                   *P51:20,MTDCASH:
+                   *P50:22,ACCTBAL,*P01:23,*EF
+. 
+. ANY MORE ?
+. 
+SEYMORE  MOVE      " "  TO  REPLY
+         KEYIN     *P01:23,*EL,"DISPLAY MORE ACCOUNTS ?  (Y/N) ",REPLY
+         CMATCH    "Y"  TO  REPLY
+         GOTO      EOJ  IF  NOT  EQUAL
+         MOVE      "ACTIVE" TO   STATUS
+         GOTO      DISPLAY
+. 
+         INCLUDE   CUSTIO
+. 
+EOJ      CLOSE     CUSTFILE
+         CHAIN     "ARMENU1"

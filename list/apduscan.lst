@@ -1,0 +1,29 @@
+
+
+
+PAGE    1      apduscan                                                                                       02-11-19 11:35:27
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apduscan -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    5.    INCLUDE  A: common.pls
+    7.    INCLUDE  B: aptranfd.pls
+    9.    INCLUDE  C: apmastfd.pls
+   42.    INCLUDE  D: apcalndr.pls
+   46.    INCLUDE  E: callerr1.inc
+   12. E                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   50.    INCLUDE  F: callerr2.inc
+   98.    INCLUDE  G: aptranrd.pls
+  107.    INCLUDE  H: aptranks.pls
+  118.    INCLUDE  I: apmastrd.pls
+  181.    INCLUDE  J: getdate.txt
+  183.    INCLUDE  K: apdates.txt
+
+   Output: c:\apc\plc\apduscan.plc                                                                                                                                                                                                                                   
+       543 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:27 11:35:27
+  000019A0 DATA;  0000053E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

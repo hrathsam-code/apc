@@ -1,0 +1,46 @@
+.
+.
+         CREATE    DBOX,DBDATA
+.
+LSTSEL
+         ACTIVATE  DBOX,GETOPT,RESULT
+         LOOP
+           WAITEVENT
+         REPEAT
+         STOP
+.
+GETOPT   COMPARE   "1" TO RESULT
+         GOTO      GETPRT IF EQUAL
+         COMPARE   "4" TO RESULT
+         GOTO      GOTPRT IF EQUAL
+         RETURN
+.
+GETPRT
+         GETITEM   DBOX,1,0,PRESULT
+         GETITEM   DBOX,1,PRESULT,PRTNAME
+         SETITEM   DBOX,3,0,PRTNAME
+         RETURN
+.
+NULSPL   RESET     PRTNAME
+         GOTO      LSTSEL
+.
+CHKLEN   RESET     PRTNAME
+         MOVELPTR  PRTNAME TO NWK2
+         SFORMAT   DEVNAME TO NWK2
+         GOTO      MVPTNAM
+.
+GOTPRT
+         RESET     PRTNAME
+         SCAN      " on " IN PRTNAME
+         GOTO      NULSPL IF EOS
+         GOTO      CHKLEN IF NOT EQUAL
+         BUMP      PRTNAME BY -1
+         MOVEFPTR  PRTNAME TO NWK2
+         SFORMAT   DEVNAME TO NWK2
+         LENSET    PRTNAME
+         RESET     PRTNAME
+MVPTNAM  MOVE      PRTNAME TO DEVNAME
+         RESET     DEVNAME
+         DEACTIVATE DBOX
+         SPLOPEN   DEVNAME,"R"              //HR 2/10/03
+         NORETURN

@@ -1,0 +1,1090 @@
+
+
+
+PAGE    1      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP F:\SOURCE\BTCHPRNT.PLS,F:\PLC\BTCHPRNT.PLC,F:\PLC\BTCHPRNT.LST -ZI,P,L 
+
+    1.                                ...................................................................
+    2.                                .    BTCHPRNT/TEXT - PRINT CASH BATCH DATA - A/R CHECK BATCHES    .
+    3.                                .    BY USE OF AN INPUT DATE RANGE                                .
+    4.                                .    JAN 5, 1991 - MICRO SYSTEMS CONSULTANTS                      .
+    5.                                         INCLUDE   MSCBRAG.TXT
+    5.    INCLUDE  A: f:\source\mscbrag.txt
+    1. A                              .......................................................
+    2. A                              .     THIS APPLICATION DESIGNED AND IMPLEMENTED BY    .
+    3. A                              .                                                     .
+    4. A                              .  M I C R O   S Y S T E M S   C O N S U L T A N T S  .
+    5. A                              .                                                     .
+    6. A                              . 1627 BRIDAL TRAIL,  ROCK HILL, SOUTH CAROLINA 29732 .
+    7. A                              .                   (803) 327-2634                    .
+    8. A                              .......................................................
+    6.                                ...................................................................
+    7.                                .
+    8.                                         INCLUDE   COMMON.TXT
+    8.    INCLUDE  B: f:\source.cnv\common.txt
+    1. B                              *................................................................
+    2. B                              . COMMON - DEFINE COMMON DATA AREAS
+    3. B                              . 
+    4. B                              . NOTE:  85 BYTES WILL BE RESERVED FOR INTER PROGRAM COMMUNICATIONS
+    5. B                              . MODIFIED 3/15/80 FOR I/O FUNCTION TYPE LOAD FOR ERROR DETECTION
+    6. B                              . 
+    7. B    00000818                  PORTN    DIM       *30
+    8. B    0000083E                  TODAY    DIM       *8                  DATE IN mm/dd/yy FORMAT
+    9. B    0000084E                  SECURITY FORM      *1                  SECURITY CLEARANCE LEVEL
+   10. B    00000854                  DATE6    DIM       *6                  DATE IN MMDDYY WITH NO /
+   11. B    00000862                  ENVS     DIM       *4                  COMPANY LOCATOR - ENVIRONMENT
+   12. B    0000086E                  PONUMBS  DIM       *4
+   13. B    0000087A                  INVNUMB  DIM       *5                  CURRENT INVOICE NUMBER
+   14. B    00000888                  ACCTNUMB DIM       *4                  CURRENT ACCOUNT NUMBER
+   15. B    00000894                  VENDNUMB DIM       *3                  CURRENT VENDOR NUMBER
+   16. B    000008A0                  FROMPGM  DIM       *8                  CALLING PROGRAM NAME
+   17. B    000008B0                  FIRSTIME DIM       *1                  FIRST TIME SWITCH
+   18. B    000008BA                  TESTONE  DIM       *1
+   19. B    000008C4                  TESTTWO  DIM       *1
+   20. B    000008CE                  TESTTHRE DIM       *1
+   21. B    000008D8                  ERRORSW1 DIM       *1
+   22. B    000008E2                  ERRORSW2 DIM       *1
+   23. B    000008EC                  ERRORSW3 DIM       *1
+   24. B    000008F6                  ERRORSW4 DIM       *1
+   25. B    00000900                  USERLOCN DIM       *1
+   26. B    0000090A                  IOTEST   DIM       *1
+   27. B    00000914                  IOTYPE   DIM       *6                  READ/WRITE/UPDATE
+   28. B    00000922                  IOERFILE DIM       *19                 NAME OF FILE TRAPPED FOR ERROR MSG
+   29. B    0000093E                  USERCODE DIM       *9                  USER ID CODE
+   30. B    00000950                  USERNAME DIM       *20                 USER'S NAME
+   31. B    0000096C                  APPCODE  DIM       *2                  APPLICATION (A/R, A/P, O/P, etc)
+   32. B    00000976                  APPSECUR FORM      *2                  USER'S SECURITY LEVEL FOR APPLICATION
+
+
+
+PAGE    2      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   33. B                              . 
+   34. B                              .  END OF COMMON WORK AREA FOR INTER PROGRAM COMMUNICATION
+   35. B                              . 
+    9.                                .
+   10.                                         INCLUDE   BATCHFD2.TXT
+   10.    INCLUDE  C: f:\source\batchfd2.txt
+    1. C                              ..........................................................
+    2. C                              .   BATCHFD/TEXT    CASH BATCH FILE DESCRIPTION          .
+    3. C                              ..........................................................
+    4. C                              .
+    5. C    00000980                  BATCHFL  IFILE     KEYL=11,UNCOMPRESSED,FIXED=284
+    6. C    000009B0                  BATCHNM  INIT      "BTCHBYDT.ISI"
+    7. C                              .
+    8. C    000009C4                  BATCHKEY DIM       5
+    9. C                              .
+   10. C    000009D2                  BSTATUS  DIM       1       ("B" BALANCED, "U" UNBALANCED, "C" CANCELED)
+   11. C    000009DB                  BCHECKS  FORM      2
+   12. C    000009E2                  BATCHTOT FORM      7.2
+   13. C    000009F2                  BTCHDATE DIM       6       (YYMMDD)
+   14. C                              .
+   15. C    00000A00                  ACCTARG  DIM       4
+   16. C    00000A0C                  BACCT1   DIM       4
+   17. C    00000A18                  BACCT2   DIM       4
+   18. C    00000A24                  BACCT3   DIM       4
+   19. C    00000A30                  BACCT4   DIM       4
+   20. C    00000A3C                  BACCT5   DIM       4
+   21. C    00000A48                  BACCT6   DIM       4
+   22. C    00000A54                  BACCT7   DIM       4
+   23. C    00000A60                  BACCT8   DIM       4
+   24. C    00000A6C                  BACCT9   DIM       4
+   25. C    00000A78                  BACCT10  DIM       4
+   26. C    00000A84                  BACCT11  DIM       4
+   27. C    00000A90                  BACCT12  DIM       4
+   28. C    00000A9C                  BACCT13  DIM       4
+   29. C    00000AA8                  BACCT14  DIM       4
+   30. C    00000AB4                  BACCT15  DIM       4
+   31. C    00000AC0                  BACCT16  DIM       4
+   32. C    00000ACC                  BACCT17  DIM       4
+   33. C    00000AD8                  BACCT18  DIM       4
+   34. C    00000AE4                  BACCT19  DIM       4
+   35. C    00000AF0                  BACCT20  DIM       4
+   36. C                              .
+   37. C    00000AFC                  BCHKNO1  DIM       6
+   38. C    00000B0A                  BCHKNO2  DIM       6
+   39. C    00000B18                  BCHKNO3  DIM       6
+   40. C    00000B26                  BCHKNO4  DIM       6
+   41. C    00000B34                  BCHKNO5  DIM       6
+   42. C    00000B42                  BCHKNO6  DIM       6
+   43. C    00000B50                  BCHKNO7  DIM       6
+   44. C    00000B5E                  BCHKNO8  DIM       6
+   45. C    00000B6C                  BCHKNO9  DIM       6
+   46. C    00000B7A                  BCHKNO11 DIM       6
+   47. C    00000B88                  BCHKNO12 DIM       6
+
+
+
+PAGE    3      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   48. C    00000B96                  BCHKNO13 DIM       6
+   49. C    00000BA4                  BCHKNO14 DIM       6
+   50. C    00000BB2                  BCHKNO15 DIM       6
+   51. C    00000BC0                  BCHKNO16 DIM       6
+   52. C    00000BCE                  BCHKNO17 DIM       6 
+   53. C    00000BDC                  BCHKNO18 DIM       6
+   54. C    00000BEA                  BCHKNO19 DIM       6
+   55. C    00000BF8                  BCHKNO20 DIM       6
+   56. C                              .
+   57. C    00000C06                  BDTPD1   DIM       6
+   58. C    00000C14                  BDTPD2   DIM       6
+   59. C    00000C22                  BDTPD3   DIM       6
+   60. C    00000C30                  BDTPD4   DIM       6
+   61. C    00000C3E                  BDTPD5   DIM       6
+   62. C    00000C4C                  BDTPD6   DIM       6
+   63. C    00000C5A                  BDTPD7   DIM       6
+   64. C    00000C68                  BDTPD8   DIM       6
+   65. C    00000C76                  BDTPD9   DIM       6
+   66. C    00000C84                  BDTPD10  DIM       6
+   67. C    00000C92                  BDTPD11  DIM       6
+   68. C    00000CA0                  BDTPD12  DIM       6
+   69. C    00000CAE                  BDTPD13  DIM       6
+   70. C    00000CBC                  BDTPD14  DIM       6
+   71. C    00000CCA                  BDTPD15  DIM       6
+   72. C    00000CD8                  BDTPD16  DIM       6
+   73. C    00000CE6                  BDTPD17  DIM       6
+   74. C    00000CF4                  BDTPD18  DIM       6
+   75. C    00000D02                  BDTPD19  DIM       6
+   76. C    00000D10                  BDTPD20  DIM       6
+   77. C                              .
+   78. C    00000D1E                  CHECKAMT FORM      6.2
+   79. C    00000D2C                  BCAMT1   FORM      6.2
+   80. C    00000D3A                  BCAMT2   FORM      6.2
+   81. C    00000D48                  BCAMT3   FORM      6.2
+   82. C    00000D56                  BCAMT4   FORM      6.2
+   83. C    00000D64                  BCAMT5   FORM      6.2
+   84. C    00000D72                  BCAMT6   FORM      6.2
+   85. C    00000D80                  BCAMT7   FORM      6.2
+   86. C    00000D8E                  BCAMT8   FORM      6.2
+   87. C    00000D9C                  BCAMT9   FORM      6.2
+   88. C    00000DAA                  BCAMT10  FORM      6.2
+   89. C    00000DB8                  BCAMT11  FORM      6.2
+   90. C    00000DC6                  BCAMT12  FORM      6.2
+   91. C    00000DD4                  BCAMT13  FORM      6.2
+   92. C    00000DE2                  BCAMT14  FORM      6.2
+   93. C    00000DF0                  BCAMT15  FORM      6.2
+   94. C    00000DFE                  BCAMT16  FORM      6.2
+   95. C    00000E0C                  BCAMT17  FORM      6.2
+   96. C    00000E1A                  BCAMT18  FORM      6.2
+   97. C    00000E28                  BCAMT19  FORM      6.2
+   98. C    00000E36                  BCAMT20  FORM      6.2
+   99. C                              .
+  100. C    00000E44                  BCSTAT1  DIM       1
+
+
+
+PAGE    4      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+  101. C    00000E4E                  BCSTAT2  DIM       1
+  102. C    00000E58                  BCSTAT3  DIM       1
+  103. C    00000E62                  BCSTAT4  DIM       1
+  104. C    00000E6C                  BCSTAT5  DIM       1
+  105. C    00000E76                  BCSTAT6  DIM       1
+  106. C    00000E80                  BCSTAT7  DIM       1
+  107. C    00000E8A                  BCSTAT8  DIM       1
+  108. C    00000E94                  BCSTAT9  DIM       1
+  109. C    00000E9E                  BCSTAT10 DIM       1
+  110. C    00000EA8                  BCSTAT11 DIM       1
+  111. C    00000EB2                  BCSTAT12 DIM       1
+  112. C    00000EBC                  BCSTAT13 DIM       1
+  113. C    00000EC6                  BCSTAT14 DIM       1
+  114. C    00000ED0                  BCSTAT15 DIM       1
+  115. C    00000EDA                  BCSTAT16 DIM       1
+  116. C    00000EE4                  BCSTAT17 DIM       1
+  117. C    00000EEE                  BCSTAT18 DIM       1
+  118. C    00000EF8                  BCSTAT19 DIM       1
+  119. C    00000F02                  BCSTAT20 DIM       1
+  120. C                              .
+  121. C                              .....................
+  122. C                              .
+  123. C    00000F0C                  BTCHRDKY DIM       11     (YYMMDD&BATCH#)
+  124. C    00000F20                  BATCH5   DIM       5
+  125. C    00000F2E                  LASTBTCH DIM       5
+  126. C    00000F3C                  THISBTCH DIM       5
+  127. C    00000F49                  BTCHINDX FORM      2
+  128. C    00000F50                  CURRCHK  FORM      2
+  129. C                              ................................................................
+   11.                                .
+   12.                                         INCLUDE   CUSTMAST.TXT
+   12.    INCLUDE  D: f:\source.cnv\custmast.txt
+    1. D                              . 
+    2. D                              . CUSTOMER MASTER FILE DEFINITION   SOURCE NAME CUSTMAST/TXT  9/29/79
+    3. D                              . 
+    4. D                              . RECORD LENGTH IS 225 BYTES: (INCLUDES AGEING CATEGORIES)
+    5. D                              . 
+    6. D                              . KEY LOCATED POSITION 1 FOR A LENGTH OF 4 BYTES
+    7. D                              . 
+    8. D    00000F58                  CUSTKEY  DIM       4
+    9. D    00000F64                  CUSTSTTS DIM       1         STATUS OF ACCT: A=OPEN, C=MODIFIED, D=DELETED
+   10. D    00000F6E                  CUSTNAME DIM       30
+   11. D    00000F94                  CUSTADDR DIM       25
+   12. D    00000FB6                  CUSTADR2 DIM       25
+   13. D    00000FD8                  CUSTCITY DIM       20
+   14. D    00000FF4                  CUSTSTAT DIM       2
+   15. D    00000FFE                  CUSTZIP  FORM      5
+   16. D    00001008                  CUSTCRED FORM      6         CREDIT LIMIT IN DOLLARS
+   17. D    00001014                  CUSTCATG DIM       1         PAYMENT CATEGORY: P=POOR, OTHERWISE OK
+   18. D                              . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+   19. D                              .  MOST CURRENT SALES AND PAYMENT ACTIVITY         
+   20. D                              .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+   21. D    0000101E                  LSTSALDT DIM       6         LAST SALE DATE
+
+
+
+PAGE    5      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   22. D    0000102C                  LSTPAYDT DIM       6         LAST PAYMENT DATE
+   23. D    0000103A                  LSTSALPR FORM      5.2       LAST INVOICE AMOUNT
+   24. D    00001047                  LSTPAYPR FORM      5.2       LAST PAYMENT AMOUNT
+   25. D                              . ......................................................................
+   26. D    00001054                  COMMCODE DIM       4         COMMISSION CODE
+   27. D                              . ......................................................................
+   28. D                              .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+   29. D                              .  ACCOUNTS RECEIVABLES SYSTEM - AGEING CATEGORIES
+   30. D                              .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+   31. D    00001060                  CURNTDUE FORM      6.2       CURRENT DUE AMOUNT    (1-30 DAYS OLD)
+   32. D    0000106E                  PD01TO30 FORM      6.2       PAST DUE 1-30         (31-60 DAYS OLD)
+   33. D    0000107C                  PD31TO60 FORM      6.2       PAST DUE 31-60        (61-90 DAYS OLD)
+   34. D    0000108A                  PD61TO90 FORM      6.2       PAST DUE 61-90        (91-120 DAYS OLD)
+   35. D    00001098                  PDOVR90  FORM      6.2       PAST DUE 91+          (121+   DAYS OLD)
+   36. D                              .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+   37. D                              .  MONTH TO DATE CASH PROCESSED AND CREDITS ISSUED TO ACCT
+   38. D                              .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+   39. D    000010A6                  MTDCASH  FORM      6.2
+   40. D    000010B4                  MTDCRED  FORM      5.2
+   41. D                              . 
+   42. D                              ........TELEFONE DIM       12
+   43. D                              .
+   44. D                              . 
+   13.                                .
+   14.      000010C4                  CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+   15.      000010EC                  CSTNAME  INIT      "ACCOUNTS.ISI"
+   16.                                .
+   17.      00001100                  REPLY    DIM       1
+   18.      00001109                  ROW      FORM      2
+   19.      00001110                  DROW     FORM      2
+   20.      00001117                  COL      FORM      2
+   21.      0000111E                  COLSW    DIM       1
+   22.      00001127                  CHKSUM   FORM      6.2
+   23.      00001135                  NEWBATCH FORM      5
+   24.      00001140                  DATE8    DIM       8
+   25.      00001150                  TEST2    FORM      2
+   26.      00001158                  MM       DIM       2
+   27.      00001162                  DD       DIM       2
+   28.      0000116C                  YY       DIM       2
+   29.      00001176                  PDATE    DIM       8
+   30.      00001186                  IOSW     DIM       1
+   31.      00001190                  ACCTIN   DIM       4
+   32.      0000119C                  KEYLINE  DIM       2
+   33.      000011A6                  LINENO   FORM      2
+   34.      000011AE                  T1       DIM       1
+   35.                                 
+   36.      000011B7                  RECCNT   FORM      4
+   37.      000011C0                  CAMTIN   FORM      6.2
+   38.      000011CE                  ERRTYPE  DIM       10
+   39.      000011E0                  CHKCNT   FORM      2
+   40.      000011E7                  LASTROW  FORM      2
+   41.      000011EE                  DATE1    DIM       8
+   42.      000011FE                  DATE1X   DIM       6
+
+
+
+PAGE    6      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   43.      0000120C                  DATE1N   FORM      6
+   44.      00001218                  DATE2    DIM       8
+   45.      00001228                  DATE2X   DIM       6
+   46.      00001236                  DATE2N   FORM      6
+   47.      00001241                  FORM6    FORM      6
+   48.      0000124C                  PTIME    DIM       9
+   49.      0000125D                  PAGES    FORM      3
+   50.      00001265                  LINES    FORM      2
+   51.      0000126C                  DASH44   INIT      "--------------------------------------------"
+   52.      000012A0                  ASTER44  INIT      "********************************************"
+   53.                                .
+   54.      000012D4                  BTCHDONE INIT      "N"
+   55.      000012DD                  MONTHTOT FORM      7.2
+   56.      000012EC                  DAYTOT   FORM      7.2
+   57.      000012FC                  EOJSW    INIT      "N"
+   58.      00001306                  FIRSTSW  INIT      "Y"
+   59.      00001310                  SAVEDATE DIM       6
+   60.      0000131E                  SVPDATE  DIM       8
+   61.      0000132E                  REPLY1   DIM       1
+   62.                                .
+   63.      00000000                           DISPLAY   *ES,*HON,*P01:01,"ACCOUNTS RECEIVABLE":
+   64.                                                               " SYSTEM - PRINT CASH LEDGER BY DATE RANGE":
+   65.                                                       *P01:06,"IF YOU ENTERED THIS PROGRAM ERRONEOUSLY ":
+   66.                                                               "YOU MAY EXIT BY PRESSING F5 NOW",*HOFF
+   67.                                .
+   68.      00000006                           BEEP 
+   69.      0000000C                           KEYIN     *P01:10,"PRESS ENTER TO PRINT CASH LEDGER ",REPLY
+   70.      00000012                           GOTO      EOJ  IF  F5
+   71.                                .
+   72.      0000001C                           BEEP 
+   73.      00000022                           DISPLAY     *P1:23,*EL,"INDEXING CASH BATCH FILES PRIOR TO PRINT",*W2
+   74.                                 
+   75.      00000028                           ROLLOUT    "F:\UTILS.CNV\BTCHINDX.BAT"
+   76.                                 
+   77.                                 
+   78.      0000002E                           CALL      OPENCUST
+   79.      00000034                           CLOCK     TIME  TO  PTIME
+   80.      0000003E                           MOVE      " "   TO  COLSW
+   81.      00000048                           GOTO      START
+   82.                                .
+   83.                                         INCLUDE   DATESCHK.TXT
+   83.    INCLUDE  E: f:\source.cnv\dateschk.txt
+    1. E                              .
+    2. E                              . ENTER DATE RANGE FOR THE RETRIEVAL
+    3. E                              .
+    4. E    0000004E                  ENTERDT  KEYIN     *P1:22,*EF,"ENTER DATE (MM/DD/YY): ":
+    5. E                                                 *DE,MM,*-,"/",*DE,DD,*-,"/",*DE,YY,*+
+    6. E    00000054                           DISPLAY   *P1:23,*EL,"YOU ENTERED ":
+    7. E                                                 MM,"/",DD,"/",YY
+    8. E    0000005A                           MOVE      " " TO REPLY
+    9. E    00000064                           KEYIN     *P25:23,"  OKAY? (Y/N) ",REPLY
+   10. E    0000006A                           CMATCH    "Y",REPLY
+   11. E    00000074                           GOTO      NXT2 IF EQUAL
+
+
+
+PAGE    7      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   12. E    0000007A                           CMATCH    "N",REPLY
+   13. E    00000084                           GOTO      ENTERDT IF EQUAL
+   14. E    0000008A                           BEEP 
+   15. E    00000090                           GOTO      ENTERDT
+   16. E                              .
+   17. E    00000096                  NXT2     MOVE      MM TO TEST2
+   18. E    000000A0                           COMPARE   "01",TEST2
+   19. E    000000AA                           GOTO      BEEPIT IF LESS
+   20. E                              .
+   21. E    000000B0                           COMPARE   "13",TEST2
+   22. E    000000BA                           GOTO      BEEPIT IF NOT LESS
+   23. E                              .
+   24. E    000000C0                           MOVE      DD TO TEST2
+   25. E    000000CA                           COMPARE   "01",TEST2
+   26. E    000000D4                           GOTO      BEEPIT IF LESS
+   27. E    000000DA                           COMPARE   "32",TEST2
+   28. E    000000E4                           GOTO      BEEPIT IF NOT LESS
+   29. E                              .
+   30. E                              ...         MOVE      YY TO TEST2
+   31. E                              ...         COMPARE   "91",TEST2
+   32. E                              ...         GOTO      BEEPIT IF LESS
+   33. E                              .
+   34. E    000000EA                           GOTO      NXT2A
+   35. E                              .
+   36. E    000000F0                  BEEPIT   BEEP 
+   37. E    000000F6                           DISPLAY   *P1:23,*EL,"INVALID DATE - PLEASE REENTER! ",*W2
+   38. E    000000FC                           GOTO      ENTERDT
+   39. E                              .
+   40. E    00000102                  NXT2A    CLEAR     BTCHDATE
+   41. E    00000108                           APPEND    YY TO BTCHDATE
+   42. E    00000112                           APPEND    MM TO BTCHDATE
+   43. E    0000011C                           APPEND    DD TO BTCHDATE
+   44. E    00000126                           RESET     BTCHDATE TO 1
+   45. E    00000130                           REP       " 0" IN BTCHDATE
+   46. E                              .
+   47. E    0000013A                          RETURN 
+   48. E                              ..................................................................
+   84.                                .
+   85.      0000013C                  NOZERO   BEEP 
+   86.      00000142                           DISPLAY   *P1:23,*EL,*HON,"NO BATCH CONTROL RECORD - ABORTING!":
+   87.                                                   *W2,*HOFF
+   88.      00000148                           CHAIN     "CASHLDGR"
+   89.                                .
+   90.      0000014E                  START    CALL      BTCHOPEN
+   91.                                .
+   92.      00000154                           DISPLAY   *P1:6,*EF
+   93.                                .
+   94.      0000015A                  WHCHBTCH CALL      CLRBATCH
+   95.                                .
+   96.      00000160                  DATE1    DISPLAY   *P1:14,*EF:
+   97.                                                   *P1:14,*HON,"ENTER  START DATE FOR CASH LEDGER (MM/DD/YY) ":
+   98.                                                   *HOFF
+   99.                                .
+
+
+
+PAGE    8      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+  100.      00000166                           CALL      ENTERDT
+  101.                                .
+  102.      0000016C                           MOVE      BTCHDATE  TO  DATE1X
+  103.      00000176                           MOVE      BTCHDATE  TO  DATE1N
+  104.                                .
+  105.      00000180                           CLEAR     DATE1
+  106.      00000186                           APPEND    MM  TO DATE1
+  107.      00000190                           APPEND    "/" TO DATE1
+  108.      0000019A                           APPEND    DD  TO DATE1
+  109.      000001A4                           APPEND    "/" TO DATE1
+  110.      000001AE                           APPEND    YY  TO DATE1
+  111.      000001B8                           RESET     DATE1  TO  1
+  112.      000001C2                           DISPLAY   *P50:14,*HON,DATE1,*HOFF
+  113.                                .
+  114.      000001C8                           DISPLAY   *P1:16,*EF,*HON,"ENTER ENDING DATE FOR CASH LEDGER ":
+  115.                                                   "(MM/DD/YY) ",*HOFF
+  116.                                .
+  117.      000001CE                           CALL      ENTERDT
+  118.                                .
+  119.      000001D4                           MOVE      BTCHDATE  TO  DATE2X
+  120.      000001DE                           MOVE      BTCHDATE  TO  DATE2N
+  121.                                .
+  122.      000001E8                           CLEAR     DATE2
+  123.      000001EE                           APPEND    MM  TO DATE2
+  124.      000001F8                           APPEND    "/" TO DATE2
+  125.      00000202                           APPEND    DD  TO DATE2
+  126.      0000020C                           APPEND    "/" TO DATE2
+  127.      00000216                           APPEND    YY  TO DATE2
+  128.      00000220                           RESET     DATE2  TO  1
+  129.                                .
+  130.      0000022A                           DISPLAY   *P50:16,*HON,DATE2,*HOFF,*P1:17,*EF
+  131.                                .
+  132.      00000230                           MOVE      " " TO REPLY
+  133.      0000023A                           KEYIN     *P1:20,"DATES CORRECT? (Y/N) ",REPLY
+  134.      00000240                           CMATCH    "Y",REPLY
+  135.      0000024A                           GOTO      SETKEY IF EQUAL
+  136.      00000250                           BEEP 
+  137.      00000256                           GOTO      DATE1
+  138.                                .
+  139.                                .
+  140.      0000025C                  SETKEY   CLEAR     BTCHRDKY
+  141.      00000262                           APPEND    "000101     " TO BTCHRDKY
+  142.      0000026C                           RESET     BTCHRDKY    TO  1
+  143.                                .
+  144.      00000276                           READ      BATCHFL,BTCHRDKY;THISBTCH,BSTATUS
+  145.                                .
+  146.      00000280                           CALL      HDR
+  147.                                .
+  148.      00000286                  RDLOOP  
+  149.                                 
+  150.      00000286                           TRAPCLR   IO
+  151.      0000028C                           TRAPCLR   RANGE
+  152.      00000292                           TRAPCLR   PARITY
+
+
+
+PAGE    9      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+  153.      00000298                           TRAPCLR   FORMAT
+  154.      0000029E                           MOVE      "BATCHFL" TO IOERFILE
+  155.      000002A8                           MOVE      "READKS"  TO IOTYPE
+  156.                                .
+  157.      000002B2                           READKS    BATCHFL;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+  158.                                                           BTCHDATE:
+  159.                                                           BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+  160.                                                           BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+  161.                                                           BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+  162.                                                           BACCT19,BACCT20:
+  163.                                                           BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+  164.                                                           BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+  165.                                                           BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+  166.                                                           BCAMT20
+  167.                                 
+  168.      000002BC                           GOTO      EOJ   IF  OVER
+  169.                                 
+  170.      000002C2                           DISPLAY   *P1:23,*EL,*HON,BATCHKEY," ",BSTATUS," ",BCHECKS
+  171.                                 
+  172.      000002C8                           MOVE      BTCHDATE TO  T1
+  173.      000002D2                           MATCH     "8"      TO  T1
+  174.      000002E0                           GOTO      EOJ IF EQUAL
+  175.      000002E6                           MATCH     "9"      TO  T1
+  176.      000002F4                           GOTO      EOJ IF EQUAL
+  177.                                .
+  178.                                 
+  179.      000002FA                  CHKDATE1 MOVE      BTCHDATE TO  FORM6
+  180.                                .
+  181.      00000304                           COMPARE   DATE1N   TO  FORM6
+  182.      0000030E                           GOTO      TAKEIT   IF  EQUAL
+  183.      00000314                           GOTO      RDLOOP   IF  LESS    (CAN'T REALLY HAPPEN!)
+  184.                                .
+  185.      0000031A                  CHKDATE2 COMPARE   DATE2N   TO  FORM6
+  186.      00000324                           GOTO      TAKEIT   IF  EQUAL
+  187.      0000032A                           GOTO      RDLOOP   IF  NOT LESS
+  188.                                .
+  189.      00000330                  TAKEIT   CMATCH    "Y",FIRSTSW
+  190.      0000033A                           GOTO      COMPLINE IF NOT EQUAL
+  191.                                .
+  192.      00000340                           MOVE      BTCHDATE TO SAVEDATE
+  193.      0000034A                           CALL      SETDATE
+  194.      00000350                           MOVE      "N" TO FIRSTSW
+  195.                                .
+  196.      0000035A                  COMPLINE COMPARE   "55",LINES
+  197.      00000364                           CALL      HDR  IF  EQUAL
+  198.                                .
+  199.      0000036A                           MATCH     BTCHDATE TO SAVEDATE
+  200.      00000378                           CALL      DATEBRK IF NOT EQUAL
+  201.                                .
+  202.      0000037E                           GOTO      MAKEDTLS
+  203.                                .
+  204.                                         INCLUDE   BATCHIO.TXT
+  204.    INCLUDE  F: f:\source\batchio.txt
+
+
+
+PAGE   10      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+    1. F                              ........................................................
+    2. F                              . BATCHIO/TEXT - BATCH FILE I/O MODULES                .
+    3. F                              ........................................................
+    4. F                              .
+    5. F    00000384                  BTCHOPEN TRAPCLR   IO
+    6. F    0000038A                           TRAP      NOBATCH IF IO
+    7. F    00000398                           MOVE      "M" TO IOSW
+    8. F    000003A2                           OPEN      BATCHFL,BATCHNM
+    9. F    000003B0                           MOVE      "H" TO IOSW
+   10. F    000003BA                           RETURN 
+   11. F                              .
+   12. F    000003BC                  NOBATCH  BEEP 
+   13. F    000003C2                           DISPLAY   *P1:23,*EL,*HON,"A/R CASH BATCH FILE NOT ON-LINE! ":
+   14. F                                                  *W4,*HOFF,*P1:23,*EL
+   15. F    000003C8                           RETURN 
+   16. F                              .
+   17. F    000003CA                  BTCHREAD TRAPCLR   IO
+   18. F    000003D0                           TRAPCLR   RANGE
+   19. F    000003D6                           TRAPCLR   PARITY
+   20. F    000003DC                           TRAPCLR   FORMAT
+   21. F    000003E2                           MOVE      "BATCHFL" TO IOERFILE
+   22. F    000003EC                           MOVE      "READ "   TO IOTYPE
+   23. F    000003F6                           MOVE      "M"       TO IOSW
+   24. F    00000400                           TRAP      STDIOERR IF IO
+   25. F    0000040E                           TRAP      STDRANGE IF RANGE
+   26. F    0000041C                           TRAP      STDPARER IF PARITY
+   27. F    0000042A                           TRAP      STDFMTER IF FORMAT
+   28. F                              .
+   29. F    00000438                           READ      BATCHFL,BTCHRDKY;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+   30. F                                                         BTCHDATE:
+   31. F                                                         BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+   32. F                                                         BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+   33. F                                                         BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+   34. F                                                         BACCT19,BACCT20:
+   35. F                                                         BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+   36. F                                                         BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+   37. F                                                         BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+   38. F                                                         BCAMT20
+   39. F                              .
+   40. F    00000442                           GOTO      BTCHRTRN IF OVER
+   41. F    00000448                           MOVE      "H"  TO  IOSW
+   42. F                              .
+   43. F    00000452                  BTCHRTRN RETURN 
+   44. F                              .
+   45. F    00000454                  BTCHWRIT TRAPCLR   IO
+   46. F    0000045A                           TRAPCLR   RANGE
+   47. F    00000460                           TRAPCLR   PARITY
+   48. F    00000466                           TRAPCLR   FORMAT
+   49. F    0000046C                           MOVE      "BATCHFL" TO IOERFILE
+   50. F    00000476                           MOVE      "WRITE"   TO IOTYPE
+   51. F    00000480                           MOVE      "M"       TO IOSW
+   52. F    0000048A                           TRAP      STDIOERR IF IO
+   53. F    00000498                           TRAP      STDRANGE IF RANGE
+
+
+
+PAGE   11      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+   54. F    000004A6                           TRAP      STDPARER IF PARITY
+   55. F    000004B4                           TRAP      STDFMTER IF FORMAT
+   56. F                              .
+   57. F    000004C2                           WRITE     BATCHFL,BTCHRDKY;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+   58. F                                                         BTCHDATE:
+   59. F                                                         BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+   60. F                                                         BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+   61. F                                                         BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+   62. F                                                         BACCT19,BACCT20:
+   63. F                                                         BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+   64. F                                                         BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+   65. F                                                         BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+   66. F                                                         BCAMT20
+   67. F                              .
+   68. F    000004CC                           MOVE      "H"  TO  IOSW
+   69. F    000004D6                           RETURN 
+   70. F                              .
+   71. F    000004D8                  BTCHUPDT TRAPCLR   IO
+   72. F    000004DE                           TRAPCLR   RANGE
+   73. F    000004E4                           TRAPCLR   PARITY
+   74. F    000004EA                           TRAPCLR   FORMAT
+   75. F    000004F0                           MOVE      "BATCHFL" TO IOERFILE
+   76. F    000004FA                           MOVE      "UPDATE"  TO IOTYPE
+   77. F    00000504                           MOVE      "M"       TO IOSW
+   78. F    0000050E                           TRAP      STDIOERR IF IO
+   79. F    0000051C                           TRAP      STDRANGE IF RANGE
+   80. F    0000052A                           TRAP      STDPARER IF PARITY
+   81. F    00000538                           TRAP      STDFMTER IF FORMAT
+   82. F                              .
+   83. F    00000546                           UPDATE    BATCHFL;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+   84. F                                                         BTCHDATE:
+   85. F                                                         BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+   86. F                                                         BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+   87. F                                                         BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+   88. F                                                         BACCT19,BACCT20:
+   89. F                                                         BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+   90. F                                                         BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+   91. F                                                         BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+   92. F                                                         BCAMT20
+   93. F                              .
+   94. F    00000550                           MOVE      "H"  TO  IOSW
+   95. F    0000055A                           RETURN 
+   96. F                              .
+   97. F                              .
+   98. F    0000055C                  BTCHRDKS TRAPCLR   IO
+   99. F    00000562                           TRAPCLR   RANGE
+  100. F    00000568                           TRAPCLR   PARITY
+  101. F    0000056E                           TRAPCLR   FORMAT
+  102. F    00000574                           MOVE      "BATCHFL" TO IOERFILE
+  103. F    0000057E                           MOVE      "READKS"  TO IOTYPE
+  104. F    00000588                           MOVE      "M"       TO IOSW
+  105. F    00000592                           TRAP      STDIOERR IF IO
+  106. F    000005A0                           TRAP      STDRANGE IF RANGE
+
+
+
+PAGE   12      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+  107. F    000005AE                           TRAP      STDPARER IF PARITY
+  108. F    000005BC                           TRAP      STDFMTER IF FORMAT
+  109. F                              .
+  110. F    000005CA                           READKS    BATCHFL;BATCHKEY,BSTATUS,BCHECKS,BATCHTOT:
+  111. F                                                         BTCHDATE:
+  112. F                                                         BACCT1,BACCT2,BACCT3,BACCT4,BACCT5,BACCT6:
+  113. F                                                         BACCT7,BACCT8,BACCT9,BACCT10,BACCT11,BACCT12:
+  114. F                                                         BACCT13,BACCT14,BACCT15,BACCT16,BACCT17,BACCT18:
+  115. F                                                         BACCT19,BACCT20:
+  116. F                                                         BCAMT1,BCAMT2,BCAMT3,BCAMT4,BCAMT5,BCAMT6,BCAMT7:
+  117. F                                                         BCAMT8,BCAMT9,BCAMT10,BCAMT11,BCAMT12,BCAMT13:
+  118. F                                                         BCAMT14,BCAMT15,BCAMT16,BCAMT17,BCAMT18,BCAMT19:
+  119. F                                                         BCAMT20
+  120. F                              .
+  121. F    000005D4                           GOTO      BTCHRTRN IF OVER
+  122. F                              .
+  123. F    000005DA                           MOVE      "H"  TO  IOSW
+  124. F    000005E4                           RETURN 
+  125. F                              ....
+  126. F    000005E6                  BTCHCLOS TRAPCLR   IO
+  127. F    000005EC                           MOVE      "CLOSE"   TO IOTYPE
+  128. F    000005F6                           MOVE      "BATCHFL" TO IOERFILE
+  129. F    00000600                           MOVE      "M"       TO IOSW
+  130. F    0000060A                           TRAP      STDIOERR  IF IO
+  131. F                              .....        CLOSE     BATCHFL,BATCHNM
+  132. F    00000618                           MOVE      "H"  TO  IOSW
+  133. F    00000622                           RETURN 
+  134. F                              .
+  135. F                              ....................................................................
+  136. F                              .
+  137. F    00000624                  STORBTCH STORE     ACCTARG INTO BTCHINDX OF BACCT1:
+  138. F                                                 BACCT2,BACCT3,BACCT4,BACCT5:
+  139. F                                                 BACCT6,BACCT7,BACCT8,BACCT9,BACCT10:
+  140. F                                                 BACCT11,BACCT12,BACCT13,BACCT14,BACCT15:
+  141. F                                                 BACCT16,BACCT17,BACCT18,BACCT19,BACCT20
+  142. F                              .
+  143. F    00000636                           STORE     CHECKAMT INTO BTCHINDX OF BCAMT1:
+  144. F                                                 BCAMT2,BCAMT3,BCAMT4,BCAMT5:
+  145. F                                                 BCAMT6,BCAMT7,BCAMT8,BCAMT9,BCAMT10:
+  146. F                                                 BCAMT11,BCAMT12,BCAMT13,BCAMT14,BCAMT15:
+  147. F                                                 BCAMT16,BCAMT17,BCAMT18,BCAMT19,BCAMT20
+  148. F                              .
+  149. F    00000648                                     RETURN 
+  150. F                              ....................................................................
+  151. F                              .
+  152. F    0000064A                  LOADBTCH LOAD      ACCTARG FROM BTCHINDX OF BACCT1:
+  153. F                                                 BACCT2,BACCT3,BACCT4,BACCT5:
+  154. F                                                 BACCT6,BACCT7,BACCT8,BACCT9,BACCT10:
+  155. F                                                 BACCT11,BACCT12,BACCT13,BACCT14,BACCT15:
+  156. F                                                 BACCT16,BACCT17,BACCT18,BACCT19,BACCT20
+  157. F                              .
+  158. F    0000065C                           LOAD      CHECKAMT FROM BTCHINDX OF BCAMT1:
+  159. F                                                 BCAMT2,BCAMT3,BCAMT4,BCAMT5:
+
+
+
+PAGE   13      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:25:43
+                                         
+
+  160. F                                                 BCAMT6,BCAMT7,BCAMT8,BCAMT9,BCAMT10:
+  161. F                                                 BCAMT11,BCAMT12,BCAMT13,BCAMT14,BCAMT15:
+  162. F                                                 BCAMT16,BCAMT17,BCAMT18,BCAMT19,BCAMT20
+  163. F    0000066E                           RETURN 
+  164. F                              .
+  165. F                              ....................................................................
+  205.                                         INCLUDE   STDIOERR.TXT
+  205.    INCLUDE  G: f:\source.cnv\stdioerr.txt
+    1. G                              .............................................................
+    2. G                              .           STDIOERR ROUTINE   3/15/80 R. BACHARACH         .
+    3. G                              .                                                           .
+    4. G                              . THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+    5. G                              . TO FACILITATE STANDARD I/O ERROR DETECTION AND MESSAGES   .
+    6. G                              .............................................................
+    7. G                              . 
+    8. G    00000670                  STDIOERR BEEP 
+    9. G    00000676                           FILEPI    0
+   10. G    00000680                           DISPLAY   *ES,*P01:10,"I/O ERROR ON ",IOTYPE," OF ",IOERFILE:
+   11. G                                                     *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+   12. G    00000686                           BEEP 
+   13. G    0000068C                           GOTO      STDIOERR
+   14. G                              . 
+   15. G                              . 
+  206.                                         INCLUDE   STDPARER.TXT
+  206.    INCLUDE  H: f:\source.cnv\stdparer.txt
+    1. H                              .............................................................
+    2. H                              .           STDPARER ROUTINE   3/15/80 R. BACHARACH         .
+    3. H                              .              STANDARD PARITY ERROR ROUTINE                .
+    4. H                              .                                                           .
+    5. H                              . THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+    6. H                              . TO FACILITATE STANDARD PARITY ERROR DETECTION/NOTIF       .
+    7. H                              .............................................................
+    8. H                              . 
+    9. H    00000692                  STDPARER BEEP 
+   10. H    00000698                           FILEPI    0
+   11. H    000006A2                           DISPLAY   *ES,*P01:10,"PARITY ERROR ON ",IOTYPE," OF ",IOERFILE:
+   12. H                                                     *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+   13. H    000006A8                           BEEP 
+   14. H    000006AE                           GOTO      STDPARER
+   15. H                              . 
+   16. H                              . 
+  207.                                         INCLUDE   STDFMTER.TXT
+  207.    INCLUDE  I: f:\source.cnv\stdfmter.txt
+    1. I                              .............................................................
+    2. I                              .           STDFMTER ROUTINE   3/15/80 R. BACHARACH         .
+    3. I                              .              STANDARD FORMAT ERROR ROUTINE                .
+    4. I                              .                                                           .
+    5. I                              . THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+    6. I                              . TO FACILITATE STANDARD FORMAT ERROR DETECTION/NOTIF       .
+    7. I                              .............................................................
+    8. I                              . 
+    9. I    000006B4                  STDFMTER BEEP 
+   10. I    000006BA                           FILEPI    0
+
+
+
+PAGE   14      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:00
+                                         
+
+   11. I    000006C4                           DISPLAY   *ES,*P01:10,"FORMAT ERROR ON ",IOTYPE," OF ",IOERFILE:
+   12. I                                                     *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+   13. I    000006CA                           BEEP 
+   14. I    000006D0                           GOTO      STDFMTER
+   15. I                              . 
+   16. I                              . 
+  208.                                         INCLUDE   STDRANGE.TXT
+  208.    INCLUDE  J: f:\source.cnv\stdrange.txt
+    1. J                              .............................................................
+    2. J                              .           STDRANGE ROUTINE   3/15/80 R. BACHARACH         .
+    3. J                              .              STANDARD RANGE ERROR ROUTINE                .
+    4. J                              .                                                           .
+    5. J                              . THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+    6. J                              . TO FACILITATE STANDARD RANGE ERROR DETECTION/NOTIF       .
+    7. J                              .............................................................
+    8. J                              . 
+    9. J    000006D6                  STDRANGE BEEP 
+   10. J    000006DC                           FILEPI    0
+   11. J    000006E6                           DISPLAY   *ES,*P01:10,"RANGE ERROR ON ",IOTYPE," OF ",IOERFILE:
+   12. J                                                     *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+   13. J    000006EC                           BEEP 
+   14. J    000006F2                           GOTO      STDRANGE
+   15. J                              . 
+   16. J                              . 
+  209.                                         INCLUDE   CUSTIO.TXT
+  209.    INCLUDE  K: f:\source.cnv\custio.txt
+    1. K                              .........................................................
+    2. K                              .   CUSTOMER MASTER FILE I/O ROUTINES                   .
+    3. K                              .........................................................
+    4. K                              . 
+    5. K    000006F8                  OPENCUST TRAPCLR   IO
+    6. K    000006FE                           TRAP      NOCUSTO IF IO
+    7. K    0000070C                           OPEN      CUSTFILE,CSTNAME
+    8. K    0000071A                           MOVE      "H"    TO IOSW
+    9. K    00000724                           RETURN 
+   10. K                              . 
+   11. K    00000726                  NOCUSTO  BEEP 
+   12. K    0000072C                           DISPLAY   *ES,*P01:12,"CUSTOMER FILE NOT ON-LINE - ABORTING"
+   13. K    00000732                           STOP 
+   14. K                              . 
+   15. K                              . 
+   16. K    00000734                  GETCUST  TRAPCLR   IO
+   17. K    0000073A                           TRAP      NOCUSTO  IF  IO
+   18. K                              . 
+   19. K    00000748                           READ      CUSTFILE,CUSTKEY;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+   20. K                                                                  CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+   21. K                                                                                            CUSTCATG:
+   22. K                                                                  LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+   23. K                                                                  COMMCODE:
+   24. K                                                                  CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+   25. K                                                                  PDOVR90,MTDCASH,MTDCRED
+   26. K                              . 
+   27. K    00000752                           GOTO      NOCUSTFD IF OVER
+
+
+
+PAGE   15      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:01
+                                         
+
+   28. K    00000758                           MOVE      "H"  TO  IOSW
+   29. K    00000762                           RETURN 
+   30. K                              . 
+   31. K                              ...........                                   CUSTADR2:
+   32. K    00000764                  NOCUSTFD MOVE      "M"  TO  IOSW
+   33. K    0000076E                           RETURN 
+   34. K                              . 
+   35. K    00000770                  PUTCUST  TRAPCLR   IO
+   36. K    00000776                           TRAP      NOCUSTFD IF  IO
+   37. K    00000784                           UPDATE    CUSTFILE;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+   38. K                                                          CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED,CUSTCATG:
+   39. K                                                          LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+   40. K                                                          COMMCODE:
+   41. K                                                          CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+   42. K                                                          PDOVR90,MTDCASH,MTDCRED
+   43. K    0000078E                           MOVE      "H"  TO  IOSW
+   44. K    00000798                           RETURN 
+   45. K                              . 
+   46. K                              ...........                           CUSTADR2:
+   47. K                              .  END OF CUSTOMER MASTER FILE I/O ROUTINES
+   48. K                              . ..........................................
+  210.                                .
+  211.      0000079A                  MAKEDTLS 
+  212.                                 
+  213.      0000079A                           MATCH     "00000"  TO  BATCHKEY  (END OF REPORT@ZERO RECORD)
+  214.      000007A8                           GOTO       EOJ  IF  EQUAL
+  215.                                 
+  216.      000007AE                           MOVE      BCHECKS  TO  NEWBATCH
+  217.      000007B8                           MOVE      "0"      TO  BTCHINDX
+  218.      000007C2                           MOVE      "N"      TO  BTCHDONE
+  219.      000007CC                           CALL      LOADDATA
+  220.                                .
+  221.      000007D2                  MKDTL1   CMATCH    "Y",BTCHDONE
+  222.      000007DC                           GOTO      BTCHBRK  IF  EQUAL
+  223.                                .
+  224.      000007E2                           CALL      PRINTDTL
+  225.                                .
+  226.      000007E8                           CALL      LOADDATA
+  227.      000007EE                           GOTO      MKDTL1      (CHECK IF WHOLE BATCH IS PRINTED)
+  228.                                .
+  229.                                .................................................................
+  230.      000007F4                  BTCHBRK  PRINT     *1," ",*FLUSH
+                                                                      *WARNING*
+Warning: I/O control not implemented.
+  231.      000007FA                           PRINT     " "
+  232.                                .
+  233.      00000800                           MOVE      " " TO COLSW
+  234.                                .
+  235.      0000080A                           ADD       BATCHTOT  TO  MONTHTOT
+  236.      00000814                           ADD       BATCHTOT  TO  DAYTOT
+  237.                                .
+  238.      0000081E                           PRINT     *1,"BATCH## ",BATCHKEY:
+  239.                                                   *35,"ENTERED ON ",SVPDATE:
+
+
+
+PAGE   16      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:01
+                                         
+
+  240.                                                   *58,"TOTAL OF DEPOSIT: ",BATCHTOT:
+  241.                                                   *112,"BALANCE: ":
+  242.                                                   *121,MONTHTOT
+  243.      00000824                           PRINT     *1," "
+  244.      0000082A                           PRINT     DASH44,DASH44,DASH44
+  245.      00000830                           PRINT     *1," "
+  246.                                .
+  247.      00000836                           ADD       "6",LINES
+  248.                                .
+  249.      00000840                           COMPARE   "55",LINES
+  250.      0000084A                           CALL      HDR IF NOT LESS
+  251.                                .
+  252.      00000850                           CMATCH    "Y",EOJSW
+  253.      0000085A                           GOTO      BTCHFINI IF EQUAL
+  254.                                .
+  255.      00000860                           GOTO      RDLOOP
+  256.                                ................................................................
+  257.      00000866                  LOADDATA ADD       "1"  TO  BTCHINDX
+  258.                                .
+  259.      0000086C                           COMPARE   BTCHINDX TO NEWBATCH
+  260.      00000876                           GOTO      BTCHFINI IF LESS
+  261.                                .
+  262.      0000087C                           CALL      LOADBTCH
+  263.      00000882                           RETURN 
+  264.                                .
+  265.      00000884                  BTCHFINI MOVE      "Y" TO BTCHDONE
+  266.      0000088E                           RETURN 
+  267.                                .
+  268.                                ................................................................
+  269.                                .
+  270.      00000890                  PRINTDTL CMATCH    "3",COLSW
+  271.      0000089A                           GOTO      CHKBLK IF NOT EQUAL
+  272.                                .
+  273.      000008A0                           PRINT     " ",*FLUSH   (THIS FLUSHES OUT THE FULL 3 COLUMN LINE)
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  274.      000008A6                           ADD       "1" TO LINES
+  275.                                .
+  276.      000008AC                           COMPARE   "55",LINES
+  277.      000008B6                           CALL      HDR IF NOT LESS
+  278.                                .
+  279.      000008BC                           MOVE      " " TO COLSW
+  280.                                .
+  281.      000008C6                  CHKBLK   CMATCH    " " TO COLSW
+  282.      000008D0                           GOTO      CHKC2  IF NOT EQUAL
+  283.                                .
+  284.      000008D6                           MOVE      ACCTARG  TO  CUSTKEY
+  285.      000008E0                           CALL      GETCUST
+  286.                                .
+  287.      000008E6                           PRINT     *1,CUSTNAME,*32,CHECKAMT,*FLUSH;
+                                                                                        *WARNING*
+Warning: I/O control not implemented.
+  288.      000008EC                           MOVE      "1" TO COLSW
+
+
+
+PAGE   17      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:01
+                                         
+
+  289.      000008F6                           ADD       CHECKAMT  TO  CHKSUM
+  290.      00000900                           RETURN 
+  291.                                .
+  292.      00000902                  CHKC2    CMATCH    "1",COLSW
+  293.      0000090C                           GOTO      PRNTCL3 IF NOT EQUAL
+  294.      00000912                           MOVE      ACCTARG  TO  CUSTKEY
+  295.      0000091C                           CALL      GETCUST
+  296.      00000922                           PRINT     *45,CUSTNAME,*77,CHECKAMT,*FLUSH;
+                                                                                         *WARNING*
+Warning: I/O control not implemented.
+  297.      00000928                           ADD       CHECKAMT  TO  CHKSUM
+  298.      00000932                           MOVE      "2" TO COLSW
+  299.      0000093C                           RETURN 
+  300.                                .
+  301.      0000093E                  PRNTCL3  MOVE      ACCTARG TO CUSTKEY
+  302.      00000948                           CALL      GETCUST
+  303.                                .
+  304.      0000094E                           COMPARE   BTCHINDX TO NEWBATCH
+  305.      00000958                           GOTO      SEMICOLN IF NOT EQUAL
+  306.                                .
+  307.      0000095E                           PRINT     *91,CUSTNAME,*122,CHECKAMT
+  308.      00000964                           GOTO      COL3
+  309.                                .
+  310.      0000096A                  SEMICOLN PRINT     *91,CUSTNAME,*122,CHECKAMT;
+  311.                                .
+  312.      00000970                  COL3     MOVE      "3" TO COLSW
+  313.                                .
+  314.      0000097A                           ADD       CHECKAMT  TO  CHKSUM
+  315.      00000984                           RETURN 
+  316.                                .
+  317.                                .............................................................
+  318.                                .
+  319.      00000986                  CLRBATCH TRAPCLR   PARITY
+  320.      0000098C                           MOVE      "0" TO BTCHINDX
+  321.                                .
+  322.      00000996                  CLR1     ADD       "1"   TO  BTCHINDX
+  323.      0000099C                           COMPARE   "21"  TO  BTCHINDX
+  324.                                .
+  325.      000009A6                           GOTO      CLREXIT   IF  EQUAL
+  326.                                .
+  327.                                . BLANK THE ACCOUNT AND ZERO THE AMOUNT FIELDS
+  328.                                .
+  329.      000009AC                           MOVE      "0.00"  TO  CHECKAMT
+  330.      000009B6                           MOVE      "    "  TO  ACCTARG
+  331.      000009C0                           CALL      STORBTCH
+  332.      000009C6                           GOTO      CLR1
+  333.                                .
+  334.      000009CC                  CLREXIT  MOVE      "00"    TO  BTCHINDX
+  335.      000009D6                           MOVE      "03"    TO  LASTROW
+  336.      000009E0                           RETURN 
+  337.                                .........................................
+  338.                                .
+  339.      000009E2                  HDR      ADD       "1"  TO  PAGES
+
+
+
+PAGE   18      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:01
+                                         
+
+  340.      000009E8                           PRINT     *F,*46,"      APC COMPONENTS, INC."
+  341.                                .
+  342.      000009EE                           PRINT     *46,"ACCOUNTS RECEIVABLE SYSTEM - CASH LEDGER":
+  343.                                                      *100,"AS OF ",TODAY,"  AT ",PTIME
+  344.                                .
+  345.      000009F4                           PRINT     *44,"FOR REPORTING PERIOD OF ",DATE1," TO ",DATE2:
+  346.                                                   *122,"PAGE ",PAGES
+  347.                                .
+  348.      000009FA                           PRINT     *1," "
+  349.                                .
+  350.      00000A00                           PRINT     *1,"CUSTOMER NAME":
+  351.                                                   *32,"   AMOUNT":
+  352.                                                   *45,"CUSTOMER NAME":
+  353.                                                   *76,"    AMOUNT":
+  354.                                                   *90," CUSTOMER NAME":
+  355.                                                   *122,"   AMOUNT"
+  356.      00000A06                           PRINT     *1," "
+  357.      00000A0C                           MOVE      "6"  TO  LINES
+  358.      00000A16                           RETURN 
+  359.                                .
+  360.                                .
+  361.      00000A18                  SETDATE  MOVE      BTCHDATE TO YY
+  362.      00000A22                           RESET     BTCHDATE TO 3
+  363.      00000A2C                           MOVE      BTCHDATE TO MM
+  364.      00000A36                           REP       " 0"     IN MM
+  365.      00000A40                           RESET     BTCHDATE TO 5
+  366.      00000A4A                           MOVE      BTCHDATE TO DD
+  367.      00000A54                           RESET     BTCHDATE TO 1
+  368.                                .
+  369.      00000A5E                           CLEAR     SVPDATE
+  370.      00000A64                           APPEND    MM  TO SVPDATE
+  371.      00000A6E                           APPEND    "/" TO SVPDATE
+  372.      00000A78                           APPEND    DD  TO SVPDATE
+  373.      00000A82                           APPEND    "/" TO SVPDATE
+  374.      00000A8C                           APPEND    YY  TO SVPDATE
+  375.      00000A96                           RESET     SVPDATE TO 1
+  376.                                .
+  377.      00000AA0                           RETURN 
+  378.                                 
+  379.      00000AA2                  DATEBRK  PRINT     *1," "
+  380.                                .
+  381.      00000AA8                  PRTDATES PRINT     *1,"TOTAL DEPOSITS FOR ",SVPDATE,*35,DAYTOT
+  382.      00000AAE                           PRINT     ASTER44,ASTER44,ASTER44
+  383.      00000AB4                           MOVE      "0.00"  TO  DAYTOT
+  384.      00000ABE                           PRINT     *1," "
+  385.      00000AC4                           ADD       "4",LINES
+  386.      00000ACE                           COMPARE   "55",LINES
+  387.      00000AD8                           CALL      HDR  IF  NOT  LESS
+  388.                                .
+  389.      00000ADE                           RESET     BTCHDATE TO 1
+  390.      00000AE8                           MOVE      BTCHDATE TO SAVEDATE
+  391.                                .
+  392.      00000AF2                           CALL      SETDATE
+
+
+
+PAGE   19      F:\SOURCE\BTCHPRNT.PLS                                                                         04-07-04 23:26:01
+                                         
+
+  393.                                .
+  394.      00000AF8                           CALL      SETDATE
+  395.      00000AFE                           MOVE      "0.00"   TO CHKSUM
+  396.                                 
+  397.      00000B08                           RETURN 
+  398.                                 
+  399.                                ................
+  400.                                        
+  401.      00000B0A                  EOJ      MOVE      "Y" TO EOJSW
+  402.      00000B14                           CALL      DATEBRK
+  403.      00000B1A                           PRINT     " "
+  404.      00000B20                           PRINT     *1,"TOTAL CASH PROCESSED FOR REPORTING PERIOD OF ":
+  405.                                                   DATE1," TO ",DATE2,":  ",*76,MONTHTOT
+  406.                                .
+  407.      00000B26                           RELEASE 
+  408.      00000B28                           CHAIN     "CASHLDGR"
+  409.                                .
+
+   Output: f:\plc\btchprnt.plc                                                                                                                                                                                                                                       
+       949 LINES;      0 ERRORS;      4 WARNINGS; Start/Stop: 23:25:40 23:26:01
+  0000269C DATA;  00000B30  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

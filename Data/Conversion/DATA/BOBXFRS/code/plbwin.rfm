@@ -1,0 +1,346 @@
+Date:  01-03-2002
+ 
+RELEASE 8.6
+ 
+*==============================================================================
+  In conjunction with this release we have released a set of new products
+  called Visual PL/B Client and Visual PL/B Server.  These add on products
+  enable you to run your existing applications across any network that uses
+  TCP/IP for its network protocol.  This generally includes Wide Area Networks
+  and the Internet.  Your existing Visual PL/B programs will generally run
+  without even being recompiled.  This saves a great amount of time in having
+  to recode an application in HTML for a browser to handle.  For more
+  information please see our web site at www.sunbelt-plb.com\products.shtml.
+*==============================================================================
+Notes for WARNINGS:
+ 
+         - The 8.6 version of SUNFHSYS.DLL has been changed such that the DLL
+           can only be used with an 8.6 version of PLBWIN, SUNFM or PLBSERVE.
+           The same holds true for the 8.6 versions of PLBWIN, SUNFM or
+           PLBSERVE in that they can only be used with an 8.6 version of
+           SUNFHSYS.DLL.  If the 8.6 version of any of these modules is used
+           with any prior releases, then a U40 error occurs.
+ 
+*==============================================================================
+  These files have been changed as follows:
+ 
+PLBWIN   - Modified GETMODE to support three new keywords to retrieve the
+PLB386     INI file names which can be used by the runtime.  The new
+UNIX       keywords are specified as follows:
+ 
+             *INICURRENT={svar}
+                  The INICURRENT keyword returns a current working directory
+                  INI path/filename.  The {svar} variable will be set NULL
+                  if this INI file is not used by the runtime.
+ 
+             *INILOCAL={svar}
+                  The INILOCAL keyword returns a local workstation
+                  INI path/filename.  The {svar} variable will be set NULL
+                  if this INI file is not used by the runtime.
+ 
+             *INIGLOBAL={svar}
+                  The INIGLOBAL keyword returns a global INI path/filename.
+                  The {svar} variable will be set NULL if this INI file is
+                  not used by the runtime.
+ 
+         - Corrected a problem when using PLB_DOSCMDLN where S$CMDLIN was
+           being initialized incorrectly when double quotes were used to
+           enclose an argument.
+ 
+           Problem Example:
+ 
+                plbwin -h "c:\test  dir\cmdline.plc" parameters
+ 
+         - Corrected a problem where the option FORMAT=MSDOS or FORMAT=UNX
+           for an AFILE/IFILE/FILE declaration was being ignored.  These
+           options can now be used to cause the appropriate end of record
+           to be used.  If a file variable is being opened which does not
+           match the EOR required for the FORMAT= settings, then an I19
+           subcode 30 will occur.  This change will cause an I19 error in
+           PLBCMP compilers with a version earlier than 8.6.
+ 
+         - Corrected an ISI FILELIST WRITE and UPDATE problem where a GPF
+           error could occur if the byte order used for an ISI file was
+           different than the CPU being used.
+ 
+PLBWIN   - Modified WINAPI to detect if a DLL function does not cleanup
+           the function parameters on the stack.  If this case is detected
+           then a U39 error is not generated.
+ 
+         - Modified GETINFO SYSTEM to give a value of '6' to identify
+           Windows XP.
+ 
+         - Added an Exception Handler to the runtime to intercept a GPF
+           error.  The Exception Handler will generate two files when a
+           GPF error occurs.  The first file is named 'PORTnnnn.IMG' and
+           the current PL/B program memory map is stored in this file.
+           The '.IMG' file is a binary file and requires special processing
+           to be analyzed. A second file named 'PLBWIN.GPF' is also
+           generated and this file is a text file which contains 
+           information that can help identify where a GPF has occurred in
+           a PL/B program.
+ 
+         - Modified TABCONTROL object default processing to detect a
+           'Control+Tab' or a 'Shift+Control+Tab' key sequence that will
+           cause the tab selection to be changed to the next tab.  This
+           change is made to provide consistent TABCONTROL operations 
+           to be the same as other Windows applications.
+ 
+         - Modified the PRTPAGE statement to allow the left and top
+           margins to be specified.  Please, note that for any given
+           page there is a minimum physical limit for the margins.
+           If the left and top margins are set below these limits then
+           printing will start at the minimum setting.  See the PLBCMP
+           description for *MARGINL and *MARGINT controls.
+ 
+         - Corrected a problem where '&&' in a string name could prevent
+           proper operations for other ALT+KEY sequences in the same
+           string name.  The change for the correction causes any '&&'
+           sequence to be ignored which means the '&' character itself
+           can never be used as an acceleration key.
+ 
+         - Corrected a GPF error which was indeterminately caused when
+           a CREATE operation recreated an object that was the object
+           of focus for a form.
+ 
+         - Corrected a problem where the title of a GROUPBOX object was
+           not being refreshed immediately when the GROUPBOX existed
+           over a TABCONTROL.
+ 
+         - Corrected a problem where a STATTEXT object on a GROUPBOX 
+           over a TABCONTROL was disappearing when the title of the
+           GROUPBOX was changed.
+
+         - Requires an 8.6 version of SUNFHSYS.DLL and PLBWSEC.DLL.
+ 
+PLBCON   - Modified the runtime to set the exit code value using S$RETVAL
+           when a program is terminated using a SHUTDOWN action.
+ 
+         - Modified the PLBCON to detect and use the current row/column
+           settings for a command shell from which the runtime is 
+           executed.  This allows the PLBCON runtime to properly 
+           determine the maximum row/column settings which may be larger
+           than specified in a screen definition file.
+ 
+         - Modified the runtime to directly call the PLBWSEC.DLL security
+           DLL when terminating.  This corrects a problem where unexplained
+           U21 errors could occur when a PLBCON runtime was being used.
+
+         - Requires an 8.6 version of SUNFHSYS.DLL and PLBWSEC.DLL.
+ 
+PLBWIN   - Modified the ERASE statement to allow the operation to be
+UNIX       redirected to the SUNFM file manager.  The erase operation
+           is redirected when the hostname or ip address is appended
+           to the filename string.
+ 
+           Example:
+                    ERASE "c:\appdir\testfile.txt|127.0.0.1"
+ 
+         - Modified the RENAME statement to allow the operation to be 
+           redirected to the SUNFM file manager.  The rename operation
+           is redirected when the SUNFM hostname or ip address is appended
+           to the source filename string.
+ 
+           Example:
+                    RENAME "c:\appdir\oldname.txt|127.0.0.1","newname.txt"
+ 
+PLBCMP   - Modified to give a warning when an indeterminable keyword is
+           encountered after a comma for file variable keywords.
+ 
+         - Modified the CHOP instruction to allow a single operand
+           syntax format.
+ 
+           Format:
+                    CHOP  {svar}[,{svar}]
+ 
+         - Modified the PRTPAGE statement to support two new controls
+           that allow the left and top margins to be specified for a
+           page.  The syntax for these controls are defined as follows:
+ 
+           Format:
+                   *MARGINL={dnumnvar}
+                        The MARGINL value sets the left margin.  The
+                        {dnumnvar} value is used in accordance with
+                        the current unit settings determined by the
+                        *UNITS control.  The left margin setting 
+                        is measured from the left edge of the paper.
+ 
+                    *MARGINT={dnumvnar}
+                        The MARGINT value sets the top margin.  The
+                        {dnumnvar} value is used in accordance with
+                        the current unit settings determined by the
+                        *UNITS control.  The top margin setting
+                        is measured from the top edge of the paper.
+ 
+         - Modified the compiler to detect execution using a PLBCON runtime
+           and in that case then the compile will execute as a non-GUI
+           application. This eliminates adverse affects to colors being
+           used for the compiler.
+ 
+         - Corrected a problem where a LOAD statement which used numeric
+           literals in the load variables could result in an operation
+           that did not work.
+ 
+         - Corrected a problem where the compiler was causing an I19 error.
+           This was being caused because the compiler was trying to force
+           a FORMAT=MSDOS type for binary files.  This problem means that
+           prior releases of the PLBCMP compiler will not work with an
+           8.6 or later runtime.
+ 
+PLBDBUG  - Corrected a problem where a 'BP nnnn' command would give an
+           erroneous command syntax error.
+ 
+         - Corrected a problem where a 'S' search string command did
+           not work properly.
+ 
+         - Corrected a problem where packed operations into a
+           single command line was not processed properly.  This
+           was causing an debugger command error to occur.
+ 
+         - Corrected GPF error caused when a Global DIM arrayed
+           variable was displayed using a DV operation.
+ 
+PLBDSIGN - The size of PLF files written by the 8.6k designer may be 
+           smaller than prior releases.  The PLF format has be optimized
+           resulting in a smaller size.
+ 
+         - The Objects drop down list now places a "*" next to objects
+           that have at least one event with code.
+
+         - When opening a form in an open dialog box, a user can now
+           select multiple forms by either clicking on the forms while
+           holding the <CTRL> key or by dragging a square around all
+           the forms in the window.  The designer will open all selected
+           forms.
+
+         - There has been added a recent files list to the file menu of
+           the designer. This list will have the most recent 16 files
+           listed with the most recent files first.  The list contains
+           either a full path or relative path to the file based on the
+           location of the active form.
+
+         - On the window menu of the designer, currently opened forms now
+           include the file name in parenthesis and the path listed is
+           either the absolute path or relative path based on the location
+           of the active form.
+ 
+         - The save option on the file menu does not gray out after you
+           save a form. As long as a file is open, this option is available.
+ 
+         - The copy/cut/paste operation of objects will now copy the
+           code with the object.
+ 
+         - The designer now supports an internal built in macro called
+           &OBJNAME.  This macro is transparent to the compiler and only
+           applies to code in the designer.  This adds to the convenience
+           of copy/paste operations that now carries the code with it.
+ 
+           Example:
+                    setprop &OBJNAME,enable=0
+ 
+           When the form is saved, the designer expands this macro to be
+           the name of the object this code is for so the compiler
+           never sees it.
+ 
+         - Pressing F1 while a menu item is highlighted should open the
+           help file to the relevant page.
+ 
+         - OLE/Automation object copy/paste support
+ 
+         - Search/replace will now search the whole form starting at 
+           the current event.
+ 
+         - Clicking on overlapping objects now selects the smallest
+           object without regard to z-order
+ 
+         - Added <CTRL><TAB> select between forms.
+ 
+         - Added full code edit.
+ 
+         - Modified recent files list numbering to be single digits only.
+ 
+         - Modified open window list numbering to be single digits only.
+ 
+         - Modified to create a backup of an original form before writing
+           the new one for a save operation.
+ 
+         - Added Close All option to file menu.
+ 
+         - Modified to allow a cut operation for an object to be undone.
+ 
+         - Bug fix: In the properties window the size properties did
+           not properly update themselves.  For example, in a combobox,
+           if you changed the font size, the height property didn't get
+           updated.
+ 
+         - Bug fix: When pressing <ALT-F> while any window other than
+           the main designer window a system beep would occur. This
+           has been fixed.
+ 
+         - Bug fix: Tools window stale tooltip problem fixed. When you
+           removed an OLE control from the tools window, the newly freed
+           spot at the bottom of the tools window would still contain a
+           tool tip for the last object that occupied that space. That
+           tooltip is now removed.
+ 
+         - Bug fix: When an object like a group box is selected, you can
+           now select a different object that is visually on top of
+           that object. (Select another object through the currently
+           selected object)
+ 
+         - Bug fix: A window in the designer can now always be resized
+           regardless of type. This reduces the hassle of having to change
+           the window type, save it, close it, and re-open the form
+           before modifications could be made.
+ 
+UTILITY  - Modified the OBJMATCH utility to perform buffered input.
+           This improves the utility processing performance.  Also,
+           the objmatch executable has been generated as a 32 bit utility.
+
+         - All of the utilities written in PL/B are now executed with PLBCON.
+           Each .BAT file that starts the utility has been changed to reference
+           PLBCON.  Should you wish to use either PLBWIN or PLB386, then you
+           must edit each of the .BAT files and make the change or copy your
+           .BAT files from a previous version of Visual PL/B.
+
+         - Each of SUNINDEX, SUNAAMDX and SUNSORT has had a new option added
+           immediately after the program name.  This new option is to invoke
+           full program logging.  If invoked, then nothing is output to the
+           console and everything that would have been sent to the console is
+           sent to the log file.  The format for the option is:
+
+              [-l{logfile}]
+
+           The format for a typical command using the option would be:
+
+              SUNIDXNT -l data.log data.txt data.isi -1-10
+
+           No extension is assumed for the log file.
+
+PLBWSEC  - Modified the security DLL to provide a logout function which
+           is used by a PLBCON runtime.  This change is needed to provide
+           a correction to a Windows OS problem which was causing user
+           count U21 errors when the PLBCON runtime was used.
+
+SUNFHSYS - Corrected a problem where a compression buffer conflict
+           could occur between multiple threads for the SUNFM file
+           manager or the Automation Server.  This conflict could
+           cause indeterminate message or compression errors.
+ 
+         - Corrected a problem where a PORT number value larger than
+           32767 was causing the runtime to perform a login for each
+           managed file being opened.  This was causing an excessively
+           large number of SUNFM child tasks to be spawned.
+ 
+         - Modified logoff operation from RMSRAS server to free the
+           RMS32.DLL.  This change allows a single PLBCLIENT to access
+           a PLBSERVE program which accesses the RMSRAS server multiple
+           times.  WARNING! The RMS32.DLL DOES NOT SUPPORT multiple
+           PLBCLIENTs accessing the RMSRAS server simultaneously.
+ 
+         - Corrected problem with sequential READ of an RMSRAS AIM file
+           giving an erroneous I05 error.
+ 
+         - Corrected a problem, where a FILELIST using an IFILE opened
+           using an ISI whose byte order was different than the
+           current CPU, would corrupt the ISI or give a GPF error.

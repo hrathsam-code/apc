@@ -1,0 +1,232 @@
+
+
+
+PAGE    1      \apc\source\har1.io                                                                            01-10-21 13:20:02
+                                         
+
+PL/B COMPILER   Version 9.9A   21 Apr 2017 
+COMMAND LINE WAS: PLBCMP \apc\source\har1.io,har.plc -L=32 ZG ZH ZI=0 ZT S   
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.                                harry   testing 
+                                                     *ERROR*  
+Invalid operation syntax.
+    2.      00000000                  harry   testing 
+                                                     *ERROR*  
+Invalid operation syntax.
+                                                     *ERROR*  
+Duplicate definition of label on this statement.
+    5.    1                                   <-CUR>
+                                              *ERROR*  
+Invalid operation syntax.
+    6.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+    9.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   10.    1 00000000                          c 
+                                               *ERROR*  
+Invalid operation syntax.
+   15.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   16.    1                                   \c
+                                              *ERROR*  
+Invalid operation syntax.
+   19.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   23.    1                                             include 
+                                                               *ERROR*  
+Invalid operation syntax.
+   25.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   27.    1                                               prtpage           p;*ATTACH 
+                                                                             *ERROR*  
+Invalid OPERAND: Undefined variable 'P'.
+                                                                                     *ERROR*  
+Invalid IO control format '=' required.
+                                                                                     *ERROR*  
+Character variable or literal expected.
+   28.    1                                               *B 
+                                                          *ERROR*  
+Invalid operation syntax.
+   30.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   37.    1                                               hARRY1.IF   
+                                                               *ERROR*  
+Undefined variable name.
+
+
+
+PAGE    2      \apc\source\har1.io                                                                            01-10-21 13:20:02
+                                         
+
+   39.    1                                               HARRY2.COPY 
+                                                               *ERROR*  
+Undefined variable name.
+   40.    1                                               *BORDER
+                                                          *ERROR*  
+Invalid operation syntax.
+   41.    1                                               HARRY2,*BORDER
+                                                                *ERROR*  
+Invalid operation syntax.
+   45.    1                                   *BORDER
+                                              *ERROR*  
+Invalid operation syntax.
+   46.    1 00000014                          harry2.Copy
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+                                                   *ERROR*  
+Undefined variable name.
+   47.    1 0000001A                          harry.copy
+                                                  *ERROR*  
+Undefined variable name.
+   49.    1                                   harry.Copy
+                                                  *ERROR*  
+Undefined variable name.
+   51.    1                                               Harry.GetItemData 
+                                                              *ERROR*  
+Undefined variable name.
+   52.    1                                               .Copy 
+                                                          *ERROR*  
+Invalid operation syntax.
+   56.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+   60.    2                                               if                 (SearchMethod = 0)
+                                                                                          *ERROR*  
+Undefined variable name.
+   61.    2 00000038                                        getprop            EChckCode,text=CustKY
+                                                                                        *ERROR*  
+Undefined variable name.
+                                                                                             *ERROR*  
+Invalid Option.
+   65.    2                                               for %(Variable) from "0" to 100 by "1"
+                                                              *ERROR*  
+Invalid OPERAND: Expected: FORM, INTEGER 
+   72.    3                                                 if                 (ReturnFl = 1)
+                                                                                        *ERROR*  
+Undefined variable name.
+   74.    3 00000078                                          alert              note,"Customer does not exist",result,"ERROR: Invalid Customer"
+                                                                                                                      *ERROR*  
+Invalid OPERAND: Undefined variable 'RESULT'.
+   75.    3 00000084                                          EChckCode.Clear
+                                                                      *ERROR*  
+Undefined variable name.
+   88.    2                                                 MOVE              "3",Status 
+                                                                                        *ERROR*  
+Invalid OPERAND: Undefined variable 'STATUS'.
+
+
+
+PAGE    3      \apc\source\har1.io                                                                            01-10-21 13:20:02
+                                         
+
+   89.    2 0000009C                                        setprop           EChckCODE,enabled=0
+                                                                                       *ERROR*  
+Undefined variable name.
+   90.    2 000000A6                                        setprop           Fill1,enabled=0
+                                                                                   *ERROR*  
+Undefined variable name.
+   91.    2 000000B0                                        setprop           BAccept,enabled=1
+                                                                                     *ERROR*  
+Undefined variable name.
+   97.    2                                         IF                (SearchMethod = 1)         //By Invoice Number
+                                                                                   *ERROR*  
+Undefined variable name.
+   98.    2 000000C2                                  RESETVAR          InvoiceKey
+                                                              *ERROR*  
+Invalid operation syntax.
+   99.    2 000000C2                                  getprop           EChckCODE,text=InvoiceKey
+                                                                                 *ERROR*  
+Undefined variable name.
+                                                                                      *ERROR*  
+Invalid Option.
+  106.    2                                           PACKKEY           ARTRNKY5 FROM $Entity,"I",InvoiceKey,"999999"
+                                                                                *ERROR*  
+Invalid OPERAND: Undefined variable 'ARTRNKY5'.
+                                                                                             *ERROR*  
+Invalid OPERAND: Undefined variable '$ENTITY'.
+                                                                                                            *ERROR*  
+Invalid OPERAND: Undefined variable 'INVOICEKEY'.
+  110.    3                                           IF                (ReturnFl = 1 or ARTrn.Reference != InvoiceKey)
+                                                                                 *ERROR*  
+Undefined variable name.
+                                                                                              *ERROR*  
+Undefined variable name.
+                                                                                              *ERROR*  
+Invalid operation syntax.
+                                                                                              *ERROR*  
+Invalid operation syntax.
+                                                                                              *ERROR*  
+Space required as statement terminator.
+  112.    3 000000F4                                    ALERT           note,"Invoice Number does not exist",result 
+                                                                                                                   *ERROR*  
+Invalid OPERAND: Undefined variable 'RESULT'.
+  116.    2                                           setprop           EChckCODE,text=ARTrn.CustomerID
+                                                                                 *ERROR*  
+Undefined variable name.
+                                                                                      *ERROR*  
+Invalid Option.
+  118.    2 00000112                                  CLEAREVENTS 
+                                                                 *ERROR*  
+Invalid operation syntax.
+  137.    1                                               hARRY1.IF   
+                                                               *ERROR*  
+Undefined variable name.
+  139.    1                                               HARRY2.COPY 
+                                                               *ERROR*  
+Undefined variable name.
+
+
+
+PAGE    4      \apc\source\har1.io                                                                            01-10-21 13:20:02
+                                         
+
+  140.    1                                               *BORDER
+                                                          *ERROR*  
+Invalid operation syntax.
+  141.    1                                               HARRY2,*BORDER
+                                                                *ERROR*  
+Invalid operation syntax.
+  145.    1                                   *BORDER
+                                              *ERROR*  
+Invalid operation syntax.
+  146.    1 00000120                          harry2.Copy
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+                                                   *ERROR*  
+Undefined variable name.
+  147.    1 00000126                          harry.copy
+                                                  *ERROR*  
+Undefined variable name.
+  149.    1                                   harry.Copy
+                                                  *ERROR*  
+Undefined variable name.
+  151.    1                                   endif 
+                                                   *ERROR*  
+Error in Structure Handling.
+  155.    2                                               if                 (SearchMethod = 0)
+                                                                                          *ERROR*  
+Undefined variable name.
+  156.    2 0000013E                                        getprop     
+                                                                   *ERROR*  
+Invalid OBJECT variable specified.
+                                                                   *ERROR*  
+Comma, colon or semi-colon expected.
+IF/LOOP/SWITCH/FOR statement at line (4) not terminated.
+IF/LOOP/SWITCH/FOR statement at line (155) not terminated.
+Undefined execution label: GETSELECTIONMETHOD
+Undefined execution label: RDCUST
+Undefined execution label: SETMAIN
+Undefined execution label: RDARTRN5
+Undefined execution label: KPARTRN5
+
+   Output: c:\apc\data\har.plc                                                                                                                                                                                                                                       
+       156 LINES;     74 ERRORS;      2 WARNINGS; Start/Stop: 13:20:02 13:20:02
+  00000D38 DATA;  0000014A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

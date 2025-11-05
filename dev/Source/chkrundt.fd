@@ -1,0 +1,113 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CheckDet.IO                                                    ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/01/2005 AT 10:55AM                                          ;
+;                                                                             ;
+;  PURPOSE:    Check Detail File Definitions                                  ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+           %IFNDEF   $CheckRunDetailVAR
+$CheckRunDetailVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+CheckRunDetail   RECORD
+Entity        DIM               8         1 - 8
+SubEntity     DIM               8         9 - 16
+BankCode      DIM               6        17 - 22
+Voucher       FORM              7        23 - 29
+Vendor        DIM               6        30 - 35
+CheckNo       FORM              10       36 - 45
+SeqMajor      FORM              7        46 - 52
+DiscAmt       FORM              5.2      53 - 60
+GrossAmount   FORM              7.2      61 - 70
+NetAmount     FORM              7.2      71 - 80
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+CheckRunDetailK1SIZE CONST            "15"                                            (Length of the Key variable)
+CheckRunDetailK2SIZE CONST            "21"                                            (Length of the Key variable 2)
+.
+. By Entity, Bank Code, Check Number, Seq Major, Seq Minor
+.
+CheckRunDetailI1DEF  INIT             "-N,1-8,23-29"                                  (Index definitions for Key 1)
+.
+. By Entity, Vendor, Seq Major
+.
+CheckRunDetailI2DEF  INIT             "1-8,30-35,23-29"                               (Index definitions for Key 2)
+.
+CheckRunDetailFSIZE  CONST            "100"                                           (Length of each Record)
+
+CheckRunDetailKY    DIM               CheckRunDetailK1SIZE                            (The Actual 'Key' variable)
+CheckRunDetailKY2   DIM               CheckRunDetailK2SIZE                            (The Actual 'Key' variable)
+
+CheckRunDetailPROG  INIT              "Program Name"
+CheckRunDetailTITLE INIT              "Record Title"                                 (Description used later for headers, etc)
+CheckRunDetailHELP  INIT              "CheckRunDetail.HLP"                           (Name of the Help file for later purposes)
+
+
+                    %if                 ProgramType = 1        //Manual Checks
+CheckRunDetailTXTNM  INIT             "$APDATA\","CHRNMDTFL.TXT"                      .Actual Text Filename  (i.e. CUSTFL.TXT)
+CheckRunDetailISI1NM INIT             "$APDATA\","CHRNMDTFL.ISI"                      .Actual ISI Filename   (i.e. CUSTFL.ISI)
+CheckRunDetailISI2NM INIT             "$APDATA\","CHRNMDT2.ISI"                       .Actual ISI Filename
+                    %else
+CheckRunDetailTXTNM  INIT             "$APDATA\","CHRNDTFL.TXT"                      .Actual Text Filename  (i.e. CUSTFL.TXT)
+CheckRunDetailISI1NM INIT             "$APDATA\","CHRNDTFL.ISI"                      .Actual ISI Filename   (i.e. CUSTFL.ISI)
+CheckRunDetailISI2NM INIT             "$APDATA\","CHRNDT2.ISI"                       .Actual ISI Filename
+                    %endif
+
+CheckRunDetailFLST  FILELIST
+           %IFDEF            CheckRunDetailKY
+CheckRunDetailFL    IFILE             Name=CheckRunDetailISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY2
+CheckRunDetailFL2   IFILE             Name=CheckRunDetailISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY3
+CheckRunDetailFL3   IFILE             Name=CheckRunDetailISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY4
+CheckRunDetailFL4   IFILE             Name=CheckRunDetailISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY5
+CheckRunDetailFL5   IFILE             Name=CheckRunDetailISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY6
+CheckRunDetailFL6   IFILE             Name=CheckRunDetailISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY7
+CheckRunDetailFL7   IFILE             Name=CheckRunDetailISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY8
+CheckRunDetailFL8   IFILE             Name=CheckRunDetailISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckRunDetailKY9
+CheckRunDetailFL9   IFILE             Name=CheckRunDetailISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $CheckRunDetailIO
+           GOTO                 #S
+           INCLUDE           ChkRunDt.IO
+#S
+         %ENDIF

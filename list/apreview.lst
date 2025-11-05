@@ -1,0 +1,32 @@
+
+
+
+PAGE    1      apreview                                                                                       02-11-19 11:35:35
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apreview -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.pls
+    7.    INCLUDE  C: apmastfd.pls
+    8.    INCLUDE  D: aptranfd.pls
+   61.    INCLUDE  E: apmasthr.pls
+   90.    INCLUDE  F: apmastks.pls
+  104.    INCLUDE  G: aptranks.pls
+  134.    INCLUDE  H: apmastks.pls
+  149.    INCLUDE  I: aptranks.pls
+  158.    INCLUDE  J: apmastrd.pls
+  177.    INCLUDE  K: apmastrd.pls
+  193.    INCLUDE  L: aptranks.pls
+  214.    INCLUDE  M: apmastks.pls
+  229.    INCLUDE  N: aptranks.pls
+  321.    INCLUDE  O: getdate.pls
+  322.    INCLUDE  P: apmastvk.pls
+  323.    INCLUDE  Q: aptranbk.pls
+
+   Output: c:\apc\plc\apreview.plc                                                                                                                                                                                                                                   
+       586 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:35 11:35:35
+  0000206C DATA;  00000936  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,48 @@
+.
+. ENTER DATE RANGE FOR THE RETRIEVAL
+.
+ENTERDT  KEYIN     *P1:22,*EF,"ENTER DATE (MM/DD/YY): ":
+                   *DE,MM,*-,"/",*DE,DD,*-,"/",*DE,YY,*+
+         DISPLAY   *P1:23,*EL,"YOU ENTERED ":
+                   MM,"/",DD,"/",YY
+         MOVE      " " TO REPLY
+         KEYIN     *P25:23,"  OKAY? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      NXT2 IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      ENTERDT IF EQUAL
+         BEEP
+         GOTO      ENTERDT
+.
+NXT2     MOVE      MM TO TEST2
+         COMPARE   "01",TEST2
+         GOTO      BEEPIT IF LESS
+.
+         COMPARE   "13",TEST2
+         GOTO      BEEPIT IF NOT LESS
+.
+         MOVE      DD TO TEST2
+         COMPARE   "01",TEST2
+         GOTO      BEEPIT IF LESS
+         COMPARE   "32",TEST2
+         GOTO      BEEPIT IF NOT LESS
+.
+...         MOVE      YY TO TEST2
+...         COMPARE   "91",TEST2
+...         GOTO      BEEPIT IF LESS
+.
+         GOTO      NXT2A
+.
+BEEPIT   BEEP
+         DISPLAY   *P1:23,*EL,"INVALID DATE - PLEASE REENTER! ",*W2
+         GOTO      ENTERDT
+.
+NXT2A    CLEAR     BTCHDATE
+         APPEND    YY TO BTCHDATE
+         APPEND    MM TO BTCHDATE
+         APPEND    DD TO BTCHDATE
+         RESET     BTCHDATE TO 1
+         REP       " 0" IN BTCHDATE
+.
+        RETURN
+..................................................................

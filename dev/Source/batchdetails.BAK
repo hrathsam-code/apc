@@ -1,0 +1,84 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    BatchDetails.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-15-2019 At 14:53                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00106   07-05-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $BatchDetailsVAR
+$BatchDetailsVAR                 EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+BatchDetails                     RECORD
+Entity                           Dim                10                  1 - 10
+SubEntity                        Dim                10                 11 - 20
+BatchDate                        Dim                8                  21 - 28
+BatchTime                        Dim                4                  29 - 32
+Reference                        Dim                10                 33 - 42
+CustomerID                       Dim                6                  43 - 48
+SeqNo                            Form               9                  49 - 57
+CheckAmt                         Form               9.2                58 - 69
+PostedFlag                       Form               1                  70 - 70       //Used to signify if batch is Posted
+PostedDate                       Dim                8                  71 - 78
+BatchCheckSeqNo                  Form               9                  79 - 87
+                                 RECORDEND
+;
+;======================================================================================;
+TempBatchDetails                    record          like   BatchDetails                    
+OrigBatchDetails                    record          like   BatchDetails                    
+SaveBatchDetails                    record          like   BatchDetails                    
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+BatchDetailsTXTNM                          INIT         "BatchDetails"
+BatchDetailsISI1NM                         INIT               "BatchDetails.ISI"
+BatchDetailsI1DEF                           init            "-n,w,z,y,1-10,49-57,79-87"
+.
+. By Entity, SeqNo, BatchCheckSeqNo
+. 1-10, 49-57, 79-87
+.
+BatchDetailsKY                   DIM                28
+;=============================================================================;
+;
+BatchDetailsFLST                         FILELIST
+BatchDetailsFL                      IFILE              name="BatchDetails.ISI",FIX=87,NODUP,WEOF,NOPATH
+                                    FILELISTEND
+ 
+BatchDetailsFileSize       CONST      "87"
+ 
+BatchDetailsProg           INIT       "BatchDetails Program"
+BatchDetailsDesc           INIT       "BatchDetails Maintenance"
+BatchDetailsTITLE          INIT       "BatchDetails Record"
+BatchDetailsHelp           INIT       "BatchDetails.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $BatchDetailsVARIO
+            INCLUDE BatchDetails.IO 
+          %ENDIF          //End of IO Include File

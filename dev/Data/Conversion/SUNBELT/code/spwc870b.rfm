@@ -1,0 +1,1344 @@
+Date:  06-11-2003
+ 
+Subject:  Patch RELEASE 8.7B Runtime Files
+ 
+    Included you will find the patch release of:
+ 
+	 PLBSERVE        8.7B  11 Jun 2003     8.7.0120
+	 PLBCLIENT       8.7B  11 Jun 2003     8.7.0120
+	 PLBCLICON       8.7B  11 Jun 2003     8.7.0120
+	 PLBWIN          8.7B  11 Jun 2003     8.7.0120
+	 PLBDSIGN        8.7B  11 Jun 2003     8.7.0120
+	 SETGUID         8.7B  11 Jun 2003     8.7.0120
+	 SUNMOD          8.7B  11 Jun 2003     8.7.0120
+	 MAKEDEF         8.7B  11 Jun 2003     8.7.0120
+	 SUNFYSYS.DLL    8.7B  11 Jun 2003     8.7.0120
+	 SUNFHDLL.DLL    8.7B  11 Jun 2003     8.7.0120
+	 SUNFHDLL.LIB    8.7B  11 Jun 2003
+	 SUNSORT         8.7B  11 Jun 2003
+	 SUNSRTNT        8.7B  11 Jun 2003     8.7.0120
+	 ODSBAC32.DLL    8.7B  11 Jun 2003
+	 PLBCMP          8.7B  11 Jun 2003
+	 PLBDBUG         8.7B  11 Jun 2003
+	 ADMEQU.INC      8.7B  28 Apr 2003
+	 PLBEQU.INC      8.7B  24 Mar 2003
+	 PLBMETH.INC     8.7B  27 May 2003
+	 TXTMATCH.PLC    8.7B  11 Jun 2003
+	 SUNIDE.PLC      8.7B  11 Jun 2003
+	 EDITOR.PLC      8.7B  11 Jun 2003
+	 MENUGEN.PLC     8.7B  11 Jun 2003
+ 
+*==============================================================================
+Notes for some NEW Items:
+ 
+	 - Added new EXPLODE statement.
+ 
+	 - Added new IMPLODE statement.
+ 
+	 - Added Cache support for the Application Server. (Plbserve/Plbclient)
+ 
+	 - Added CACHELIST/CACHELISTEND statements for PL/B language.
+ 
+	 - Added PLBCLIUNX Unix Client for Application Server.
+ 
+	 - Added new Admin data types for ADMGETINFO statement.
+ 
+	 - Added EXPORT CODE submenu item to File menu for PLBDSIGN.
+ 
+	 - Added PLB_CLOCKUSEIP keyword and added CLOCKUSEIP keyword to
+	   GETMODE and SETMODE statements.
+ 
+	 - Added *ZFON and *ZFOFF controls for WRITE, DISPLAY, KEYIN, PRINT
+	   DBSEND, and PRTPAGE instructions.
+ 
+	 - Added PLBCS_NOCLIENT={on|off} for PLBSERVE server.
+ 
+	 - Added GETFNAME support for PLBCLIENT.
+ 
+	 - Added ROWSVISIBLE property for COMBOBOX.
+ 
+	 - Added AllowEmptyTab method for DATALIST.
+ 
+	 - Added *TASKID keyword for GETMODE.
+ 
+*==============================================================================
+Notes for WARNINGS:
+ 
+	 - If a mismatch version for an 8.7B PLBWIN and SUNDBSYS.DLL is
+	   detected, then a U40 error occurs.
+ 
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+	 - A new F09 error has been added to the PL/B runtimes.  The F09
+	   indicates that a list variable is invalid for an EXPLODE or
+	   IMPLODE statement.  This error can occur when the source variable
+	   in an EXPLODE operation is the same as a destination list
+	   variable that is being processed.  Also, this error occurs
+	   in an EXPLODE operation if a GUI Object variable is processed
+	   in the destination list and the delimiter parameter is NULL.
+	   In an IMPLODE statement, an F09 error occurs if an invalid
+	   GUI object is detected in the source list.
+ 
+	 - A new F10 error has been added to the PL/B runtimes.  The F10
+	   indicates that the delimiter variable contains a binary zero
+	   which is not allowed.  This error can occur for an EXPLODE or
+	   IMPLODE statement.
+ 
+	 - The following must be included in the PL/B language reference
+	   under the CACHELIST/CACHELISTEND instruction descriptions.
+ 
+	       The "RSA Data Security, Inc. MD5 Message-Digest Algorithm"
+	       is used for the CACHELIST/CACHELISTEND group identification
+	       when caching is being used.
+ 
+	 - The CLOCK statement affects the LESS flag if the PLB_CLOCKUSEIP
+	   keyword or a SETMODE *CLOCKUSEIP string is set to an ip address.
+	   Otherwise, the LESS is not affected.  See description below for
+	   more details.
+ 
+	 - Add the VISIBLE property to the TOOLBUTTON object.
+ 
+*==============================================================================
+The following files have been changed as follows:
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - In release 8.7A, the PLBSERVE server was modified to prevent
+	   a program from terminating at the 256 instruction check event
+	   point when the PLBCLIENT has prematurely terminated.  This
+	   change for 8.7A has caused problems resulting in hung threads
+	   at the application server because PL/B programs have logic
+	   resulting in endless loops that do not execute statements that
+	   require communication with a PLBCLIENT.
+ 
+	   Therefore, for the 8.7B patch release we are changing the default
+	   operation of the PLBSERVE server to detect a socket error at the 256
+	   instruction check event point when the PLBCLIENT has prematurely
+	   terminated.  In this case, the program at the server terminates
+	   immediately.  This eliminates eliminate the hung thread situation.
+ 
+	   In addition, for those users who wish to execute in a manner that
+	   DOES NOT terminate a program at the 256-instruction check event
+	   point, a new keyword named 'PLBCS_NOCLIENT={ON|OFF}' can be
+	   specified in the PLBSERVE.INI file.  Setting this keyword ON causes
+	   PLBSERVE to execute in a manner consistent with the 8.7A changes.
+ 
+	 - Modified the PLBSERVE server runtime to prevent the program
+	   from terminating at the 256 instruction check event point when
+	   the PLBCLIENT has prematurely terminated.  This change means
+	   that a program only terminates after a PLBCLIENT process
+	   has prematurely terminated when the PLBSERVE executes a PL/B
+	   statement that requires access to the client workstation.  This
+	   change is implemented as per user's request that the server
+	   program should be able to continue processing file updates after
+	   the PLBCLIENT workstation connection has terminated.  It is the
+	   user's responsibility to insure that a program does not have
+ 
+	 - Modified the Application Server for the '-d3' option to create log
+	   files with the thread/process identification number included in the
+	   log file name.  The log file names are 'plbwin_nnnn.log',
+	   'plbwin1_nnnn.log', and 'plbwin2_nnnn.log' where 'nnnn' is the
+	   thread/process identification.
+ 
+	 - A new keyword named 'PLBCS_RECVTIMEOUT={seconds}' has been
+	   added to specify a maximum time allowed where no messages
+	   are received from the server while in a receive mode.  If this
+	   timeout period expires, then a 'timeout expired' message is
+	   logged into the server log file and the socket connection is
+	   closed.  If this keyword is not specified, then a default value
+	   of 130 seconds is used.  If the {seconds} value is set to zero,
+	   then the receive timeout is disabled and the application program
+	   thread continues to wait for a received message until the socket
+	   connection is lost.
+ 
+	 - Corrected a UNIX release problem where the Admin service process
+	   could cause a SEGV error when the current child task count was
+	   being accessed.
+ 
+	 - Corrected a problem where an object method was causing a return
+	   value action to be executed when no return value was required.
+	   This problem could indeterminately prevent method buffering from
+	   occurring.
+ 
+	 - Corrected a UNIX release problem where a GETPROP operation might
+	   not retrieve valid data for a property.
+ 
+	 - Corrected a problem that would cause a GPF or SEGV error.  This
+	   problem would occur if a SETPROP for a VISIBLE=1 property was
+	   executed for a COLLECTION object that contained a FORM object
+	   of a MODAL type and a program executed a CHAIN or STOP operation
+	   while the MODAL window was active.  Also, note that this error
+	   would occur if the same opertions were executed using a PLFORM
+	   label reference of a MODAL form because the PLFORM label
+	   reference is actually a COLLECTION reference.  This problem is
+	   now corrected.
+ 
+-------------------------------------------------------------------------------
+PLBCLIENT- Added a new option named '-ver' that causes PLBCLICON to display a
+	   version, serial number and license-to information.
+ 
+	 - Rewrote TIMER object processing to avoid application conflict
+	   with Windows OS TCP/IP operations.  This change was done to
+	   avoid potential lost messages that could cause a lost client to
+	   server connection.
+ 
+	 - A new keyword named 'PLBCS_RECVTIMEOUT={seconds}' has been
+	   added to specify a maximum time allowed where no messages
+	   are received from the server while in a receive mode.  If this
+	   timeout period expires, then a 'communications problem' dialog
+	   is presented to the client user to allow the client task to
+	   continue or be aborted.  If this keyword is not specified, then
+	   a default time of 300 seconds is used.  If the {seconds} value
+	   is set to zero, then a receive timeout is disabled and the
+	   client task waits for an indefinite time for a message.
+ 
+	 - Corrected a problem where the processing of an ICON property
+	   in a CREATE statement that would cause a PLBSERVE on a Unix
+	   Forward Byte Ordered system to give a SEGV error. Please note
+	   that the program at the server was getting this SEGV error.
+ 
+-------------------------------------------------------------------------------
+PLBCLIUNX- Added new character based Unix client utility to access a
+	   PLBSERVE Application Server.  The PLBCLIUNX only supports
+	   character based applications that use DISPLAY/KEYIN operations.
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Client caching support has been added for the Application Server.
+PLBCLIENT
+ 
+	   CACHE Overview
+ 
+	       This support allows client side caching of PL/B PLF forms,
+	       icons, pictures, sounds, and copyfile files.
+ 
+	       All icons, pictures, sounds, and copyfile files are cached
+	       both in memory in a 100 element LRU (Least Recently Used)
+	       list and on disk.
+ 
+	       Files can be deleted from the cache manually with no ill
+	       effect.
+ 
+	       Resources used during a PLF form load of a cached form are
+	       also cached.
+ 
+	   Languages Changes
+ 
+	       The filename specification for icons, pictures, sounds and
+	       the source file of a COPYFILE statement now allow a leading '?'
+	       or '*' character to be specified. (just as a '!' character
+	       is allowed)
+ 
+	       The '?' character is used to indicate that the file should be
+	       either obtained from the cache or from the server and placed
+	       in the cache.
+ 
+	       The '*' character is used to indicate that the file should
+	       be either obtained from the in-memory cache or from the
+	       server and placed only in the in-memory cache.
+ 
+	       New keywords have been added to the PLBSERVE configuration
+	       parameters that can be used to modify the caching behavior.
+	       These keywords are named PLBCS_CACHEICONS, PLBCS_CACHEPICTS,
+	       and PLBCS_CACHESNDS.
+ 
+	       The 8.7B designer has been changed to mark each PLF form with a
+	       GUID to identify the PLF form for caching. This allows the same
+	       PLF form, used in multiple programs, to be cached only once
+	       In addition, a new (ServerCanCache) property has been added
+	       to a PLF form to allow the caching of a PLF form to be
+	       turned off.  This property is a designer only property.
+ 
+	       Each time a PLF form is written back to disk, the GUID is
+	       changed.
+ 
+	       If a GUID is not stored into a PLF form using the 8.7B designer,
+	       then a PLF form is cached as identified by a PLC compiled time
+	       stamp.  This allows older programs compiled without GUID
+	       identifications to cache a PLF for each PLC program that
+	       includes the PLF form.  This causes more cached items to be used
+	       at the client workstation.  Each time a program is compiled and
+	       used, then a new PLF cache item is created.  Old PLF cached
+	       items are removed from the client cache as each cached item
+	       {age} exceeds the PLBCS_CACHEAGE time period without being used.
+ 
+	       NOTE:
+		  1. ANY FORM TO BE CACHED WITH THE OPTIMAL OR MOST EFFICIENT
+		     STORAGE/USAGE MUST BE LOADED AND SAVED BY THE 8.7B
+		     DESIGNER AND THEN COMPILED INTO A PL/B PROGRAM.
+ 
+		  2. AN ALTERNATIVE TO ITEM (1.) IS TO USE THE 'SETGUID.EXE'
+		     UTILITY TO MODIFY A PLF FORM AND THEN COMPILE IT INTO
+		     A PL/B PROGRAM.
+ 
+		  3. OLDER PROGRAMS THAT DO NOT HAVE 8.7B GUID IDENTICATION
+		     CACHE EACH PLF FORM INSTANCE BASED ON A COMPILE PLC TIME
+		     STAMP.  THIS IS A NON-OPTIMAL CACHE.  PROGRAMS OLDER THAN
+		     8.4A CAN NOT BE CACHED UNLESS THEY ARE RECOMPILED BECAUSE
+		     THEY DO NOT HAVE AN ACCEPTABLE PLC TIME STAMP.
+ 
+	   Plbclient Changes
+ 
+	       When the Plbclient comes up for the first time during a day, the
+	       cache is aged and any files that have expired are purged.  The
+	       default aging time is 7 days.  A new keyword named
+	       PLBCS_CACHEAGE can be used to change the default cache aging
+	       time.
+ 
+	       A new Plbclient command line option named '-clear' has been
+	       added.  This option causes all of the current cached items
+	       to be deleted.
+ 
+	       The following configuration parameters have been added:
+ 
+	       PLBCS_CACHE={ON/OFF}
+ 
+		   This parameter indicates if caching should be used or not.
+		   The current default is ON.
+ 
+	       PLBCS_CACHEDIR={Directory}
+ 
+		   This parameter is used to indicate the directory to store
+		   cached items in. The default is the PLBCSTEMP directory
+		   located in the same directory as the executing Plbclient
+		   command.
+ 
+	       PLBCS_CACHEAGE={age}
+ 
+		   The {age} parameter specifies the number of days a cached
+		   item is retained if not used.  The default is 7 days.
+ 
+	       PLBCS_IMCOUNT={count}
+ 
+		   This parameter specifies the maximum number of in-memory
+		   cached items in a LRU list. The default is 100 items.
+ 
+	       PLBCS_IMSIZE={kb}
+ 
+		   The {kb} parameter specifies the maximum memory size in
+		   Kilobytes of the in-memory cache. The default is 0 for
+		   unlimited size.
+ 
+ 
+	   Plbserve Configuration Parameters
+ 
+	       PLBCS_CACHEICONS={NONE/MEM/DISK}
+ 
+		   This parameter specifies the default caching for any icon
+		   files obtained from this server.
+ 
+		       NONE - no caching (default)
+		       MEM  - cache in-memory only
+		       DISK - cache in-memory and on disk.
+ 
+	       PLBCS_CACHEPICTS={NONE/MEM/DISK}
+ 
+		   This parameter specifies the default caching for
+		   any picture file obtained from this server.
+ 
+		       NONE - no caching (default)
+		       MEM  - cache in-memory only
+		       DISK - cache in-memory and on disk
+ 
+	       PLBCS_CACHESNDS={NONE/MEM/DISK}
+ 
+		   This parameter specifies the default caching for any
+		   sound file obtained from this server.
+ 
+		       NONE - no caching (default)
+		       MEM  - cache in-memory only
+		       DISK - cache in-memory and on disk
+ 
+	 - Added new PL/B language statements named CACHELIST and
+	   CACHELISTEND.  These statements are new program control
+	   instructions that identify the beginning and ending points
+	   for a group of CREATE statements.  The group of CREATE
+	   statements is assigned a group id and is then stored into
+	   the PLBCLIENT item cache when used.  When an identical CACHELIST
+	   group is used in any program, then it is retrieved from the
+	   PLBCLIENT cache and used.  This provides improved performance
+	   for programs that implement individual CREATE operations and
+	   are executed using the Application Server PLBSERVE runtime.
+ 
+	   Note:
+ 
+		1. The CACHELIST and CACHELISTEND instructions are
+		   executed as NOP instructions for all runtimes except
+		   for the PLBSERVE Application Server runtimes.
+ 
+		2. The current implementation for a CACHELIST/CACHELISTEND
+		   instruction group only allows CREATE statements.
+		   The only other instructions allowed between a CACHELIST
+		   and CACHELISTEND are Comments, Conditional Compiler
+		   directives and the INCLUDE directive.
+ 
+		3. All GUI Objects supported for a CREATE operation can
+		   be included in a CACHELIST/CACHELISTEND except for
+		   AUTOMATION, DIALOG, VARIANT, MENU, SUBMENU, and FLOATMENU.
+ 
+		4. The following rules apply when CREATE operations are
+		   included in a CACHELIST/CACHELISTEND grouping:
+ 
+		   a. If a WINDOW object is to be included in the CREATE
+		      CACHELIST group, then it can exist as the 1st
+		      CREATE operation.  In this case, then ALL other
+		      CREATE operations CACHELIST group MUST reference
+		      this WINDOW object using the 'CREATE win;gui...'
+		      syntax formats.
+ 
+		   b. If a WINDOW object in not specified in the CREATE
+		      CACHELIST group, then all of the CREATE statements
+		      MUST either reference the same WINDOW object or
+		      not reference any WINDOW object.  The requirement
+		      is that all CREATE operations must be executed for
+		      the same window whether specified or not.
+		      Example:
+			      WIN      WINDOW
+			      ET       EDITTEXT
+			      ET1      EDITTEXT
+			      .
+				       CACHELIST
+					CREATE   WIN=1:20:5:50
+					CREATE   WIN;ET=1:2:5:10
+					CREATE   WIN;ET1=6:7:5:10
+				       CACHELISTEND
+			      .
+				       CACHELIST
+					CREATE   ET=1:2:5:10
+					CREATE   ET1=6:7:5:10
+				       CACHELISTEND
+			      .
+				       CACHELIST
+					CREATE   WIN;ET=1:2:5:10
+					CREATE   WIN;ET1=6:7:5:10
+			      ;.ERR.....CREATE   WIN=1:20:5:50
+				       CACHELISTEND
+			      .
+ 
+		   c. If a WINDOW object array is being used, then all
+		      variably indexed references can only reference the
+		      same WINDOW object array.  In addition, it is NOT
+		      permitted to mix variably indexed WINDOW object array
+		      references and statically indexed WINDOW object array
+		      references in the same CREATE CACHELIST group.
+ 
+		      Example:
+			      WINARR   WINDOW    (3)
+			      ET       EDITTEXT
+			      ET1      EDITTEXT
+			      NDX2     FORM      "2"
+			      .
+				       CREATE    WINARR(2)=1:20:5:50
+			      .
+				       CACHELIST
+					CREATE   WINARR(NDX2);ET=1:2:5:10
+					CREATE   WINARR(NDX2);ET1=6:7:5:10
+				       CACHELISTEND
+			      .
+				       CACHELIST
+					CREATE   WINARR(2);ET=1:2:5:10
+					CREATE   WINARR(2);ET1=6:7:5:10
+				       CACHELISTEND
+			      .
+				       CACHELIST
+					CREATE   WINARR(NDX2);ET=1:2:5:10
+			      ;.ERR.....CREATE   WINARR(2);ET1=6:7:5:10
+				       CACHELISTEND
+ 
+		5. Nested CACHELIST/CACHELISTEND operations are not
+		   allowed.
+ 
+		6. The CACHELIST/CACHELISTEND group identification is
+		   determined using the "RSA Data Security, Inc. MD5
+		   Message-Digest Algorithm".
+ 
+	 - Modified the PLBCLIENT/PLBSERVE to support new Admin Services
+	   ADMGETINFO data types. ( See ADMIN section )
+ 
+	 - Modified the PLBCLIENT/PLBSERVE to support GETFNAME execution
+	   at the PLBCLIENT workstation.  The GETFNAME input and output
+	   can ONLY reflect the workstation file system information.
+ 
+	 - Modified the PLBCLIENT/PLBSERVE buffering actions to improve
+	   the execution speed when executing INSERTITEM, SETITEM, and
+	   SETPROP using a COLLECTION object.
+ 
+	 - Corrected a problem where a WINAPI executed at the PLBCLIENT
+	   would cause a GPF at the client when an API parameter used a DIM
+	   with a size of 32KB.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the PREP and OPEN for a FILELIST to give an I23 subcode 41
+PLBSERVE   error if the Primary file of the FILELIST is an IFILE and it is
+PLB (UNIX) declared to use the 'Pn=x' option.  This change is required to
+	   insure that data file records can be accessed by key for an
+	   IFILE Primary file.
+ 
+	 - Added a new instruction named EXPLODE that allows a source
+	   variable string to be disassembled into one or more variables
+	   based on a specified delimiter character(s).
+ 
+	   Format:
+ 
+		  [label] EXPLODE  {source}{sep}{delm}{sep}{dest}
+ 
+		  Where:
+ 
+			[label]   is an optional Program Execution Label.
+ 
+			{source}  is a previously defined Character
+				  String Variable or FORM variable that is
+				  disassembled into the {dest} variables.
+ 
+			{sep}     is a comma or one of the following
+				  prepositions: BY, TO, OF, FROM, USING, WITH,
+				  IN, or INTO.
+ 
+			{delm}    is a Character String Variable, Dim Literal,
+				  decimal, octal, or hex value.  For a
+				  Character String Variable or a Dim Literal
+				  the logical string specifies the delimiter
+				  characters that separate individual fields
+				  in the {source} variable.  For a decimal,
+				  octal, or hex value, the numeric value
+				  identifies the delimiter character that
+				  separates individual fields in the
+				  {source} variable.
+ 
+			{sep}     is a comma or one of the following
+				  prepositions: BY, TO, OF, FROM, USING, WITH,
+				  IN, or INTO.
+ 
+			{dest}    is a previously defined Character String
+				  Variable, Numeric Variable, a list of
+				  string and/or numeric variables, or a
+				  VARLIST of string and/or numeric variables
+				  that receives the contents of the {source}
+				  operand.  The {dest} variable can also
+				  be GUI Object ( EDITTEXT, STATTEXT, RADIO,
+				  CHECKBOX, or BUTTON ).
+ 
+		  Flags Affected: EOS, OVER, ZERO
+ 
+		  Note the following:
+ 
+		  1. If the {delm} delimiter variable is a NULL string, then
+		     the EXPLODE instruction executes exactly the same
+		     as an UNPACK instruction.  This includes disassembly
+		     of the {source} and the flag states.
+ 
+		  2. When the {delm} variable is not NULL, then the characters
+		     specified by the logical string are used to identify
+		     delimiter characters that separate fields found in
+		     the {source} variable.  The maximum number of delimiter
+		     characters supported in the {delm} variable are 256.
+ 
+		  3. If the {delm} variable is a decimal, octal, or hex value,
+		     then the value must be between 1 to 255.  A compile error
+		     occurs if the value is not in this range.
+ 
+		  4. The EOS and OVER flags are set the same as an UNPACK
+		     statement.  The ZERO flag is not affected if the {delm}
+		     variable is NULL.  However, if the {delm} variable
+		     is not NULL, then the ZERO flag is affected by the
+		     EXPLODE statement and it indicates whether all of the
+		     fields in the {source} variable were processed and
+		     transferred to the {dest} variables.  The ZERO flag
+		     is set TRUE if all of the {source} variable fields
+		     were processed.  The ZERO flag is set FALSE when more
+		     {source} variable fields exist to be processed.
+ 
+		  5. The EXPLODE variable does affect the {source}
+		     variable FP setting when the ZERO flag is set to a
+		     FALSE state.  When more fields exist in the {source}
+		     variable as indicated by the ZERO flag being set to
+		     FALSE, then the FP for the {source} variable is
+		     set to the beginning of the next field to be processed.
+		     If all of the fields in the {source} variable are
+		     processed and the ZERO flag is set TRUE, then the
+		     {source} variable FP is set to be the same as when
+		     the EXPLODE instruction was started.  Notice that
+		     no changes are made to the {source} variable if it
+		     is a Numeric Variable.
+ 
+		  6. The processing implemented for the EXPLODE statement
+		     does not conform to a MOVE operation.
+ 
+		  7. An F09 error occurs if a {dest} variable being processed
+		     is the same as the {source} variable.  The {source} can
+		     not be specified in the {dest} EXPLODE variable list.
+		     Also, an F09 error occurs if a {dest} variable is a GUI
+		     Object variable and the {delm} parameter is NULL.
+ 
+		  8. If a {dest} variable is a valid GUI Object, then the
+		     corresponding {source} field string is set into the
+		     GUI Object in the same manner as a SETITEM operation
+		     with a zero valued {item} parameter.  If the {source}
+		     field is NULL, then the GUI Object is cleared.  This
+		     operation is only allowed for the following GUI
+		     objects:  BUTTON, CHECKBOX, EDITTEXT, RADIO, and
+		     STATTEXT.
+ 
+		  9. An F10 error occurs if the {delm} delimiter string
+		     contains a binary zero.  A binary zero is not allowed as
+		     a delimiter character.
+ 
+	   Example:
+		A       INIT  "ABC;DEF;RST"
+		B       INIT  "123,456,789"
+		FX      FORM  "12345.02"
+		C       INIT  "X",0x09,"Y",0x09,"Z"
+		.
+		ARR     DIM   20(5)
+		X1      DIM   10
+		X2      DIM   10
+		X3      DIM   10
+		F1      FORM  5
+		F2      FORM  5
+		F3      FORM  5
+		.
+		V1      VARLIST X1,X2,X3
+		V2      VARLIST F1,F2,F3
+		.
+		ET      EDITTEXT
+		ST      STATTEXT
+		.
+			EXPLODE A,";",ARR
+			EXPLODE A,";",X1,X2,X3
+			EXPLODE A,";",V1
+			EXPLODE B,",",F1,F2,F3
+			EXPLODE B,",",V2
+			EXPLODE FX,".",F1,F2
+			EXPLODE C,0x09,X1,X2,X3
+		.
+		. ET and ST must be CREATEd objects.
+		.
+			EXPLODE A,";",ET,ST
+
+	 - Added a new instruction named IMPLODE that appends data to a
+	   single destination variable from variables found in a list
+	   of PL/B data variables that can include GUI objects. A specified
+	   delimiter character is used to separate the data from each
+	   list variable.
+ 
+	   Format:
+ 
+		  [label] IMPLODE  {dest}{sep}{delm}{sep}{source}
+ 
+		  Where:
+ 
+			[label]   is an optional Program Execution Label.
+ 
+			{dest}    is a Character String Variable to which
+				  {source} variable data is appended.
+ 
+			{sep}     is a comma or one of the following
+				  prepositions: BY, TO, OF, FROM, USING, WITH,
+				  IN, or INTO.
+ 
+			{delm}    is a Character String Variable, Dim Literal,
+				  decimal, octal, or hex value.  For a
+				  Character String Variable or a Dim Literal
+				  the character identified by the FP value
+				  specifies the delimiter character to be
+				  used.  If a NULL DIM variable is specified,
+				  then no delimiter is used.  A delimiter
+				  character of binary zero is not allowed.
+ 
+			{sep}     is a comma or one of the following
+				  prepositions: BY, TO, OF, FROM, USING, WITH,
+				  IN, or INTO.
+ 
+ 
+			{source}  is list of previously defined Character
+				  String variables, Numeric Variables,
+				  a VARLIST of string and/or numeric
+				  variables, or GUI objects that can
+				  include BUTTON, CHECKBOX, EDITTEXT,
+				  RADIO, and STATTEXT.
+ 
+		  Flags Affected: EOS
+ 
+		  Note the following:
+ 
+		  1. If the {dest} variable is too small to receive all of
+		     {source} list data and delimiter characters, then the
+		     EOS flag is set TRUE.
+ 
+		  2. If the {delm} delimiter variable is a NULL string, then
+		     the IMPLODE instruction does not store any delimiter
+		     characters in the {dest} string.
+ 
+		  3. If the {delm} variable is a decimal, octal, or hex value,
+		     then the value must be between 1 to 255.  A compile error
+		     occurs if the value is not in this range.
+ 
+		  4. An F10 error occurs if the {delm} delimiter character is a
+		     binary zero.  A binary zero is not allowed as a delimiter
+		     character.
+ 
+		  5. The IMPLODE instruction stores back to back delimiter
+		     characters in the {dest} variable when the corresponding
+		     {source} list variable does not have any data.
+ 
+		  6. If a {source} list variable is a GUI object. Then the GUI
+		     object must have been previously created.  Otherwise, an
+		     O105 error occurs.
+ 
+		  7. The IMPLODE instruction retrieves data from the GUI
+		     objects like a GETITEM instruction is used.  The data is
+		     retrieved as follows:
+ 
+		     EDITTEXT - The data is retrieved the same as when
+		     STATTEXT - a GETITEM has a Character String destination
+				and the {item} number is zero.
+ 
+		     BUTTON   - The data is retrieved the same as when
+		     CHECKBOX   a GETITEM has a Numeric variable as the
+		     RADIO      destination and the {item} number is zero.
+				The values returned are the same as
+				documented for the GETITEM statement.
+ 
+		  8. It is allowed that the {dest} and the first {source}
+		     variable can be the same.
+ 
+	   Example:
+		    A   INIT  "ABC"
+		    FX  FORM  "12345.02"
+		    TAB INIT  0x09
+		    .
+		    ET  EDITTEXT
+		    ST  STATTEXT
+		    .
+		    .
+		    . Create objects......
+		    .
+			IMPLODE S$CMDLIN,",",A,FX
+			IMPLODE S$CMDLIN,"",A,FX
+			IMPLODE S$CMDLIN,TAB,A,"Literal",FX
+			IMPLODE S$CMDLIN,0x09,A,FX
+			IMPLODE S$CMDLIN,";",ET,ST
+ 
+	 - Additional example showing how the combination of IMPLODE and
+	   EXPLODE can be used to simplify loading of objects from a record
+	   just read in from a file.  To populate the objects, the record is
+	   read, an IMPLODE statement is used to pack all of the items into
+	   a single field that is separated by the specified delimiter.  Then
+	   the EXPLODE is used to move each delimiter separated field to the
+	   object.  The record can then be updated by performing the reverse
+	   operation.
+	   
+	   Example:
+
+		VarList LIST
+		A       DIM     10
+		B       DIM     15
+		C       DIM     15
+		D       FORM    4.2
+		E       FORM    4.2
+		F       FORM    4.2
+			LISTEND
+		.
+		ET_A    EDITTEXT
+		ET_B    EDITTEXT
+		ET_C    EDITTEXT
+		ET_D    EDITTEXT
+		ET_E    EDITTEXT
+		ET_F    EDITTEXT
+		.
+		FILE    IFILE
+		DATA    DIM     66
+			...
+		ReadNext
+			READKS  FILE;VarList
+			IMPLODE DATA,0x01,VarList
+			EXPLODE DATA,0x01,ET_A,ET_B,ET_C,ET_D,ET_E,ET_F
+			RETURN
+			...
+		UpdateRec
+			IMPLODE DATA,0x01,ET_A,ET_B,ET_C,ET_D,ET_E,ET_F
+			EXPLODE DATA,0x01,VarList
+			UPDATE  FILE;VarList
+			RETURN
+
+	 - Modified the COPYFILE statement to detect and use the PLB_FNC
+	   keyword setting specified for the runtime where a program is
+	   being executed.  Prior to this change the COPYFILE file names
+	   were always used in the character case as specified by the
+	   user program.  With this change the COPYFILE file names are
+	   forced to lowercase when the PLB_FNC is declared.  If the
+	   user wants to have mixed lowercase and uppercase characters,
+	   then the user needs to specify 'PLB_FNC=MIXED'.  Also,
+	   note that if the PLB_FNC keyword is not specified/declared,
+	   then the default action for a Windows runtime is to force
+	   names to be lowercase.  The default action for a Unix runtime
+	   is to allow names to have mixed character case names.
+ 
+	 - Modified the COPYFILE statement operations to automatically
+	   change the source and destination path characters to be the
+	   expected OS path character consistent with the OS type where
+	   a file is found or stored.
+ 
+	 - Added a new runtime keyword named 'PLB_CLOCKUSEIP={ip adr}'.  When
+	   this keyword is specified, then a CLOCK statement performs a logon
+	   to the SUNFM file manager specified by the {ip adr} setting to
+	   retrieve the time and date information.  Use of this keyword causes
+	   all CLOCK operations that retrieve any time or date information to
+	   go to a file manager.  If an error occurs when accessing the file
+	   manager, then the time and date for the local workstation is used.
+ 
+	   Note:
+		1. A CLOCK statement causes the LESS flag to be cleared/set
+		   when the PLB_CLOCKUSEIP keyword is set.  The LESS flag in
+		   this case is set FALSE if the CLOCK time/date information
+		   was accessed from the file manager.  The LESS flag is set
+		   TRUE if an error occurred accessing the time/date from the
+		   file manager.
+ 
+		2. Be aware that if the PLB_CLOCKUSEIP keyword specifies an
+		   invalid {ip adr} or the file manager is not currently
+		   running, then a CLOCK operation sets the LESS flag.  Also,
+		   note that the CLOCK operation executes slower than normal
+		   due to network overhead.
+ 
+	 - A new keyword named '*CLOCKUSEIP=' has been added to the GETMODE
+	   and SETMODE statements.  A 'SETMODE *CLOCKUSEIP={ip adr}'
+	   operation causes the runtime to access a file manager to retrieve
+	   the time/date information for a CLOCK statement.  This is the
+	   same as using the new runtime keyword named PLB_CLOCKUSEIP.  The
+	   'GETMODE *CLOCKUSEIP={svar}' operation can be used to retrieve
+	   the current {ip adr} string setting.  The {svar} is set to be
+	   NULL if a CLOCKUSEIP string is not in use.  Please notice that
+	   CLOCK instruction affects the LESS flag when the *CLOCKUSEIP
+	   string is set.
+ 
+	 - Added new controls named *ZFON and *ZFOFF for the following
+	   statements.  The *ZFON control turns the *ZF zero fill control
+	   on until a *ZFOFF or the end of the instruction is encountered.
+ 
+	   Statements affected:
+ 
+		   DISPLAY, DBSEND, KEYIN, PRINT, PRTPAGE, and WRITE
+ 
+	 - Modified the *ZF control operation to perform a zero fill
+	   action for all the elements of a data variable when the
+	   variable following the *ZF is an ARRAY (without index), RECORD,
+	   or a VARLIST.
+ 
+	   Note:
+		1. When a program is compiled with an 8.7B compiler that
+		   contains a *ZF control with an ARRAY, RECORD, or VARLIST
+		   as the next variable, then an 8.7B runtime version or later
+		   performs a zero fill for all the variable elements. However,
+		   if this same program is executed with an older runtime then
+		   NO elements are set to zero in the ARRAY, RECORD, or VARLIST.
+ 
+	 - Modified the '-mNNNNN' and '-mvNNNNN' options to be accepted and
+	   processed to be the same for a given runtime.  This avoids problems
+	   where the same options are used for different runtime platforms.
+ 
+	 - Added a new keyword named '*TASKID={nvar|ivar}' for the GETMODE
+	   instruction.  The TASKID value returned is the thread id for
+	   a program when executing under Windows.  The TASKID value returned
+	   is a process id for a program when executing under UNIX.
+	   The TASKID value returned to a program is the same as a task id
+	   value reported by the $ADMITEMTASKID child data for an
+	   ADMGETINFO operation.
+ 
+	 - Corrected an I01 error that could occur executing a DELETE FILELIST
+	   operation and an isam key did not exist for a secondary filelist
+	   IFILE.
+ 
+	 - Corrected a problem where a *RV control in a KEYIN operation for
+	   a DIM variable could cause a GPF/SEGV error if the PL size of
+	   the DIM variable was larger than 512.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the KEYIN *T0 operation to check for Windows events.
+	   This allows this instruction to be inserted into logic to
+	   cause windows events to be processed in a similar manner as
+	   an EVENTQUEUE instruction.
+ 
+	 - Modified zero numeric character of the fonts for the PLBWIN.FON
+	   and PLBWIND.FON resource files to have a slash across the
+	   character.  This change is being made to allow the uppercase
+	   alpha 'O' to be differentiated from a numeric zero '0' character.
+ 
+	 - Added a new keyword named 'PLBWIN_DISPFLUSH={on|off}' to allow
+	   an immediate action for each DISPLAY/KEYIN instruction when
+	   this keyword is set to ON.  This is being implemented to
+	   eliminate any delayed display actions caused by the event
+	   processing for the Windows OS. When this keyword is set to ON,
+	   a character-based program may execute slower since each DISPLAY
+	   and KEYIN is forces the Windows OS to take an immediate display
+	   action.
+ 
+	 - Added new keyword named '*DISPFLUSH=' for the GETMODE/SETMODE
+	   instructions.  This keyword allows program control for the
+	   PLBWIN_DISPFLUSH keyword state.  If this keyword is set to a
+	   non-zero value, this has the same action for DISPLAY/KEYIN
+	   operation as setting the PLBWIN_DISPFLUSH to an ON state.
+ 
+	   Format:
+		     GETMODE  *DISPFLUSH=<nvar|ivar>
+		     SETMODE  *DISPFLUSH=<nvar|ivar|dnum>
+ 
+	 - Modified the LISTVIEW FindItem method to work around an OS
+	   problem where the returned results were invalid when the
+	   LISTVIEW object SORTORDER was set to either ascending or
+	   descending.
+ 
+	 - Modified the 'show' method for the WINDOW object to support a
+	   specialized '*Mode=103' mode.  This mode is a specialized method
+	   that causes a WINDOW to be maximized and the window does not overlay
+	   the OS Taskbar window area.
+ 
+	 - Added a new keyword named 'ABORT[={dnumnvar}]' for a PRTCLOSE
+	   instruction.  The ABORT keyword allows a user to terminate
+	   an advanced printing session without coming up into the
+	   PRINT PREVIEW window.  Notice, that the ABORT keyword can be
+	   specified with or without an optional {dnumnvar} parameter.
+	   When the {dnumnvar} value is specified, then a non-zero value
+	   causes the printing session to be terminated.  A value of
+	   zero does not terminate the printing session.  Also, note that
+	   a spooled file is deleted if a printing session is terminated.
+ 
+	   Example:
+		    PF      PFILE
+		    .
+			    PRTOPEN  PF,"@?",""
+		    .
+			    PRTCLOSE PF,ABORT         ;Aborts print session
+			    PRTCLOSE PF,ABORT=1       ;Aborts print session
+			    PRTCLOSE PF,ABORT=0       ;Does not abort
+			    PRTCLOSE PF,ABORT=ABTFLG  ;Optional ABORT
+ 
+	 - Added a new property named 'ROWSVISIBLE' for the COMBOBOX
+	   object.  This property specifies the number of rows that are
+	   to be visible in the COMBOBOX drop down list.  When more data
+	   items are added to the COMBOBOX than can be visible at one time,
+	   then a scrollbar automatically appear.  If fewer data
+	   items are added to the COMBOBOX than the ROWSVISIBLE count,
+	   then a scrollbar does not show.  This property can be used in
+	   a CREATE or GETPROP statement.  The ROWSVISIBLE value can not
+	   be changed by a SETPROP operation.
+ 
+	 - Added a new method named 'AllowEmptyTab' for a DATALIST
+	   object.  This method allows the runtime to perform a user tab
+	   operation to an empty DATALIST.
+ 
+	   Format:
+		   [label] {object}.AllowEmptyTab [GIVING {return}]:
+						  USING [*VALUE=]{value}
+ 
+	   Where:
+		 label  - is an optional Program Execution Label.
+		 object - is a required DATALIST object that is accessed.
+		 return - is an optional Numeric Variable that indicates
+			  the success or failure of the method.
+		 value  - is a required decimal number or Numeric Variable
+			  that indicates whether tabbing to an empty
+			  DATALIST is allowed or not.
+ 
+	   Flags Affected:
+		 EOS, OVER, ZERO
+ 
+	   Notes:
+		 1. If the {value} is non-zero when this method is executed,
+		    then the DATALIST object operation is changed to allow
+		    a user tabbing action to set the focus to the object
+		    when is empty.
+ 
+		 2. If the {value} is zero, then the DATALIST object
+		    operation does not allow a user tabbing action to set
+		    the focus to an empty DATALIST.  This is the default
+		    operation of a DATALIST object.
+ 
+	 - Rewrote TIMER object processing to avoid application conflict
+	   with Windows OS TCP/IP operations.
+ 
+	 - Corrected a problem where the S$CMDLIN variable was prematurely
+	   being cleared during a CHAIN operation when only the chain to
+	   program name was specified.  This problem could occur
+	   indeterminately depending on how the data variables were laid
+	   out in a program.
+ 
+	 - Corrected a problem where the PLB_DOSCMDLN keyword action was
+	   not properly simulating the MSDOS runtime CHAIN operations.
+ 
+	 - Corrected a problem that might cause a GPF error in the SUNIDE
+	   during the shutdown processing.
+ 
+	 - Corrected a problem where a SETPROP operation for the VISIBLE
+	   property did not work for a TOOLBUTTON object or a TOOLBAR
+	   toolbutton collection item.
+ 
+	 - Corrected a problem where a SETPROP of the LEFT property for
+	   a COLLECTION did not work properly for objects after the first
+	   object in the collection.
+ 
+	 - Corrected a memory leak caused when an logon operation to a
+	   SUNFM file manager failed because a file could not be found.
+ 
+	 - Corrected a problem where a PLBWIN runtime could go into a
+	   non-responsive state when using a managed file accessing a
+	   SUNFM file manager that specified FM_KEEPALIVE checking.  If
+	   a PLBWIN runtime entered the non-responsive state, then the
+	   SUNFM keep alive checking would timeout and terminate the
+	   connection resulting in an I81 error in a program.  Also,
+	   when the connection was terminated a 10057 error would be
+	   logged into the SUNFM log file.
+ 
+-------------------------------------------------------------------------------
+RMSRAS   - Corrected a problem where all READ statements did not retry
+	   an operation when a file was locked.  This problem could cause
+	   an erroneous OVER flag.
+ 
+-------------------------------------------------------------------------------
+PLB (UNIX)- Modified the Unix runtimes to support the PLB_DOSCMDLN keyword
+	    to simulate MSDOS runtime operations with regard to the
+	    CHAIN statement.
+ 
+	  - Corrected a problem where SETMODE *ENV would work once and then
+	    could give indeterminate results when accessed via CLOCK ENV.
+	    This correction should allow multiple SETMODE *ENV keywords to
+	    be specified at the same time.
+ 
+-------------------------------------------------------------------------------
+PLBCMP   - Modified the compiler to provide array support for the
+	   ADMIN data type.  This change is for pointer and non-pointer
+	   declarations.
+ 
+	   Example:
+		    ARR    ADMIN   (4)      ;supported
+		    ARRPTR ADMIN   ^(4)     ;Supported
+ 
+	 - Modified the compiler to support an array size of one.
+ 
+	   Example:
+		    ARRONE DIM     20(1)
+ 
+	 - Added support for an EXPLODE statement.
+ 
+	 - Added support for an IMPLODE statement.
+ 
+	 - Added support for CACHELIST and CACHELISTEND statements.
+ 
+	 - Added new keyword named 'PLBCMP_INCEXT={extension}.  This keyword
+	   specifies the default extension used by the compiler when
+	   opening the file without an extension for an INCLUDE operation.
+	   If this keyword is not defined, then the default INCLUDE file
+	   extension is the same as specified for a source file.
+ 
+	 - Modified the GETMODE/SETMODE statements to support a *CLOCKUSEIP
+	   keyword.
+ 
+	 - Modified the compiler to give a Warning when the initialization
+	   decimal or hex values for an INIT or INTEGER are too large and
+	   truncated.
+ 
+	 - Corrected a problem where an ADMIN data variable specified
+	   in a CALL USING list was not properly checked for the
+	   corresponding ROUTINE operand type.  CALL USING and ROUTINE
+	   data types are now checked properly for an ADMIN variable.
+ 
+	 - Corrected a problem where a GLOBAL pointer variable was not
+	   being identified as a pointer in a ROUTINE operand list.  This
+	   problem would cause an F04 error to occur.
+ 
+	 - Corrected a problem where the compiler could start giving
+	   indeterminate errors after processing a user macro operation.
+ 
+	 - Corrected a CALL USING/ROUTINE parameter problem using
+	   whole array parameters when compiled using 'zc=3' option.
+	   This problem could cause indeterminate program execution.
+ 
+	   Example:
+		   XARR    DIM  1(3)
+			   CALL XXX USING XARR
+			   STOP
+		   .
+		   XPTR    DIM  ^(3)
+		   .
+		   XXX     ROUTINE  XPTR
+			   ...
+			   RETURN
+ 
+	 - Corrected a problem in MOVEADDR & MOVEPTR  where an array reference
+	   was causing a compiler error when assigned to a
+	   non-array reference using the 'zc=3' option.
+ 
+	   Example:
+		    X      DIM   20(5)
+		    XPTR   DIM   ^
+		    YARR   DIM   ^(20)
+		    .
+			   MOVEADDR  X(1),XPTR
+			   MOVEPTR   YARR(1),XPTR
+ 
+	 - Corrected a problem where a 'LIST ^' statement was not being
+	   output for a listing.
+ 
+	 - Corrected a problem where the printed statement output for
+	   a data variable might list the wrong UDA address of the variable.
+	   This is a listing problem only and does not affect the actual
+	   program operations.
+ 
+	 - Corrected a problem where the PLC header did not have a FILE link
+	   list reference when the '-c' command option was used to compile
+	   a program.  A PLB program compiled in this manner would not
+	   implicitly close program files when a CHAIN operation was
+	   executed.
+ 
+	 - Corrected a problem where the compiler was not closing the
+	   source program when it stopped resulting in a chain operation
+	   back to a master.  This problem was caused due to the compiler
+	   being compiled with the '-c' command line option problem.
+ 
+	 - Corrected a problem where the ANCHOR and DOCK properties were
+	   not supported for the CONTROL object.
+ 
+-------------------------------------------------------------------------------
+PLBDBUG  - Modified the debugger to recognize the following objects as
+	   variable constructs.  ( MAINWINDOW, STATUSPANEL, TOOLBUTTON,
+	   SPLITTER, and PANEL )
+ 
+	 - Modified the debugger to use a SDB file generated on a
+	   platform with a byte order different than the platform where
+	   the debugger is being executed.
+ 
+-------------------------------------------------------------------------------
+PLBDSIGN - Modified the designer to provide an EXPORT CODE submenu item
+	   for the File menu.  This is being added to address a situation
+	   where the form being used was completely covered with child
+	   GUI objects.  The problem was that a user could not access the
+	   form window to execute a right click menu operation.
+ 
+	 - Added support for the ROWSVISIBLE property for a COMBOBOX object.
+ 
+	 - Corrected a problem where the creation of a STATTEXT object
+	   over a PANEL object did not show the text until the object
+	   was moved.
+ 
+	 - Corrected a problem where the menu action of Format\Align options
+	   did not work properly aligning objects over a PANEL object.
+ 
+	 - Corrected a problem where the object sizing rectangles for
+	   a STATTEXT object that overlapped with an EDITTEXT object
+	   remained visible when the EDITTEXT object got the focus.
+ 
+-------------------------------------------------------------------------------
+SUNMOD   - Now generated as a 32 bit Windows console utility.
+	   
+-------------------------------------------------------------------------------
+MAKEDEF  - Now generated as a 32 bit Windows console utility.
+ 
+-------------------------------------------------------------------------------
+SUNSORT  - Modified the SUNSORT utility when sorting a file in place to insure
+	   that the temporary working file is created at the same location as
+	   the file being sorted.  This corrects a renaming problem that could
+	   occur when the temporary working file existed on a Novell 3.2
+	   server.
+ 
+	 - Corrected a problem where the reformat output operation for
+	   SUNSORT did not work properly when a compressed data file
+	   was being sorted.
+
+-------------------------------------------------------------------------------
+SETGUID  - A new utility to update PLF forms with a current GUID identification
+	   without having to load the PLF form into the PLBDSIGN designer.
+	   SETGUID is executed as a Windows OS console utility and can be
+	   executed in a batch file.  After the SETGUID utility has modified a
+	   PLF form, the PLF form can be used in multiple programs and cached
+	   optimally when executed using the Application Server.
+ 
+	   Format:
+		   setguid  myform
+		   setguid  myform.plf
+ 
+-------------------------------------------------------------------------------
+MENUGEN  - Corrected a problem where this utility would not run with the
+	   personal version of the runtime.
+
+-------------------------------------------------------------------------------
+REFORMAT - Modified to show the beginning column being displayed when the
+	   screen is shifted left or right.  Also modified to show the column
+	   where a mismatch occured. 
+
+-------------------------------------------------------------------------------
+SUNIDE   - Added option so "Backup Project Files" does not copy files if the
+	   destination file is newer than source.
+
+	 - Fixed a bug in variable autocomplete logic where a variable my not
+	   be found in the Browse labels even if it is there.
+
+	 - Modified the build process so all list files are not reloaded after
+	   every compile, only the ones for programs that have actually
+	   changed.  Browse info is now loaded at the same time we scan the
+	   list file for errors.  This improves peformance.
+
+	 - Fixed a bug where if a user clicked "Save All" on the tool bar or
+	   selected it from the menu, the ide would still prompt to save each
+	   file before compiles or on program exit.
+
+	 - Fixed a bug in "Find In Files" where it could skip a search of a
+	   PLF.
+
+	 - When a project is loaded, the search path is now modified to use
+	   PLB_PATH in the projects specified .ini file.
+
+	 - Fixed a bug where the saved font name was not being used when the
+	   settings were being restored.
+
+	 - The editor now saves the font properties for the editor.
+
+	 - Added an option to create .BAK files when a file is saved.
+
+	 - Modified the printing routine to try to ensure consistant printer
+	   output between different printers by adding the *Quality list
+	   control during printer initialization.
+
+	 - Fixed a problem where an extra empty line may be added to the end of
+	   the file each time the file is opened and saved.
+	   
+-------------------------------------------------------------------------------
+WATCH    - Corrected a problem that would create a configuration file
+	   (watch.cfg) that was unnecessarily large (64kb).
+
+	 - Corrected writing of information to a blank configuration file.
+
+	 - Corrected a display error that occurred when there were clients but
+	   no open files.
+
+	 - Added program names to client task section of treeview.
+
+	 - Added trap logic to catch a gone-away server.
+
+	 - Added descriptive messages to connection IO errors based on error
+	   subcodes.
+
+	 - Corrected cosmetic problems in DISCONNECT routine.
+
+	 - Optimized code with new Implode and Explode verbs.
+
+	 - Added additional server information.
+
+	 - Added server log file display that also works with the refresh
+	   timer.
+
+	 - Added server and client version conversion routine to format the
+	   version into a standard Sunbelt format.
+
+	 - Corrected resizing logic in modal dialogs.
+
+	 - Added logic to disabled timer when modal dialogs are active.
+
+	 - Delayed loading of modal dialogs until needed.
+
+	 - Added shorcut menu in Clients and Files windows.  Moved tab
+	   functions from buttons to the shortcut menu.
+
+	 - Added client logging contol to client tab shortcut menu.
+
+	 - Optimized Files tab functions with ADMGETINFO filter.
+
+-------------------------------------------------------------------------------
+ADMEQU.INC - Modified to provide equates for new Admin Services data types.
+ 
+-------------------------------------------------------------------------------
+ODSBAC32.DLL- The 8.7B Sunbelt ODBC driver has been updated for the latest
+	      reported issues from Syware, Inc. for the ODBC bronze support.
+ 
+	    - Make note that the 8.7B ODSBAC32.DLL must used the 8.7B
+	      SUNFHDLL.DLL or a version error occurs.
+ 
+	    - It should also be noted that 8.7 or later versions of the
+	      ODSBAC32.DLL have Admin support added when accessing a
+	      File Manager with Admin services being used.
+ 
+-------------------------------------------------------------------------------
+SUNFHSYS.DLL- Modified to support new Admin Services data types.
+ 
+	    - Corrected a memory leak resulting from a failed logon
+	      attempt to a SUNFM file manager.
+ 
+-------------------------------------------------------------------------------
+ADMIN    - Modified the Windows server versions to provide critical
+	   exception handler to capture any Admin thread GPF errors.  This
+	   change is needed to prevent premature termination of a server
+	   when a GPF occurs in an Admin thread.
+ 
+	 - Modified the Admin Services to support new ADMGETINFO data
+	   types as follows:
+ 
+	   $ADMITEMUSERNAME    specifies that the client user name string
+			       is to be returned.  The user name is the name
+			       identified by the OS for the client workstation.
+ 
+			     $ADMITEMUSERNAME      EQU   16
+ 
+	   $ADMITEMCOMPUERNAME specifies that the client computer name
+			       string is be returned.  The computer name
+			       is the name identified by the OS for the
+			       client workstation.
+ 
+			     $ADMITEMCOMPUERNAME   EQU   17
+ 
+	   $ADMITEMMODULENAME  specifies that the names of all load modules
+			       currently in use by a Application Server
+			       PL/B program is to be returned.  The load
+			       module data is not available for the
+			       File Manager Server.
+ 
+			     $ADMITEMMODULENAME    EQU   18
+ 
+	   $ADMITEMAAMFILENAME specifies that the AFILE file names currently
+ 
+			       opened by a program are to be returned.
+ 
+			     $ADMITEMAAMFILENAME   EQU   19
+ 
+	   $ADMITEMISIFILENAME specifies that the IFILE file names currently
+			       opened by a program are to be returned.
+ 
+			     $ADMITEMISIFILENAME   EQU   20
+ 
+	   $ADMITEMPRTFILENAME specifies that the print spool file names
+			       currently opened by a program are to be
+			       returned.
+ 
+			     $ADMITEMPRTFILENAME   EQU   21
+ 
+	   $ADMITEMTXTFILENAME specifies that the FILE filenames currently
+			       currently opened by a program are to be
+			       returned.
+ 
+			     $ADMITEMTXTFILENAME   EQU   22
+ 
+	   $ADMITEMSRVNAME     specifies the server name is to returned.  The
+			       server name is identified by the new server
+			       keyword named 'ADMIN_SRVNAME={name}'.
+ 
+			     $ADMITEMSRVNAME       EQU   114
+ 
+	   $ADMITEMSRVUSERNAME specifies that the admin client user name
+			       string is to be returned.  The user name is
+			       the name identified by the OS for the client
+			       workstation that is logged on to the
+			       Admin Services.
+ 
+			     $ADMITEMSRVUSERNAME   EQU   115
+ 
+	   $ADMITEMSRVCOMPUTERNAME specifies that the admin client computer
+			       name string is to be returned.  The compiler
+			       name is the name identified by the OS for
+			       the client workstation that is logged on to
+			       the Admin Services.
+ 
+			     $ADMITEMSRVCOMPUTERNAME EQU 116
+ 
+	 - Corrected a problem where an invalid Admin id value was being
+	   returned when an ADMGETINFO operation for a $ADMITEMADMID data
+	   type was specified.
+ 
+	 - Corrected a GPF problem that could occur when an invalid
+	   Admin id value was specified for an ADMGETINFO operation.

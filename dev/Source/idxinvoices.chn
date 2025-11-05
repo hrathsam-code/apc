@@ -1,0 +1,5 @@
+SUNINDEX Invvoices.txt,Invoices.isi,L800 -n,z,y,1-8,9-17 
+SUNINDEX Invvoices.txt,Invoices2.isi,L800 -n,w,z,y,1-8,93-100,9-17 
+SUNINDEX Invvoices.txt,Invoices3.isi,L800 -n,w,z,y,1-8,663-663,9-17 
+SUNINDEX Invvoices.txt,Invoices4.isi,L800 -n,z,y,1-8,45-54,93-100,9-17 
+SUNINDEX Invvoices.txt,Invoices5.isi,L800 -n,z,y,1-8,65-84,9-17 

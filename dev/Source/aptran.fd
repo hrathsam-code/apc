@@ -1,0 +1,101 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APTran.FD                                                      ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:    Accounts Payable Open Transaction File                         ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $APTranVAR
+$APTranVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APTran        RECORD
+AccountNumber DIM               6
+TransYear     DIM               2
+TransMonth    DIM               2
+TransDay      DIM               2
+Invoice       DIM               6
+Counter       FORM              1
+Description   DIM               20
+Amount        FORM              6.2
+LastDiscDay   DIM               8
+DiscountAmt   FORM              4.2
+GLCode        DIM               6
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APTranK1SIZE CONST            "19"                                     (Length of the Key variable)
+.APTranK2SIZE CONST            ""                                      (Length of the Key variable 2)
+.
+. By Vendor, Year, Month, Day, Invoice Number, Counter
+.
+APTranI1DEF  INIT             "1-19"                                   (Index definitions for Key 1)
+.
+APTranFSIZE  CONST            "69"                                     (Length of each Record)
+
+APTranKY    DIM               APTranK1SIZE                             (The Actual 'Key' variable)
+
+APTranPROG  INIT              "AP Open Transaction Inquiry"
+APTranTITLE INIT              "AP Open Transactions"                   (Description used later for headers, etc)
+APTranHELP  INIT              "APTran.HLP"                             (Name of the Help file for later purposes)
+
+APTranTXTNM  INIT             "$SC\","APTRANFL.TXT"                    .Actual Text Filename  (i.e. CUSTFL.TXT)
+APTranISI1NM INIT             "$SC\","APTRANFL.ISI"                   .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+APTranFLST  FILELIST
+           %IFDEF            APTranKY
+APTranFL    IFILE             Name=APTranISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY2
+APTranFL2   IFILE             Name=APTranISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY3
+APTranFL3   IFILE             Name=APTranISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY4
+APTranFL4   IFILE             Name=APTranISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY5
+APTranFL5   IFILE             Name=APTranISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY6
+APTranFL6   IFILE             Name=APTranISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY7
+APTranFL7   IFILE             Name=APTranISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY8
+APTranFL8   IFILE             Name=APTranISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTranKY9
+APTranFL9   IFILE             Name=APTranISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $APTranIO
+.           INCLUDE           APTran.IO
+         %ENDIF
+

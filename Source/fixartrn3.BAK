@@ -1,0 +1,72 @@
+
+              INCLUDE           NCOMMON.TXT
+              INCLUDE           workvar.inc
+              include                  Sequence.FD
+              INCLUDE           ARTRN.FD
+              include                  ARTRM.FD
+              include                  Invoices.FD
+
+IOSW     DIM       1       I/O INDICATOR
+OldInvoiceNumber FORM           5
+OldInvoiceNumber10 FORM         10
+OldInvoiceNumberD DIM           5
+BalanceD      DIM               12
+OrigAmtD      DIM               12
+InputCount    FORM              8
+
+AgingDays           form               4
+DiscountDays        form               4
+DiscountPercent     form               2.2
+
+                    call               OpenARTRN
+                    call               OpenInvoices
+                    call               OpenARTRM
+                    call               OpenSequence
+
+                    call               RDInvoices
+
+
+                    LOOP
+                      CALL               KSInvoices
+                    UNTIL              (ReturnFL = 1 )
+                      move               Invoices.TermCode,ARTRMKY
+                      call               RDARTRM
+                      move               ARTrm.DiscDays,DiscountDays
+                      move               ARTrm.NetDays,AgingDays
+                      move               ARTrm.DiscPerc,DiscountPercent
+
+                      move               Invoices.BillCust,ARTRN.CustomerID
+                      move               Invoices.Reference,ARTRN.Reference
+                      squeeze            ARTRN.Reference,ARTRN.Reference
+                      packkey            ARTRNKY from Invoices.Entity,ARTRN.CustomerID,Invoices.Reference
+                      call               RDARTRN
+                      if               (ReturnFl = 1)
+                      display          "FUCKUP"
+                      debug
+                      continue
+                      endif
+
+                      call               ConvDateToDays using ARTrn.EntryDate,TodayDays
+                      add                AgingDays,TodayDays
+                      call               ConvDaysToDate using TodayDays,ARTrn.DueDate
+;
+; Calculate the Discount Amount
+;
+                      call               ConvDateToDays using ARTrn.EntryDate,TodayDays
+                      add                DiscountDays,TodayDays
+                      call               ConvDaysToDate using TodayDays,ARTrn.DiscDate
+;
+; That's why...It seems that there's transactions out there without an Invoice Amount
+;
+                      MOVE              DiscountPercent,ARTrn.DiscPct
+                      CALC              ARTrn.DiscAmt = ARTrn.OrigAmt * (DiscountPercent / 100)
+
+                      ADD               "1",InputCount
+                      DISPLAY           *P10:10,"Counter : ",InputCount
+                      call             UPDARTRN
+
+
+              REPEAT
+
+              STOP
+

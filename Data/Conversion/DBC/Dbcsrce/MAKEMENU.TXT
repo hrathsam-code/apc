@@ -1,0 +1,425 @@
+. MAKEMENU - MENU GENERATION PROGRAM
+.
+         INCLUDE   COMMON
+*................................................................
+NAME     DIM       8                   NAME OF MENU / NAME OF
+.                                      PROGRAM FOR CHAIN INST.
+TITLE    DIM       50                  TITLE TO BE DISPLAYED
+REPLY    DIM       1                   REPLY TO QUESTIONS
+*................................................................
+BRANCH   INIT      "BRANCH    INDEX OF "    SEE BELOW
+.
+. WHEN WRITING THE BRANCH INSTRUCTION, THE STRING ABOVE MUST BE
+. WRITTEN PRECEDING THE FIRST PROGRAM NAME ONLY.  A STRING OF
+. BLANKS MUST BE WRITTEN PRECEDING ALL OTHER PROGRAM NAMES.  THIS
+. IS HANDLED USING THE VARIABLE "BRANCH".  THE VARIABLE "BRANCH"
+. IS WRITTEN PRECEDING THE PROGRAM NAME FOR ALL LINES OF THE
+. BRANCH INSTRUCTION.  THE FIRST TIME "BRANCH" IS WRITTEN IT
+. CONTAINS THE STRING GIVEN ABOVE.  AFTER WRITING THE VARIABLE
+. "BRANCH" A STRING OF ALL BLANKS IS MOVED INTO IT CAUSING ALL
+. SUBSEQUENT WRITES USING "BRANCH" TO WRITE BLANKS PRECEDING THE
+. PROGRAM NAME.
+.
+*................................................................
+. THESE VARIABLE ARE USED BY THIS PROGRAM TO POSITION TO THE
+. PROPER POSITION ON THE SCREEN AS WELL AS BEING USED TO WRITE
+. THE *P<h>:<v> CONTROLS FOR DISPLAYING THE MENU.
+.
+INDEX    FORM      2                   NUMBER INDICATING WHICH
+.                                      PROGRAM
+HPOS     FORM      2                   HORIZONTAL POSITION
+VPOS     FORM      2                   VERTICAL POSTION
+*................................................................
+. UTILITY WORK AREAS
+. C => CHARACTER STRING VARIABLE
+. N => NUMERIC STRING VARIABLE
+. NUMBER IN LABEL INDICATES THE LENGTH OF THE WORK AREA
+.
+CWK9     DIM       9
+CWK34    DIM       34
+CWK65    DIM       65
+NWK1     FORM      1
+*................................................................
+OUTFILE  FILE                          ON COMPLETION CONTAINS THE
+.                                      MENU THAT WAS BUILT
+WKFILE1  FILE                          WORK FILE USED TO STORE
+.                                      BRANCH INSTRUCTION
+WKFILE2  FILE                          WORK FILE USED TO STORE
+.                                      THE CHAIN INSTRUCTION
+.                                      SECTION OF THE MENU
+SEQ      FORM      "-1"                USED FOR SEQUENTIAL I/O
+REWIND   FORM      "0"                 USED TO REWIND FILES
++................................................................
+. MAINLINE
+.
+         COMPARE   "8" TO SECURITY     REQUIRE A SECURITY CLEAR-
+         STOP      IF LESS             ANCE OF AT LEAST 8
+*................................................................
+. GET THE NAME OF THE MENU
+.
+BADMENU  KEYIN     *ES,"What is the name of the menu? ",NAME
+         CMATCH    " " TO NAME
+         GOTO      BADMENU IF EOS
+         GOTO      BADMENU IF EQUAL
+*................................................................
+. PREPARE THE OUTPUT FILE
+.
+         TRAP      PREPOUT IF IO
+         OPEN      OUTFILE,NAME
+         TRAPCLR   IO
+*................................................................
+. FILE ALREADY EXISTS
+.
+         KEYIN     "That menu already exists!":
+                   *N,"Do you want to overwrite it? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      DATAREA IF EQUAL
+         STOP
+*................................................................
+. PREPARE THE OUTPUT FILE
+.
+PREPOUT  PREPARE   OUTFILE,NAME
+*................................................................
+. DATA AREA GENERATION
+.
+DATAREA  KEYIN     "What is the menu's title? ",TITLE
+*
+         CLEAR     CWK65               BUILD THE FIRST COMMENT
+         APPEND    NAME TO CWK65
+         APPEND    " - " TO CWK65
+         APPEND    TITLE TO CWK65
+         RESET     CWK65
+*................................................................
+. WRITE THE OPENING COMMENTS
+.
+         WRITE     OUTFILE,SEQ;*+,". ",CWK65
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;". THIS PROGRAM WAS GENERATED ":
+                               "USING THE #"MAKEMENU#" PROGRAM"
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;". COMPILING THIS PROGRAM ":
+                   "REQUIRES THAT THE FILES:  #"COMMON/TXT#","
+         WRITE     OUTFILE,SEQ;". #"LOGDATA/TXT#" AND ":
+                   "#"LOGIO/TXT#" EXIST ON ANY DRIVE ":
+                   "WHICH IS ON-"
+         WRITE     OUTFILE,SEQ;". LINE.  THESE INCLUSION FILES ":
+                   "CONTAIN THE INFORMATION COMMON TO"
+         WRITE     OUTFILE,SEQ;". ALL OF THE SYSTEM PROGRAMS."
+         WRITE     OUTFILE,SEQ;"."
+*................................................................
+. WRITE THE USER'S DATA AREA
+.
+         WRITE     OUTFILE,SEQ;"         INCLUDE   COMMON/TXT"
+         WRITE     OUTFILE,SEQ;"INDEX    FORM      2":
+                               "                   ":
+                               "USER SELECTION VARIABLE"
+         WRITE     OUTFILE,SEQ;"TIME     INIT":
+                               "      #"hh:mm:ss#"":
+                               "          ":
+                               "hours:minutes:seconds"
+         WRITE     OUTFILE,SEQ;"         INCLUDE   LOGDATA/TXT"
+*................................................................
+. START WRITING THE MAINLINE
+.
+         WRITE     OUTFILE,SEQ;"+........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". MAINLINE"
+         WRITE     OUTFILE,SEQ;"."
+*................................................................
+. SET UP SECURITY CHECK
+.
+         KEYIN     "What security clearance should be required":
+                   " to execute this menu? (1-9) ",NWK1
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". THIS MENU REQUIRES A ":
+                               "SECURITY CLEARANCE OF AT ":
+                               "LEAST ",NWK1
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;"         COMPARE":
+                               "   #"",NWK1,"#" TO SECURITY"
+         WRITE     OUTFILE,SEQ;"         STOP      IF LESS"
+         WRITE     OUTFILE,SEQ;"         INCLUDE   LOGIO/TXT"
+*................................................................
+. WRITE THE INITIAL PART OF THE MENU DISPLAY INSTRUCTION
+.
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". DISPLAY THE MENU"
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;"         DISPLAY   *ES:"
+*
+         CLEAR     CWK65
+         APPEND    TITLE TO CWK65
+         APPEND    "#":" TO CWK65
+         RESET     CWK65
+         WRITE     OUTFILE,SEQ;"                   #"",CWK65
+         WRITE     OUTFILE,SEQ;"                   ":
+                               "*P51:1,#"Today is #",TODAY:"
+*................................................................
+. PREPARE THE WORK FILES
+.
+         TRAP      NOWORK IF IO
+         PREPARE   WKFILE1,"WKFILE1"   USE FOR "BRANCH" INSTRUCT.
+         PREPARE   WKFILE2,"WKFILE2"   USE FOR "CHAIN" SECTION
+         GOTO      GETMENU
+*................................................................
+. WORK FILES COULD NOT BE CREATED
+.
+NOWORK   DISPLAY   "Work file could not be created!"
+         STOP
+*................................................................
+. INITIALIZE FOR GETTING THE MENU
+.
+GETMENU  DISPLAY   *ES,*+,TITLE,*P51:1,"Today is ",TODAY
+         MOVE      "1" TO HPOS
+         MOVE      "3" TO VPOS
+         MOVE      "1" TO INDEX
+         GOTO      GETITEM
+*................................................................
+. THE LOOP FOR GETTING THE MENU BEGINS HERE.
+. THE FOLLOWING ORGANIZATION IS USED FOR THE LOOP SO THAT THE
+. LAST LINE OF THE "BRANCH" INSTRUCTION WILL NOT BE WRITTEN UNTIL
+. AFTER LEAVING THIS LOOP:
+.
+. 1. WRITE LINE OF "BRANCH" INST.
+. 2. GET NEXT ITEM FROM KEYBOARD     <-- THE LOOP IS ENTERED HERE
+. 3. WRITE "LINE" OF CHAIN SECTION
+. 4. IF NOT LAST ITEM, GO TO 1.
+. 5. WRITE LAST LINE OF "BRANCH"
+.
+*................................................................
+. 1. WRITE A LINE OF THE BRANCH INSTRUCTION
+.
+. WRITE THE BRANCH INSTRUCTION TO A WORK FILE TO BE COPIED TO THE
+. OUTPUT FILE AT A LATER TIME
+.
+WRITEBR  CLEAR     CWK65
+         APPEND    "         " TO CWK65   NULL LABEL FIELD.
+         APPEND    BRANCH TO CWK65        EXCEPT FOR 1ST TIME
+.                                         NULL OPERATION FIELD.
+         APPEND    NAME TO CWK65          PROGRAM NAME NEXT
+         APPEND    ":  " TO CWK65         ATTACH CONTINUATION ":"
+         APPEND    CWK34 TO CWK65         USE PROGRAM DESCRIPTION
+.                                         AS COMMENT FIELD
+*................................................................
+. WRITE THE LINE OF THE BRANCH INSTRUCTION
+.
+. MAKE SURE THAT THE NEXT LINE OF THE BRANCH INSTRUCTION WILL
+. HAVE A NULL OPERATION FIELD
+.
+         RESET     CWK65
+         WRITE     WKFILE1,SEQ;*+,CWK65
+         MOVE      "                   " TO BRANCH
+*................................................................
+. 2. GET AN ITEM FROM THE KEYBOARD
+.
+*................................................................
+. GET THE PROGRAM NAME
+.
+GETITEM  KEYIN     *P1:12,*EL,"Enter the name of a program to ":
+                   "which this menu will CHAIN: ",NAME
+         CMATCH    " " TO NAME
+         GOTO      GETITEM IF EOS
+         GOTO      GETITEM IF EQUAL
+*................................................................
+. GET THE PROGRAM DESCRIPTION
+.
+. NOTE THAT; THE VERTICAL AND HORIZONTAL POSITIONS USED TO GET
+. THE DESCRIPTION ARE THE SAME AS THE POSITIONS PUT INTO THE
+. MENU PROGRAM WHILE DISPLAYING THE MENU
+.
+         DISPLAY   *PHPOS:VPOS,"(",INDEX,") ":             PROMPT
+                   "______Describe_this_program.______"
+         DISPLAY   *PHPOS:VPOS,"(",INDEX,") ";        RE-POSITION
+         KEYIN     *IT,CWK34,*IN,*EL                   DATA ENTRY
+*................................................................
+. WRITE THE DISPLAY POSITIONING FOR THIS ITEM
+.
+         WRITE     OUTFILE,SEQ;"                   ":
+                               "*P",*ZF,HPOS,":",*ZF,VPOS:
+                               ",#"(",INDEX,") #":"
+*................................................................
+. CAUSE DISPLAY OF THE PROGRAM DESCRIPTION
+.
+         CLEAR     CWK65
+         APPEND    CWK34 TO CWK65
+         APPEND    "#":" TO CWK65
+         RESET     CWK65
+         WRITE     OUTFILE,SEQ;"                   #"",CWK65
+*................................................................
+. 3. WRITE A "LINE" OF THE CHAIN INSTRUCTIONS
+.
+. WHERE: "LINE" INCLUDES ALL OF THE INSTRUCTIONS NEEDED BEFORE
+.        AND AFTER THE ACTUAL CHAIN INSTRUCTION
+.
+. THESE INSTRUCTIONS ARE WRITTEN TO A WORK FILE TO BE COPIED TO
+. THE OUTPUT FILE AT A LATER TIME
+*................................................................
+. PUT A DOUBLE QUOTE AFTER THE PROGRAM NAME AND LEAVE IN CWK9
+.
+         CLEAR     CWK9
+         APPEND    NAME TO CWK9
+         APPEND    "#"" TO CWK9
+         RESET     CWK9
+*................................................................
+. WRITE COMMENTS TO PRECEDE INSTRUCTIONS THAT CAUSE CHAIN TO THE
+. PROGRAM
+.
+         WRITE     WKFILE2,SEQ;*+,"*........................":
+                                  ".........................":
+                                  "..............."
+         WRITE     WKFILE2,SEQ;". ",CWK34
+         WRITE     WKFILE2,SEQ;"."
+*................................................................
+. WRITE THE INSTRUCTIONS
+.
+         WRITE     WKFILE2,SEQ;NAME," MOVE      #"PROGRAM#" ":
+                               "TO LOGTYPE"
+         WRITE     WKFILE2,SEQ;"         MOVE      #"",NAME:
+                               "#" TO LOGINFO"
+         WRITE     WKFILE2,SEQ;"         CALL      LOGWRITE"
+         WRITE     WKFILE2,SEQ;"         CHAIN     #"",CWK9
+         WRITE     WKFILE2,SEQ;"         WRITAB    LOGFILE,":
+                               "LOGRN;*12,#"NO PROGRAM#""
+         WRITE     WKFILE2,SEQ;"         GOTO      GETINDEX"
+*................................................................
+. 4. IF THE LAST ITEM, GO TO 5.
+.    IF NOT THE LAST ITEM, GOT TO 1.
+.
+         COMPARE   "16" TO INDEX       NO MORE THAN 16 ITEMS
+         GOTO      ENDLOOP IF NOT LESS
+*
+BADANS   KEYIN     *P1:12,*EL,"Are there any more programs to ":
+                   "be included? ",*+,REPLY
+         CMATCH    "N" TO REPLY
+         GOTO      ENDLOOP IF EQUAL    REQUIRE YES OR NO ANSWER
+         CMATCH    "Y" TO REPLY
+         GOTO      BADANS IF NOT EQUAL
+*................................................................
+. BUMP THE INDEX, VERTICAL POSITION AND THE HORIZONTAL POSITION
+. BEFORE GOING TO 1.
+.
+         ADD       "1" TO INDEX
+         ADD       "1" TO VPOS
+         COMPARE   "9" TO INDEX
+         GOTO      WRITEBR IF NOT EQUAL
+         MOVE      "3" TO VPOS
+         MOVE      "41" TO HPOS
+         GOTO      WRITEBR
+*................................................................
+. 5. WRITE THE LAST LINE OF THE BRANCH INSTRUCTION
+. (LAST LINE OF BRANCH INSTRUCTION CANNOT HAVE A COLON FOLLOWING)
+.
+ENDLOOP  CLEAR     CWK65
+         APPEND    "         " TO CWK65
+         APPEND    BRANCH TO CWK65
+         APPEND    NAME TO CWK65
+         APPEND    "   " TO CWK65
+         APPEND    CWK34 TO CWK65
+         RESET     CWK65
+         WRITE     WKFILE1,SEQ;CWK65
+*................................................................
+. WRITE END OF FILES TO THE WORK FILES
+.
+         WEOF      WKFILE1,SEQ
+         WEOF      WKFILE2,SEQ
+*................................................................
+. WRITE THE LAST LINE OF THE MENU DISPLAY INSTRUCTION
+.
+         WRITE     OUTFILE,SEQ;"                   *EL"
+*................................................................
+. WRITE THE ROUTINE TO PROMPT AND KEYIN THE INDEX
+.
+         DISPLAY   *ES,"Writing KEYIN routine."
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". GET THE PROGRAM'S INDEX"
+         WRITE     OUTFILE,SEQ;"."
+*................................................................
+. WRITE THE INSTRUCTIONS THAT DISPLAY THE PROMPTING MESSAGE
+.
+         WRITE     OUTFILE,SEQ;"GETINDEX KEYIN     *P1:12,":
+                               "*EL,#"Selection by number#":"
+         WRITE     OUTFILE,SEQ;"                   *P41:12,":
+                               "#"Enter (99) to leave this ":
+                               "menu.#":"
+         WRITE     OUTFILE,SEQ;"                   *P25:12,":
+                               "#"__#",*P25:12,INDEX"
+*................................................................
+. WRITE THE INSTRUCTIONS THAT DO THE RANGE CHECK ON THE INDEX
+.
+         WRITE     OUTFILE,SEQ;"         COMPARE   #"1#"":
+                               " TO INDEX"
+         WRITE     OUTFILE,SEQ;"         GOTO      GETINDEX ":
+                               "IF LESS"
+         WRITE     OUTFILE,SEQ;"         COMPARE   #"99#" ":
+                               "TO INDEX"
+         WRITE     OUTFILE,SEQ;"         STOP      IF EQUAL"
+         ADD       "1" TO INDEX
+         WRITE     OUTFILE,SEQ;"         COMPARE   #"":
+                               *ZF,INDEX,"#" TO INDEX"
+         WRITE     OUTFILE,SEQ;"         GOTO      GETINDEX ":
+                               "IF NOT LESS"
+*................................................................
+. COPY THE BRANCH INSTRUCTION FROM THE WORK FILE
+.
+         DISPLAY   *ES,"Writing the BRANCH instruction."
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". BRANCH TO THE ROUTINE ":
+                               "INDICATED BY THE INDEX"
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;"         TRAP      BADCHAIN ":
+                               "IF CFAIL"
+         WRITE     OUTFILE,SEQ;"         CLOCK     TIME ":
+                               "TO TIME"
+         READ      WKFILE1,REWIND;;
+         GOTO      BEGINBRL
+*................................................................
+. GET THE ACTUAL BRANCH STATEMENT FROM WORK FILE 1
+.
+BRLOOP   WRITE     OUTFILE,SEQ;CWK65
+BEGINBRL READ      WKFILE1,SEQ;CWK65
+         GOTO      BRLOOP IF NOT OVER
+*
+         WRITE     OUTFILE,SEQ;"         GOTO      GETINDEX"
+*
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". PROGRAM DOES NOT EXIST."
+         WRITE     OUTFILE,SEQ;"."
+         WRITE     OUTFILE,SEQ;"BADCHAIN RETURN"
+*................................................................
+. COPY THE CHAIN INSTRUCTION SECTION FROM THE WORK FILE
+.
+         DISPLAY   *ES,"Writing the CHAIN instructions."
+         WRITE     OUTFILE,SEQ;"*........................":
+                               ".........................":
+                               "..............."
+         WRITE     OUTFILE,SEQ;". CHAIN INSTRUCTIONS"
+         READ      WKFILE2,REWIND;;
+         GOTO      BEGINCHL
+*................................................................
+. GET THE ACTUAL CHAIN INSTRUCTIONS FROM WORK FILE 2
+.
+CHLOOP   WRITE     OUTFILE,SEQ;CWK65
+BEGINCHL READ      WKFILE2,SEQ;CWK65
+         GOTO      CHLOOP IF NOT OVER
+*................................................................
+. WRITE AN END OF FILE MARK TO THE OUTPUT FILE
+. KILL OFF THE WORK FILES
+.
+         WEOF      OUTFILE,SEQ
+*
+         PREPARE   WKFILE1,"WKFILE1"
+         CLOSE     WKFILE1
+*
+         PREPARE   WKFILE2,"WKFILE2"
+         CLOSE     WKFILE2

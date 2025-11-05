@@ -1,0 +1,47 @@
+
+
+
+PAGE    1      GLMAST.pls                                                                                     01-20-21 01:08:52
+                                         
+
+PL/B COMPILER   Version 9.9A   21 Apr 2017 
+COMMAND LINE WAS: PLBCMP GLMAST.pls,GLMAST.PLC, -L=32 ZG E ZH ZI=0 ZT S ZN  
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   23.    INCLUDE  A: c:\apc\source\common.pls
+   24.    INCLUDE  B: c:\apc\source\workvar.inc
+  303. B   INCLUDE  C: c:\apc\source\macrolib.inc
+  304. B   INCLUDE  D: c:\apc\source\users.fd
+   86. D    INCLUDE  E: c:\apc\source\users.io
+   25.    INCLUDE  F: sequence.fd
+   73. F   INCLUDE  G: sequence.io
+   26.    INCLUDE  H: c:\apc\source\printrtn.inc
+  110. H   INCLUDE  I: c:\apc\source\printvia.plf
+  111. H   INCLUDE  J: c:\apc\source\prntprog.plf
+  150. H   INCLUDE  K: c:\apc\source\print.fd
+   85. K    INCLUDE  L: c:\apc\source\print.io
+  153. H   INCLUDE  M: c:\apc\source\cust.fd
+   39. M                              Addr3                            Dimr                30                191 - 220      //131 - 160
+                                                                           *ERROR*  
+Invalid operation syntax.
+  156. M    INCLUDE  N: c:\apc\source\cust.io
+   29.    INCLUDE  O: c:\apc\source\glmast.fd
+   92. O   INCLUDE  P: c:\apc\source\glmast.io
+   31.    INCLUDE  Q: c:\apc\source\glmast.plf
+   32.    INCLUDE  R: c:\apc\source\about.plf
+   33.    INCLUDE  S: c:\apc\source\datamenu.plf
+   57.    INCLUDE  T: c:\apc\source\security.inc
+   94.                                           FORMLOAD          MAIN2 
+                                                                        *ERROR*  
+Invalid PLFORM specified!
+  116.    INCLUDE  U: c:\apc\source\search4.plf
+  138.      00001CBA                             RETURN 
+                                                       *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  184.    INCLUDE  V: c:\apc\source\glmastrpt.plf
+  933.    INCLUDE  W: c:\apc\source\menudefs.inc
+
+   Output: c:\apc\data\glmast.plc                                                                                                                                                                                                                                    
+      7962 LINES;      2 ERRORS;      1 WARNINGS; Start/Stop: 01:08:52 01:08:52
+  00045FB4 DATA;  000029CA  CODE;   SYMBOL TABLE USAGE:  UDA:   1% EXE:   0%
+

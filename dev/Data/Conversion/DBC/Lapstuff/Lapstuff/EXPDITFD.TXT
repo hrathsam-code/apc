@@ -1,0 +1,33 @@
+..................................................................
+.  EXPDITFD/TEXT - FILE DESCRIPTION FOR EXPEDITE FILE            .
+..................................................................
+.
+EXPEDITE IFILE     KEYL=5,UNCOMPRESSED       (KEY IS INVOICE NO.)
+EXPEDTNM INIT      "EXPEDITE/ISAM:BILLING"
+.
+EXPKEY   DIM       5
+.
+EXACCTIN IFILE     KEYL=9,UNCOMPRESSED      (KEY IS ACCT/INVC NO)
+EXACINNM INIT      "EXACTINV/ISAM:BILLING"
+.
+EXACCTKY DIM       9
+.
+EXACCTPO IFILE     KEYL=24,UNCOMPRESSED     (KEY IS ACCT/PO NO)
+EXACPONM INIT      "EXACTPO/ISAM:BILLING"
+.
+EXACPOKY DIM       24
+.
+ESTATUS  DIM       1
+EACCT    DIM       4
+EINVC    DIM       5
+EDATE    DIM       6      (YYMMDD)
+EPONO    DIM       20
+EINVTOTL FORM      6.2
+EPDTOTL  FORM      6.2
+ECPCODE  DIM       1
+ECHKNO   DIM       6
+.
+EFILL1   DIM       9
+EFILL2   DIM       15   
+.
+..........................................................................

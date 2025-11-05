@@ -1,0 +1,10 @@
+*******************************************************************************
+Runtime : 'Version 9.9A  21 Apr 2017'
+Date : 8-17-19  Time: 17:15:39
+Flags   : 'Secure Sockets Layer (SSL) used'
+17:15:40  Http 'start_ssl' Error:
+17:15:40  Http Error: 24 OsError: 99
+17:15:40  FhHttpConnect: Unable to connect!
+17:15:40  Http Url\IP: wwwcie.ups.com
+17:15:40  Http Exit with Error: 24 OsError: 99
+SSL Error: 1 Description: 'error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version'

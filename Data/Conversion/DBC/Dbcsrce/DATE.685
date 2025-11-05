@@ -1,0 +1,66 @@
++........................................................................
+.          D A T E T B L Z     MODULE       9/7/81 R. BACHARACH
+.........................................................................
+. 
+. THIS WORK AREA IS UTILIZED BY THE   D A T E C A L C  ROUTINE
+. 
+.........................................................................
+. 
+. 
+. THE FOLLOWING TABLE REPRESENTS ACCUMULATED CALENDAR DAYS
+.   P R I O R   TO THE MONTH SHOWN ON THE LINE ITEM LABELS
+. 
+. (ie.  IF THIS IS DECEMBER, THEN TO DATE 334 DAYS HAVE GONE BY IN
+.       PRIOR MONTHS)
+. 
+. 
+YRFORM   FORM      2
+MONFORM  FORM      2
+DAYFORM  FORM      2
+WKFORM5  FORM      7
+MONWORK  FORM      3
+. 
+XXDEC    FORM      "365"
+TMON     DIM       2
+TDAY     DIM       2
+TYEAR    DIM       2
+DIM3     DIM       3
+COLUMNSW DIM       1
+. 
+WKDATE6  DIM       6
+WKDATE   DIM       8
+. 
+CCMON    DIM       2
+CCDAY    DIM       2
+CCYR     DIM       2
+. 
+CCDATE   DIM       6
+CURDATE  DIM       6
+. 
+DAYSOLD  FORM      "0000000"
+CINDX1   FORM      "000"
+CINDX2   FORM      "000"
+. 
+CURDAYS  FORM      "0000000"
+CMPDAYS  FORM      "0000000"
+DIFDAYS  FORM      "0000000"
+. 
+DTTODAY  FORM      7
+DTCURNT  FORM      7
+DT130PD  FORM      7
+DT3160PD FORM      7
+DT6190PD FORM      7
+DTOV90PD FORM      7
+. 
+WKAMT    FORM      7.2
+AMTCURNT FORM      7.2
+AMT130P  FORM      7.2
+AMT3160P FORM      7.2
+AMT6190P FORM      7.2
+AMTOV90P FORM      7.2
+. 
+EOMSW    INIT      "N"
+SVCURRYR FORM      4
+. 
+. END OF   D A T E T B L Z  .......
+....................................................................

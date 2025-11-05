@@ -1,0 +1,94 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CreditCards.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-19-2019 At 17:24                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00103   06-28-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;
+                     %IFNDEF $CreditCardsVAR
+$CreditCardsVAR                  EQUATE         1
+;
+;
+;         Field Definitions
+;================================================================================================;
+;
+;
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+CreditCards                      RECORD
+Entity                           Dim                8                   1 - 8
+CustomerID                       dim                10                  9 - 18 // Like             Cust.CustomerID    //
+SeqNo                            Like             Sequence.SeqNo       19 - 27 //
+DateAdded                        Dim                8                  28 - 35
+Primary                          Form               1                  36 - 36
+Type                             Form               2                  37 - 38
+Number                           Dim                20                 39 - 53     //Fuckup
+ExpirationDate                   Dim                8                  54 - 61
+CVC                              Dim                8                  62 - 69
+NameOnCard                       Dim                50                 70 - 119
+NameOnCardFlag                   Form               1                 120 - 120
+BillingAddressFlag               Form               1                 121 - 121
+BillingAddressNo                 Dim                10                122 - 131
+                                 RECORDEND
+;
+;======================================================================================;
+TempCreditCards                     record          like   CreditCards
+OrigCreditCards                     record          like   CreditCards
+SaveCreditCards                     record          like   CreditCards
+;======================================================================================;
+;
+; File Keys and File Labels
+; --------------------------------------------------
+CreditCardsTXTNM                          INIT         "CreditCards"
+CreditCardsISI1NM                         INIT               "CreditCards.ISI"
+CreditCardsISI2NM                         INIT               "CreditCards2.ISI"
+CreditCardsI1DEF                           init            "-n,z,y,1-8,9-18,19-27"
+CreditCardsI2DEF                           init            "-n,z,y,1-8,9-18,36-36,19-27"
+;
+; By Entity, CustomerID, SeqNo
+; 1-8, 9-18, 19-27
+;
+CreditCardsKY                    DIM                27
+;
+; By Entity, CustomerID, Primary, SeqNo
+; 1-8, 9-18, 36-36, 19-27
+;
+CreditCardsKY2                   DIM                28
+;=============================================================================;
+;
+CreditCardsFLST                         FILELIST
+CreditCardsFL                       IFILE              name="CreditCards.ISI",FIX=250,NODUP,NOPATH
+CreditCardsFL2                      IFILE              name="CreditCards2.ISI",FIX=250,NODUP,NOPATH
+                                    FILELISTEND
+
+CreditCardsFileSize       CONST      "250"
+
+CreditCardsProg           INIT       "CreditCards Program"
+CreditCardsDesc           INIT       "CreditCards Maintenance"
+CreditCardsTITLE          INIT       "CreditCards Record"
+CreditCardsHelp           INIT       "CreditCards.HLP"
+
+
+
+
+          %ENDIF          //End of FD Include File
+
+
+          %IFNDEF $CreditCardsVARIO
+            INCLUDE CreditCards.IO
+          %ENDIF          //End of IO Include File

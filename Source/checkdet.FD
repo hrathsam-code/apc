@@ -1,0 +1,107 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CheckDet.IO                                                    ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/01/2005 AT 10:55AM                                          ;
+;                                                                             ;
+;  PURPOSE:    Check Detail File Definitions                                  ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+           %IFNDEF   $CheckDetailVAR
+$CheckDetailVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+CheckDetail   RECORD
+Entity        DIM               8         1 - 8
+SubEntity     DIM               8         9 - 16
+BankCode      DIM               6        17 - 22
+Vendor        DIM               6        23 - 28
+CheckNo       FORM              10       29 - 38
+SeqMajor      FORM              7        39 - 45
+SeqMinor      FORM              3        46 - 48
+Voucher       FORM              7        49 - 55
+DiscAmt       FORM              5.2      56 - 63
+GrossAmount   FORM              7.2      64 - 73
+NetAmount     FORM              7.2      74 - 83
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+CheckDetailK1SIZE CONST            "34"                                        (Length of the Key variable)
+CheckDetailK2SIZE CONST            "41"                                        (Length of the Key variable 2)
+.
+. By Entity, Bank Code, Check Number, Seq Major, Seq Minor
+.
+CheckDetailI1DEF  INIT             "-N,1-8,17-22,29-38,39-48"                  (Index definitions for Key 1)
+.
+. By Entity, Voucher, Bank Code, Check Number, Seq Major, Seq Minor
+.
+CheckDetailI2DEF  INIT             "1-8,49-55,17-22,29-38,39-48"               (Index definitions for Key 2)
+.
+CheckDetailFSIZE  CONST            "100"                                       (Length of each Record)
+
+CheckDetailKY    DIM               CheckDetailK1SIZE                           (The Actual 'Key' variable)
+CheckDetailKY2   DIM               CheckDetailK2SIZE                           (The Actual 'Key' variable)
+
+CheckDetailPROG  INIT              "Program Name"
+CheckDetailTITLE INIT              "Record Title"                              (Description used later for headers, etc)
+CheckDetailHELP  INIT              "CheckDetail.HLP"                           (Name of the Help file for later purposes)
+
+CheckDetailTXTNM  INIT             "$APDATA\","CHKDTFL.TXT"                    .Actual Text Filename  (i.e. CUSTFL.TXT)
+CheckDetailISI1NM INIT             "$APDATA\","CHKDTFL.ISI"                    .Actual ISI Filename   (i.e. CUSTFL.ISI)
+CheckDetailISI2NM INIT             "$APDATA\","CHKDTFL2.ISI"                   .Actual ISI Filename
+
+CheckDetailFLST  FILELIST
+           %IFDEF            CheckDetailKY
+CheckDetailFL    IFILE             Name=CheckDetailISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY2
+CheckDetailFL2   IFILE             Name=CheckDetailISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY3
+CheckDetailFL3   IFILE             Name=CheckDetailISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY4
+CheckDetailFL4   IFILE             Name=CheckDetailISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY5
+CheckDetailFL5   IFILE             Name=CheckDetailISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY6
+CheckDetailFL6   IFILE             Name=CheckDetailISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY7
+CheckDetailFL7   IFILE             Name=CheckDetailISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY8
+CheckDetailFL8   IFILE             Name=CheckDetailISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            CheckDetailKY9
+CheckDetailFL9   IFILE             Name=CheckDetailISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $CheckDetailIO
+           GOTO                 #S
+           INCLUDE           CheckDet.IO
+#S
+         %ENDIF

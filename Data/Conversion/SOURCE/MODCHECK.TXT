@@ -1,0 +1,35 @@
+....................................................................
+. ROUTINE TO MODIFY LINE ITEMS
+....................................................................
+.
+MODIFY   KEYIN     *P10:ROW,*RV,ACCTIN
+         MOVE      ACCTIN  TO  CUSTKEY
+         CALL      GETCUST
+         DISPLAY   *P18:ROW,CUSTNAME
+.
+         KEYIN     *P53:ROW,*RV,CAMTIN
+.
+MODSOKAY DISPLAY   *P10:ROW,CUSTKEY,*P53:ROW,CAMTIN
+         MOVE      " " TO REPLY
+         KEYIN     *P1:22,*EL,"DATA CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      STORMOD  IF  EQUAL
+.
+         CMATCH    "N",REPLY
+         GOTO      MODIFY  IF  EQUAL
+         BEEP
+         GOTO      MODSOKAY
+.
+STORMOD  MOVE      ACCTIN  TO ACCTARG
+         MOVE      CAMTIN  TO CHECKAMT
+         MOVE      DROW    TO BTCHINDX
+.
+         CALL      STORBTCH
+.
+         ADD       CAMTIN  TO  CHKSUM
+         DISPLAY   *P62:2,*HON,CHKSUM,*HOFF
+         DISPLAY   *P1:ROW,DROW
+.
+         GOTO      EOJ    (TRY TO BALANCE THE BATCH)
+.
+...............................................................

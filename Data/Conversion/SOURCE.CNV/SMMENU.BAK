@@ -1,0 +1,239 @@
+.......................................................................
+. SMMENU.TXT - USER ACCESS CONTROL SYSTEM
+.
+. LAST REVISION - 08/25/98
+.
+. 08/25/98 - CONVERTED TO RUN WITH NEW USER ACCESS CONTROL SYSTEM
+.
+         INCLUDE   NCOMMON.TXT
+.
+INDEX    FORM      2                   USER SELECTION VARIABLE
+INDEXC   FORM      2                   USER SELECTION VARIABLE
+INDEXX   FORM      2
+LINDEX   FORM      2
+AINDEX   FORM      1
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+FOUR     FORM      "4"
+BTM      FORM      2
+SEMCOL   INIT      ";"
+DIM3     DIM       3
+. 
+.
+USERMNUS IFILE     "KEYL=13,UNCOMPRESSED,FIX=61,NODUP
+USERMNUN INIT      "USERMNUS.ISI"
+USERMKEY DIM       13
+.
+UMNUID   DIM       9         1 -  9    User ID Number
+UMNUCD   DIM       2        10 - 11    Application System Code
+UMNSELNO DIM       2        12 - 13    Menu Selection Number
+UMNPRGNM DIM       8        14 - 21    Program Name
+UMNPRGDS DIM       40       22 - 61    Program Description         
+.
+UMNUREC  DIM       67
+UMNUDSC  DIM       40
+UMNUPGM  DIM       8
+UMNUSEL  DIM       2
+UMNUCOD  DIM       2
+.
+COMPUSER DIM       9
+COMPSYS  DIM       2
+.
+PROGRAM  DIM       8
+PROG     DIM       8(32)
+SETONE   FORM      "1"
+SETZERO  FORM      "0"
+.
+VARBTMS  DIM       2(32):
+                   (" 4"),(" 5"),(" 6"),(" 8"),(" 9"),("10"),("12"),("13"):
+                   ("14"),("15"),("17"),("18"),("19"),("20"),("21"),("22"):
+                   (" 4"),(" 5"),(" 6"),(" 8"),(" 9"),("10"),("12"),("13"):
+                   ("14"),("15"),("17"),("18"),("19"),("20"),("21"),("22")
+.
+SCRTITL  INIT      "SUPERIOR WASHER - USER ACCESS CONTROL SYSTEM MENU"
+TITLTXT  DIM       50
+NYATEXT  INIT      "Selection Not Yet Available"
+PROGNTXT INIT      "SMMENU"
+PROGNAME STATTEXT
+DATE     STATTEXT
+TITLE    STATTEXT
+NYA      STATTEXT
+MENU1    RADIOGRP
+MENU2    RADIOGRP
+ContButton  BUTTON
+QuitButton  BUTTON
+RESULT   FORM      4
+RESULTB  FORM      4
+GRP1DATA DIM       660(2)
+.
++................................................................
+. MAINLINE
+.
+         SETMODE   *LTGRAY=ON,*3D=ON
+         DISPLAY   *BGCOLOR=*YELLOW,*ES,*BLUE
+*................................................................
+. THIS MENU REQUIRES A SECURITY CLEARANCE OF AT LEAST 6
+.
+USERMOPN TRAP      NOUSERM IF IO
+         OPEN      USERMNUS,USERMNUN
+         TRAPCLR   IO
+         GOTO      USRMOPND
+.         
+NOUSERM  ALERT     CAUTION,"User Menus File NOT FOUND!",RESULT
+         DSCNCT
+.
+USRMOPND         
+.         COMPARE   "6" TO APPSECUR
+.         GOTO      BREACH IF LESS
+.
+*................................................................
+. Read the User Menus File
+.
+         CLEAR     GRP1DATA
+         CLEAR     USERMKEY
+         PACKKEY   USERMKEY WITH USERCODE,APPCODE
+         RESET     USERMKEY
+         MOVE      USERCODE TO COMPUSER
+         MOVE      APPCODE TO COMPSYS
+         READ      USERMNUS,USERMKEY;DIM3
+         MOVE      "1" TO AINDEX
+         MOVE      "0" TO LINDEX
+         LOOP
+           READKS  USERMNUS;UMNUID,UMNUCOD,UMNSELNO,UMNPRGNM,UMNPRGDS
+           GOTO    ENDLPUM IF OVER
+           MATCH   UMNUID TO COMPUSER
+           GOTO    ENDLPUM IF NOT EQUAL
+           MATCH   UMNUCOD TO COMPSYS
+           GOTO    ENDLPUM IF NOT EQUAL
+           APPEND  UMNPRGDS TO GRP1DATA(AINDEX)
+           APPEND  SEMCOL TO GRP1DATA(AINDEX)
+           ADD     "1" TO LINDEX
+           MOVE    UMNPRGNM TO PROG(LINDEX)
+           COMPARE "16" TO LINDEX
+           GOTO    LOOPBACK IF NOT EQUAL
+           MOVE    "2" TO AINDEX
+LOOPBACK REPEAT
+ENDLPUM
+         COMPARE   "0" TO LINDEX
+         GOTO      BLDIT IF NOT EQUAL
+         ALERT     STOP,"You have NO SELECTIONS on this menu",RESULT
+         DSCNCT
+BLDIT         
+         BRANCH    AINDEX OF BLD1MENU,BLD2MENU
+BLD1MENU MOVE      VARBTMS(LINDEX) TO BTM
+         DISPLAY   *BLACK
+         BUMP      GRP1DATA(1),-1
+         CMOVE     " " TO GRP1DATA(1)
+         RESET     GRP1DATA(1)
+         CREATE    MENU1=3:BTM:21:60:
+                   GRP1DATA(1):
+                   STYLE=3DOUT,FONT="HELVETICA"
+         GOTO      DISPLAY                   
+.
+BLD2MENU MOVE      VARBTMS(LINDEX) TO BTM
+         DISPLAY   *BLACK
+         BUMP      GRP1DATA(1),-1
+         BUMP      GRP1DATA(2),-1
+         CMOVE     " " TO GRP1DATA(1)
+         CMOVE     " " TO GRP1DATA(2)
+         RESET     GRP1DATA(1)
+         RESET     GRP1DATA(2)
+         CREATE    MENU1=3:23:1:39:
+                   GRP1DATA(1):
+                   STYLE=3DOUT,FONT="HELVETICA"
+         CREATE    MENU2=3:BTM:42:80:
+                   GRP1DATA(2):
+                   STYLE=3DOUT,FONT="HELVETICA"
+.                                       
+DISPLAY  PACK      TITLTXT WITH SCRTITL
+         DISPLAY   *BLUE
+  CREATE  TITLE=1:2:12:69,TITLTXT,"HELVETICA(10,BOLD)",CENTER,BORDER,STYLE=3DOUT
+      CREATE  PROGNAME=1:2:1:10,PROGNTXT,"HELVETICA",BORDER,STYLE=3DOUT
+      CREATE  DATE=1:2:72:80,TODAY,"HELVETICA",BORDER,STYLE=3DOUT
+      DISPLAY      *BLACK
+      DISPLAY   *RED
+      CREATE  NYA=24:25:30:51,NYATEXT,"HELVETICA",BORDER,STYLE=3DOUT   
+      DISPLAY   *BLACK
+      CREATE  ContButton=24:25:55:63,"&Continue"
+      CREATE  QuitButton=24:25:65:73,"&Quit"
+.
+.
+      
+         ACTIVATE  PROGNAME
+         ACTIVATE  TITLE
+         ACTIVATE  DATE
+         ACTIVATE  ContButton,GETINDEX,RESULTB
+         ACTIVATE  QuitButton,LIBMENU1,RESULTB
+         ACTIVATE  MENU1,SETINDX1,RESULT
+         COMPARE   "2" TO AINDEX
+         GOTO      SKIP2 IF NOT EQUAL
+         ACTIVATE  MENU2,SETINDX2,RESULT
+SKIP2    LOOP
+           WAITEVENT
+         REPEAT
+         STOP  
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+SETINDX1
+         COMPARE   "1" TO RESULT
+         RETURN    IF LESS 
+         MOVE      RESULT TO INDEX
+         MOVE      RESULT TO INDEXC
+         SETITEM   MENU1,INDEX,SETONE
+         COMPARE   "2" TO AINDEX
+         CALL      CLR2 IF EQUAL
+         RETURN
+.
+SETINDX2
+         COMPARE   "1" TO RESULT
+         RETURN    IF LESS 
+         MOVE      RESULT TO INDEX
+         MOVE      RESULT TO INDEXC
+         ADD       "16" TO INDEXC
+         SETITEM   MENU2,INDEX,SETONE
+         CALL      CLR1
+         RETURN
+*................................................................
+. BRANCH TO THE ROUTINE INDICATED BY THE INDEX
+.
+GETINDEX
+         COMPARE   "1" TO INDEXC
+         RETURN    IF LESS
+         TRAP      BADCHAIN IF CFAIL
+         CLOCK     TIME TO TIME
+         MOVE      PROGNTXT TO FROMPGM
+         CHAIN     PROG(INDEXC)
+         GOTO      GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+.
+CLR1     MOVE      "0" TO INDEXX
+CLR1LOOP ADD       "1" TO INDEXX
+         SETITEM   MENU1,INDEXX,SETZERO
+         COMPARE   "16" TO INDEXX
+         RETURN    IF EQUAL
+         GOTO      CLR1LOOP
+.         
+CLR2     MOVE      "0" TO INDEXX
+CLR2LOOP ADD       "1" TO INDEXX
+         SETITEM   MENU2,INDEXX,SETZERO
+         COMPARE   "16" TO INDEXX
+         RETURN    IF EQUAL
+         GOTO      CLR2LOOP
+.................................................................
+DUMMY    ACTIVATE  NYA
+         PAUSE     FOUR
+         DEACTIVATE  NYA
+         RETURN
+.
+.
+LIBMENU1 CHAIN     "MASTER"
+         GOTO      GETINDEX
+.
+BREACH   BEEP
+         ALERT     STOP,"SECURITY VIOLATION-YOU ARE NOT AUTHORIZED",RESULT
+         DSCNCT
+

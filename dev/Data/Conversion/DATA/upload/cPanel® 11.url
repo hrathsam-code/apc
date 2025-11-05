@@ -1,0 +1,7 @@
+[DEFAULT]
+BASEURL=http://apccomponents.com:2095/
+[InternetShortcut]
+URL=http://apccomponents.com:2095/
+Modified=30A86F6AD167CC01B6
+IconFile=http://apccomponents.com:2095/cPanel_magic_revision_1261012096/unprotected/cpanel/favicon.ico
+IconIndex=1

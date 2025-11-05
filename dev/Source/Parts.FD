@@ -1,0 +1,121 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Parts.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    10-14-2019 At 13:04                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00102   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $PartsVAR
+$PartsVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+Parts                            RECORD
+PartNumber                       Dim                25                  1 - 25       //6
+SeqNo                            Form               9                  26 - 34       //9
+Description1                     Dim                35                 35 - 69       //5
+Description2                     Dim                35                 70 - 104      //5
+ProductCode                      Dim                8                 105 - 112      //8
+Taxable                          Form               1                 113 - 113      //1
+TaxCode                          Dim                8                 114 - 121      //8
+InventoryControlled              Form               1                 122 - 122      //1
+ReplacementPart                  Dim                16                123 - 138      //6
+ImageFileNumber                  Form               9                 139 - 147      //9
+Category                         Dim                8                 148 - 155      //8
+UOM                              Dim                4                 156 - 159      //4
+AllowFractional                  Form               1                 160 - 160      //1
+AdditionalTaxes                  Form               1                 161 - 161      //1
+SerialNumbered                   Form               1                 162 - 162      //1
+WarrantyIncluded                 Form               1                 163 - 163      //1
+WarrantyTime                     Form               4                 164 - 167      //4
+ServiceLife                      Form               4                 168 - 171      //4
+Price                            Form               6.4               172 - 182      //4
+Cost                             Form               6.4               183 - 193      //4
+PriceAdjustable                  Form               1                 194 - 194      //1
+DiscountableItem                 Form               1                 195 - 195      //1
+AdjustablePrice                  Form               1                 196 - 196      //1
+Inactive                         Form               1                 197 - 197      //1
+Size                             Dim                15                198 - 212      //5
+KitItem                          Form               1                 213 - 213      //1
+MinOnHandQty                     Form               9.4               214 - 227      //4
+KitPriceOverride                 Form               1                 228 - 228      //1
+AllowKitOverride                 Form               1                 229 - 229      //1
+SellableItem                     Form               1                 230 - 230      //1
+LotNumber                        Dim                20                231 - 250      //0
+ItemType                         Form               1                 251 - 251      ////1=Stock,2=Component Only, 3=Stock/Comp
+                                 RECORDEND
+;
+;======================================================================================;
+TempParts                           record          like   Parts                           
+OrigParts                           record          like   Parts                           
+SaveParts                           record          like   Parts                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+PartsTXTNM                          INIT         "Parts"
+PartsISI1NM                         INIT               "Parts.ISI"
+PartsISI2NM                         INIT               "Parts2.ISI"
+PartsISI3NM                         INIT               "Parts3.ISI"
+PartsI1DEF                           init            "-n,1-25"
+PartsI2DEF                           init            "-w,26-34"
+PartsI3DEF                           init            "-n,z,y,105-112,1-25"
+;
+; By PartNumber
+; 1-25
+;
+PartsKY                          DIM                25
+;
+; By SeqNo
+; 26-34
+;
+PartsKY2                         DIM                 9
+;
+; By ProductCode, PartNumber
+; 105-112, 1-25
+;
+PartsKY3                         DIM                33
+;=============================================================================;
+;
+PartsFLST                         FILELIST
+PartsFL                             IFILE              name="Parts.ISI",FIX=600,NODUP
+PartsFL2                            IFILE              name="Parts2.ISI",FIX=600,WEOF
+PartsFL3                            IFILE              name="Parts3.ISI",FIX=600,NODUP,NOPATH
+                                    FILELISTEND
+ 
+PartsFileSize       CONST      "600"
+ 
+PartsProg           INIT       "Parts Program"
+PartsDesc           INIT       "Parts Maintenance"
+PartsTITLE          INIT       "Parts Record"
+PartsHelp           INIT       "Parts.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $PartsVARIO
+            INCLUDE Parts.IO 
+          %ENDIF          //End of IO Include File

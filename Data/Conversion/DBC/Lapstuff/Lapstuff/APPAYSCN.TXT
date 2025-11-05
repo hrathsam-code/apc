@@ -1,0 +1,269 @@
+. .
+. APPAYINQ MODULE - DISPLAY PAYMENTS HISTORY
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   APPAIDFD
+. 
+         INCLUDE   APMASTFD
+. 
+APPAIDFL IFILE     KEYL=19,UNCOMPRESSED
+APPAIDNM INIT      "APPAIDFL/ISAM"
+. 
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+APMASTNM INIT      "APMASTER/ISAM"
+. 
+VENDIN   DIM       6
+DROW     FORM      "03"
+REPLY    DIM       1
+VENDTOT  FORM      "       0.00"                                              
+RUNTOTS  FORM      "000000000.00"
+PAGES    FORM      "0000"
+LINES    FORM      "00"
+WHORPLY  DIM       1
+ASTER    INIT      "---------------------------------------------"
+LISTTYPE DIM       1
+PERIOD   DIM       1
+LISTNAME DIM       25
+. 
+         INCLUDE   APCALNDR
+. 
+         DISPLAY   *ES,*HON,"ACCOUNTS PAYABLE SYSTEM - SCAN PAYMENTS ":
+                   "HISTORY BY VENDOR",*HOFF
+         MOVE      "* ALL PAYMENTS *" TO LISTNAME
+         GOTO      OPENFILZ
+. 
+OPENFILZ OPEN      APPAIDFL,APPAIDNM                                          
+         OPEN      APMASTER,APMASTNM
+. 
+         MOVE      TODAY TO TMON
+         REP       " 0"  IN TMON
+. 
+         RESET     TODAY TO 4                                                 
+         MOVE      TODAY TO TDAY                                              
+. 
+         RESET     TODAY TO 7
+         MOVE      TODAY TO TYEAR
+. 
+         CALL      CALCDATE
+         MOVE      TESTDATE TO CURRDATE
+         SUBTRACT  "60" FROM CURRDATE
+. 
+. NOW ALL WE NEED DO IS SEE IF TESTDATE OF TRANSACTION IS LESS THAN CURRDATE
+. 
+. IF LESS, AND OPTION IS PRINT 60, THEN BYPASS
+. 
+SUMMARY  KEYIN     *P1:4,*HON,"PRINT (S)ummary or (D)etail REPORT ?  ":
+                   LISTTYPE,*HOFF
+         CMATCH    "S" TO LISTTYPE
+         GOTO      WHO IF EQUAL                                               
+         CMATCH    "D" TO LISTTYPE
+         GOTO      WHO IF EQUAL
+         BEEP
+         GOTO      SUMMARY
+. 
+. 
+WHO      MOVE      "      " TO VENDIN
+         MOVE      " " TO REPLY
+. 
+. NOW DETERMINE IF WE WANT ONLY PAYMENTS OF LAST SIXTY DAYS
+. 
+         KEYIN     *P1:6,*HON,"PRINT (A)ll items or ":
+                   "(P)ast 60 DAYS PAYMENTS ? ",REPLY,*HOFF
+. 
+         MOVE      REPLY TO PERIOD
+         CMATCH    "A",REPLY
+         GOTO      WHO1 IF EQUAL
+         CMATCH    "P",REPLY
+         GOTO      WHO1 IF EQUAL
+         BEEP
+         DISPLAY   *P1:6,*EL
+         GOTO      WHO
+. 
+WHO1     TRAPCLR   IO    (NOP)
+. 
+WHO1A    KEYIN     *P1:8,*HON,"PRINT (A)ll vendors or by (V)endor ? ",WHORPLY:
+                   *HOFF
+         CMATCH    "A",WHORPLY
+         GOTO      PRNTALL IF EQUAL
+         CMATCH    "V",WHORPLY
+         GOTO      WHO2 IF EQUAL
+         BEEP
+         GOTO      WHO1A
+. 
+PRNTALL  MOVE      "000000" TO ACCKEY
+. 
+         INCLUDE   APMASTRD
+. 
+         INCLUDE   APMASTKS
+. 
+         MOVE      ACCNO  TO  VENDIN
+. 
+         MOVE      ACCNO TO TRNKEY
+         RESET     TRNKEY TO 6
+         APPEND    "             " TO TRNKEY                                  
+         RESET     TRNKEY TO 1
+. 
+         INCLUDE   APPAIDRD
+.                                                                             
+         GOTO      READPAID
+. 
+WHO2     KEYIN     *P01:23,*EL,*HON,"ENTER VENDOR NUMBER DESIRED or ":
+                   "PRESS F5 TO TERMINATE ",VENDIN,*HOFF
+. 
+         GOTO      EOJ IF F5
+. 
+         MOVE      VENDIN TO ACCKEY
+. 
+         INCLUDE   APMASTRD
+. 
+         GOTO      NOGOOD IF OVER
+. 
+         DISPLAY   *P01:02,"VENDOR IS ",NAME                             
+. 
+CORRVEND MOVE      " " TO REPLY                                               
+         KEYIN     *P1:23,*EL,*HON,"CORRECT VENDOR ? (Y/N) ",REPLY,*HOFF
+         CMATCH    "Y",REPLY
+         GOTO      OK IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      WHO IF EQUAL
+         BEEP
+         GOTO      CORRVEND
+. 
+VENDSET  TRAPCLR   IO
+         TRAPCLR   FORMAT
+         TRAP      BADMAST IF IO
+         TRAP      BADMAST IF FORMAT
+         INCLUDE   APMASTKS
+         MOVE      ACCNO TO VENDIN
+         GOTO      EOJ IF OVER
+. 
+         MOVE      ACCNO  TO  ACCKEY
+. 
+. 
+OK       CLEAR     TRNKEY                                                     
+         APPEND    ACCKEY TO TRNKEY
+         APPEND    "              " TO TRNKEY
+         RESET     TRNKEY TO 1
+. 
+         INCLUDE   APPAIDRD
+. 
+. 
+READPAID TRAPCLR   IO
+         TRAPCLR   FORMAT
+         TRAP      BADPAID IF IO
+         TRAP      BADPAID IF FORMAT
+. 
+         INCLUDE   APPAIDKS
+. 
+         GOTO      VENDBRK IF OVER
+. 
+         MATCH     TACCN TO VENDIN
+         GOTO      VENDBRK IF NOT EQUAL
+. 
+. 
+. CHECK IF WE ARE SEEKING ONLY LAST 60 DAYS ACTIVITY
+. AND IN DETAIL PRINT
+. 
+         CMATCH    "S",LISTTYPE
+         GOTO      RDXX IF NOT EQUAL
+. 
+. FALLTHRU MEANS WE ARE IN DETAIL PRINT
+. SO ARE WE IN THE (P) PERIOD (60 DAYS ACTY?)
+. 
+         CMATCH    "P",PERIOD
+         GOTO      RDXX IF NOT EQUAL                                          
+. 
+. OKAY LETS TEST THE DATES
+. 
+         CALL      CALCDATE
+         COMPARE   CURRDATE TO TESTDATE
+         GOTO      READPAID IF LESS
+. 
+RDXX     ADD       TAMT  TO  VENDTOT                                          
+         ADD       "1"   TO  DROW
+. 
+         REP       " 0" IN TMON                                               
+. 
+         CMATCH    "S" TO LISTTYPE
+         GOTO      READPAID IF EQUAL
+. 
+         DISPLAY   *P1:23,*EL,*P1:23,TINVNO,*P7:23,TMON,TDAY,TYEAR:
+                   *P15:23,TDESC,TAMT," ",CKNUMBER,*R
+         ADD       "1" TO LINES
+. 
+         GOTO      READPAID
+. 
+. 
+BADPAID  DISPLAY   *P1:23,*EL,"IO OR FORMAT ERROR ON APPAIDFL"
+         GOTO      BADPAID
+.
+BADMAST  DISPLAY   *P1:23,*EL,"IO OR FORMAT ERROR ON APMASTER"
+         GOTO      BADMAST
+.
+VENDBRK  TRAPCLR   PARITY
+. 
+. CHECK IF SUMMARY LISTING
+. IF SO AND IF VENDTOT = ZERO BYPASS PRINT
+. 
+         CMATCH    "S",LISTTYPE
+         GOTO      VNDPRT IF NOT EQUAL                                        
+. 
+. FALLTHRU MEANS WE ARE PRINTING A SUMMARY LISTING
+. 
+         COMPARE   "0.00" TO VENDTOT                                          
+         GOTO      VNDBRK IF EQUAL
+. 
+VNDPRT   DISPLAY   *P1:23,*EL,VENDIN," ",NAME," ",VENDTOT,*R
+. 
+. IF THIS IS A SUMMARY PRINT AND VENDOR TOTAL > ZERO
+. THEN SINGLE SPACE ONLY!
+. 
+         CMATCH    "S",LISTTYPE
+         GOTO      ADDVNDS IF EQUAL
+. 
+         ADD       "1" TO LINES
+. 
+ADDVNDS  ADD       VENDTOT TO RUNTOTS
+         MOVE      "0.00" TO VENDTOT                                          
+. 
+VNDBRK   CMATCH    "A",WHORPLY
+         GOTO      VENDSET IF EQUAL
+.                                                                             
+.                                                                             
+         MOVE      " " TO REPLY
+MOREVEND KEYIN     *P1:23,*EL,"MORE VENDORS ? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      WHOM IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      MOREVEND IF NOT EQUAL
+         GOTO      EOJ
+. 
+WHOM     DISPLAY   *P01:04,*EF
+         MOVE      "03" TO DROW
+         MOVE      "0.00"  TO VENDTOT
+         GOTO      WHO
+. 
+NOGOOD   DISPLAY   *P1:23,*HON,"INVALID VENDOR - PLEASE RETRY ! ",*W2,*HOFF
+         GOTO      WHO
+. 
+RESETDSP DISPLAY   *P1:22,*EL,*HON,"VENDOR TOTAL THUS FAR IS ",VENDTOT,*HOFF
+         KEYIN     *P1:23,*EL,*HON,"TAP ENTER KEY FOR DISPLAY OF ADD":
+                   "ITIONAL ITEMS ",REPLY,*HOFF
+. 
+         MOVE      "04" TO DROW
+. 
+ADDEM    DISPLAY   *P1:DROW,*EL                                               
+         ADD       "1" TO DROW
+         COMPARE   "22" TO DROW                                               
+         GOTO      RESETRTN IF EQUAL
+         GOTO      ADDEM
+. 
+RESETRTN MOVE      "04" TO DROW
+         RETURN
+. 
+         INCLUDE   APDATES
+. 
+EOJ      CHAIN     "APMENU1"
+. 
+. 

@@ -1,0 +1,21 @@
+.........................................................
+. READ CUSTOMER MASTER FILE KEY SEQUENTIALLY
+.........................................................
+. 
+GTCUSTKS TRAPCLR   IO
+         TRAP      NOCUSTO  IF  IO
+. 
+         READKS    CUSTFILE;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                                    CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+                                                              CUSTCATG:
+                                    LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+                                    COMMCODE:
+                                    CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+                                    PDOVR90,MTDCASH,MTDCRED
+. 
+         GOTO      NOCUSTFD IF OVER
+         MOVE      "H"  TO  IOSW
+         RETURN
+. 
+.  END OF CUSTOMER KEY SEQUENTIAL READ
+. ..........................................

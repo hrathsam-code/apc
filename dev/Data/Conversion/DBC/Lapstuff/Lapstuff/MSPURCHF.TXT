@@ -1,0 +1,38 @@
+.................................................................
+.      MSPURCHF/TXT - MILSPEC PARTS PURCHASING HISTORY FILE      .
+.                                                               .
+. RECORD LENGTH = 99 CHARACTERS                                 .
+. PRIMARY KEY   = MSPOKEY (MSPARTNO/JULIAN DATE/3 DIGIT SUFFIX) .
+.                 (29 CHARS =  20  /     6     /3)
+.................................................................
+. 
+MSPURCHS IFILE     KEYL=29,UNCOMPRESSED
+MSPURNM  INIT      "MSPURCHS/ISAM"
+. 
+MSPOSTAT DIM       1    (A= ACTIVE/I=INACTIVE)
+. 
+.    MSPOKEY  DIM       29
+. 
+MSPOPART DIM       20   (MILSPEC PART NUMBER)
+MSPOJULD DIM        6   (DATE .. 831201)
+MSPOSUFX DIM        3   (000-999)
+. 
+MSPOTYPE DIM        1   (P=PURCHASE, R=REQUEST QUOTATION)
+. 
+MSPONUMB DIM       18   (PURCHASE ORDER NUMBER)
+. 
+MSPOUOP  DIM        2   (EA=EACH,PC=PIECE,C=HUNDRED,M=THOUSAND)
+.                       (BG=BAG,BX=BOX,FT=FOOT,LB=POUND,OZ=OUNCE)
+MSPOQTY  FORM       5.2
+. 
+MSPOPRC  FORM       5.2  
+. 
+MSPODATE DIM        6   (DATE OF PURCHASE)
+. 
+MSPOVEND DIM        6   (A/P SYSTEM VENDOR CODE)
+. 
+MSPOVNAM DIM       20   (NAME KEYED IN)
+. 
+MSPOKEY  DIM       29   (READ/WRITE KEY)
+. 
+.................................................................

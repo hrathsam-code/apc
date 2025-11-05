@@ -1,0 +1,10 @@
+NOTE       1032
+CAU        8003
+Delive  3798024
+INVNum  2503964
+ARTRN   2503972
+KitH         18
+CSTPar        4
+OrderH        7
+InvH    1460170
+ARDist       39

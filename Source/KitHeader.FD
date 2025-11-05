@@ -1,0 +1,125 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    KitHeader.FD                                                   ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %IFNDEF           $KitHeaderVAR
+$KitHeaderVAR          EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+KitHeaderREC        record
+KitPartNumber       dim                20       1 - 20                    // Special Pricing File, including Start/End date and new price
+SeqNo               form               9       21 - 29
+StartingDate        dim                8       30 - 37
+EndingDate          dim                8       38 - 45
+Inactive            form               1       46 - 46
+KitPrice            form               6.4     47 - 57
+KitCost             form               6.4     58 - 68
+PriceOverride       form               1       69 - 69
+AllowChanges        form               1       70 - 70
+Comments            dim                80      71 - 150
+                    recordend
+
+TempKitHeaderREC       RECORD            LIKE       KitHeaderREC
+OrigKitHeaderREC       RECORD            LIKE       KitHeaderREC
+SaveKitHeaderREC       RECORD            LIKE       KitHeaderREC
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+KitHeaderK1SIZE        CONST             "29"                                     //Length of the Key variable)
+KitHeaderK2SIZE        CONST             "37"                                       //Length of the Key variable 2)
+KitHeaderK3SIZE        CONST             "37"                                       //Length of the Key variable 2)
+.
+. By Entity, Seq Major, Seq Minor
+.
+KitHeaderI1DEF         INIT              "-N,1-20,21-29"                              //Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+KitHeaderI2DEF         INIT              "-N,1-20,30-37,21-29"                        //Index definitions for Key 2)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+KitHeaderI3DEF         INIT              "-N,1-20,38-45,21-29"                        //Index definitions for Key 2)
+.
+KitHeaderFileSize      CONST             "250"                                        //Length of each Record)
+
+KitHeaderKY            DIM               KitHeaderK1SIZE                              //The Actual 'Key' variable)
+KitHeaderKY2           DIM               KitHeaderK2SIZE                              //The Actual 'Key' variable)
+KitHeaderKY3           DIM               KitHeaderK3SIZE                              //The Actual 'Key' variable)
+
+KitHeaderPROG          INIT              "Program Name"
+KitHeaderDESC          init              "KitHeader description"                      //Description of the Master files
+KitHeaderTITLE         INIT              "Record Title"                           //Description used later for headers, etc)
+KitHeaderHELP          INIT              "KitHeader.HLP"                              //Name of the Help file for later purposes)
+
+KitHeaderTXTNM         INIT              "$DataDir\","KitHeader.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+KitHeaderISI1NM        INIT              "$DataDir\","KitHeader.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+KitHeaderISI2NM        INIT              "$DataDir\","KitHeader2.ISI"                //Actual ISI Filename
+KitHeaderISI3NM        INIT              "$DataDir\","KitHeader3.ISI"                //Actual ISI Filename
+
+KitHeaderFLST          FILELIST
+                   %IFDEF            KitHeaderKY
+KitHeaderFL            IFILE             Name=KitHeaderISI1NM,DUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY2
+KitHeaderFL2           IFILE             Name=KitHeaderISI2NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY3
+KitHeaderFL3           IFILE             Name=KitHeaderISI3NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY4
+KitHeaderFL4           IFILE             Name=KitHeaderISI4NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY5
+KitHeaderFL5           IFILE             Name=KitHeaderISI5NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY6
+KitHeaderFL6           IFILE             Name=KitHeaderISI6NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY7
+KitHeaderFL7           IFILE             Name=KitHeaderISI7NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY8
+KitHeaderFL8           IFILE             Name=KitHeaderISI8NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+
+                   %IFDEF            KitHeaderKY9
+KitHeaderFL9           IFILE             Name=KitHeaderISI9NM,NODUP,NOPATH,UPPER
+                   %ENDIF
+                   FILELISTEND
+                   %ENDIF
+
+                   %IFNDEF           $KitHeaderIO
+                     INCLUDE           KitHeader.IO
+                   %ENDIF

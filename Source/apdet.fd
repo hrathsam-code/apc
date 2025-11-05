@@ -1,0 +1,142 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APDET.FD                                                       ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/06/2005 AT 12:35PM                                          ;
+;                                                                             ;
+;  PURPOSE:    AP Detail Record                                               ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   06/01/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+
+       %IFNDEF   $APDETVAR
+$APDETVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+APDetail      RECORD
+Entity        DIM               8        1 - 8
+SubEntity     DIM               8        9 - 16
+Vendor        DIM               6       17 - 22
+TransCode     FORM              1       23 - 23             //0 = Invoice, 1=????, 2=Debit Memo, 3=Credit Memo, 7 = Check, 6 = Disc Amount
+SeqMajor      FORM              7       24 - 30
+SeqMinor      FORM              3       31 - 33
+TransDate     DIM               8       34 - 41
+Blank2        DIM               8       42 - 49             //Used to be Check Date   (See Transaction Date)
+Blank         DIM               8       50 - 57             //Used to be Check Number (See Reference No)
+PostDate      DIM               8       58 - 65
+Year          DIM               4       66 - 69
+Month         FORM              2       70 - 71
+Amount        FORM              7.2     72 - 81
+ReferenceNo   DIM               20      82 - 101            //Reference..Either Check # or Invoice #
+Memo          DIM               60      82 - 161
+APAccount     DIM               8      162 - 169
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APDETK1SIZE CONST            "18"                                   .Index Size of Key 1
+APDETK2SIZE CONST            "24"                                   .Index Size of Key 2
+APDETK3SIZE CONST            "27"                                   .Index Size of Key 3
+APDETK4SIZE CONST            "33"                                   .Index Size of Key 4
+.APDETK5SIZE CONST            "47"                                   .Index Size of Key 5
+.
+. By Entity, Seq Major, Seq Minor
+.
+APDETI1DEF  INIT             "N,1-8,24-33"                                               .Index definitions for Key 1
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+APDETI2DEF  INIT             "1-8,66-71,24-33"                                         .Index definitions for Key 2
+.
+. By Entity, Trans Code, Entry Date, Seq Major, Seq Minor
+.
+APDETI3DEF  INIT             "1-8,23-23,34-41,24-33"                                   .Index definitions for Key 4
+.
+. By Entity, Entry Date, Vendor, Invoice,Seq Major, Seq Minor
+.
+..HR 7/25/2005  APDETI4DEF  INIT             "1-8,34-41,23-23,17-22,24-33"             .Index definitions for Key 4
+APDETI4DEF  INIT             "1-8,17-22,58-65,23-23,24-33"                             .Index definitions for Key 4
+. By Entity, Trans Code, Entry Date, Vendor, Seq Major, Seq Minor
+.
+.APDETI5DEF  INIT             "1-8,72-79,17-26,36-45,35-35,212-221"                    .Index definitions for Key 4
+.
+APDETFSIZE  CONST            "190"                                   .Length of Text Record
+
+APDETKY    DIM               APDETK1SIZE
+APDETKY2   DIM               APDETK2SIZE
+APDETKY3   DIM               APDETK3SIZE
+APDETKY4   DIM               APDETK4SIZE
+.APDETKY5   DIM               APDETK4SIZE
+
+
+APDETTITLE INIT              "AR Transaction Record"
+APDETHLP   INIT              "APDETER.HLP"
+
+APDETTXTNM    INIT        "$APDATA\","APDETFL.TXT"         .Actual Text Filename
+APDETISI1NM   INIT        "$APDATA\","APDETFL.ISI"         .Actual ISI Filename
+APDETISI2NM   INIT        "$APDATA\","APDETFL2.ISI"        .Actual ISI Filename
+APDETISI3NM   INIT        "$APDATA\","APDETFL3.ISI"        .Actual ISI Filename
+APDETISI4NM   INIT        "$APDATA\","APDETFL4.ISI"        .Actual ISI Filename
+APDETISI5NM   INIT        "$APDATA\","APDETFL5.ISI"        .Actual ISI Filename
+
+APDETFLST  FILELIST
+           %IFDEF            APDETKY
+APDETFL    IFILE             Name=APDETISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            APDETKY2
+APDETFL2   IFILE             Name=APDETISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            APDETKY3
+APDETFL3   IFILE             Name=APDETISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            APDETKY4
+APDETFL4   IFILE             Name=APDETISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDETKY5
+
+APDETFL5   IFILE             Name=APDETISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDETKY6
+
+APDETFL6   IFILE             Name=APDETISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDETKY7
+
+APDETFL7   IFILE             Name=APDETISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APDETKY8
+
+APDETFL8   IFILE             Name=APDETISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            APDETKY9
+APDETFL9   IFILE             Name=APDETISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $APDETIO
+           INCLUDE           APDET.IO
+         %ENDIF
+#end

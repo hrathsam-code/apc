@@ -1,0 +1,29 @@
+
+
+
+PAGE    1      apmaint                                                                                        02-11-19 11:35:28
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apmaint -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    2.    INCLUDE  A: mscbrag.txt
+    6.    INCLUDE  B: common.pls
+    8.    INCLUDE  C: apmastfd.pls
+   40.    INCLUDE  D: callerr1.inc
+   12. D                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   44.    INCLUDE  E: callerr2.inc
+  131.    INCLUDE  F: apmastrd.pls
+  312.    INCLUDE  G: apmastup.pls
+  317.    INCLUDE  H: apmastrt.pls
+  326.    INCLUDE  I: apmastrd.pls
+  356.    INCLUDE  J: checkdat.pls
+  357.    INCLUDE  K: apmastvk.pls
+
+   Output: c:\apc\plc\apmaint.plc                                                                                                                                                                                                                                    
+       591 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:28 11:35:28
+  00002430 DATA;  000007FC  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

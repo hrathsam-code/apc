@@ -1,0 +1,977 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+                    include            NCOMMON.TXT
+           INCLUDE           WORKVAR.INC
+#RESULT    FORM              1
+           GOTO              STARTPGM
+           INCLUDE           Comments.FD
+           INCLUDE              Sequence.FD
+
+
+           INCLUDE              Cust.FD
+#CustomerID        DIM               ^
+X                  FORM              4
+Y                  FORM              3
+CommentRow         form              4
+
+
+MAIN       PLFORM            Comments.PLF
+AddComment    PLFORM            Comment2.PLF
+About      PLFORM            About.PLF
+
+.X FileMenu    menu
+.X ChangeMenu  menu
+.X HelpMenu    menu
+
+FileMenuTxt init      "&File;":
+                      "&Print;":
+                      "-;":
+                      "E&xit"
+
+ChngMenuTxt init      "&Edit;":
+                      "&New record;":
+                      "&Change Record;":
+                      "&Delete Record;":
+                      "&Save Record"
+
+HelpMenuTxt init      "&Help;":
+                      "F1 - Help with A//P Terms;":
+                      "-;":
+                      "&About Chiron Software"
+.
+.STARTPGM   ROUTINE
+STARTPGM   ROUTINE              #CustomerID
+              DEBUG
+
+              MOVE              #CustomerID,Cust.CustomerID
+           INCLUDE           SECURITY.INC
+           MOVE              "1",ProgLoaded
+.
+. If we're unable to find the Help file, then we're going to simply just not make
+. the F1 Function key available to the Users
+.
+           MOVE              "AppDir;HELPDIR",EnvData
+           CLOCK             INI,EnvData
+           IF                NOT OVER
+             PACK              EnvData,EnvData,CommentsHelp
+             TRAP              NOHELP IF OBJECT
+             SETMODE           *HELPLIB=EnvData
+             SETMODE           *F1HELP=ON
+             TRAPCLR           OBJECT
+             GOTO              OPENFILES
+NOHELP
+             NORETURN
+           ENDIF
+.
+OPENFILES
+           TRAP              NOFILE NORESET IF IO
+           CALL              OPENComments
+           CALL              OpenSequence
+           TRAPCLR           IO
+
+CommentsCOLL  COLLECTION
+CommentsEDT   COLLECTION
+.           LISTINS           CommentsCOLL,
+
+.           LISTINS           CommentsEDT,
+
+.           winhide
+
+                   debug
+           FORMLOAD             MAIN
+           FORMLOAD             AddComment,WMain
+           CALL                 SetMain
+
+           SETPROP              Main,visible=1
+           LOOP
+             WAITEVENT
+           REPEAT
+.
+. We never get here!!   Just in case though.... :-)
+.
+           RETURN
+.           STOP
+
+BROWSEFILE ROUTINE
+SEARCH     PLFORM            SEARCH.PLF
+           FORMLOAD          SEARCH
+           RETURN
+
+INITSRCH
+           PACK              SearchTitle,CommentsTitle," Search Window"
+           SETPROP           LVSearch,*TitleText=SearchTitle
+
+..           CTADDCOL          "A/P Term Code",100,"Term Description",100:
+..                             "Net Days",75
+
+..           CTLoadTable       Comments,Code,Desc,NetDays,DiscDays,DiscPerc,DiscAmt
+           RETURN
+.
+. Routines that operate the Main program
+.
+
+
+NOFILE
+           NORETURN
+           ALERT             PLAIN,"Comments Master file does not exist. Do you wish to create it?",#RESULT
+           IF                (#RESULT = 1)
+             CALL              PREPComments
+             GOTO              OPENFILES
+           ENDIF
+           STOP
+
+.X READOPT    DIM               12
+.X PAGED      DIM               4
+.X NEXTLINE   INIT              127
+.X PRTFILE    PFILE
+.X PRTCOUNT   FORM              6
+.X PRTCOUNTD  FORM              6
+.X PRGTITLE   INIT              "A/P Terms MAster Listing"
+.X PAGETITLE  DIM               60
+.X DIM500     DIM               500
+.X PRTWIDTH   FORM              8
+.X PRTHEIGHT  FORM              8
+.X DIM8       DIM               8
+.X COL        FORM              3
+.X ROW        FORM              3
+.X MAXROWS    FORM              3
+.X ACCT       DIM               9
+.X TODAY8     DIM               8
+.X TIME8      DIM               8
+.X NUM1       FORM              3
+.X NUM2       FORM              3
+.X ToCode     DIM               8
+.X .
+.X PRTREPORT
+.X CommentsRPT   PLFORM            CommentsRPT.PLF
+.X .           WINHIDE
+.X
+.X            CLOCK             DATE,TODAY8
+.X            CLOCK             TIME,TIME8
+.X
+.X            MOVE              "60",MAXROWS
+.X            MOVE              "0",PAGE
+.X            MOVE              "90",LINE
+.X
+.X            FORMLOAD          CommentsRPT
+.X            LOOP
+.X              WAITEVENT
+.X            REPEAT
+.X
+.X            RETURN
+.X
+.X .           alert             note,"how???",returnfl
+.X .           LOOP                                              .Wait...and Wait...
+.X .             WAITEVENT                                       .
+.X .           REPEAT                                            .and wait
+.X
+.X START
+.X .
+.X .
+.X . Since we're dealing with a sorted file, we're going to read it in
+.X . Sequential order vs. Key Sequential.  Also, we must make sure that
+.X . we don't read any records that we're not supposed to based on the
+.X . code that was in the other program. (AP42.DBS)
+.X .
+.X
+.X            CLOCK             DATE,TODAY8
+.X            CLOCK             TIME,TIME8
+.X
+.X            MOVE              "60",MAXROWS
+.X            MOVE              "0",PAGE
+.X            MOVE              "90",LINE
+.X            MOVE              "0",PRTCOUNT
+.X .
+.X . Process all Vendors in Sorted Order
+.X .
+.X            MOVE              " ",CommentsKY
+.X
+.X            GETITEM           RAll,0,RETURNFL
+.X            BRANCH            RETURNFL OF ALL
+.X
+.X            GETITEM           EFromRange,0,CommentsKY
+.X            GETITEM           EToRange,0,ToCode
+.X
+.X            IF                (ToCode < CommentsKY)
+.X            BEEP
+.X            ALERT             STOP,"From Code cannot be less than the To Code",RETURNFL,"Range Error"
+.X            SETFOCUS          ETORANGE
+.X            RETURN
+.X            ENDIF
+.X
+.X ALL
+.X            TRAP              NOPRINT IF SPOOL
+.X            PRTOPEN           PRTFILE,"@?","A/P Term Code Listing"
+.X            TRAPCLR           IO
+.X
+.X            CALL              PRTHEADER2
+.X
+.X
+.X            CALL              RDComments
+.X            LOOP
+.X              CALL              KSComments
+.X            UNTIL             (RETURNFL = 1 OR CommentsREC.Code > ToCode)
+.X              CALL              PRTLINE
+.X            REPEAT
+.X .
+.X . Print Totals line
+.X .
+.X            IF                (LINE + 4 > MAXROWS)
+.X              CALL              PRTHEADER
+.X            ENDIF
+.X            PRTPAGE           PRTFILE;*N=3,PRTCOUNT," A/P Term Records Printed"
+.X            PRTCLOSE          PRTFILE
+.X            RETURN
+.X .
+.X . Print Each Detailed line
+.X .
+.X PRTLINE
+.X            ADD               "1",PRTCOUNT
+.X            MOVE              PRTCOUNT,PRTCOUNTD
+.X
+.X            IF                (LINE > MAXROWS)
+.X              CALL              PRTHEADER
+.X            ENDIF
+.X            CHOP              CommentsREC.NETDAYS,CommentsREC.NETDAYS
+.X            CHOP              CommentsREC.DISCDAYS,CommentsREC.DISCDAYS
+.X
+.X            MOVE              CommentsREC.NETDAYS,NUM1
+.X            MOVE              CommentsREC.DISCDAYS,NUM2
+.X
+.X            PRTPAGE           PRTFILE;*1,CommentsREC.Code:
+.X                                      *16,CommentsREC.Desc:
+.X                                      *Alignment=*Right:
+.X                                      *38,Num1:
+.X                                      *50,Num2:
+.X                                      *Alignment=*Decimal:
+.X                                      *61,CommentsREC.DiscPerc:
+.X                                      *Alignment=*Left
+.X
+.X            ADD       "2" TO LINE
+.X            RETURN
+.X
+.X PRTHEADER
+.X            PRTPAGE           PRTFILE;*NEWPAGE;
+.X PRTHEADER2
+.X            CALC              COL=PRTWIDTH-15
+.X            ADD               "1",PAGE
+.X            MOVE              PAGE,PAGED
+.X .           SETITEM           EPage,0,PAGED
+.X
+.X            PRTPAGE           PRTFILE;*P1:63,*LINE=85:63:
+.X                              *N:
+.X                              *40,"Page :",*alignment=*left,PAGE:
+.X                              *P1:1:
+.X                              *P1:1,"Date : ",TODAY8:
+.X                              *BOLDON:
+.X                              *H=27,"Chiron Software & Services, Inc.",*BOLDOFF:
+.X                              *72,"APTERM":
+.X                              *N:
+.X                              *H=1,"Time : ",TIME8:
+.X                              *H=29,"A/P Term Code Master Listing":
+.X                              *72,"Accounts Payable":
+.X                              *N=2:
+.X                              *ULON:
+.X                              *H=1,"Term Code",*H=16,"Description":
+.X                              *H=33,"Net Days",*H=44,"Disc. Days":
+.X                              *H=57,"Disc. %":
+.X                              *ULOFF:
+.X                              *N
+.X
+.X            MOVE              "5",LINE
+.X            RETURN
+
+EXITASK
+           ALERT             PLAIN,"Are you sure you wish to exit this report?",#RESULT
+           IF                (#RESULT=1)
+             STOP
+           ENDIF
+           RETURN
+
+NOPRINT
+           TRAPCLR           SPOOL
+           NORETURN
+           RETURN
+.=============================================================================
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+#RES1      FORM              1
+#DIM1      DIM               1
+#DIM2      DIM               2
+#RES2      FORM              2
+#LEN1      FORM              3
+#MenuObj   Automation
+#MenuItem  DIM               25
+.
+.=============================================================================
+.
+MaintMenuOption
+           EVENTINFO         0,ARG1=#MenuObj
+           GETPROP           #MenuObj,*ID=#MenuItem
+.
+           SELECT            USING #MenuItem
+           WHEN              "ID_New"
+             CALL              MainNew
+             RETURN
+           WHEN              "ID_Exit"
+             CALL              MainClose
+             RETURN
+           WHEN              "ID_Print"
+             CALL              MainPrint
+             RETURN
+           WHEN              "ID_Cancel"
+             CALL              MainCancel
+             RETURN
+           WHEN              "ID_Change"
+             CALL              MainChange
+             RETURN
+           WHEN              "ID_Delete"
+             CALL              MainDelete
+             RETURN
+           WHEN              "ID_Find"
+             CALL              MainFind
+             RETURN
+           WHEN              "ID_First"
+             CALL              MainFirst
+             RETURN
+           WHEN              "ID_Last"
+             CALL              MainLast
+             RETURN
+           WHEN              "ID_Next"
+             CALL              MainNext
+             RETURN
+           WHEN              "ID_Previous"
+             CALL              MainPrevious
+             RETURN
+           WHEN              "ID_About"
+             CALL              MainAbout
+             RETURN
+           WHEN              "ID_Save"
+             CALL              SaveMode
+             RETURN
+           WHEN              "ID_Undo"
+             CALL              MainUndo
+             RETURN
+           WHEN              "ID_ShowToolbar"
+             CALL              MainToolbar
+             RETURN
+           DEFAULT
+           ENDSELECT
+           RETURN
+
+MainValid
+           IF                (Status = 0)
+...HR             GETCOUNT          ECommentsCODE
+             IF                (CharCount > 0)
+...HR               GETITEM           ECommentsCODE,0,CommentsKY
+               CALL              RDComments
+               IF               (RETURNFL = 1)
+                 PARAMTEXT        CommentsTITLE,CommentsKY,"",""
+                 ALERT            CAUTION,"^0: ^1 Not Found",#RES2,"Record does not exist"
+                 CALL             MAINRESET
+                 RETURN
+               ENDIF
+.
+. OK, we've been able to read the record and now let's show it on the screen.
+.
+               CALL              SETMAIN
+               MOVE              "3",Status                   .We've found a record
+               ENABLEITEM        BMainCHANGE
+..               ENABLETOOL        ID_Change
+
+.               DISABLEITEM       BMainNEW
+.               DISABLETOOL       ID_New
+
+               ENABLEITEM        BMainDELETE
+.               ENABLETOOL        ID_Delete
+
+...HR               DISABLEITEM       ECommentsCODE
+..               DISABLEITEM       Fill1
+.1               DISABLEITEM       ChangeMenu,1
+.1               ENABLEITEM        ChangeMenu,2
+.1               ENABLEITEM        ChangeMenu,3
+.1               DISABLEITEM       ChangeMenu,4
+               SETFOCUS          BMainChange
+             ENDIF
+           ENDIF
+           RETURN
+
+.=============================================================================
+. Initialize MAIN Form and setup the Menu's, Fields, Objects, Buttons, etc
+.
+MAININIT
+.           CREATE            WMAIN;HelpMenu,HelpMenuTxt
+.           CREATE            WMAIN;ChangeMenu,ChngMenuTxt
+.           CREATE            WMAIN;FileMenu,FileMenuTxt
+.
+.           ACTIVATE          HelpMenu,onClickMainWinHelpMenu,result
+.           ACTIVATE          ChangeMenu,onClickMainWinChangeMenu,result
+.           ACTIVATE          FileMenu,onClickMainWinFileMenu,result
+.
+. Set the SELECTALL property for the COLLECTION and then take care of
+. any ActiveX controls.
+.
+.           SETPROP           CommentsEDT,SELECTALL=$SelectAll
+.
+           CALL              MAINRESET
+           RETURN
+.=============================================================================
+. New Button is pressed
+.
+MAINNEW
+              setprop           EComments
+              SETPROP           AddComment,Visible=1
+.
+. Disable & Enable the proper Buttons along with changing
+. the description of the Button's (i.e. Exit --> Change)
+.
+..             DISABLEITEM       BMainCHANGE
+..             DISABLETOOL       ID_Change
+
+..             DISABLEITEM       BMainDELETE
+..             DISABLETOOL       ID_Delete
+
+..             SETITEM           BMainNEW,0,SaveTitle
+..             ENABLETOOL        ID_Save
+
+..             SETITEM           BMainCancel,0,CancelTitle
+..           ENDIF
+           RETURN
+.=============================================================================
+. Change/Save Button has been pressed
+.
+MAINCHANGE
+.
+. I'm only getting here if the Change Button has been selected.  Soooooo....Either the
+. Change Button has been pressed, or this button now reads 'Save'.  If it reads Save,
+. the Status flag will have been set to 1 the first time that this routine has been
+. reached.
+           IF                (Status = 1)                //'Save' button has been pressed
+             CALL              VALIDATE1
+             IF                (ValidFlag = 0)           //Great..All fields ARE valid!!!
+               CALL              GETMAIN                 //Get all of the fields
+               CALL              UPDComments                //Update the record
+               CALL              MAINRESET               //Reset the objects & fields
+             ENDIF
+             RETURN                                      //Voila...Either way, we're RETURNING
+           ENDIF
+...HR           GETCOUNT          ECommentsCODE
+           IF                (Charcount > 0)
+...HR             GETITEM           ECommentsCODE,0,CommentsKY      //Read the Primary field ito the Key
+
+             CALL              RDCommentsLK               //Lock the record so that nobody uses it
+.
+. Just for arguments sake, let's just make sure that the record hasn't been deleted
+. by another user, AND...Let's make sure that it's not being used by another user
+. as well!!
+.
+             IF                (RETURNFL = 1)          //WHAT!!! Somebody deleted this record
+               BEEP
+               ALERT             STOP,"Record deleted by another User!!",RESULT
+               CALL              MAINRESET
+               RETURN
+             ENDIF
+.
+. Record is locked...Try again later
+.
+             IF                (RETURNFL = 2)          //WHAT!!! Somebody's locked the record
+               BEEP
+               ALERT             NOTE,"Record locked by another User..."::
+                                       "Try again later",RESULT,LOCKTITLE
+               RETURN
+             ENDIF
+.
+. OK, OK...We've gotten this far...The record is now locked and we
+. can safely change the Status to "Modify"
+.
+             MOVE              "1",Status                  //We've selected the Modify/Change Button
+             CALL              DisableRecordButtons
+.
+. Not only do we have a good record, but we've been able to 'Lock' the record
+. and now we're ready to proceed
+.
+. Enable the Entire Collection of EditText fields as well as setting the
+. background colors and making them Non Read-Only
+.
+.             ENABLEITEM        CommentsCOLL
+..             DISABLEITEM       Fill1
+             %IFDEF            CBCommentsActive
+             ENABLEITEM        CBCommentsActive
+             %ENDIF
+.             SETPROP           CommentsCOLL,READONLY=0
+.             SETPROP           CommentsCOLL,BGCOLOR=$WINDOW
+.
+. OK, OK...What do we do with any ActiveX components. We've got to handle
+. them as well.  Let's change these to Non Read-Only and change the
+. Background colors as well
+.
+.             SETPROP           ECommentsDiscPerc,*Enabled=1
+.             SETPROP           ECommentsDiscPerc,*BackColor=$Window
+.
+. Change the Cancel button button to 'Save' and the 'Exit' button to Cancel
+.
+             SETITEM           BMainCancel,0,CancelTitle
+..             ENABLETOOL        ID_Cancel
+
+             SETITEM           BMainCHANGE,0,SaveTitle
+..             ENABLETOOL        ID_Save
+.
+..             ENABLETOOL        ID_Undo
+..             DISABLETOOL       ID_Change
+.
+..             DISABLETOOL       ID_New
+             DISABLEITEM       BMainNew
+.
+...HR             SETFOCUS          ECommentsDesc               //Set the cursor to the next field
+...HR             DISABLEITEM       ECommentsCODE               //and Disable the Primary Code
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainUndo
+. If I've click on the Undo/Reset button, I've already got the 'Key' based on
+. the fact that I'm changing a record that already exists and I loaded the
+. key the first time.  Soooooo....Simply 'Re-read' the record, Calll the
+. SetMain routine and Voila!!!!
+.
+           BEEP
+           ALERT             PLAIN,"Revert back to the 'Original' record",RESULT:
+                                   SureTitle
+           IF                (RESULT = 1)
+             CALL              RDCommentsLK
+             CALL              SetMain
+           ENDIF
+           RETURN
+.=============================================================================
+MainFind
+...HR           FindSearch        ECommentsCode
+           IF                (PassedVar = "Y")
+...HR             GETITEM           ECommentsCode,0,CommentsKY
+             MOVE              $SearchKey,CommentsKY
+             CALL              RDComments
+.
+. We've got a record thanks to our Trusy Search/Browse window. Let's
+. continue now by setting up the proper Code field and calling the
+. MainValid subroutine, that will take care of it for us.
+.
+             MOVE              "0",Status
+...HR             SETITEM           ECommentsCode,0,CommentsREC.Code
+             CALL              MainValid
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainFirst
+           CLEAR             CommentsKY
+           FILL              FirstASCII,CommentsKY
+           CALL              RDComments
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KSComments         . Try the 'next' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      FirstTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+...HR           SETITEM           ECommentsCode,0,CommentsREC.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Last record and display it
+.
+MainLast
+           CLEAR             CommentsKY
+           FILL              LastASCII,CommentsKY
+           CALL              RDComments
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KPComments         . Try the 'Previous' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      LastTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKP.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+...HR           SETITEM           ECommentsCode,0,CommentsREC.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Next record and display it
+.
+MainNext
+. We can't just do a simple READKS/READKP because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+...HR           GETCOUNT          ECommentsCode
+           IF                (CharCount <> 0)
+...HR             GETITEM           ECommentsCode,0,CommentsKY
+             CALL              RDComments
+           ENDIF
+.
+           CALL              KSComments         . Try the 'next' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"End of file has been reached.",RESULT:
+                                    NextTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+...HR           SETITEM           ECommentsCode,0,CommentsREC.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Previous record and display it
+.
+MainPrevious
+. We can't just do a simple 'READKS' because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+...HR           GETCOUNT          ECommentsCode
+           IF                (CharCount <> 0)
+...HR             GETITEM           ECommentsCode,0,CommentsKY
+             CALL              RDComments
+           ENDIF
+.
+           CALL              KPComments         . Try the 'Previous' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"Beginning of file has been reached...",RESULT:
+                                    PrevTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+...HR           SETITEM           ECommentsCode,0,CommentsREC.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Save has been selected from the MENU vs. the Button
+.
+SAVEMODE
+.
+. OK...The 'Save' has been selected from the Menu rather than from the Save Button.
+. What to do, What to do??  Is this a Save to a 'NEW' record or is it a Save to a
+. 'CHANGED' record....
+. Let's check the 'Status' flag...1 is a Change record, 2 is a New Record
+.
+           BRANCH            Status,MainChange,MainNew
+           RETURN
+.=============================================================================
+. Routine to Validate the data from the Form
+.
+VALIDATE1
+           MOVE              "0",ValidFlag
+
+.X           GETITEM           ECommentsCode,0,TestChars
+.X           COUNT             CharCount,TestChars
+.X           IF                (CharCount = 0)
+.X             MOVE            "1",ValidFlag
+.X             BEEP
+.X             ALERT             CAUTION,"A Code must be entered into the system",RETURNFL,"Error in Field"
+.X             SETFOCUS          ECommentsCode
+.X             RETURN
+.X           ENDIF
+
+.
+. Everything's OK...Let's just return because the ValidFlag will be set to
+. Zero from the top of this routine.
+.
+           MOVE              "0",ValidFlag
+           RETURN
+.=============================================================================
+. Routine to 'Reset' everything which includes the Button's, Objects,
+. fields, etc.
+.
+MAINRESET
+           MOVE              "0",Status     //Reset the status to Not updating
+           clear             CommentRow
+           UNLOCK            CommentsFL
+.
+. Reset the fields to 'Blank' and DISABLE all of those fields as well
+.           DELETEITEM        CommentsCOLL,0
+.           DISABLEITEM       CommentsCOLL
+.           SETPROP           CommentsCOLL,READONLY=1
+.           SETPROP           CommentsCOLL,BGCOLOR=$BTNFACE
+..           ENABLEITEM        Fill1
+.
+. Reset the Buttons for the Next record
+.
+           DISABLEITEM       BMainChange
+..           DISABLETOOL       ID_Change
+
+           DISABLEITEM       BMainDELETE
+..           DISABLETOOL       ID_Delete
+
+           SETITEM           BMainCHANGE,0,ChangeTitle
+
+           SETITEM           BMainNEW,0,NewTitle
+..           ENABLETOOL        ID_New
+
+           ENABLEITEM        BMainNEW
+           SETITEM           BMainCancel,0,ExitTitle
+
+..           DISABLETOOL       ID_Save
+..           DISABLETOOL       ID_Undo
+..           DISABLETOOL       ID_Cancel
+
+           CALL              EnableRecordButtons
+.
+. Enable & Disable the proper Menu options
+.
+.X           ENABLEITEM        FileMenu,1
+.X           ENABLEITEM        ChangeMenu,1
+.X           DISABLEITEM       ChangeMenu,2
+.X           DISABLEITEM       ChangeMenu,3
+.X           DISABLEITEM       ChangeMenu,4
+.
+. Setup any ActiveX control fields to what they should be
+.
+.           SETPROP           ECommentsDiscPerc,*Text="0"
+.           SETPROP           ECommentsDiscPerc,*Enabled=0
+.           SETPROP           ECommentsDiscPerc,*BackColor=$BTNFACE
+.
+. Setup the Primary field that is used for Entry purposes
+.
+           %IFDEF            CBCommentsActive
+           SETITEM           CBCommentsActive,0,0
+           DISABLEITEM       CBCommentsActive
+           %ENDIF
+
+...HR           SETPROP           ECommentsCODE,READONLY=0
+...HR           SETPROP           ECommentsCode,BGCOLOR=$WINDOW
+...HR           ENABLEITEM        ECommentsCODE
+...HR           SETFOCUS          ECommentsCODE
+           RETURN
+.=============================================================================
+. Cancel Button has been Clicked
+.
+MAINCLOSE
+.
+. Only display this message if I'm in either the Modify or New mode.  If not,
+. simply exit the program and proceed as normal
+.
+           IF                (Status <> 0)
+             BEEP
+             ALERT              PLAIN,"By Exiting the program now, your operation will be Cancelled?",RESULT:
+                                      "Are you sure?"
+             IF                 (RESULT = 1)
+               DESTROY         WMAIN      . Get rid of the Bank Window
+               NORETURN                   . Get rid of the call to MAINCLOSE
+               RETURN                     . Return to the Main calling routine
+             ELSE
+               RETURN                     . Contine with standard operations
+             ENDIF
+           ENDIF
+           DESTROY         WMAIN          . Get rid of the Bank Window
+           NORETURN                       . We don't need this call anymore
+           RETURN
+.=============================================================================
+. Cancel button has been pressed
+.
+MainCancel
+           IF                (Status = 0)      . They want to exit the program
+             DESTROY         WMAIN             . Get rid of the Main Window
+             NORETURN
+             RETURN
+           ELSE
+             IF                (Status = 1 OR Status = 2)  . Change/New Mode
+               BEEP
+               ALERT              PLAIN,"Do you wish to cancel this operation?",RETURNFL:
+                                        "Are you sure?"
+               IF                 (RETURNFL = 1)
+                 CALL               MAINRESET
+                 RETURN
+               ELSE
+                 RETURN
+               ENDIF
+             ELSE
+               CALL              MAINRESET
+             ENDIF
+             RETURN
+           ENDIF
+.=============================================================================
+. Delete Button has been Pressed
+.
+MainDelete
+           PARAMTEXT        CommentsREC.Code,CommentsTitle,"",""
+           BEEP
+           ALERT            PLAIN,"Do you wish to Delete the ^1: ^0 ?",#RES1,DelTitle
+           IF               (#RES1 = 1)
+             CALL             DELComments
+             ALERT            NOTE,"Comments Code ^0 has been deleted",#RES1,DelOKTitle
+             CALL             MAINRESET
+           ENDIF
+           RETURN
+.=============================================================================
+.
+. Setup all of the fields in the Form based upon the data record
+SETMAIN
+...HR           SETITEM           ECommentsCode,0,CommentsREC.CODE
+.           SETPROP           ECommentsDiscPerc,*Text=CommentsREC.DiscPerc
+           %IFDEF            CBCommentsActive
+           SETITEM           CBCommentsActive,0,CommentsREC.Active
+           %ENDIF
+
+           PACKKEY           CommentsKY,$Entity,Cust.CustomerID,"9999999"
+           CALL              RDComments
+
+           LOOP
+             CALL              KPComments
+           UNTIL             (ReturnFL = 1 or Cust.CustomerID != CommentsREC.CustomerID)
+             UNPACK             CommentsREC.EntryDate into CC,YY,MM,DD
+...             SQUEEZE            CommentsREC.Comments,CommentsREC.Comments
+             PACK               Dataline FROM MM,SLASH,DD,SLASH,YY,"~ "
+.             PACK              DataLine,CommentsREC.EntryDate
+             CALL               AddCommentToList
+           REPEAT
+           RETURN
+.=============================================================================
+. Retrieve all of the fields in the Form based upon the data record
+.
+GETMAIN
+...HR           GETITEM           ECommentsCode,0,CommentsREC.CODE
+.           GETPROP           ECommentsDiscPerc,*Text=CommentsREC.DiscPerc
+           %IFDEF            CBCommentsActive
+           GETITEM           CBCommentsActive,0,CommentsREC.Active
+           %ENDIF
+           RETURN
+.=============================================================================
+.Help Menu selection if required
+.
+MAINHELP
+          RETURN
+
+onClickMainWinChangeMenu
+           PERFORM           RESULT OF  MAINNEW,MAINCHANGE,MainDelete,SAVEMODE
+           RETURN
+.=============================================================================.
+onClickMainWinExitButton
+.
+. check to see if this is masquerading as a CANCEL button
+.
+           CALL              MainCancel
+           RETURN
+.=============================================================================.
+onClickMainWinFileMenu
+.
+. process a click on the file menu
+.
+           PERFORM           result of MainPrint,,MAINCLOSE
+           RETURN
+.=============================================================================.
+onClickMainWinHelpMenu
+           PERFORM           result of MAINHELP,MAINHELP,MAINAbout
+           RETURN
+.=============================================================================.
+. Display the Standard "About Box"
+.
+MAINAbout
+.
+. display an alert box describing the program
+.
+           FORMLOAD          About
+           RETURN
+.=============================================================================
+. Print Report option
+.
+MainPrint
+.X           CALL              PRTREPORT
+           RETURN
+MainToolBar
+           RETURN
+
+.=============================================================================
+. Disable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+DisableRecordButtons
+..           DISABLETOOL       ID_First
+..           DISABLETOOL       ID_Next
+..           DISABLETOOL       ID_Previous
+..           DISABLETOOL       ID_Last
+..           DISABLETOOL       ID_Find
+           RETURN
+.=============================================================================
+. Enable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+EnableRecordButtons
+..           ENABLETOOL        ID_First
+..           ENABLETOOL        ID_Next
+..           ENABLETOOL        ID_Previous
+..           ENABLETOOL        ID_Last
+..           ENABLETOOL        ID_Find
+           RETURN
+.=============================================================================
+AddNewComments
+.SalesRepID    DIM               4         23 - 26
+.Code          DIM               4        283 - 286
+.
+              MOVE              $Entity,CommentsREC.Entity
+              CLOCK             TimeStamp,CommentsREC.EntryDate
+              GETITEM           EComments,0,CommentsREC.Comments
+              MOVE              Cust.CustomerID,CommentsREC.CustomerID
+              GetNextSeq               Cmt
+              MOVE              Sequence.SeqNo,CommentsREC.SeqNo
+              CALL              WrtComments
+
+              call              AddCommentToList
+              SETITEM           EComments,0,""
+              SETPROP           AddComment,visible=0
+
+              RETURN
+.=============================================================================
+AddCommentToList
+              CHOP              CommentsREC.Comments,CommentsREC.Comments
+             UNPACK             CommentsREC.EntryDate into CC,YY,MM,DD
+             PACK               Date10 FROM MM,"-",DD,"-",YY
+
+             incr               CommentRow
+.              PACK              DataLine,CommentsREC.EntryDate
+              pack              DataLine from Date10,";":
+                                              CommentsREC.Comments
+              CTComments.SetItemTextAll using *Index=SelectedRow,*Text=DataLine,*Delimiter=";",*Param=CommentsREC.SeqNo   //,*Options=LVOptions  //HR 4.4.2016
+
+....              CTComments.AddItem giving X using DataLine
+....              SETPROP           CTComments,*ListSubText(X)=CommentsREC.Comments
+....              GETPROP           CTComments,*CalcSubTextHeight(X)=Y
+....              SETPROP           CTComments,*ListSubHeight(X)=Y
+              RETURN

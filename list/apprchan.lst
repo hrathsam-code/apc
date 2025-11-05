@@ -1,0 +1,20 @@
+
+
+
+PAGE    1      apprchan                                                                                       02-11-19 11:35:35
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apprchan -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    3.    INCLUDE  B: common.pls
+  125.                                         GOTO      EOJ IF NOT EQUAL
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\apprchan.plc                                                                                                                                                                                                                                   
+       184 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:35 11:35:35
+  00001228 DATA;  000002FE  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

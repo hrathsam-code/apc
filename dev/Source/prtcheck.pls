@@ -1,0 +1,854 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    PRTCHECK.PLS                                                   ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08/05/2005 AT 1:12PM                                           ;
+;                                                                             ;
+;  PURPOSE:    Print Check's from Check Run File                              ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   07/29/2005  HOR     INITIAL VERSION                      ;
+;                                                                             ;
+;=============================================================================;
+              INCLUDE           NCOMMON.TXT
+              INCLUDE           WORKVAR.INC
+
+PrintCheckDate DIM              10
+ItemCount     FORM              6
+TransDate     DIM               8
+DueDate       DIM               8
+..today      DIM                8
+ToDate        DIM               8
+FromDate      DIM               8
+DiscDate      DIM               8
+HoldFlag      DIM               1
+LastValidCheck FORM             10
+VoidString    INIT              "VOID VOID VOID VOID VOID VOID VOID VOID VOID VOID ":
+                                "VOID VOID VOID VOID VOID VOID VOID VOID VOID VOID"
+
+AddressLine   DIM               50(5)
+VendorLine    FORM              2
+
+CheckDate     DIM               8
+PrtCheckDate  DIM               10
+CheckNumber   FORM              10
+CheckIncrement FORM             2
+CheckNumber2  FORM              10
+CheckNumber8  FORM              8
+VoucherLines  FORM              3
+CheckLines    FORM              3
+AmountString  DIM               100
+StubLine1     FORM              4
+StubTotalLine1 FORM             4
+StubLine2     FORM              4
+StubTotalLine2 FORM             4
+CheckStub     FORM              4
+SeqMinor      FORM              3
+
+PostDate      DIM               8
+AgingDays     FORM              3
+CityState     DIM               42
+VDiscTotals   FORM              10.2
+VNetTotals    FORM              10.2
+VGrossTotals  FORM              10.2
+GTDiscTotal   FORM              10.2
+PaymentType   DIM               8
+GrossAmt      FORM              10.2
+NetAmt        FORM              10.2
+PrintDetails  FORM              1
+TransactionTotals FORM          6
+VendorPrinted DIM               1
+PrintGLInfo   FORM              1
+PrtEntity     DIM               2
+GLAmount      FORM              7.2
+GLType        DIM               2
+
+LightGrayRGB  FORM              8
+LightGray     COLOR
+
+
+VendorGross   FORM              10.2
+VendorNet     FORM              10.2
+VendorDisc    FORM              10.2
+
+ReferencGross FORM              10.2
+ReferencNet   FORM              10.2
+ReferencDisc  FORM              10.2
+PaymentDesc   DIM               10
+.
+DiscountTotal FORM              10.2
+GrossTotal    form             10.2
+NetTotal      FORM              10.2
+AllVendorFlag FORM              1
+FromVendor    DIM               6
+ToVendor      DIM               6
+SelectedType  FORM              2
+SavedVendor    DIM               6
+SavedReferenceNo DIM              10
+.
+X             FORM              3
+
+              GOTO              #S
+              INCLUDE           Amounts.INC
+              INCLUDE           APTRN.FD
+              INCLUDE           APDET.FD
+              INCLUDE           Sequence.FD
+              INCLUDE           CMPNY.FD
+              INCLUDE           GLMast.FD
+              INCLUDE           APDist.FD
+              INCLUDE           Vendor.FD
+              INCLUDE           VHST.FD
+              INCLUDE           Bank.FD
+              INCLUDE           Check.FD
+              INCLUDE           CheckDet.FD
+              INCLUDE           ChkRun.FD
+              INCLUDE           ChkRunDT.FD
+              include                  Default.FD
+
+              INCLUDE           PrintRtn.INC
+PRTCHECK      PLFORM            PRTCHECK.PLF
+PRTCHECK2     PLFORM            PRTCHK2.PLF
+
+#S
+STARTPGM      routine
+              WINHIDE
+              OPEN              VendorFLST,READ
+..HR 8/29/2005              OPEN              APTRNFLST,READ
+              CALL              OpenAPTRN
+              CALL              OpenAPDet
+              CALL              OPENCMPNY
+              CALL              OpenCheck
+              CALL              OpenBank
+              CALL              OpenCheckDetail
+              CALL              OpenSequence
+              OPEN              GLMastFLST,READ
+..              OPEN              APDistFLST,READ
+              call              OpenAPDist
+              CALL              OpenVHST
+              CALL              OpenCheckRun
+              CALL              OpenCheckRunDetail
+
+                   move                "2101",Default.APAcct
+                   move                "1101",Default.APCashAcct
+                   move                "2401",Default.APPurchaseDiscAcct
+
+              FORMLOAD          PRTCHECK
+              FORMLOAD          PRTCHECK2
+
+              CLOCK             DATE,TODAY8
+              SETPROP           DTCheckDate,text=Today8
+
+              LOOP
+                WAITEVENT
+              REPEAT
+
+              GOTO              ExitProgram
+.
+. We'll never get to this spot!!
+.....................................................
+StartPrint
+DelCheckFlag        form               1
+;
+; Let's make sure that the Checks haven't been printed from the normal method
+;
+                    packkey           CheckRunKY FROM $Entity                          1460295
+                    call              RDCheckRun
+
+                    loop
+                      call              KSCheckRun
+                    until             (ReturnFL = 1)
+                      clear             DelCheckFlag
+                      packkey           CheckRunDetailKY2 FROM CheckRun.Entity,CheckRun.Vendor
+                      call              RDCheckRunDetail2
+
+                      loop
+                        call              KSCheckRunDetail2
+                      until             (ReturnFl = 1 or CheckRun.Vendor != CheckRunDetail.Vendor)
+                        packkey           APTRNKY2,CheckRun.Entity,CheckRunDetail.Voucher
+                        call              RDAPTRN2
+                        if                (ReturnFL = 0 and APTRN.ClosedFlag = "C")
+                          call              DelCheckRunDetail
+                          set               DelCheckFlag
+                        endif
+                      repeat
+                      if               (DelCheckFlag = 1)           //We've deleted the Check Details
+                        call             DelCheckRun
+                      endif
+                    repeat
+
+
+
+              CREATE            LightGray=*LTGRAY               //HR 6/2/2005
+              GETITEM           LightGray,0,LightGrayRGB        //HR 6/2/2005
+
+              CALL              PrintInit
+              return               if (printInitFailed = "N")
+
+              SETMODE           *MCURSOR=*Wait
+
+              getprop           DTCheckDate,text=CheckDate
+              UNPACK            CheckDate into CC,YY,MM,DD
+              PACK              PrtCheckDate FROM MM,"-",DD,"-",YY
+
+              GETPROP           ECheckNumber,value=CheckNumber
+
+              MOVE              "Y",FirstFlag
+
+              PACKKEY           CheckRunKY FROM $Entity                          1460295
+              CALL              RDCheckRun
+
+              LOOP
+                CALL              KSCheckRun
+              UNTIL             (ReturnFL = 1)
+                CONTINUE          IF (CheckRun.Printed = 1)      //Ignore those that have already been printed!!
+                ADD               "1",ItemCount
+                MOVE              "1",CheckIncrement
+
+                MOVE              CheckRun.Vendor,VendorKY
+                CALL              RDVendor
+.
+. Format the Address lines now for printing on the Checks
+.
+              CLEAR             AddressLine
+              CHOP              Vendor.Address1
+              CHOP              Vendor.Address2
+              CHOP              Vendor.Address3
+              CHOP              Vendor.City,Vendor.City
+              CHOP              Vendor.Zip,Vendor.Zip
+
+              MOVE              "0",VendorLine
+
+              IF                (Vendor.Address1 != "")           //We have a valid Address Line...Add it
+                ADD               "1",VendorLine
+                MOVE              Vendor.Address1,AddressLine(VendorLine)
+              ENDIF
+
+              IF                (Vendor.Address2 != "")           //We have a valid Address Line...Add it
+                ADD               "1",VendorLine
+                MOVE              Vendor.Address2,AddressLine(VendorLine)
+              ENDIF
+
+              IF                (Vendor.Address3 != "")           //We have a valid Address Line...Add it
+                ADD               "1",VendorLine
+                MOVE              Vendor.Address3,AddressLine(VendorLine)
+              ENDIF
+.
+. Let's just add the City, State & Zip now
+.
+              ADD               "1",VendorLine
+              PACK              AddressLine(VendorLine) FROM Vendor.City,",  ",Vendor.State,"   ",Vendor.Zip
+.
+. Calculate how many Detail lines first before we start printing a check
+.
+                MOVE              "0",VoucherLines
+                PACKKEY           CheckRunDetailKY2 FROM CheckRun.Entity,CheckRun.Vendor
+                CALL              RDCheckRunDetail2
+
+                LOOP
+                  CALL              KSCheckRunDetail2
+                UNTIL             (ReturnFl = 1 or Vendor.AccountNumber != CheckRunDetail.Vendor)
+                  ADD               "1",VoucherLines
+                REPEAT
+.
+. Now that we know how many Check Detail lines we need to print, we can determine what the
+. actual check number is going to be.
+.
+..HR 2019.3.1                MOVE              "414",StubTotalLine1
+..HR 2019.3.1                MOVE              "760",StubTotalLine2
+..HR 2019.3.1                MOVE              "414",StubLine1
+..HR 2019.3.1                MOVE              "760",StubLine2
+                MOVE              "444",StubTotalLine1
+                MOVE              "784",StubTotalLine2
+                MOVE              "444",StubLine1
+                MOVE              "784",StubLine2
+                MOVE              "60",ChecKStub               //HR 8/25/2005
+                MOVE              "0",CheckLines
+
+                CALL              PrintCheckLayout
+
+                PACKKEY           CheckRunDetailKY2 FROM CheckRun.Entity,CheckRun.Vendor
+                CALL              RDCheckRunDetail2
+
+                LOOP
+                  CALL              KSCheckRunDetail2
+                UNTIL             (ReturnFl = 1 or Vendor.AccountNumber != CheckRunDetail.Vendor)
+                  CALL              PrintCheckDetails
+                REPEAT
+
+..HR 9/13/2005                CALL              PrintCheckLine
+                CALL              PrintCheckLine IF (CheckIncrement = 1)    //We DID NOT have a StubOverflow, Print the Check Header!!!
+.                CALL              PrintVoidCheck2 IF (CheckIncrement != 1)   //We had a StubOverflow, Print out the last Void Check Line
+.
+. We've printed a check, we have to update the CheckRun record to show that we actually DID print
+. the check for this record.  Also, now let's increment the Check Number for the next check!!! We also have to check
+. on the actual Check Number that was/is incremented...We "could" have Voided the 2nd Check within the system
+.
+                MOVE              CheckNumber,CheckRun.CheckNo              //Update the 3 fields necessary
+                MOVE              "1",CheckRun.Printed                      //for recording the Actual Check
+                MOVE              CheckDate,CheckRun.CheckDate              //information when ready!!!!
+                CALL              UpdCheckRun                               //Update it now!!
+.
+. OK, NEXT!!!! What's the next CheckRun Number...
+.
+..HR 9/13/2005               ADD               "1",CheckNumber
+                ADD               CheckIncrement,CheckNumber         //HR 9/13/2005
+              REPEAT
+.
+. OK, NEXT!!!! We should update the BankRec code with the
+. last BankREC Check Number someday in the future if we want
+.
+              MOVE              BankREC.Code,BankKY
+              CALL              RDBank
+              IF                (ReturnFl = 0)                         //We have a valid Bank Record
+                MOVE              (CheckNumber - 1),CheckNumber8       //This would be the last valid Check Number that was "USED"
+                MOVE              CheckNumber8,BankREC.LastCheck
+                CALL              UpdBank
+              ENDIF
+
+              CALL              PrintClose
+              SETMODE           *MCURSOR=*Arrow
+              ALERT             Plain,"Have ALL of the checks printed successfully?",result,"Printing Complete?"
+              IF                (result = 1)
+                CALL              UpdateCheckDetails
+.
+. OK, They've all printed but with an error!!
+.
+              ELSE
+                SETPROP           WLastCheck,visible=1              //OK, let's get the Last Valid Check Number
+
+                GETPROP           ELastCheck,value=LastValidCheck
+                IF                (LastValidCheck = 0)
+                  ALERT             Plain,"Are you sure you wish to reset the ENTIRE Check Run process?",result,"Reset All Checks?"
+                  CALL              ResetCheckRun IF (result = 1)
+                ELSE
+                  CALL              ResetCheckRun
+                ENDIF
+              ENDIF
+
+              GOTO              ExitProgram
+;==========================================================================================================
+WriteGLDetails
+;
+; Write the Accounts Payable Transaction First
+;
+                GetNextSeq         Pay
+
+                MOVE              Check.Entity,APDist.Entity
+                MOVE              Check.SubEntity,APDist.SubEntity
+                MOVE              Check.Vendor,APDist.Vendor
+                move              Check.CheckNo,APDist.CheckNo
+                MOVE              Check.TransDate,APDist.TransDate
+                MOVE              Sequence.SeqNo,APDist.SeqMajor
+                move              Sequence.SeqNo,Check.CheckSeqMajor
+                MOVE              Sequence.SeqNo,APDist.Voucher
+                move              Default.APAcct,APDist.GLCode                  //Default A/P GL Code
+                UNPACK            APDist.TransDate into APDist.Year,APDist.Month
+
+                MOVE              "0",APDist.PostedToGL
+                MOVE              "5",APDist.TransCode                 //Check
+                move              "1",APDist.SeqMinor
+                PACK              APDist.Description FROM "Check : ",Check.CheckNo," for Vendor : ",APTRN.Vendor
+
+                IF                (Check.GrossAmount > 0)                  //Debit Transaction
+                  move              Check.GrossAmount,APDist.DebitAmount
+                  MOVE              "0",APDist.CreditAmount
+                ELSE                                                   //Credit Transaction
+                  multiply          "-1",Check.GrossAmount,APDist.CreditAmount
+                  MOVE              "0",APDist.DebitAmount
+                ENDIF
+
+                call                   WRTAPDist           // Write out the Debit to A/P Trade Account first
+;
+; Let's write out the Cash portion of the General Ledger Transaction
+;
+                IF                (Check.CheckAmount > 0)                  //Debit Transaction
+                  move              Check.CheckAmount,APDist.CreditAmount
+                  MOVE              "0",APDist.DebitAmount
+                ELSE                                                   //Credit Transaction
+                  multiply          "-1",Check.CheckAmount,APDist.DebitAmount
+                  MOVE              "0",APDist.CreditAmount
+                ENDIF
+                add                    "1",APDist.SeqMinor
+                move                   Default.APCashAcct,APDist.GLCode
+                call                   WRTAPDist           // Write out the Credit to Cash Account
+
+                if                (Check.DiscAmt != 0)
+                  IF                (Check.DiscAmt > 0)                  //Debit Transaction
+                    move              Check.DiscAmt,APDist.CreditAmount
+                    MOVE              "0",APDist.DebitAmount
+                  ELSE                                                   //Credit Transaction
+                    multiply          "-1",Check.DiscAmt,APDist.DebitAmount
+                    MOVE              "0",APDist.CreditAmount
+                  ENDIF
+                  add                    "1",APDist.SeqMinor
+                  move                   Default.APPurchaseDiscAcct,APDist.GLCode
+                  call                   WRTAPDist           // Write out the Credit to Cash Account
+                endif
+              RETURN
+
+;=============================================================================
+ResetCheckRun
+              PACKKEY           CheckRunKY FROM $Entity
+              CALL              RDCheckRun
+
+              LOOP
+                CALL              KSCheckRun
+              UNTIL             (ReturnFL = 1)
+                CONTINUE           IF (CheckRun.Printed = 0 or:
+                                       CheckRun.CheckNo < LastValidCheck)    //OK, now we're ignoring ONLY those that haven't been printed!!
+
+                MOVE               "0",CheckRun.CheckNo                      //Update the 3 fields necessary
+                MOVE               "0",CheckRun.Printed                      //for recording the Actual Check
+                MOVE               "       ",CheckRun.CheckDate              //information when ready!!!!
+                CALL               UpdCheckRun                               //Update it now!!
+              REPEAT
+              RETURN
+;=============================================================================
+PrintCheckLayout
+              IF                (FirstFlag = "N")             //We've already printed at least one item/check
+                PrtPage           P;*NewPage;
+              ELSE
+                MOVE              "N",FirstFlag
+              ENDIF
+
+              PrtPage           P;*font=DetailFont:
+                                *alignment=*left:
+                                *FGCOLOR=*Black,*BGCOLOR=LightGrayRGB:
+                                *OVERLAYON:
+                                *FILL=*ON:
+                                *RECT=(StubLine1 - 40):(StubLine1 - 20):15:780:               //Check Stub Header 1
+                                *RECT=(StubLine1 + 180):(StubLine1 + 210):15:780:             //Check Stub Footer 1    //HR 2019.7.18 Was 200, 220
+                                *p=15:(StubLine1 - 40),*Line=15:(StubLine1 + 224):            //Check Lines       1    //HR 2019.7.18 Was 234
+                                *p=100:(StubLine1 - 40),*Line=100:(StubLine1 + 224):          //Check Lines       1
+                                *p=230:(StubLine1 + 210),*Line=230:(StubLine1 + 224):         //Check Lines       1    //Was 220 HR 2019.7.18
+                                *p=300:(StubLine1 - 40),*Line=300:(StubLine1 + 224):          //Check Lines       1
+                                *p=470:(StubLine1 - 40),*Line=470:(StubLine1 + 224):          //Check Lines       1
+                                *p=620:(StubLine1 - 40),*Line=620:(StubLine1 + 224):          //Check Lines       1
+                                *p=780:(StubLine1 - 40),*Line=780:(StubLine1 + 224):          //Check Lines       1
+                                *p=15:(StubLine1 + 224),*lINE=780:(StubLine1 + 224):          //Check Lines       1
+                                *RECT=(StubLine2 - 40):(StubLine2 - 20):15:780:               //Check Stub Header 2
+                                *RECT=(StubLine2 + 220):(StubLine2 + 240):15:780:             //Check Stub Footer 2
+                                *p=15:(StubLine2 - 40),*Line=15:(StubLine2 + 254):            //Check Lines       2
+                                *p=100:(StubLine2 - 40),*Line=100:(StubLine2 + 254):          //Check Lines       2
+                                *p=230:(StubLine2 + 220),*Line=230:(StubLine2 + 254):         //Check Lines       2
+                                *p=300:(StubLine2 - 40),*Line=300:(StubLine2 + 254):          //Check Lines       2
+                                *p=470:(StubLine2 - 40),*Line=470:(StubLine2 + 254):          //Check Lines       2
+                                *p=620:(StubLine2 - 40),*Line=620:(StubLine2 + 254):          //Check Lines       2
+                                *p=780:(StubLine2 - 40),*Line=780:(StubLine2 + 254):          //Check Lines       2
+                                *p=15:(StubLine2 + 254),*lINE=780:(StubLine2 + 254):          //Check Lines       2
+                                *FGCOLOR=*BLACK,*BGCOLOR=LightGrayRGB:
+                                *BoldOn:
+                                *p=030:(StubLine1 - 37),"Inv. Date":                          //Check Stub Header 1
+                                *p=180:(StubLine1 - 37),"Invoice":                            //Check Stub Header 1
+                                *p=340:(StubLine1 - 37),"Invoice Amount":                     //Check Stub Header 1
+                                *p=500:(StubLine1 - 37),"Discout Amount":                     //Check Stub Header 1
+                                *p=665:(StubLine1 - 37),"Net Amount":                         //Check Stub Header 1
+                                *p=024:(StubLine1 + 192),"Check Date":                        //Check Stub Footer 1    HR 2019.7.18 Was 202
+                                *p=122:(StubLine1 + 192),"Check Number":                      //Check Stub Footer 1
+                                *p=245:(StubLine1 + 192),"Vendor":                            //Check Stub Footer 1
+                                *p=330:(StubLine1 + 192),"Total Invoice Amt.":                //Check Stub Footer 1
+                                *p=490:(StubLine1 + 192),"Total Discout Amt.":                //Check Stub Footer 1
+                                *p=655:(StubLine1 + 192),"Check Amount":                      //Check Stub Footer 1
+                                *p=030:(StubLine2 - 37),"Inv. Date":                          //Check Stub Header 2
+                                *p=180:(StubLine2 - 37),"Invoice":                            //Check Stub Header 2
+                                *p=340:(StubLine2 - 37),"Invoice Amount":                     //Check Stub Header 2
+                                *p=500:(StubLine2 - 37),"Discout Amount":                     //Check Stub Header 2
+                                *p=665:(StubLine2 - 37),"Net Amount":                         //Check Stub Header 2
+                                *p=024:(StubLine2 + 222),"Check Date":                        //Check Stub Footer 2
+                                *p=122:(StubLine2 + 222),"Check Number":                      //Check Stub Footer 2
+                                *p=245:(StubLine2 + 222),"Vendor":                            //Check Stub Footer 2
+                                *p=330:(StubLine2 + 222),"Total Invoice Amt.":                //Check Stub Footer 2
+                                *p=490:(StubLine2 + 222),"Total Discout Amt.":                //Check Stub Footer 2
+                                *p=655:(StubLine2 + 222),"Check Amount":                      //Check Stub Footer 2
+                                *FGCOLOR=*BLACK,*BGCOLOR=*WHITE:
+                                *Font=DetailFont:
+                                *BoldOff
+              RETURN
+;=============================================================================
+UpdateCheckDetails
+.
+. OK, all of the Check information has printed OK!!!!  Yipee!! (Did we think that it wouldn't???)
+. Now, let's update the APTRN, APDET, Check, CheckDetails, VendorHistory files with the
+. appropriate information
+.
+              transaction       start,CheckRunFLST,CheckRunDetailFLST,CheckFLST,CheckDetailFLST,SequenceFLST,VhstFLST,APTrnFLST,APDetFLST,APDistFLST
+              PACKKEY           CheckRunKY FROM $Entity
+              CALL              RDCheckRun
+
+              LOOP
+                CALL              KSCheckRun
+              UNTIL             (ReturnFL = 1)
+                CONTINUE           IF (CheckRun.Printed = 0)      //OK, now we're ignoring ONLY those that haven't been printed!!
+
+                MOVE              CheckRun.Vendor,VendorKY
+                CALL              RDVendor
+.
+. Ah yes, now let's write out the Check information...Check Details to follow!!!
+.
+                MOVE              CheckRun.Entity,Check.Entity
+                MOVE              CheckRun.SubEntity,Check.SubEntity
+                MOVE              CheckRun.Vendor,Check.Vendor
+                MOVE              CheckRun.BankCode,Check.BankCode
+                MOVE              CheckRun.CheckNo,Check.CheckNo
+                MOVE              CheckRun.CheckDate,Check.CheckDate
+                MOVE              CheckRun.CheckAmount,Check.CheckAmount
+                MOVE              CheckRun.DiscAmt,Check.DiscAmt
+                MOVE              CheckRun.GrossAmount,Check.GrossAmount
+                MOVE              CheckRun.CheckFlag,Check.CheckFlag
+                MOVE              CheckRun.Printed,Check.Printed
+                MOVE              "0",Check.VoidedFlag                 //0, DUH...We just printed the check!!
+                MOVE              "        ",Check.VoidedDate
+                MOVE              CheckRun.Memo,Check.Memo
+                CLOCK             TimeStamp,Check.TransDate
+
+                UNPACK            Check.TransDate,YYYY,MM,DD
+                MOVE              YYYY,Check.Year
+                MOVE              MM,Check.Month
+
+                GetNextSeq        CHK
+
+                MOVE              Sequence.SeqNo,Check.SeqMajor
+
+                MOVE              "0",CheckDetail.SeqMinor         //We're going to start with 1 as the main Sequence
+;
+; Write the GL Details
+;
+                    call               WriteGLDetails
+;
+; Now write the Check record
+;
+                CALL              WrtCheck
+
+.
+. OK, let's write out to the Vendor History information
+.
+                CALL              WriteVendorHistory
+.
+. OK, we've written out the Check Header...Let's go through each of the CheckRun Details!!!
+.
+                PACKKEY           CheckRunDetailKY2 FROM CheckRun.Entity,CheckRun.Vendor
+                CALL              RDCheckRunDetail2
+
+                LOOP
+                  CALL              KSCheckRunDetail2
+                UNTIL             (ReturnFl = 1 or Vendor.AccountNumber != CheckRunDetail.Vendor)
+                  PACKKEY           APTRNKY2,CheckRun.Entity,CheckRunDetail.Voucher
+                  CALL              RDAPTRN2
+                  IF                (ReturnFL = 1)
+                    ALERT             note,"A/P Transaction could not be found",result,"A/P Trans Not Fount"
+                    CONTINUE
+                  ENDIF
+.
+. OK, we have our A/P Transaction, now what???
+.
+                  CALC              APTRN.Balance = APTRN.Balance - CheckRunDetail.GrossAmount   //We write out the Disc & Net information later
+.
+. HR 3/16/2006
+. Fixup Bug where system would automatically 'C'lose the Invoice, regardless of whether or not it had a Zero balance
+.
+                  IF                (APTRN.Balance = 0)           //HR 3/16/2006
+                    MOVE              "C",APTRN.ClosedFlag        //HR 3/16/2006  Moved to inside IF...ENDIF
+                  ENDIF                                           //HR 3/16/2006
+                  CALL              UpdAPTRN
+.
+. One file down, what's next??? Oh yes, the APDetail Transactions!!
+. Get the last SeqMinor record for writing out future records.
+.
+                  PACKKEY           APDetKY,$Entity,APTRN.SeqMajor,"999"
+                  CALL              RDAPDet
+                  CALL              KPAPDet
+
+                  IF                (ReturnFL = 0 and APDetail.SeqMajor = APTrn.SeqMajor)
+                    MOVE              APDetail.SeqMinor,SeqMinor
+                   ADD               "1",SeqMinor
+                  ELSE
+                    MOVE              "1",SeqMinor
+                  ENDIF
+
+                  CLEAR             APDetail               //Start fresh, JUST in case!!!
+
+                  MOVE              APTRN.Entity,APDetail.Entity
+                  MOVE              APTRN.SubEntity,APDetail.SubEntity
+                  MOVE              APTRN.SeqMajor,APDetail.SeqMajor
+
+                  MOVE              SeqMinor,APDetail.SeqMinor                //Increment the Minor record by one!!!
+                  CLOCK             TimeStamp,APDetail.PostDate
+                  MOVE              CheckRun.CheckDate,APDetail.TransDate
+                  MOVE              APTRN.Vendor,APDetail.Vendor
+                  UNPACK            APDetail.PostDate,YYYY,MM,DD
+                  MOVE              YYYY,APDetail.Year
+                  MOVE              MM,APDetail.Month
+
+                  MOVE              "7",APDetail.TransCode                      //Check Printed Trans Code...could be automatic check
+
+                  MOVE              CheckRun.CheckNo,APDetail.ReferenceNo
+                  MOVE              CheckRun.Memo,ApDetail.Memo
+                  MOVE              "    ",APDetail.APAccount
+
+                  MOVE              CheckRunDetail.NetAmount,APDetail.Amount    //Use the 'Net Amount'
+                  CALL              WrtAPDet                                    //Write out the 'Net Amount'
+.
+. Now write out any Discount Amount information if available!!
+.
+                  IF                (CheckRun.DiscAmt != 0)
+                    ADD               "1",APDetail.SeqMinor
+                    MOVE              CheckRunDetail.DiscAmt,APDetail.Amount
+                    MOVE              "6",APDetail.TransCode
+                    CALL              WrtAPDet
+                  ENDIF
+.
+. OK, we've created the appropriate A/P Detail transactions, now what???
+. Ah yes, the Check Details too!!!
+.
+                  MOVE              Check.Entity,CheckDetail.Entity
+                  MOVE              Check.SubEntity,CheckDetail.SubEntity
+                  MOVE              Check.BankCode,CheckDetail.BankCode
+                  MOVE              CheckRunDetail.Voucher,CheckDetail.Voucher
+                  MOVE              Check.Vendor,CheckDetail.Vendor
+                  MOVE              Check.CheckNo,CheckDetail.CheckNo
+                  MOVE              Check.SeqMajor,CheckDetail.SeqMajor
+                  MOVE              CheckRunDetail.DiscAmt,CheckDetail.DiscAmt
+                  MOVE              CheckRunDetail.GrossAmount,CheckDetail.GrossAmount
+                  MOVE              CheckRunDetail.NetAmount,CheckDetail.NetAmount
+                  ADD               "1",CheckDetail.SeqMinor
+                  CALL              WrtCheckDetail                      //OK, let's write out this Check Detail Transaction
+.
+. OK, we're just Kickin' A** and taking numbers here...We're written out
+. the Main Check information, the Check Details, the AP Details...What's next???
+. Absolutely Nothing, say it again!!!!
+. OK, Voila!!!
+. We've written out to the Vendor History, Check History and now we've
+. updated the AP Detail and Check Run Detail information, there's nothing
+. left to do.....EXCEPT....Delete the
+. CheckRun and CheckRun Detail information
+.
+                REPEAT                 //Check Run Details Loop
+.
+. OK, we've been done with the Check Run master file, now what???
+. Let's delete this record and all of the CheckRun Details!!!!
+.
+                PACKKEY           CheckRunDetailKY2 FROM $Entity,CheckRun.Vendor
+                CALL              RDCheckRunDetail2
+                LOOP
+                  CALL              KSCheckRunDetail2
+                UNTIL             (ReturnFl = 1 or CheckRun.Vendor != CheckRunDetail.Vendor)
+                  CALL              DELCheckRunDetail
+                REPEAT
+.
+. Delete the Check Run record as well, now that we're done with it!!!  This is THE LAST command to do!!
+.
+                CALL              DelCheckRun
+              REPEAT                 //Check Run
+              transaction              commit
+              RETURN
+;=============================================================================
+WriteVendorHistory
+              UNPACK            Check.TransDate,CC,YY,MM,DD
+              MOVE              MM,MMF
+
+              PACKKEY           VHSTKY FROM Check.Entity,Check.Vendor,CC,YY
+              CALL              RDVHST                                //Read the Vendor History record
+              IF                (ReturnFL = 1)                        //Vendor History record not found, add it!!!
+                CLEAR             VendorHistory
+                MOVE              Check.Entity,VendorHistory.Entity
+                MOVE              Check.Vendor,VendorHistory.Vendor
+                PACKKEY           VendorHistory.Year FROM CC,YY
+                MOVE              Check.DiscAmt,VendorHistory.DiscAmt(MMF)
+                MOVE              Check.DiscAmt,VendorHistory.DiscAmt(13)
+                MOVE              Check.CheckAmount,VendorHistory.PaidAmt(MMF)
+                MOVE              Check.CheckAmount,VendorHistory.PaidAmt(13)
+                MOVE              "1",VendorHistory.PaidTotal(MMF)
+                MOVE              "1",VendorHistory.PaidTotal(13)
+
+                MOVE              Check.CheckDate,VendorHistory.LastPayDt
+                MOVE              Check.CheckNo,VendorHistory.LastCheck
+                MOVE              Check.CheckAmount,VendorHistory.LastPayAmt
+                CALL              WrtVHST
+              ELSE
+                ADD               Check.DiscAmt,VendorHistory.DiscAmt(MMF)
+                ADD               Check.DiscAmt,VendorHistory.DiscAmt(13)
+                ADD               Check.CheckAmount,VendorHistory.PaidAmt(MMF)
+                ADD               Check.CheckAmount,VendorHistory.PaidAmt(13)
+                ADD               "1",VendorHistory.PaidTotal(MMF)
+                ADD               "1",VendorHistory.PaidTotal(13)
+
+                MOVE              Check.CheckDate,VendorHistory.LastPayDt
+                MOVE              Check.CheckNo,VendorHistory.LastCheck
+                MOVE              Check.CheckAmount,VendorHistory.LastPayAmt
+                CALL              UpdVHST
+              ENDIF
+              RETURN
+;=============================================================================
+PrintCheckLine
+              MOVE              CheckRun.CheckAmount,Number
+
+              FILL              "*",WordString
+              CLEAR             AmountString
+              CLEAR             WordString
+
+              CALL              ConverAmtToString
+              SETLPTR           WordString
+
+              MOVE              WordString,AmountString
+
+              CHOP              Vendor.City,Vendor.City
+              PACK              CityState,Vendor.City,", ",Vendor.State,"  ",Vendor.Zip
+
+              UNPACK            Check.CheckDate into CC,YY,MM,DD
+              PACKKEY           PrintCheckDate FROM MM,"/",DD,"/",YY
+.
+. Moved up here so that we can print Multiple Stubs from the same routine
+.
+              PrtPage           P;*font=DetailFont:
+                                *alignment=*left:
+                                *p=509:(CheckStub + 080),PrtCheckDate:
+                                *p=80:(CheckStub + 098),AmountString:
+                                *p=125:(CheckStub + 137 + SingleLine * 0),Vendor.Name:
+                                *p=125:(CheckStub + 137 + SingleLine * 1),AddressLine(1):
+                                *p=125:(CheckStub + 137+ SingleLine * 2),AddressLine(2):
+                                *p=125:(CheckStub + 137 + SingleLine * 3),AddressLine(3):
+                                *p=125:(CheckStub + 137 + SingleLine * 4),AddressLine(4):
+                                *p=125:(CheckStub + 137 + SingleLine * 5),AddressLine(5):
+                                *alignment=*decimal:
+                                *p=725:(CheckStub + 080),CheckRun.CheckAmount:
+                                *alignment=*left
+
+PrintCheckLine2
+              PrtPage           P;*font=DetailFont:
+                                *alignment=*left:
+                                *p=033:(StubTotalLine1 + 210),PrtCheckDate:            //Was 220, HR 2019.7.18
+                                *p=033:(StubTotalLine2 + 240),PrtCheckDate:
+                                *p=110:(StubTotalLine1 + 210),CheckNumber:
+                                *p=110:(StubTotalLine2 + 240),CheckNumber:
+                                *p=245:(StubTotalLine1 + 210),Vendor.AccountNumber:            21705
+                                *p=245:(StubTotalLine2 + 240),Vendor.AccountNumber:            2230454
+                                *p=110:(StubTotalLine2 + 260),Vendor.Name:            //Added Vendor Name
+                                *alignment=*decimal:
+                                *p=445:(StubTotalLine1 + 210),CheckRun.GrossAmount:
+                                *p=595:(StubTotalLine1 + 210),CheckRun.DiscAmt:
+                                *p=755:(StubTotalLine1 + 210),CheckRun.CheckAmount:
+                                *p=445:(StubTotalLine2 + 240),CheckRun.GrossAmount:
+                                *p=595:(StubTotalLine2 + 240),CheckRun.DiscAmt:
+                                *p=755:(StubTotalLine2 + 240),CheckRun.CheckAmount:
+                                *alignment=*left
+..HR 2019.3.1                                *OverlayOn:
+..HR 2019.3.1                                *BoldOn:
+..HR 2019.3.1                                *p=267:(StubTotalLine1 - 55),"Vendor Name : ",Vendor.Name:
+..HR 2019.3.1                                *p=267:(StubTotalLine2 - 55),"Vendor Name : ",Vendor.Name:
+..HR 2019.3.1                                *BoldOff:
+..HR 2019.3.1                                *OverLayOff
+
+              IF                (Vendor.PrintAcctNo = 1)                  //Print the Vendor's Account Number
+                PrtPage           P;*font=DetailFont:
+                                  *alignment=*left:
+                                  *OverlayOn:
+                                  *BoldOn:
+.                                  *p=260:(StubTotalLine1 - 55),"Vendor Name : ",Vendor.Name:
+.                                  *p=260:(StubTotalLine2 - 55),"Vendor Name : ",Vendor.Name:
+                                  *p=250:(StubTotalLine1 - 70),"Account Number : ",Vendor.VendorAccount:
+                                  *p=250:(StubTotalLine2 - 70),"Account Number : ",Vendor.VendorAccount:
+                                  *BoldOff:
+                                 *OverLayOff
+              ENDIF
+
+              RETURN
+;=============================================================================
+PrintCheckDetails
+              PACKKEY            APTRNKY2,$Entity,CheckRunDetail.Voucher
+              CALL               RDAPTRN2
+
+              unpack            APTRN.TransDate,CC,YY,MM,DD
+              PACK              TransDate FROM MM,"/",DD,"/",YY
+
+              UNPACK            APTRN.DiscDate,CC,YY,MM,DD
+              PACK              DiscDate FROM MM,"/",DD,"/",YY
+
+              UNPACK            APTRN.DueDate,CC,YY,MM,DD
+              PACK              DueDate FROM MM,"/",DD,"/",YY
+
+              ADD               "1",CheckLines
+
+              IF                ((CheckLines / 14) * 14 = CheckLines)
+                CALL              PrintVoidCheck
+              ENDIF
+.              IF                (CheckLines = 12 and CheckLines != VoucherLines)  //We're at the end of the line for each Stub
+.              CALL              PrintVoidCheck
+.              ENDIF
+
+              PrtPage           P;*alignment=*left:
+                                *font=DetailFont:
+                                *alignment=*left:
+                                *p=033:(StubLine1 - 20),TransDate:
+                                *p=033:(StubLine2 - 20),TransDate:
+                                *p=110:(StubLine1 - 20),APTRN.Invoice:
+                                *p=110:(StubLine2 - 20),APTRN.Invoice:
+                                *alignment=*decimal:
+                                *p=445:(StubLine1 - 20),CheckRunDetail.GrossAmount:
+                                *p=595:(StubLine1 - 20),CheckRunDetail.DiscAmt:
+                                *p=755:(StubLine1 - 20),CheckRunDetail.NetAmount:
+                                *p=445:(StubLine2 - 20),CheckRunDetail.GrossAmount:
+                                *p=595:(StubLine2 - 20),CheckRunDetail.DiscAmt:
+                                *p=755:(StubLine2 - 20),CheckRunDetail.NetAmount
+
+              ADD               SingleLine,StubLine1
+              ADD               SingleLine,StubLine2
+              RETURN
+;=============================================================================
+PrintVoidCheck
+...              MOVE              "0",CheckLines      //HR 9/13/2005 Reset it back to zero!
+
+
+              IF                (CheckIncrement = 1)      //This is THE FIRST Stub Overflow, Print it as you normally would!!!
+                CALL              PrintCheckLine                //Print the actual check first
+..HR 2019.3.1                MOVE              "414",StubLine1               //Reset the Stub line informatin
+                MOVE              "444",StubLine1               //Reset the Stub line informatin
+..HR 2019.3.1                MOVE              "760",StubLine2
+                MOVE              "784",StubLine2
+                CALL              PrintCheckLayout              //Print a Layout for the Next Check (which actually is a StubOverflow)
+                CALL              PrintCheckLine2               //Print the Check Stub Totals on this line/page
+              ELSE
+                CALL              PrintCheckLayout              //Print a Layout for the Next Check (which actually is a StubOverflow)
+                CALL              PrintCheckLine2               //Print the Check Stub information on the New Check
+..HR 2019.3.1                MOVE              "414",StubLine1
+..HR 2019.3.1                MOVE              "760",StubLine2
+                MOVE              "444",StubLine1
+                MOVE              "784",StubLine2
+              ENDIF
+
+PrintVoidCheck2
+              PRTPAGE           P;*font=DetailFont:
+                                *alignment=*left:
+                                *p=090:(CheckStub + 075),VoidString:
+                                *p=090:(CheckStub + 090),VoidString:
+                                *p=090:(CheckStub + 105),VoidString:
+                                *p=090:(CheckStub + 120),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 0),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 1),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 2),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 3),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 4),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 5),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 6),VoidString:
+                                *p=090:(CheckStub + 135 + SingleLine * 7),VoidString:
+                                *alignment=*decimal
+.                                *p=750:(CheckStub + 070),"VOID VOID VOID";
+
+              ADD               "1",CheckIncrement
+              RETURN
+.=============================================================================
+ExitProgram
+              winshow
+              CHAIN             FROMPGM
+              STOP
+.=============================================================================
+PrintCustomHeader
+              RETURN
+;=============================================================================

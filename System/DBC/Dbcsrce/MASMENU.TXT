@@ -1,0 +1,119 @@
+. MASMENU - MICRO SYSTEMS CONSULTANTS - SYSTEM INITIALIZATION
+.
+. MODIFIED 9/20/82 TO TEST COMPANY AND DIRECT ACCORDINGLY
+. 
+         INCLUDE   COMMON/TEXT
+.
+INDEX    FORM      2                   USER SELECTION VARIABLE
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+ANSWER   DIM       8
+PORTX    DIM       2
+COMPFORM FORM      1
+COMPDISP INIT      "CO= "
+. 
+         INCLUDE   LOGDATA/TEXT
+. 
+PROGRAM  DIM       8
+.
+ROLLNAME INIT      "ROLLOUT/SYST"
+REPLY    DIM       1
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY CLEARANCE OF AT LEAST 1
+.
+         INCLUDE   LOGIO/TEXT
+*................................................................
+. DISPLAY THE MENU
+.
+         DISPLAY   *ES,*HON,*P1:1,"AMERICAN PRECISION PRODUCTS. - ":
+                   "SYSTEM INITIALIZATION ":
+                   *HOFF:
+                   *P60:1,"Today is ",TODAY:
+                   *P01:03,"( 1) ":
+                   "DISPLAY PROCESSING SYSTEMS":
+                   *P01:04,"( 2) ":
+                   "OPERATOR LOG-ON":
+                   *P01:23,"VERSION 3.1 - 5/5/85"
+*................................................................
+. GET THE PROGRAM'S INDEX
+         COMPARE   "9",SECURITY
+         GOTO      GETINDEX IF NOT EQUAL
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,"DO YOU WANT TO SHUT DOWN D/S? ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      GETINDEX IF NOT EQUAL
+         SHUTDOWN   "INFO"
+.
+GETINDEX KEYIN     *P1:12,*EL,"Selection by number":
+                   *P41:12,"Enter (99) to leave this menu.":
+                   *P25:12,"__",*P25:12,INDEX
+         COMPARE   "1" TO INDEX
+         GOTO      GETINDEX IF LESS
+         COMPARE   "99" TO INDEX
+         STOP      IF EQUAL
+         COMPARE   "45" TO INDEX
+         GOTO      ASKPGM IF EQUAL
+         COMPARE   "03" TO INDEX
+         GOTO      GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE ROUTINE INDICATED BY THE INDEX
+.
+         TRAP      BADCHAIN IF CFAIL
+         CLOCK     TIME TO TIME
+         BRANCH    INDEX OF APPMENU1:  DISPLAY PROCESSING SYSTEMS
+                            ANSWER1  OPERATOR LOG-ON
+         GOTO      GETINDEX
+*................................................................
+ASKPGM   TRAP      BADCHAIN IF CFAIL
+         COMPARE   "9" TO SECURITY 
+         GOTO      BREACH IF NOT EQUAL
+GETPGM   KEYIN     *P01:24,*EL,"ENTER PGM NAME ",PROGRAM
+         CHAIN     PROGRAM
+         GOTO      GETINDEX
+BREACH   BEEP
+         DISPLAY   *P01:24,*EL,*HON,"S E C U R I T Y   V I O L A T I O N":
+                   "  - YOU ARE CAUGHT!"
+         DISPLAY   *P01:24,*R,*HON,"YOU HAVE BEEN LOGGED IN VIOLATION!"
+         GOTO      ANSWER1
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN INSTRUCTIONS
+*................................................................
+. DISPLAY PROCESSING SYSTEMS
+.
+APPMENU1 MOVE      "PROGRAM" TO LOGTYPE
+         MOVE      "APPMENU1" TO LOGINFO
+         MOVE      "1" TO COMPFORM
+         GOTO      COMPCHK
+. 
+COMPANY  BEEP
+         KEYIN     *P01:14,*EL,"ENTER COMPANY TO PROCESS":
+                   *P40:16,"NCL STUDS            (3)   ",COMPFORM
+. 
+COMPCHK  COMPARE   "2" TO COMPFORM
+         GOTO      COMPANY IF NOT LESS
+         CHAIN     "APPMENU1"
+         GOTO      GETINDEX
+. 
+*................................................................
+. OPERATOR LOG-ON
+.
+ANSWER1  MOVE      "PROGRAM" TO LOGTYPE
+         CLEAR     ANSWER
+         APPEND    "ANSWER"  TO ANSWER
+RESETANS RESET     ANSWER
+         MOVE      ANSWER    TO LOGINFO
+         CHAIN     ANSWER
+         GOTO      GETINDEX
+*................................................................
+. RETURN TO OPERATING SYSTEM
+.
+EXIT     MOVE      "PROGRAM" TO LOGTYPE
+         MOVE      "EXIT    " TO LOGINFO
+         SHUTDOWN   "INFO"
+         GOTO      GETINDEX

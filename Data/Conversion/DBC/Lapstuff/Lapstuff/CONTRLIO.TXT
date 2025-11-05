@@ -1,0 +1,62 @@
++ 
+.....................................................................
+.   CONTRLIO = CORPORATE CONTROL I/O MODULE        (VOLID MSC 6)
+. 
+.   THIS MODULE REQUIRES THAT MODULE  - CONTFILE - (VOLID MSC 6)
+.   ALSO BE INCLUDED IN THE PROGRAM WORK AREA
+.....................................................................
+. 
+OPENCTLS TRAPCLR   IO
+         TRAP      NOCTLS IF IO
+         OPEN      CONTROLS,CTLNAME          OPEN THE ISAM FILE
+         RETURN
+. 
+GETCTL   TRAPCLR   IO
+         TRAP      NOCTLS IF IO
+         READ      CONTROLS,CTLKEY;CTLKEY:
+                                   CTLDATE:
+                                   CTLINVC:
+                                   CTLPONO:
+                                   CTLRCVD:
+                                   CTLSOLD:
+                                   CTLCASH:
+                                   CTLMRCVD:
+                                   CTLMSOLD:
+                                   CTLMCASH:
+                                   CTLYRCVD:
+                                   CTLYSOLD:
+                                   CTLYCASH
+         GOTO      NOCTLS IF OVER
+. 
+         MOVE      "H"    TO IOSW
+CTLRTRN  RETURN
+. 
+NOCTLS   BEEP
+         DISPLAY   *ES,*P01:12,"ERROR IN CORPORATE CONTROLS FILE ":
+                               " I/O - JOB ABORTING",*W,*W,*W
+         BEEP
+         STOP
+. 
+PUTCTL   TRAPCLR   IO
+         TRAP      NOCTLS IF IO
+         UPDATE    CONTROLS;CTLKEY:
+                            CTLDATE:
+                            CTLINVC:
+                            CTLPONO:
+                            CTLRCVD:
+                            CTLSOLD:
+                            CTLCASH:
+                            CTLMRCVD:
+                            CTLMSOLD:
+                            CTLMCASH:
+                            CTLYRCVD:
+                            CTLYSOLD:
+                            CTLYCASH
+         MOVE      "H" TO IOSW
+         GOTO      CTLRTRN                 UPDATE SUCCESSFUL
+         RETURN
+. 
+. 
+.  END OF CONTROL I/O MODULE
+. 
+. 

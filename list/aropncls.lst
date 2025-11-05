@@ -1,0 +1,26 @@
+
+
+
+PAGE    1      aropncls                                                                                       02-11-19 11:35:39
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP aropncls -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   14.    INCLUDE  A: common.txt
+   16.    INCLUDE  B: rcvbles.txt
+   21.    INCLUDE  C: date.685
+   22.    INCLUDE  D: apcalndr.txt
+   34.    INCLUDE  E: custmast.pls
+   80.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   84.    INCLUDE  G: callerr2.inc
+  208.    INCLUDE  H: rcvblsio.txt
+
+   Output: c:\apc\plc\aropncls.plc                                                                                                                                                                                                                                   
+       610 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:39 11:35:39
+  00001F3C DATA;  000003CA  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

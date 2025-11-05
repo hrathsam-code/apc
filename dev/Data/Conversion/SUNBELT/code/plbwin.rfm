@@ -1,0 +1,2090 @@
+Date:  01-31-2003
+
+Subject:  RELEASE 8.7 Runtime Files
+
+*==============================================================================
+Notes for some NEW Items:
+
+	 - Sunbelt PL/B IDE (Integrated Development Environment for PL/B)
+	   Totally new program that allows you to create program/system
+	   projects.  The projects allow you to edit, compile, debug and run
+	   your programs without ever going to a command propmt.  It also
+	   keeps track of what files a program depends on and if one of those
+	   files changes, then it compiles the dependent program.
+
+	   There are many other features of this new and exciting product.
+	   Please see the enclosed help file for more information.
+
+	 - Sunbelt Administration Services for Server Products.  The ADMIN
+	   features are turned off by default.  .INI file changes must be made
+	   to enable these features.  Please see the included .INI files for
+	   the File Manager and Application Server.  For detailed informtion
+	   see the 'ADMIN' section in this .RFM file.
+
+	 - Sunbelt WATCH program that has many of the Administration Services
+	   function already implimented.
+
+	 - New PL/B Statements
+
+	      CLEARADR, LOADADR, STOREADR
+	      ADMLOGON, ADMLOGOFF, ADMGETINFO, ADMSETINFO, ADMCOMMAND
+
+	 - New PLBCMP Options
+
+	      '-c[="command"]' - New PLC command header format for Unix
+
+	      '-zc=3'          - Vendor Compatibility Mode
+
+	 - GUI Objects
+
+	      LISTVIEW line item color control methods added.
+
+	      VARIANT Safearray support added.
+
+	 - PLB386 support has been dropped.  For character mode support please
+	   use PLBCON instead.
+
+*==============================================================================
+Notes for WARNINGS:
+
+	 - The PLB386 (WATCOM) runtime has been dropped as a supported
+	   runtime in release 8.7.
+
+	 - PL/B programs compiled using the new '-c' compiler option or
+	   using the new UNIXCMD directory cannot be executed using
+	   any runtime versions prior to version 8.7.  A U12 error is given.
+
+	 - The 8.7 version of the SUNFHSYS.DLL cannot be used with any
+	   prior releases of PLBWIN.  A U40 error is given if this is
+	   attempted.  Also, the 8.7 version of a PLBWIN runtime cannot
+	   be used with any prior releases of SUNFHSYS.DLL.  In this
+	   case, an 'Entry Point Not Found' error is given.
+
+	 - Cross platform file access is no longer supported in PL/B.  You
+	   should not try to access a file on windows from windows and unix at
+	   the same time.  Also you should not try to access a file on unix
+	   from unix and windows at the same time.  The ability to access files
+	   on other platforms is one of the reasons for Sunbelt File Manager
+	   and/or Sunbelt Application Server.  If you need to have cross
+	   platform file support, then you should use one of these products.
+	   We have determined there are too many inconsistencies concering
+	   file accesses on the various platforms to have a truly reliable
+	   system.  As we work towards 64 bit file support, the problem even
+	   becomes more accute as the various systems are not compatible with
+	   each other.  We have even found a statement that NETBUI does not
+	   support file accesses beyond 32 bits.
+
+*==============================================================================
+    The following files have been changed as follows:
+
+-------------------------------------------------------------------------------
+PLBSERVE - Made modifications to allow multiple PRTPAGE statements to be
+	   cached.  This provides better throughput performance when
+	   interfacing with the PLBCLIENT module.  Prior to this change,
+	   the individual control actions in a single PRTPAGE statement
+	   were cached but the next PRTPAGE statement flushed cached
+	   operations.
+
+	 - Add Client and File administration functions.  See the 'ADMIN'
+	   section of this .RFM for more information.
+
+	 - Two new keywords have been added to the Application Server
+	   to require user logon and/or ip filtering for all PLBCLIENTs
+	   accessing the server.  These keywords must be added to
+	   the PLBSERVE.INI configuration file to provide secured
+	   access to the Application Server. The keywords are
+	   described as follows:
+
+	       PLBCS_KEYFILE={keyfile}
+		  The Application Server uses the data found in the
+		  {keyfile} file to determine if a PLBCLIENT can have
+		  access to the server.  The specifications for the
+		  user logon data in the {keyfile} are identical to
+		  the SUNFM documentation.
+
+		  A PLCLIENT user must have a valid 'PLBCS_LOGON={logonkey}'
+		  specified in the PLBCLIENT.INI file before a user can
+		  execute programs on a secured Application Server that
+		  is using the PLBCS_KEYFILE settings.
+
+	       PLBCS_IPFILE={filename}
+		  If this keyword is declared in the PLBSERVE.INI
+		  configuration file, the Application Server performs
+		  IP address filtering when a PLBCLIENT attempts
+		  to gain access to the server.  The setup and details
+		  for the data specified in the {ipfilter} file is
+		  the same as documented for the SUNFM documentation.
+
+	 - Implemented keep-alive support for the Unix Application Server
+	   runtime.  This insures that a server child process can
+	   detect situations where a client user workstation is rebooted
+	   while a PL/B application is still executing.
+
+	 - Added a new server option named '-r'.  This option reset the
+	   license for a new authorization number.  This allows
+	   the authorization license to be reset real time.  This eliminates
+	   the need to bring the server down and reload it to change the
+	   supported number of connections.  Note, that no more than five
+	   reset are allowed.  After five reset  have been detected,
+	   the server must be reloaded to reset an authorization license.
+
+	 - Corrected a F05 problem when passing an AUTOMATION object as
+	   a CALL(S) ROUTINE parameter where the AUTOMATION object is
+	   created at the client workstation.
+
+	 - Corrected a problem where a socket error (10054) was being logged
+	   when a child process was terminating.  This mistaken socket error
+	   is no longer being logged.
+
+-------------------------------------------------------------------------------
+PLBCLIENT- Modified to support new message for cached PRTPAGE statement.
+PLBCLICON
+	 - The PLBCLIENT/PLBCLICON modules now support a logon keyword
+	   named 'PLBCS_LOGON={logonkey}'.  This keyword must be specified
+	   when accessing an Application Server that expects logon
+	   identification.  If this keyword is specified, the {logonkey}
+	   string specifies the identification key used by PLBSERVE
+	   to allow client access.  The {logonkey} string must be
+	   composed of up to sixteen (16) hexadecimal digits that must
+	   match the expected logon identification by the Application
+	   Server.
+
+	   If the PLBCS_LOGON key does not allow access to the Application
+	   server, the client access is disconnected.
+
+-------------------------------------------------------------------------------
+PLBWIN   - Added support to generate keep-alive messages for all
+PLBSERVE   file manager servers currently connected to a runtime program.
+PLB (UNIX) This support is needed to prevent a file manager child thread
+	   from becoming hung when a PC workstation was rebooted.  This
+	   capability is enabled by default.  However, a new keyword
+	   named 'PLB_FMKEEPALIVE={on|off}' disables this keepalive
+	   support for a runtime if needed.
+
+	 - All of the runtimes have been modified to support an optional
+	   new header command line format.  See the PLBCMP description
+	   for more detail.  This new module format allows execution of
+	   a PLC module on a Unix platform where the Unix OS
+	   recognizes the command header and automatically invokes the
+	   runtime using the command line embedded in the PLC module.
+
+	 - Modified the PREP statements for IFILE and AFILE variables to
+	   perform an internal lock.  This change prevents more than one
+	   process from performing the PREP operation at exactly the same
+	   time.
+
+	   **WARNING**
+
+	       It is NOT good programming practice to allow more than one
+	       user program to PREP the same AAM/ISI files in a multi-user
+	       environment.  The default action for the PREP instruction
+	       for an AFILE/IFILE is to TRUNCATE the text data file and
+	       initialize the AAM/ISI files.  Improper use of PREP can
+	       result in corrupted or lost records when executed by
+	       multiple users against the same AAM/ISI files.
+
+	   The PREP statement can now generate an I01 or an I77 io error.
+
+	   The I01 error can occur if an OS error occurs while locking
+	   the data file.  This error should not occur unless the OS
+	   is failing.
+
+	   The I77 error is given if the PL/B runtime does not support
+	   the capability to truncate a data file.  Contact the Sunbelt
+	   Technical Support if this error occurs.  This error should never
+	   occur in a released runtime.
+
+	 - The {mode} parameter for a OPEN/PREP of an IFILE has been
+	   modified to support a new MODE control bit.  The CMP_ISI_BLOCK
+	   bit definition has been added.  This control bit causes the
+	   runtime Isam processing to always allocate/extend the ISI file
+	   by 8 isam sectors (4096) bytes.
+
+	      CMP_ISI_BLOCK  - 0x00000100   - Allocate 8 isam sectors
+
+	   This capability can help improve performance for an application
+	   that writes a high number of isam records in a batch mode.
+
+	 - Added new keyword named *USEDBCTYPE={dnumnvar} to the GETMODE
+	   and SETMODE statements.  The default setting for this keyword
+	   is zero.  When this keyword is set to zero, the enhanced
+	   TYPE statement specifies variable type values as implemented
+	   specific for SUNBELT.  When this keyword value is set to
+	   non-zero, the enhanced TYPE statement specifies variable
+	   type values as implemented for SWDBC compatibility.
+
+	   In addition, a new keyword named 'PLB_USEDBCTYPE={on|off}' has
+	   been added.  This keyword controls the enhanced TYPE statement
+	   variable types the same as described for the *USEDBCTYPE keyword
+	   used by a SETMODE statement.
+
+	 - The TYPE statement has been enhanced to allow language variable
+	   types and array dimensions to be determined when a program
+	   is being executed. Notice that the extended TYPE instruction
+	   syntax format is only allowed by the compiler when the '-zc=3'
+	   option is specified.
+
+	   Format:
+		  [label] TYPE {dest}
+		  [label] TYPE {var}[,{type}[,Dim1[,Dim2[,Dim3]]]]
+
+	   Where:
+		  {dest} - When the first syntax format is used, the
+			   {dest} variable can only be a DIM type variable.
+			   In this case, the TYPE instruction executes in
+			   a traditional manner to verify whether the string
+			   contents is a valid numeric format or not.
+
+		  {var} - The {var} operand variable can be specified as any
+			  valid data variable reference type.  The second
+			  syntax format returns the type and dimensions
+			  for a data variable reference.
+
+		  {type}- The {type} operand can be an INTEGER or NUMERIC
+			  variable that returns a numeric value to identify
+			  the {var} variable type.  Note, that the values
+			  stored into the {type} operand can be controlled
+			  by the runtime keyword 'PLB_USEDBCTYPE={on|off}'
+			  and the SETMODE keyword named *USEDBCTYPE={dnumnvar}.
+			  The type values being returned are specified
+			  for a SUNBELT (default) set of values or for a
+			  SWDBC compatibility set of values.
+
+			  Data Type          SUNBELT         SWDBC
+
+			  DIM                32 (0x0020)       1
+			  FORM               16 (0x0010)       2
+			  INTEGER (1)       264 (0x0108)       2
+			  INTEGER (2)       520 (0x0208)       2
+			  INTEGER (3)       776 (0x0308)       2
+			  INTEGER (4)      1032 (0x0408)       2
+			  DIMARRAY           96 (0x0060)       3
+			  FORMARRY           97 (0x0061)       4
+			  INTEGERARRAY       98 (0x0062)       4
+			  FILELIST           20 (0x0014)       5
+			  VARLIST            04 (0x0004)       5
+			  FILE               64 (0x0040)       6
+			  IFILE              65 (0x0041)       7
+			  AFILE              66 (0x0042)       8
+			  COMFILE            71 (0x0047)       9
+			  PFILE              67 (0x0043)       15
+			  SNDFILE            68 (0x0044)
+			  DBFILE             69 (0x0045)
+			  BFILE              70 (0x0046)
+			  ADMIN              73 (0x0049)
+			  GUI OBJECTS        Values Below      16
+			    BUTTON              (0x0130)       16
+			    CHECKBOX            (0x0230)       16
+			    CHECKGRP            (0x0330)       16
+			    DATALIST            (0x0430)       16
+			    DIALOG              (0x0530)       16
+			    EDITTEXT            (0x0630)       16
+			    ICON                (0x0730)       16
+			    MENU                (0x0830)       16
+			    MOUSE               (0x0930)       16
+			    MOVIE               (0x1030)       16
+			    PICT                (0x1130)       16
+			    POPUPMENU           (0x1230)       16
+			    RADIOGRP            (0x1330)       16
+			    RADIO               (0x1430)       16
+			    SUBMENU             (0x1530)       16
+			    STATTEXT            (0x1630)       16
+			    TIMER               (0x1730)       16
+			    COLOR               (0x1830)       16
+			    FLOATMENU           (0x1930)       16
+			    FONT                (0x2030)       16
+			    GROUPBOX            (0x2130)       16
+			    IMAGELIST           (0x2230)       16
+			    LISTVIEW            (0x2330)       16
+			    PROGRESS            (0x2430)       16
+			    HSCROLLBAR          (0x2530)       16
+			    VSCROLLBAR          (0x2630)       16
+			    STATUSBAR           (0x2730)       16
+			    TREEVIEW            (0x2830)       16
+			    TOOLBAR             (0x2930)       16
+			    WINDOW              (0x3030)       16
+			    COMBOBOX            (0x3130)       16
+			    SHAPE               (0x3230)       16
+			    SLIDER              (0x3330)       16
+			    TABCONTROL          (0x3430)       16
+			    COLLECTION          (0x3530)       16
+			    PLBFORM             (0x3630)       16
+			    LINE                (0x3730)       16
+			    Reserved            (0x3830)       16
+			    CONTAINER           (0x3930)       16
+			    CONTROL             (0x4030)       16
+			    VARIANT             (0x4130)       16
+			    Reserved            (0x4230)       16
+			    MAINWINDOW          (0x4330)       16
+			    STATUSPANEL         (0x4430)       16
+			    TOOLBUTTON          (0x4530)       16
+
+		  {Dim1}- Numeric variable to return a first dimension
+			  size if the {var} is an array.  If the {var}
+			  is not an array, a value of zero is returned.
+
+		  {Dim2}- Numeric variable to return the size of the
+			  second dimension if the {var} is a two
+			  dimensioned array.  If the {var} variable is
+			  not a two dimensioned array, a value of
+			  zero is returned.
+
+		  {Dim3}- Numeric variable to return the size of the
+			  third dimension if the {var} is a three
+			  dimensioned array.  If the {var} variable is
+			  not a three dimensioned array, a value
+			  zero is returned.
+
+	   Note:
+		1. The enhanced syntax format for the TYPE statement that
+		   allows variable type and array dimension operands
+		   is only supported by the compiler when a program
+		   is compiled using the 'zc=3' compiler option.  Use
+		   of the 'zc=3' option causes array dimension
+		   information to be stored into the UDA of a PLC module.
+
+	 - Support for a new CLEARADR instruction has been added.  The
+	   CLEARADR statement clears/detaches each pointer variable
+	   found in an operand list.  If a list variable is an array of
+	   pointers, each pointer in the array is cleared/detached.
+
+	   Format:
+		  [label] CLEARADR {varptr}[,{varptr}[, ...]]
+
+	   Where:
+		  {varptr} - Any PL/B variable that is a pointer.  Also,
+			     {varptr} can be an array that contains pointers.
+	   Flags:
+		 None Affected
+
+	   Notes:
+		 1. If the {varptr} is an array of pointers, each
+		    pointer in the array is cleared/detached.
+
+		 2. Each {varptr} is detached from any previous variable or
+		    pointer. Once a {varptr} variable is unattached, the
+		    {varptr} variable must be reattached by either a
+		    MOVEADDR, MOVEPTR, SMAKE, LOADADR, or STOREADR
+		    instruction prior to being referenced.  See MOVEADDR
+		    instruction item (4.) for error details.
+
+	   Example:
+		   A        DIM       ^
+		   B        FORM      ^
+		   C        INTEGER   ^
+		   .
+		   BUT      BUTTON    ^
+		   .
+		   DIMARR   DIM       ^(3)
+		   pDIMARR  DIM       ^[]
+		   .
+		   VARLIST  VARLIST   ^
+		   .
+		   CLEARADR  A,B,C,BUT,DIMARR,pDIMARR,VARLIST
+
+	 - Support for a new LOADADR instruction has been added.  The
+	   LOADADR statement loads the address of a variable found
+	   in a variable list into a destination pointer.  The selection
+	   of a variable from the variable list is determined by the
+	   index value.
+
+	   Format:
+		  [label] LOADADR {destptr}{sep}{index}{sep}{var}[,{var}...]
+		  [label] LOADADR {destptr}{sep}{index}{sep}{varlist}
+		  [label] LOADADR {destptr}{sep}{index}{sep}{array}
+
+	   Where:
+		  {destptr} - The destination variable can be any pointer
+			      variable type.
+		  {index}   - The index is a numeric variable or numeric
+			      literal value whose value indicates which
+			      variable from the variable list is retrieved.
+		  {var}     - Any variable data type whose type is
+			      the same as the {destptr}.  If the {destptr}
+			      variable is a VAR typeless variable,
+			      any {var} variable type is allowed.
+		  {varlist} - The {varlist} can be any VARLIST variable
+			      whose pseudo type is compatible with the
+			      {destptr} when it is a DIM, FORM, or INTEGER
+			      pointer type.  The {varlist} variable can
+			      be any pseudo type when the {destptr} is a
+			      VARLIST pointer type.
+		  {array}   - The {array} variable be any array variable
+			      whose data type is compatible with the
+			      {destptr} variable.  The {index} value is
+			      used to reference individual elements in the
+			      {array} variable.  However, if the {destptr} is
+			      an Array Pointer variable, it is processed
+			      as a single variable in the variable list.  In
+			      this case, the address of the {array} variable is
+			      loaded into the {destptr}.
+	   Flags:
+		 None Affected
+
+	   Notes:
+		 1. If the {index} value is zero or greater than the
+		    number of variables processed in the variable list,
+		    no action is taken. In this case, the {destptr}
+		    remains unchanged.
+
+	   Example:
+		   A       DIM      1
+		   B       DIM      1
+		   C       DIM      1
+		   DARR    DIM      2(3)
+		   DARR1   DIM      2(3)
+		   DARR2   DIM      2(3)
+		   .
+		   F1      FORM     "1"
+		   F2      FORM     "2"
+		   F3      FORM     "3"
+		   .
+		   pDARR   DIM      ^[]
+		   pDIM    DIM      ^
+		   pVARL   VARLIST  ^
+		   pTYP    VAR      ^
+		   .
+		   NDX     FORM     "2"
+		   .
+		   VARLDIM VARLIST  A, B, C
+		   VARLNUM VARLIST  F1, F2, F3
+		   .
+			   LOADADR  pDIM,  NDX, A, B, C
+			   LOADADR  pDIM,  NDX, VARLDIM ;Process VARLIST items
+			   LOADADR  pDIM,  NDX, DARR    ;Process DARR items
+			   LOADADR  pDARR, NDX, DARR, DARR1, DARR2
+			   LOADADR  pVARL, NDX, VARLDIM, VARLNUM
+			   LOADADR  pTYP,  NDX, A, F1, VARLDIM, pDARR
+
+	 - Support for a new STOREADR instruction has been added.  The
+	   STOREADR statement stores the address of a variable into
+	   a pointer variable found in a variable list.  The selection
+	   of the destination variable in the variable list is determined
+	   by the index value.
+
+	   Format:
+		  [label] STOREADR {var}{sep}{ndx}{sep}{varptr}[,{varptr}...]
+		  [label] STOREADR {var}{sep}{ndx}{sep}{varlist}
+		  [label] STOREADR {var}{sep}{ndx}{sep}{array}
+
+	   Where:
+		  {var}     - The source variable can be any variable type.
+		  {index}   - The index is a numeric variable or numeric
+			      literal value whose value indicates the
+			      variable from the variable list that is updated.
+		  {varptr}  - Any pointer variable data type whose type is
+			      the same as the {var}.
+		  {varlist} - The {varlist} can be any VARLIST variable
+			      whose pseudo type is compatible with the
+			      {var} when it is a DIM, FORM, or INTEGER
+			      variable type.  The {varlist} variable items
+			      are processed in this case to determine the
+			      destination pointer to store the {var} address.
+		  {array}   - The {array} variable can be any array variable
+			      of pointers whose data type is compatible
+			      with the {var} variable.  The {index} value
+			      references individual elements in the {array}
+			      variable.
+	   Flags:
+		 None Affected
+
+	   Notes:
+		 1. If the {index} value is zero or greater than the
+		    number of variables processed in the variable list,
+		    no action is taken. In this case, no variable
+		    is changed.
+
+	   Example:
+		   pA      DIM      ^
+		   pB      DIM      ^
+		   pC      DIM      ^
+		   .
+		   ADIM    DIM      1
+		   .
+		   DARR    DIM      2(3)
+		   .
+		   pDARR   DIM      ^[]         ;DIM Array Pointer
+		   pDARR1  DIM      ^[]
+		   pDARR2  DIM      ^[]
+		   pDARR3  DIM      ^[]
+		   .
+		   DARRPTR DIM      ^(3)        ;Array of DIM pointers
+		   .
+		   pTYP    VAR      ^           ;Typeless Pointer
+		   pTYP1   VAR      ^
+		   pTYP2   VAR      ^
+		   pTYP3   VAR      ^
+		   .
+		   NDX     FORM     "2"
+		   .
+		   VARLDIM VARLIST  pA, pB, pC
+		   pVARL1  VARLIST  ^
+		   pVARL2  VARLIST  ^
+		   pVARL3  VARLIST  ^
+		   .
+			   STOREADR ADIM,    NDX, pA, pB, pC
+			   STOREADR pTYP,    NDX, pTYP1, pTYP2, pTYP3
+			   STOREADR DARR,    NDX, pDARR, pDARR1, pDARR2
+			   STOREADR ADIM,    NDX, VARLDIM
+			   STOREADR ADIM,    NDX, DARRPTR
+			   STOREADR VARLDIM, NDX, pVARL1, pVARL2, pVARL3
+
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the LISTVIEW SortColumn method to support two new
+	   sorting types.  The new types allow sorting that is not
+	   case sensitive.  The new {type} values are as follows:
+
+	       11 - Sort Alpha ascending  (Not Case Sensitive)
+	       12 - Sort Alpha descending (Not Case Sensitive)
+
+	 - Modified the LISTVIEW object to support two new methods named
+	   'InsertColumnBgClr' and 'InsertColumnFgClr'.  These new methods
+	   allow data columns to be inserted into a LISTVIEW that can be
+	   used to control the Foreground and Background colors for
+	   line item.
+
+	      LISTVIEW Methods
+
+		.--------------------
+		. InsertColumnBgClr Method
+		.
+		The InsertColumnBgClr method inserts a special column
+		into a LISTVIEW object that allows specification of the
+		background color of a line item row.
+		The data string stored into each subitem for this column
+		specifies a hex string that represents the RGB value
+		used for a line item.  The expected string format
+		of a line item color is '0xRRGGBB'.
+
+		The method uses the following format:
+
+		[label] {object}.InsertColumnBgClr [GIVING {return}]:
+						    USING [*Index=]{index}
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Listview object that is accessed.
+
+		     return  is an optional numeric Variable that receives the
+			     return value.
+
+		     index   is a required decimal number or Numeric Variable
+			     that specifies the index of the new column.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. The background color column is inserted with a width
+		     size of zero.  This allows the color column
+		     to exist and be used in a LISTVIEW without being
+		     visible to a user.
+
+		  2. It is also possible to use SortColumn to sort the
+		     color data items.  This allows grouping of line
+		     items by color.
+
+		  3. Upon completion, {return} contains the new column
+		     number or -1 if the method fails.
+
+		  4. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+
+		  5. If {return} is too small to contain the result of the
+		     method, the OVER Condition Flag is set (TRUE).
+
+		  6. The EOS Condition Flag is always cleared (FALSE).
+
+		.--------------------
+		. InsertColumnFgClr Method
+		.
+		The InsertColumnFgClr method inserts a special column
+		into a LISTVIEW object that defines the foreground color
+		of a line item row. The data string stored into each
+		subitem for this column specifies a hex string that
+		represents the RGB value of the color for a line item.
+		The expected string format of a line item color is '0xRRGGBB'.
+
+		The method uses the following format:
+
+		[label] {object}.InsertColumnFgClr [GIVING {return}]:
+						    USING [*Index=]{index}
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Listview object that is accessed.
+
+		     return  is an optional numeric Variable that receives the
+			     return value.
+
+		     index   is a required decimal number or Numeric Variable
+			     that specifies the index of the new column.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. The foreground color column is inserted with a width
+		     size of zero.  This allows the color column
+		     to exist and be used in a LISTVIEW without being
+		     visible to a user.
+
+		  2. It is also possible to use SortColumn to sort the
+		     color data items.  This allows grouping of line
+		     items by color.
+
+		  3. Upon completion, {return} contains the new column
+		     number or -1 if the method fails.
+
+		  4. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+
+		  5. If {return} is too small to contain the result of the
+		     method, the OVER Condition Flag is set (TRUE).
+
+		  6. The EOS Condition Flag is always cleared (FALSE).
+
+	 - Modified the VARIANT object to support VARIANT ARRAYs.  This
+	   support is implemented as follows:
+
+	   1. The VARTYPE property value can now include a $VT_ARRAY value
+	      (0x2000) in a CREATE VARIANT operation to cause a one
+	      dimensioned VARIANT ARRAY to be created with a single
+	      VARIANT element.  The number of VARIANT elements can be
+	      changed using the new 'ResizeElements' method for the
+	      VARIANT object.
+
+	   2. The $VT_ARRAY value CAN NOT be used for a VARTYPE value
+	      to change a variant type in a SETPROP operation.  This
+	      causes an O132 error to occur.
+
+	   3. A SETPROP operation to set the VARVALUE property for
+	      a VARIANT that was created using the $VT_ARRAY type changes
+	      the first variant value in the VARIANT ARRAY.
+
+	   4. A GETPROP operation to get the VARVALUE or VARABSVALUE
+	      property value for a VARIANT that was created using the
+	      $VT_ARRAY type retrieves the first variant value in
+	      the VARIANT ARRAY.
+
+	   5. Support for methods have been added to a VARIANT object.
+	      The following methods have been added for a VARIANT object
+	      to support VARIANT ARRAY(s).
+
+	      VARIANT Methods
+
+		.--------------------
+		. GetDim Method
+		.
+		The GetDim method retrieves the number of dimensions
+		defined for a VARIANT object.
+
+		The method uses the following format:
+
+		[label] {object}.GetDim GIVING {return}
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Variant object that is accessed.
+
+		     return  is a Numeric Variable that gets the current
+			     number of dimensions for a VARIANT object.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  2. The OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+		  3. If the VARIANT object has a VARIANT ARRAY type,
+		     the returned value is the number of dimensions
+		     for the VARIANT ARRAY.  Otherwise, the returned
+		     value is zero.
+
+		.--------------------
+		. GetElement Method
+		.
+		The GetElement method retrieves the specified variant
+		from the VARIANT ARRAY and return it in a PL/B VARIANT
+		object.
+
+		The method uses the following format:
+
+		[label] {object}.GetElement GIVING {variant}:
+					    USING  [*Index=]{index}[:
+						   [*Index1=]{index1}[:
+						   [*Index2=]{index2}[:
+						   [*Index3=]{index3}[:
+						   [*Index4=]{index4}]]]]
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Variant object that is accessed
+			     that has been created as a $VT_ARRAY.
+
+		     variant is a PL/B VARIANT object where the VARIANT
+			     ARRAY variant element is to be stored.
+			     If there is an error, the returned
+			     VARIANT has a VARTYPE of $VT_EMPTY.
+
+		     index   is a numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in the first dimension of the
+			     VARIANT ARRAY.
+
+		     index1  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a second dimension of the
+			     VARIANT ARRAY.
+
+		     index2  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a third dimension of the
+			     VARIANT ARRAY.
+
+		     index3  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a fourth dimension of the
+			     VARIANT ARRAY.
+
+		     index4  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a fifth dimension of the
+			     VARIANT ARRAY.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. The ZERO, OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+
+		  2. The PL/B CREATE VARIANT ARRAY operation can only
+		     create a one dimensioned VARIANT ARRAY.  This
+		     methods supports multiple dimensions for
+		     a VARIANT ARRAY that has been created by a CONTROL
+		     or another third party application.
+
+		.--------------------
+		. GetElemCount Method
+		.
+		The GetElemCount method retrieves the element count
+		for a specified VARIANT ARRAY dimension.  A value of
+		zero is returned if there are no elements for a dimension.
+
+		The method uses the following format:
+
+		[label] {object}.GetElemCount GIVING {return}:
+					      [USING [*DIMPOS]{dimpos}]
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Variant object that is accessed.
+
+		     return  is a Numeric Variable that gets the current
+			     number of variant elements found in a
+			     VARIANT ARRAY dimension.
+
+		     dimpos  is an optional numeric value that specifies
+			     the VARIANT ARRAY dimension to retrieve the
+			     variant element count for.  If the {dimpos}
+			     is not specified, the method retrieves
+			     the variant element count for the first
+			     dimension as a default.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  2. The OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+
+		.--------------------
+		. SetElemCount Method
+		.
+		The SetElemCount method allows the number variant elements
+		to be changed for a single dimensioned VARIANT ARRAY.
+
+		The method uses the following format:
+
+		[label] {object}.SetElemCount [GIVING {return}]:
+					       USING [*Size=]{size}
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Variant object that is accessed.
+
+		     return  is an optional numeric variable that gets the
+			     current return value.
+
+		     size    is a numeric value that specifies the new
+			     variant element count for a single dimensioned
+			     VARIANT ARRAY.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  2. The OVER and EOS Condition Flags are always cleared
+		     (FALSE).
+		  3. If the {object} is a $VT_ARRAY variant and the returned
+		     value is zero, the resizing action was successful.  A
+		     non-zero value in this case indicates that the resizing
+		     was unsuccessful.
+		  4. If the {object} is a $VT_ARRAY variant and the {size}
+		     value is zero, this is an error and no resizing action is
+		     performed.  The returned value is non-zero in this case.
+		  5. If the {object} is NOT a $VT_ARRAY variant, the returned
+		     value is zero and no action is performed.
+
+		.--------------------
+		. PutElement Method
+		.
+		The PutElement method stores a PL/B VARIANT object
+		into the specified variant element of the VARIANT ARRAY.
+
+		The method uses the following format:
+
+		[label] {object}.PutElement [GIVING {return}]:
+					    USING  [*Value=]{variant}:
+						   [*Index=]{index}[:
+						   [*Index1=]{index1}[:
+						   [*Index2=]{index2}[:
+						   [*Index3=]{index3}[:
+						   [*Index4=]{index4}]]]]
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required Variant object that is accessed
+			     that is created as $VT_ARRAY type.
+
+		     return  is an optional numeric variable to receive the
+			     returned value.  If the variant was stored
+			     successfully a returned value is zero.
+			     Otherwise, a non-zero value is returned.
+
+		     variant is a PL/B VARIANT object that is placed
+			     into the VARIANT ARRAY.
+
+		     index   is a numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in the first dimension of the
+			     VARIANT ARRAY.
+
+		     index1  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a second dimension of the
+			     VARIANT ARRAY.
+
+		     index2  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a third dimension of the
+			     VARIANT ARRAY.
+
+		     index3  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a fourth dimension of the
+			     VARIANT ARRAY.
+
+		     index4  is an optional numeric value that specifies the
+			     zero relative indexed value for the variant
+			     element in a fifth dimension of the
+			     VARIANT ARRAY.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. The ZERO, OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+
+		  2. The PL/B CREATE VARIANT ARRAY operation can only
+		     create a one dimensioned VARIANT ARRAY.  This
+		     method supports multiple dimensions for
+		     a VARIANT ARRAY that has been created by a CONTROL
+		     or another third party application.
+
+	 - Two new methods have been added for a TREEVIEW object.  The
+	   methods are named GETITEMSTATE and SETITEMSTATE.  The methods
+	   are described as follows:
+
+	      TREEVIEW Methods
+
+		.--------------------
+		. GetItemState Method
+		.
+
+		The GetItemState method retrieves the current state flags,
+		overlay image index, and state image index for a
+		specified line item in a TREEVIEW object.
+
+		The method uses the following format:
+
+		[label] {object}.GetItemState GIVING {return}:
+					      USING  [*Item=]{item}[:
+						     [*StateMask=]{statemask}]
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required TREEVIEW object that is accessed.
+
+		     return  is a numeric value whose integer bit map
+			     represents the item state flags as follows:
+
+			       bits
+			      0 -  7  - Item state flags
+			      8 - 11  - Item overlay image index
+			     12 - 15  - State image index
+
+		  statemask  is a numeric value whose integer bit map mask
+			     identifies the state member bits that are valid
+			     to be retrieved.  This parameter is optional.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+
+		  2. The OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+
+		  3. The following is a description of the returned state
+		     flag bit map values:
+
+		     State flag description:
+
+		      Set of bit flags and image list indexes that
+		      indicate the item's state. When setting the state
+		      of an item, the stateMask member indicates
+		      the bits of this member that are valid. When retrieving
+		      the state of an item, this member returns the current
+		      state for the bits indicated in the StateMask member.
+
+		      .........................
+		      . Item State Flags
+		      .
+		      Bits 0 through 7 of this member contain the item
+		      state flags. The following is a list of possible
+		      item state flags.
+
+
+		      TVIS_BOLD           0x0010
+
+			  The item is bold.
+
+		      TVIS_CUT            0x0004
+
+			  The item is selected as part of a cut-and-paste
+			  operation.
+
+		      TVIS_DROPHILITED    0x0008
+
+			  The item is selected as a drag-and-drop target.
+
+		      TVIS_EXPANDED       0x0020
+
+			  The item's list of child items is currently
+			  expanded; that is, the child items are visible.
+			  This value applies only to parent items.
+
+		      TVIS_EXPANDEDONCE   0x0040
+
+			  The item's list of child items has been expanded at
+			  least once. This value applies only to parent items.
+
+		      TVIS_EXPANDPARTIAL  0x0080
+
+			  Available in Version 4.70 of commctrl. A partially
+			  expanded tree-view item. In this state, some but not
+			  all of the child items are visible and the parent
+			  items plus symbol is displayed.
+
+		      TVIS_SELECTED       0x0002
+
+			  The item is selected. Its appearance depends on
+			  whether it has the focus.  The item is drawn using
+			  the system colors for selection.
+
+		      .........................
+		      . Overlay Image Index
+		      .
+
+		      Bits 8 through 11 of this state member specify the
+		      one-based overlay image index. The overlay image
+		      is superimposed over the item's icon image. If
+		      these bits are zero, the item has no overlay image.
+		      To isolate these bits, use the TVIS_OVERLAYMASK
+		      mask.
+
+		      When you set or retrieve an item's overlay image
+		      index, you must specify the TVIS_OVERLAYMASK
+		      in the Statemask member.
+
+		      TVIS_OVERLAYMASK    0x0F00
+
+			  Mask for the bits used to specify the item's
+			  overlay image index.
+
+		      .........................
+		      . State Image Index
+		      .
+
+		      A state image is displayed next to an item's icon to
+		      indicate an application-defined state. Specify the
+		      state image list by executing the SetImageList
+		      method. To set an item's state image, include
+		      the TVIS_STATEIMAGEMASK value in the StateMask.
+
+		      Bits 12 through 15 of the state member operand
+		      specify the index in the state image list of the
+		      image to be drawn.
+
+		      To indicate that the item has no state image,
+		      set the index to zero. This convention means
+		      that image zero in the state image list cannot be used
+		      as a state image. To isolate bits 12 through 15 of the
+		      state member, use the TVIS_STATEIMAGEMASK mask.
+
+		      When you set or retrieve an item's state image
+		      index, you must specify the TVIS_STATEIMAGEMASK
+		      in the Statemask member.
+
+		      TVIS_STATEIMAGEMASK 0xF000
+
+			  Mask for the bits used to specify the item's
+			  state image index.
+
+		  4. The following is a description of the returned StateMask
+		     flag bit map values:
+
+		     StateMask flag description:
+
+		      Bits of the state member that are valid. If you are
+		      retrieving an item's state, set the bits of the stateMask
+		      member to indicate the bits to be returned in the
+		      state member. If you are setting an item's state,
+		      set the bits of the stateMask member to indicate the
+		      bits of the state member that you want to set. To
+		      set or retrieve an item's overlay image index, set
+		      the TVIS_OVERLAYMASK bits. To set or retrieve
+		      an item's state image index, set the TVIS_STATEIMAGEMASK
+		      bit.
+
+		.--------------------
+		. SetItemState Method
+		.
+		The SetItemState method sets the current state flags,
+		overlay image index, and state image index for a
+		specified line item in a TREEVIEW object.
+
+		The method uses the following format:
+
+		[label] {object}.SetItemState [GIVING {return}]:
+					      USING  [*Item=]{item}:
+						     [*State=]{state}[:
+						     [*StateMask=]{statemask}]
+
+		Where:
+
+		     label   is an optional Program Execution Label.
+
+		     object  is a required TREEVIEW object that is accessed.
+
+		     return  is an optional numeric value that is always zero.
+			     The returned value is not used.
+
+		      state  is a numeric value whose integer bit map
+			     settings identify the state member bits to
+			     be set for a TREEVIEW object item.
+
+		  statemask  is a numeric value whose integer bit map mask
+			     identifies the state member bits that are valid
+			     to be retrieved.  This parameter is optional.
+
+		Flags Affected: EOS, OVER, ZERO
+
+		Note the following:
+
+		  1. If the value returned is zero, the ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+
+		  2. The OVER and EOS Condition Flags are always
+		     cleared (FALSE).
+
+		  3. The descriptions of the {state} and {statemask} are
+		     the same as specified in the GetItemState method.
+
+	 - Corrected a problem where a ROLLOUT operation for PLBWIN was closing
+	   managed files resulting in I05 errors.  The ROLLOUT statement
+	   for PLBWIN has been corrected to temporarily close files
+	   exactly like an EXECUTE statement.
+
+	 - Corrected a problem where ALT+char sequences did not work for
+	   TOOLBAR buttons.  The ALT+char sequences now work as expected.
+
+	 - Corrected a problem where execution of 'SETPROP obj,*ENABLED=0'
+	   was causing an O105 error.  The error being reported now gives
+	   an O123 error in this case.
+
+	 - A GPF error was corrected when the MAINWINDOW object was used
+	   as the target window when executing a CREATE for the following
+	   objects:  AUTOMATION, COLOR, MENU, FLOATMENU, MREGION, and TIMER.
+
+	 - Corrected a problem where use of the keyword
+	   PLB_RECORDLOCK=PHYSICAL was conflicting with an internal
+	   lock for files opened by a PLB Unix runtime.  This problem
+	   could cause a program to hang indefinitely when opening and
+	   using files from a PLBWIN PL/B program accessing files on
+	   a Unix system.
+
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the SPLOPEN output operations to reduce physical disk
+PLBCON     io write operations when executing PRINT statements.  This
+	   improves the spooled file output performance.
+
+-------------------------------------------------------------------------------
+PLB (UNIX)-Corrected a problem where a READKS was always waiting for
+	   a timeout when Record Locking was being used.  This was causing
+	   unexpected poor program performance when using Record Locking.
+
+-------------------------------------------------------------------------------
+PLBCMP   - The compiler has been modified to support a new option
+	   '-c[="command line"]'.  This option causes the PLC module output
+	   to contain a new header format that includes the "command line"
+	   that is specified.  If the '-c' option is specified without
+	   a user command line, a default command 'plb'
+	   is put into the new header.  This new command line header
+	   format allows a PLC module to be executed on a Unix platform
+	   directly without specifying a runtime on the command line.
+
+	   Also, a new compiler directive named 'UNIXCMD ["command line"]' has
+	   been added.  If this new directive is specified in the source of a
+	   PL/B application, the PLC output for the application is generated
+	   for the new PLC header format. The PLC header in this case contain
+	   the "command line" data or a default 'plb' command line.
+
+	   Note:
+		1. The '-c' command line option overrides any UNIXCMD
+		   directives found in a program's source.  The compiler gives
+		   an appropriate compiler WARNING if a UNIXCMD is ignored.
+
+		2. When the new PLC command line header format is used,
+		2. All 87 runtimes recognize and properly execute a program
+		   with the new PLC command line header format.  However, if
+		   the new PLC module format is executed by a runtime for a
+		   prior release, a U12 error occurs.
+
+	 - The compiler has been modified to allow the '-zc' option to
+	   have an optional compatibility value.  The new accepted format
+	   is '-zc[=n]'.  The 'n' value in this case can have one of the
+	   following values:
+
+		    ZC    - Compile in Datapoint DOS mode
+		    ZC=0  - Compile in Sunbelt Mode
+		    ZC=1  - Compile in Datapoint DOS mode
+		    ZC=2  - Compile in Datapoint RMS mode
+		    ZC=3  - Compile in DBC mode
+
+	 - If the compiler is compiling for the 'ZC=3' mode, the
+	   following statement syntax formats are supported.
+
+	       DimArray    DIM     6[3], INITIAL "123", "abc", "xyz"
+	       FormArray   FORM    6[3], INITIAL 1, 2, 3
+	       IntArray    INTEGER [3],  INITIAL 1, 2, 3
+	       .
+	       Int         INTEGER "123"
+	       TypeLess    VAR     @
+	       TypeLessArr VAR     [3]@
+	       .
+	       DimPtr      DIM     @
+	       DimArr      DIM     [3]@
+	       DimArrPtr   DIM     @[]
+	       Dim2ArrPtr  DIM     @[,]
+	       Dim3ArrPtr  DIM     @[,,]
+	       .
+			   TYPE    TypeLess, TYP,DZ1,DZ2,DZ3
+			   MOVEADR TypeLess, DimPtr
+			   MOVEPTR TypeLess, DimPtr
+			   CALL    XXX USING DimArray
+	       .
+	       XXX         ROUTINE DimArrPtr
+			   RETURN
+	       .
+	       YYY         ROUTINE TypeLess
+			   RETURN
+	       .
+
+	       Note:
+
+		 1. For the 'ZC=3' compatibility mode, the following data
+		    PL/B language statements have been modified to
+		    support the alternate syntax forms.
+
+	   ----------------------------------------------
+	   DIM Variable
+
+	       The DIM variable has been modified to support the following
+	       alternate statement syntax formats when compiling with the
+	       'ZC=3' compiler option.
+
+	       Formats: (ZC=3 Compatibility Mode)
+
+	       [label] DIM [*][%]{size}({arraysize}), INITIAL "????", ...
+	       [label] DIM ({arraysize})@
+	       [label] DIM @()
+	       [label] DIM @(,)
+	       [label] DIM @(,,)
+
+		    a. The first format supports a new array
+		       initialization syntax form.
+		    b. The second format supports a new DIM syntax
+		       for an array of DIM pointers.
+		    c. The third format specifies a new DIM ARRAY POINTER
+		       construct.  The DIM ARRAY POINTER can contain an
+		       address of a DIM ARRAY.
+		    d. The fourth format specifies a two dimensioned
+		       DIM ARRAY POINTER construct.  The two dimensioned
+		       DIM ARRAY POINTER can contain an address of a two
+		       dimensioned DIM ARRAY.
+		    e. The fifth format specifies a three dimensioned
+		       DIM ARRAY POINTER construct.  The three dimensioned
+		       DIM ARRAY POINTER can contain an address of a three
+		       dimensioned DIM ARRAY.
+
+	       Example:
+		   DimArray    DIM     6[3], INITIAL "123", "abc", "xyz"
+		   DimArr      DIM     [3]@   ;Array of 3 pointers
+		   DimArrPtr   DIM     @[]    ;Array Pointer 1 dimension
+		   Dim2ArrPtr  DIM     @[,]   ;Array Pointer 2 dimensions
+		   Dim3ArrPtr  DIM     @[,,]  ;Array Pointer 3 dimensions
+		   .
+			       MOVEADR DimArray, DimArrPtr
+			       DISPLAY DimArrPtr(2)
+
+	   ----------------------------------------------
+	   FORM Variable
+
+	       The FORM variable has been modified to support the following
+	       alternate statement syntax formats when compiling with the
+	       'ZC=3' compiler option.
+
+	       Formats: (ZC=3 Compatibility Mode)
+
+	       [label] FORM [*][%]{size}({arraysize}), INITIAL {dvalue}, ..
+	       [label] FORM ({arraysize})@
+	       [label] FORM @()
+	       [label] FORM @(,)
+	       [label] FORM @(,,)
+
+		    a. The first format supports a new array initialization
+		       syntax form.  The {dvalue} in this syntax form is
+		       a decimal immediate value without '"' double quote
+		       characters.
+		    b. The second format supports a new FORM syntax
+		       for an array of FORM pointers.
+		    c. The third format specifies a new FORM ARRAY POINTER
+		       construct.  The FORM ARRAY POINTER can contain an
+		       address of a FORM ARRAY.
+		    d. The fourth format specifies a two dimensioned
+		       FORM ARRAY POINTER construct.  The two dimensioned
+		       FORM ARRAY POINTER can contain an address of a two
+		       dimensioned FORM ARRAY.
+		    e. The fifth format specifies a three dimensioned
+		       FORM ARRAY POINTER construct.  The three dimensioned
+		       FORM ARRAY POINTER can contain an address of a three
+		       dimensioned FORM ARRAY.
+
+	       Example:
+		   FormArray   FORM    2.2[3], INITIAL 1.5, 2.5, 3.5
+		   FormArr     FORM    [3]@   ;Array of 3 pointers
+		   FormArrPtr  FORM    @[]    ;Array Pointer 1 dimension
+		   Form2ArrPtr FORM    @[,]   ;Array Pointer 2 dimensions
+		   Form3ArrPtr FORM    @[,,]  ;Array Pointer 3 dimensions
+
+	   ----------------------------------------------
+	   INTEGER Variable
+
+	       The INTEGER variable has been modified to support the following
+	       alternate statement syntax formats when compiling with the
+	       'ZC=3' compiler option.
+
+	       Formats: (ZC=3 Compatibility Mode)
+
+	       [label] INTEGER [*][%]{size}({arraysize}), INITIAL {dvalue}, ..
+	       [label] INTEGER ({arraysize})@
+	       [label] INTEGER @()
+	       [label] INTEGER @(,)
+	       [label] INTEGER @(,,)
+	       [label] INTEGER {value}
+
+		    a. The first format supports a new array initialization
+		       syntax form.  The {dvalue} in this syntax form is
+		       a decimal immediate value without '"' double quote
+		       characters.
+		    b. The second format supports a new INTEGER syntax
+		       for an array of INTEGER pointers.
+		    c. The third format specifies a new INTEGER ARRAY POINTER
+		       construct.  The INTEGER ARRAY POINTER can contain an
+		       address of a INTEGER ARRAY.
+		    d. The fourth format specifies a two dimensioned
+		       INTEGER ARRAY POINTER construct.  The two dimensioned
+		       INTEGER ARRAY POINTER can contain an address of a two
+		       dimensioned INTEGER ARRAY.
+		    e. The fifth format specifies a three dimensioned
+		       INTEGER ARRAY POINTER construct.  The three dimensioned
+		       INTEGER ARRAY POINTER can contain an address of a three
+		       dimensioned INTEGER ARRAY.
+		    f. The sixth format allows an INTEGER to be specified
+		       where the {value} is a numeric literal without a
+		       size specification.  In this case, the INTEGER size
+		       defaults to an 4-byte integer.
+
+	       Example:
+		   IntArray   INTEGER    [3], INITIAL 1, 2, 3
+		   IntArr     INTEGER    [3]@   ;Array of 3 pointers
+		   IntArrPtr  INTEGER    @[]    ;Array Pointer 1 dimension
+		   Int2ArrPtr INTEGER    @[,]   ;Array Pointer 2 dimensions
+		   Int3ArrPtr INTEGER    @[,,]  ;Array Pointer 3 dimensions
+		   Int        INTEGER    "123"  ;Default to 4 byte integer
+
+	   ----------------------------------------------
+	   VAR Variable (New Statement)
+
+	       The VAR variable is a new language declaration statement
+	       that declares a typeless data variable pointer.
+	       A typeless variable can contain the address of any PL/B
+	       language variable.  The Typeless variable can only be
+	       declared when the compiler 'ZC=3' option is used.  Also
+	       it can only be used as an operand variable in the following
+	       statements:
+
+		    ROUTINE
+		    LROUTINE
+		    MOVEADR
+		    MOVEPTR
+		    TYPE         (Enhanced format)
+		    STOREADR     (New)
+		    LOADADR      (New)
+		    CLEARADR     (New)
+
+	       Formats: (ZC=3 Compatibility Mode)
+
+	       [label] VAR   @
+	       [label] VAR   [{arraysize}]@
+
+	       Example:
+		   TypeLess    VAR     @
+		   TypeLessArr VAR     [3]@
+		   DimX        INIT    "ABC"
+		   FormX       FORM    "123.456"
+		   IntX        INTEGER 1,"256"
+		   XType       INTEGER 4
+		   DimPtr      DIM     @
+		   FormPtr     FORM    @
+		   IntPtr      INTEGER @
+		   $08h        INTEGER 1,"0x08"
+		   $10h        INTEGER 1,"0x10"
+		   $20h        INTEGER 1,"0x20"
+		   .
+			       CALL    XXX USING DimX
+			       CALL    XXX USING FormX
+			       CALL    XXX USING IntX
+			       STOP
+		   .
+		   XXX         ROUTINE TypeLess
+			       TYPE    TypeLess, XType
+			       AND     0xFF,XType
+			       SWITCH  XType
+				CASE   $20h
+				 MOVEADR  TypeLess, DimPtr
+				 DISPLAY  "DIM:",*LL,DimPtr
+
+				CASE   $10h
+				 MOVEADR  TypeLess, FormPtr
+				 DISPLAY  "FORM:",FormPtr
+
+				CASE   $08h
+				 MOVEADR  TypeLess, IntPtr
+				 DISPLAY  "INTEGER:",IntPtr
+
+				DEFAULT
+				 DISPLAY  "Input Variable Type Invalid!"
+
+			       ENDSWITCH
+			       RETURN
+
+	   ----------------------------------------------
+	   MOVEADR and MOVEADDR Statements
+
+	       The MOVEADR/MOVEADDR statements have been modified to allow
+	       a VAR typeless variable or ARRAY POINTER variable in
+	       the source and destination operands.
+
+	       Example:
+		   See VAR description
+
+	   ----------------------------------------------
+	   MOVEPTR Statement
+
+	       The MOVEPTR statement has been modified to allow a
+	       VAR typeless variable or ARRAY POINTER variable in the
+	       source and destination operands.
+
+	   ----------------------------------------------
+	   ROUTINE/LROUTINE Statements
+
+	       The ROUTINE and LROUTINE variable list has been modified to
+	       allow a VAR typeless variable or ARRAY POINTER as valid
+	       variables.
+
+	       Example:
+		   See VAR description
+
+	   ----------------------------------------------
+	   TYPE Statement
+
+	       The TYPE statement has been modified to accept an alternate
+	       syntax format.
+
+	       Format: (ZC=3 Compatibility Mode)
+
+	       [label] TYPE {var}[,{type}[,Dim1[,Dim2[,Dim3]]]]
+
+	       Note:
+		    1. Please detailed discussion for the enhanced
+		       TYPE instruction in the PLBWIN/PLBSERVE/PLB
+		       section above.
+
+	       Example:
+		   See VAR description
+
+	 - Three new instructions have been added to provide vendor
+	   compatibility support for variable pointers.  The new
+	   instructions are CLEARADR, LOADADR, and STOREADR.  Please
+	   see the instruction descriptions in the PLBWIN/PLBSERVE/PLB
+	   section above.
+
+	 - Modified the compiler displayed output to be bold/high intensity.
+	   This makes the displayed output to be easier to view.
+
+	 - Modified MACRO processing to improve performance for compilation
+	   times.
+
+	 - Corrected a problem where the compiler was ignoring the optional
+	   MASK parameter if a preposition was used.  The compiler now
+	   compiles correctly when a comma or preposition is used.
+
+	 - Corrected a problem where the compiler was not honoring the TEMP
+	   path for the cross reference temporary files or for the sorting
+	   of these files. Can provide dramatic speed improvements when a
+	   cross reference is generated and the source is on a network drive.
+
+	 - Corrected a problem with a TIFF image that used LZW compression that
+	   caused O103 errors.
+
+	.-.Corrected a GPF problem when a PLFORM implied collection was added
+	   to a COLLECTION object.
+
+-------------------------------------------------------------------------------
+PLBDSIGN - Modified the designer to examine a CONTROL type library output to
+	   be more detailed/precise for Safearrays.  Also, if a USING
+	   parameter is identified as {out}, the VARPTR parameter
+	   is required.
+
+	 - Added an option to only allow a single instance of the designer
+	   to be loaded.
+
+	 - Corrected a problem where the designer would allow a form to opened
+	   multiple times.
+
+-------------------------------------------------------------------------------
+UTILITY  - SUNIDXNT and SUNINDEX
+	   Corrected a problem where an extra CR (0x0D) character was
+	   being logged for a Duplicate key record when using the '-l log'
+	   option.
+
+	 - PXLAT
+	   Modified the translation utility to accept the new PLC
+	   command line header format.
+
+-------------------------------------------------------------------------------
+ADMEQU.INC - New include module that contains equates for ADMIN services.
+
+-------------------------------------------------------------------------------
+PLBEQU.INC - Modified to include LISTOFF/LISTON to reduce listing output.
+
+	   - Modified to include $VT_ARRAY definitions for VARIANT objects.
+
+-------------------------------------------------------------------------------
+PLBMETH.INC- Updated for VARIANT methods.
+
+	   - Updated the TREEVIEW object for new methods.
+
+-------------------------------------------------------------------------------
+ADMIN    - Administrative Services have been added to all of the Sunbelt
+	   server products.  This includes the SUNFM File Manager, the
+	   PLBSERVE Application Server, and the PLBWIN Automation Server.
+	   The basic capabilities provided by the Administrative Services
+	   are as follows:
+
+	     1. An Admin Main Task is created when a Sunbelt server is
+		loaded.  As client users access/use a server, data
+		is automatically collected and maintained in a Admin
+		Database.
+
+	     2. The Admin Main Task allows PL/B programs to logon to the
+		Administrative services to provide a user interface for
+		administrators.
+
+	     3. New Administrative statements have been added to the
+		PL/B language to allow access to the Admin Database.
+		The new Admin statements allow data to be retrieved
+		to provide a real time view of the current client users
+		making use of any server.  In addition, the new Admin
+		statements provide specific commands that can be sent
+		to individual server child tasks to allow basic
+		administrator controls for child tasks.
+
+	   ---------------
+	   -- ADMIN Errors
+
+	   All ADMIN statement errors are O155 errors with a sub-code.
+
+	       #define O155_failedtostartsocket 1
+	       #define O155_badipaddr           2
+	       #define O155_outofmemory         3
+	       #define O155_socketcreatefail    4
+	       #define O155_socketbindfail      5
+	       #define O155_adminnotfound       6
+	       #define O155_badversion          7
+	       #define O155_unknownversion      8
+	       #define O155_connectlost         9
+	       #define O155_socketerr           10
+	       #define O155_encryptstartup      11
+
+	   ----------------------------------
+	   -- Server Configuration Parameters
+
+	      The following configuration keyword parameters can be used
+	      in the server configuration/ini files SUNFM, PLBSERVE, or
+	      PLBWIN in Automation Server Mode.
+
+	      ADMIN_SUPPORT={ON|OFF}
+
+		  This parameter specifies whether the main admin task is
+		  created.  A value of OFF prevents the main admin task
+		  from being created.  A value of ON creates a main admin
+		  task.  If the parameter is not found, the main admin task
+		  is created only if an ADMIN_HOSTNAME, or a server
+		  log file (FM_LOGNAME, FM_LOGFILE, PLBAS_LOGNAME,
+		  PLBAS_LOGFILE, PLBCS_LOGNAME, or PLBCS_LOGFILE) is found.
+
+	      ADMIN_PORTNUM={port number}
+
+		  This parameter specifies a port number for the admin logon
+		  task.  If not provided, the default is 2101.
+
+	      ADMIN_HOSTNAME={hostname}
+
+		  This parameter specifies an I/P address for the admin logon
+		  task.  If the parameter is not found, no admin logon task
+		  is created.  If no admin logon task is created an ADMLOGON
+		  statement only works with the 'local' option for an
+		  I/P address.
+
+	      ADMIN_PUBLIC={public key}
+
+		  This parameter specifies a user provided public
+		  encryption key.
+
+	      ADMIN_KEYFILE={filename}
+
+		  This parameter specifies a LOGON key file. (Same as SUNFM)
+
+	      ADMIN_IPFILE={filename}
+
+		  This parameter specifies a I/P filtering file.
+		  (Same as SUNFM)
+
+	      ADMIN_DATASET={string}
+
+		  This parameter specifies a filter for data kept by
+		  the main admin task.  This parameter is a quoted string of
+		  comma separated numbers, or number ranges(x-x). Each number
+		  represents a data type (same data types as used in the
+		  ADMGETINFO statement). This causes all data items to be
+		  cleared and items specified in the string to be set
+		  for collection.  (e.g. - "1,20-22" would cause collection of
+		  data items 1, 20, 21 and 22)
+
+	      ADMIN_DATACLR={string}
+
+		  This parameter is like the ADMIN_DATASET parameter, but
+		  starts with all data items set and clears the items specified
+		  by the string.  This parameter is not used if the
+		  ADMIN_DATASET parameter is specified.  If neither
+		  ADMIN_DATACLR or ADMIN_DATASET is used, all data items are
+		  collected.
+
+	      ADMIN_LOGCHILD={ON|OFF}
+
+		  This parameter specifies if a child task should start with
+		  logging ON or OFF.  The default is ON.
+
+	      ADMIN_LOGLEVEL={value}
+
+		  This parameter specifies the starting log level for all
+		  tasks.  The default is log level 0.
+
+	   ----------------------------------
+	   -- Client Configuration Parameters
+
+	      The following parameter keywords can be specified for a client in
+	      any PL/B runtime that supports the ADMIN statements.
+
+	      ADMIN_PUBLIC={public key}
+
+		  This parameter specifies a user provided public encryption
+		  key.
+
+	      ADMIN_LOGON={logon key}
+
+		  This parameter is the default value for the logon encryption
+		  key used if the ADMLOGON statement does not specify a logon
+		  key.  The server must have a file name set in the
+		  ADMIN_KEYFILE configuration parameter. The use of this
+		  keyword is optional and not required in that the logon key
+		  value can be specified in the ADMLOGON statement parameters.
+
+	   ----------------------------
+	   -- New Admin PL/B Statements
+
+	   ------------
+	   -- ADMLOGON
+
+	      The ADMLOGON statement connects a ADMIN data variable with a
+	      admin server.
+
+	      [label] ADMLOGON {admin},{ipaddr},{port}[,{public}[,{logon}]]
+
+	      Where:
+		    {admin}  - ADMIN data variable
+		    {ipaddr} - I/P Address of server
+		    {port}   - Port number of server
+		    {public} - Optional public key
+		    {logon}  - Optional logon key
+
+	      Flags:
+		    ZERO - This flag is set TRUE if the logon operation was
+			   completed without error.  Otherwise, it is set
+			   to FALSE.
+
+	      Notes:
+		    1) The optional public and logon keys override
+		       the ADMIN_PUBLIC and ADMIN_LOGON configuration
+		       parameters.
+
+		    2) {ipaddr} can be set to "local" for local
+		       application server if this statement is being
+		       using by the Plbclient command. Any ADMIN_KEYFILE
+		       used by the local application server is still
+		       checked for security purposes.
+
+	   ------------
+	   -- ADMLOGOFF
+
+	      The ADMLOGOFF statement disconnects a ADMIN data variable
+	      from a admin server.
+
+	      [label] ADMLOGOFF {admin}
+
+	      Where:
+		    {admin} - ADMIN data variable
+
+	      Flags:
+		    ZERO - This flag is always set to FALSE.
+
+	   ------------
+	   -- ADMGETINFO
+
+	      The ADMGETINFO statement obtains data for the admin server.
+
+	      [label] ADMGETINFO {admin},{id},{type},{mask},{result}
+
+	      Where:
+		    {admin}  - ADMIN data variable
+		    {id}     - Admin ID of object
+		    {type}   - Type of info
+		    {mask}   - Mask to filter the request
+		    {result} - Data variable for result
+
+	      Flags:
+		    EOS  - This flag is set TRUE if the {result} variable
+			   output is too small causing data to be truncated.
+			   Otherwise, it is set to FALSE.
+
+		    ZERO - This flag is set TRUE if the ADMGETINFO is
+			   returning data in the {result} variable. If
+			   there is no data to be returned, the
+			   ZERO flag is set FALSE.
+
+	      Notes:
+		    1) {id} can be 0 for all, or a specific admin ID.
+
+		    2) {type} is a number or string indicating the type
+		       or types of data to return. (see equ file for data
+		       item types)  If the string is used it contains comma
+		       separated numbers. (e.g. "1,2,4")
+
+		    3) {mask} is specific to the first data item in
+			      the {type} parameter.
+		       {mask} can be null to match all, or a string
+			      of characters.
+		       {mask} can contain a * to match a group of characters.
+		       {mask} can contain a ? to match a single character.
+		       {mask} can contain a leading <, >, =, >=, <=, <> if
+			      the first type is numeric.
+
+		    4) {result} is always a test string.
+
+		    5) Data items in result are separated by the ','
+		       character.
+
+		    6) Data groups in result are separated by the ';'
+		       character.
+
+		    7) When {id} is set to 0, data group starts with admin ID.
+
+		    8) File names are stored as {index name}%{data name}.
+
+	   ------------
+	   -- ADMCOMMAND
+
+	      The ADMCOMMAND statement sends a command to the admin server.
+
+	      [label] ADMCOMMAND {admin},{cmd},{type},{mask}[,{value}]
+
+	      Where:
+		    {admin} - ADMIN data variable
+		    {cmd}   - Command to execute
+		    {type}  - Type of info
+		    {mask}  - Mask to filter the request
+		    {value} - Optional new value
+
+	      Flags:
+		    ZERO - This flag is set TRUE to indicate that the command
+			   was completed successfully.  Otherwise, it
+			   it is set to FALSE.
+
+	      Notes:
+		    1) {cmd} is a number indicating the action to take.
+		       (see 'ADMEQU.INC' equate file)
+
+		    2) The {type} and {mask} parameters are used to
+		       select the tasks to be sent the command.
+
+		      {type} is a number indicating the type data that the
+		      {mask} parameter is for. (see 'ADMEQU.INC' equate file)
+
+		    3) {mask} is specific to the {type} parameter.
+		       {mask} can be null to match all, or a string
+			      of characters.
+		       {mask} can contain a * to match a group of characters.
+		       {mask} can contain a ? to match a single character.
+		       {mask} can contain a leading <, >, =, >=, <=, <> if
+			      the first type is numeric.
+
+		    4) {value} specifies a new value if the command requires
+		       one.  For example, the {value} for $ADMCMDSETLOGLEVEL
+		       command is a new log level.
+
+	   ------------
+	   -- ADMSETINFO
+
+	      The ADMSETINFO statement sends data to a local admin main task.
+
+	      [label] ADMSETINFO {action},{type},{value}
+
+	      Where:
+		    {action} - Action of $ADMADD, $ADMDELETE, or $ADMREPLACE
+		    {type}   - Type of info
+		    {value}  - Value to set
+
+	      Flags:
+		    ZERO - This flag is set TRUE to indicate that the action
+			   was completed successfully.  Otherwise, it
+			   it is set to FALSE.
+
+	      Notes:
+		    1) An {action} of delete removes one entry matching the
+		       {type} and {value}.
+
+		    2) An {action} of replace replaces one entry matching the
+		       {type} with the {value}.
+
+		    3) The number used in the {type} parameter is a
+		       user defined number between 1000 and 2000.
+
+		    4) {value} can be any text data.
+
+
+	   ----------------------------
+	   -- PL/B EQU FILE DATA
+
+	   ------------
+	   -- Admin General Ids
+
+	      The $CHILDTASKLIST or $ADMINTASKLIST can serve as an
+	      {id} to indicate which task list should be used to
+	      retrieve Admin database information.
+
+	      $CHILDTASKLIST  EQU     0
+	      $ADMINTASKLIST  EQU     1
+
+	   ------------
+	   -- Admin Child Data Types
+
+	      These items are maintained by all child and admin tasks.
+	      The child data types can be used in an ADMGETINFO statement
+	      to return data to an Administration PL/B program.
+
+	      $ADMITEMADMID specifies an {id} assigned to each task
+			    upon startup.
+
+			    $ADMITEMADMID           EQU     0
+
+	      $ADMITEMUSERIP specifies the I/P address of the client
+			     for this task.
+
+			    $ADMITEMUSERIP          EQU     1
+
+	      $ADMITEMPROGRAMNAME specifies the name of the PL/B
+				  program running this task.
+
+			    $ADMITEMPROGRAMNAME     EQU     2
+
+	      $ADMITEMFILENAME specifies zero or more files the
+			       program has open.
+
+			    $ADMITEMFILENAME        EQU     3
+
+	      $ADMITEMUPTIME specifies the number of seconds that
+			     the task has been running.
+
+			    $ADMITEMUPTIME          EQU     4
+
+	      $ADMITEMLOGLEVEL specifies the tasks logging level (0-2).
+
+			    $ADMITEMLOGLEVEL        EQU     5
+
+	      $ADMITEMCLIVER specifies the basic client version.
+
+			    $ADMITEMCLIVER          EQU     6
+
+	      $ADMITEMTASKID specifies the thread id or pid.
+
+			    $ADMITEMTASKID          EQU     7
+
+	      $ADMITEMFULLCLIVER specifies the full client version.
+
+			    $ADMITEMFULLCLIVER      EQU     8
+
+	      $ADMITEMSHAREDMEM returns the 32 bit shared memory value.
+
+			    $ADMITEMSHAREDMEM       EQU     9
+
+	      $ADMITEMKEYNAME specifies the key name if a XXX_KEYFILE is used.
+
+			    $ADMITEMKEYNAME         EQU     10
+
+	       $ADMITEMLOGSTATE specifies whether logging is on (1) or off (0).
+
+			    $ADMITEMLOGSTATE        EQU     11
+
+	       $ADMITEMSENDBYTES specifies the number of bytes sent to
+				 the client from this child server task.
+
+			    $ADMITEMSENDBYTES       EQU     12
+
+	       $ADMITEMRECVBYTES specifies the number of bytes received
+				 from the client to this child server task.
+
+			    $ADMITEMRECVBYTES       EQU     13
+
+	       $ADMITEMRUNTYPE specifies the runtime type of the child task.
+			       The values are:
+
+				     0 - Unknown
+				     1 - ODBC
+				     2 - Sun Access
+				     3 - Windows version PL/B Runtime
+				     4 - Unix version Plbserve
+				     5 - Unix version PL/B Runtime
+				     6 - WindowsCE Hand Held Runtime
+				     7 - WindowsCE Palm Top Runtime
+				     8 - WindowsCE Pocket PC Runtime
+				     9 - Windows Console version PL/B Runtime
+				    10 - Windows version Plbserve
+
+			    $ADMITEMRUNTYPE         EQU     14
+
+	       $ADMITEMIDLETIME specifies the number of minutes the child task
+				has been idle since the last command was
+				processed.
+
+			    $ADMITEMIDLETIME        EQU     15
+
+	   ------------
+	   -- Admin Server Data Types
+
+	      These data types can be obtained only by using a
+	      $CHILDTASKLIST or $ADMINTASK {id}.
+
+	      $ADMITEMSRVVER specifies the version of the server.
+
+			    $ADMITEMSRVVER          EQU     100
+
+	      $ADMITEMLOGONCNT specifies the number logons since startup.
+
+			    $ADMITEMLOGONCNT        EQU     101
+
+	      $ADMITEMLOGONFAIL specifies the number logon failures
+				since startup.
+
+			    $ADMITEMLOGONFAIL       EQU     102
+
+	      $ADMITEMSRVUPTIME specifies the number of seconds since startup.
+
+			    $ADMITEMSRVUPTIME       EQU     103
+
+	      $ADMITEMSRVTYPE specifies a server type of 1 for
+			      Application Server, 2 for File Manager, or
+			      3 for Automation Server.
+
+			    $ADMITEMSRVTYPE         EQU     104
+
+	      $ADMITEMSRVEXENAME specifies the name of the server
+				 executable file.
+
+			    $ADMITEMSRVEXENAME      EQU     105
+
+	      $ADMITEMSRVININAME specifies the name of the server
+				 configuration file.
+
+			    $ADMITEMSRVININAME      EQU     106
+
+	      $ADMITEMSRVLOGNAME specifies the name of the server log file.
+
+			    $ADMITEMSRVLOGNAME      EQU     107
+
+	      $ADMITEMSRVCHILDCNT specifies the current number of
+				  child tasks running.
+
+			    $ADMITEMSRVCHILDCNT     EQU     108
+
+	      $ADMITEMSRVCHILDMAX specifies the maximum number of
+				  child tasks allowed.
+
+			    $ADMITEMSRVCHILDMAX     EQU     109
+
+	   --------------------------------
+	   -- Admin PL/B Runtime Data Types
+
+	      These items are filtered out by default.  To turn them on,
+	      use the ADMIN_DATASET or ADMIN_CLR options.
+
+	      $ADMITEMLOCKIO          EQU     200
+	      $ADMITEMRECORDLOCK      EQU     201
+	      $ADMITEMXPIO            EQU     202
+	      $ADMITEMW33RETRY        EQU     203
+
+	   --------------------------------
+	   -- Admin Commands
+
+	      The following Admin Commands are for use with the ADMCOMMAND
+	      statement.  These commands are sent to a child task
+	      to control basic operations.
+
+	      The commands are as follows:
+
+
+	      $ADMCMDSOFTTERM causes the program to act as if the next
+			      instruction to execute is a SHUTDOWN instruction
+			      or a File Manager child ask to terminate.
+
+			    $ADMCMDSOFTTERM         EQU 1
+
+	      $ADMCMDHARDTERM immediately kills or terminates the child task.
+			      This causes some resources to be lost until the
+			      server is totally shutdown. For a Windows server,
+			      this also can leave file handles opened. Any lost
+			      resources can only be recovered when a server
+			      main task is unloaded.
+
+			    $ADMCMDHARDTERM         EQU 2
+
+	      $ADMCMDLOGGINGON turns logging on for this task.
+
+			    $ADMCMDLOGGINGON        EQU 3
+
+	      $ADMCMDLOGGINGOFF turns logging off for this task.
+
+			    $ADMCMDLOGGINGOFF       EQU 4
+
+	      $ADMCMDSETLOGLEVEL allows the logging level to be set from 0 to
+				 2.  The level 0 logging allows error and
+				 basic information to be logged.  Error levels
+				 1 and 2 are available for future releases to
+				 allow additional information to be logged.
+
+			    $ADMCMDSETLOGLEVEL      EQU 5 ;Value parameter is
+							  ;(0-2).
+
+	      $ADMCMDSHUTDOWNLOGON shutdown the Admin Logon Task.
+
+			    $ADMCMDSHUTDOWNLOGON    EQU 7
+
+	   --------------------------------
+	   -- Admin Setinfo Actions
+
+	      These operations can be used for the ADMSETINFO {action}.
+	      These actions allow User Data in the Admin Database to
+	      to be processed.
+
+	      $ADMADD adds user data to the Admin database.
+
+			    $ADMADD         EQU     1
+
+	      $ADMDELETE removes user data from the Admin database.
+
+			    $ADMDELETE      EQU     2
+
+	      $ADMREPLACE replaces user data in the Admin database
+				  that has been previously added.
+
+			   $ADMREPLACE     EQU     3
+

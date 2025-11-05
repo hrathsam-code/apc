@@ -1,0 +1,284 @@
+. PRINT DAILY INVOICE TRANSACTIONS
+. 
+. WRITTEN BY R BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                          41 TEELE DRIVE
+.                          CORAM, NEW YORK 11727
+.                          (516) 698-5577
+         INCLUDE   COMMON
+NAME     INIT      "ARFILE/ISI:ACCOUNTS"
+INPUT    IFILE     (ISAM INPUT )
+. 
+. 
+REPLY    DIM       1
+SWMR     FORM      "0"         '1'=MATCHING RECORD
+SW1P     FORM      "1"         '1'=FIRST CYCLE
+LINECT   FORM      "000"           LINE COUNTER
+PAGE     FORM      3           PAGE NUMBER
+RID01    FORM      "0"         RECORD TYPE 01
+LR       FORM      "0"         '1'=LAST RECORD PENDING
+LRTOT    FORM      5            GRAND TOTAL
+VOIDS    FORM      5
+PAIDS    FORM      5
+CRDTS    FORM      5
+ORDRTOTS FORM      7.2
+. 
+IOSW     DIM       1
+COMP     DIM       1
+. 
+EOJTIME  DIM       9
+STARTIME DIM       9
+EOJDATE  DIM       8
+ENDTIME  DIM       9
+TIMEFILE FILE
+TIMENAME INIT      "EOJTIME/TXT:D0"
+REC0     FORM      "0000"
+. 
+         INCLUDE   CUSTMAST
+. 
+CUSTFILE IFILE
+CSTNAME  INIT      "ACCOUNTS/ISI"
+. 
+         INCLUDE   RCVBLES
+. 
+COMPVAR  DIM       27
+. 
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+DATE8    DIM       8
+. 
+STATUS   DIM       8
+. 
+ARFILEDT IFILE
+ARFLDTNM INIT      "ARFILEDT/ISI"
+ARFLDTKY DIM       11
+. 
++............................................................
+. MAINLINE FOLLOWS
+.
+. FILE OPENING SEQUENCE
+. 
+         DISPLAY   *ES,*P1:10,*HON,"SUPER DAILY INVOICE TRANSACTION LISTING ":
+                   "FOR ",TODAY
+. 
+         GOTO      CONT1
+. 
+NOTIME   BEEP
+         DISPLAY   *ES,"NO TIME FILE FOUND - UNABLE TO COMPLETE JOB"
+         GOTO      NOTIME
+. 
+NOARFILE BEEP
+         DISPLAY   *P01:24,*EL,"ACCOUNTS RECEIVABLE FILE NOT ON LINE",*W2
+         GOTO       NOARFILE
+. 
+CONT1    TRAPCLR   IO
+         TRAP      NOARFILE IF IO
+.....    OPEN      RCVBFILE,RCVBNAME
+         OPEN      RCVBFILE,ARFLDTNM
+.
+. SET DATE6
+. 
+         MOVE      TODAY  TO  MM
+         RESET     TODAY  TO  4
+         MOVE      TODAY  TO  DD
+         RESET     TODAY  TO  7
+         MOVE      TODAY  TO  YY
+         RESET     TODAY  TO  1
+. 
+         CLEAR     DATE6
+         APPEND    MM     TO  DATE6
+         APPEND    DD     TO  DATE6
+         APPEND    YY     TO  DATE6
+         RESET     DATE6  TO  1
+. 
+. SET THE READ KEY
+. 6/22/83
+.
+         CLEAR     ARFLDTKY
+         APPEND    YY TO ARFLDTKY
+         APPEND    MM TO ARFLDTKY
+         APPEND    DD TO ARFLDTKY
+         APPEND    "     "  TO  ARFLDTKY
+         RESET     ARFLDTKY TO  1
+         READ      RCVBFILE,ARFLDTKY;STATUS   (SET FILE POINTER)
+. 
+         REP       " 0"   IN  DATE6
+         DISPLAY   *P1:24,*EL,*HON,"CURRENT DATE=",DATE6
+. 
+         TRAPCLR   IO
+         CALL      OPENCUST
+         CMATCH    "H"  TO  IOSW
+         GOTO      NOFILE   IF NOT EQUAL
+         GOTO      GETCOMP
+. 
+NOFILE   BEEP
+         DISPLAY   *P01:12,*EL,"ACCOUNT FILE NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         GOTO      CHAINOUT
+. 
+GETCOMP  TRAPCLR   PARITY    (NOP)
+. 
+MOVLIB   MOVE      "AMERICAN PRECISION PRODUCTS  " TO  COMPVAR
+         MOVE      "A"  TO  COMP
+         CALL      HEADER
+. 
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    RCVBFILE;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,IPMNTS:
+                            IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                            ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                            IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                            IDOLSLFT,IPRGDTE
+         GOTO      EOJROUT  IF  OVER
+*............................................................
+. CHECK THE COMPANY CODE FOR MATCH TO TERMINAL INPUT
+         MATCH     COMP    TO INVCOMP
+         GOTO      READ IF NOT EQUAL
+. 
+. BYPASS THE ZERO RECORD
+. 
+         MATCH     "00000" TO INVKEY
+         GOTO      READ    IF EQUAL
+. ........
+. MATCH INVDATE TO DATE6 AND PRINT IF EQUAL
+. 
+         REP       " 0" IN INVDATE
+         MATCH     INVDATE  TO  DATE6
+         GOTO      READ    IF NOT EQUAL
+. 
+*............................................................
+. IS THE ITEM AN  O P E N  RECEIVABLE  ?
+         CMATCH    "X",INVSTAT
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN   P A I D)
+         CMATCH    "V",INVSTAT
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN  V O I D E D)
+         CMATCH    "W",INVSTAT
+. 
+. 
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN  WRITTEN OFF)
+MOVEDATA PI        1 (NOP)
+         MOVE      INVCUST TO CUSTKEY
+         CMATCH    "O" TO INVSTAT
+         GOTO      CHKCLS IF NOT EQUAL
+         MOVE      "OPEN " TO STATUS
+         GOTO      TRAPS
+CHKCLS   CMATCH    "P" TO INVSTAT
+         GOTO      MAKCANC IF NOT EQUAL
+         MOVE      "PARTIAL" TO STATUS
+         GOTO      TRAPS
+MAKCANC  CMATCH    "V"    TO  INVSTAT
+         GOTO      MKC1   IF  NOT   EQUAL
+         MOVE      "VOID"     TO    STATUS
+         GOTO      TRAPS
+MKC1     CMATCH    "X"    TO  INVSTAT
+         GOTO      MKC2   IF  NOT   EQUAL
+         MOVE      "PAID"     TO    STATUS
+         GOTO      TRAPS
+MKC2     CMATCH    "C"    TO  INVSTAT
+         GOTO      MKC3   IF  NOT  EQUAL
+         MOVE      "CRDT"     TO   STATUS
+         GOTO      TRAPS
+MKC3     MOVE      "DEL."     TO   STATUS
+TRAPS    TRAPCLR   IO
+         CALL      GETCUST
+         CMATCH    "H"    TO IOSW
+         GOTO      SETDATE   IF  EQUAL
+PNOVEND  MOVE      "*ACCOUNT NOT ON FILE*" TO CUSTNAME
+*............................................................
+. CLEAR OUT ACCUMULATORS (DETAIL TIME)
+.
+SETDATE  TRAPCLR   IO
+         MOVE      INVDATE TO DATE8
+         MOVE      DATE8  TO MM
+         RESET     DATE8  TO 3
+         MOVE      DATE8  TO DD
+         RESET     DATE8  TO 5
+         MOVE      DATE8  TO YY
+         RESET     DATE8
+         CMATCH    "C"    TO INVTYPE
+         GOTO      DETCALC IF NOT EQUAL
+         MULT      "-1"   BY INVTOTL
+         MULT      "-1"   BY IDOLSLFT
+. 
+DETCALC  ADD       "1" TO LRTOT
+         ADD       IDOLSLFT TO ORDRTOTS
+*............................................................
+. HEADING AND DETAIL OUTPUT
+.
+DETOUT   COMPARE   "50" TO LINECT
+         CALL      HEADER IF NOT LESS
+*............................................................
+         PRINT     *3,INVKEY:
+                   *9,MM,"/",DD,"/",YY:
+                   *19,CUSTNAME:
+                   *50,STATUS:
+                   *58,INVTOTL:
+                   *68,IDOLSLFT
+. 
+         ADD       "1" TO LINECT
+         GOTO      READ
+*............................................................
+. 
+         INCLUDE   CUSTIO
+. PAGE HEADING ROUTINE
+.
+HEADER   ADD       "1" TO PAGE
+         PRINT     *F:
+                   *21,"DAILY INVOICE TRANSACTION LISTING":
+                   *56,"FOR ",TODAY:
+                   *70,"PG ",PAGE
+         PRINT     *24,COMPVAR,*C,*L
+         MOVE      "0" TO LINECT
+         PRINT     *2,"INVOICE/CREDIT":
+                   *19,"ACCOUNT NAME":
+                   *49,"STATUS":
+                   *58,"BEGINNING":
+                   *71,"OPEN"
+         PRINT     *2,"NUMBER":
+                   *11,"DATE":
+                   *60,"TOTAL":
+                   *71,"TOTAL":
+                   *C,*L
+         RETURN
+*............................................................
+. TOTAL OUTPUT
+.
+EOJROUT  PRINT     *67,"----------"
+         PRINT     *67,ORDRTOTS
+. 
+         CALL      HEADER
+         PRINT     " "
+         PRINT     " "
+         PRINT     *5,LRTOT," INVOICES ENTERED FOR ",COMPVAR:
+                   *66,ORDRTOTS,"***",*C,*L
+.
+         RELEASE
+. 
+CHAINOUT BEEP
+. 
+. UPDATE THE TIME FILE AND PRINT THE TIME ELAPSED
+. 
+         DISPLAY   *P1:24,*EL,*HON,"SUPER-END NOW INDEXING PARTS FILES !",*W3
+. 
+         ROLLOUT   "CHAIN  MSINDEXS"
+. 
+         CHAIN     "SMSEOD"
+. 
+         TRAPCLR   IO
+         TRAP      NOTIME IF IO
+         OPEN      TIMEFILE,TIMENAME
+         READ      TIMEFILE,REC0;STARTIME,ENDTIME,EOJDATE
+         CLOCK     TIME TO ENDTIME
+         WRITE     TIMEFILE,REC0;STARTIME,ENDTIME,EOJDATE
+. 
+         PRINT     *F,*25,"END-OF-DAY PROCEDURE FOR ",EOJDATE:
+                   " BEGAN AT ",STARTIME," AND ENDED AT ",ENDTIME
+         PRINT     *F
+         KEYIN     *ES,*P01:10,*HON,"END OF DAY PROCEDURE IS COMPLETE!":
+                   *P1:12,"YOU MAY SHUT DOWN THE COMPUTER NOW":
+                   *P1:14,"TAP   E N T E R  KEY WHEN READY ",REPLY
+. 
+         CHAIN     "APPMENU1"

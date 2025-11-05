@@ -1,0 +1,89 @@
+
+
+
+PAGE    1      APCNTENT.PLS IDE                                                                               03-22-04 14:49:45
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APCNTENT.PLS","F:\PLC\APCNTENT.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    2.    INCLUDE  A: common.txt
+   17.    INCLUDE  B: callerr1.inc
+   21.    INCLUDE  C: callerr2.inc
+
+   Output: f:\plc\apcntent.plc                                                                                                                                                                                                                                       
+       160 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:49:45 14:49:45
+  00000E64 DATA;  000001B0  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APCNTENT.PLS IDE                                                                               03-22-04 14:49:45
+                                         
+
+"                                          D      30. C*
+"                                          D      40.  *
+"APCONTFL.ISI                              D      23.  *
+"CONTACT FILE ENTRY                        D      19.  *
+0                                          F      34.  *
+999                                        F      32.  *
+ACCTNUMB                                   D      14. A*
+ANS                                        D      13.  *    42.      43.      45.      47.  
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+D                                          O 5    12. B*    13. C    16. C    31. C
+DATE6                                      D      10. A*
+DDATA                                      D      13. B*    13. C
+ENVS                                       D      11. A*
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+FIRSTIME                                   D      17. A*
+FROMPGM                                    D      16. A*    28. C    65.  
+INDXIT                                     X      26. C*    22. C
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+KEY                                        D      12.  *    31.      36.      60.      63.  
+MAINLINE                                   X      30. C*    22. C
+MEN2                                       D      11.  *    26.      28.      30.      31.      40.  
+MENO                                       F      10.  *    30.      32.      34.  
+MESS                                       i       6.  *    23.      36.      60.      63.  
+MNO                                        D       7.  *
+NAME                                       D       8.  *    36.      38.      51.      52.      60.  
+NULL                                       X      24. C*    22. C
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+REPLY                                      D       4.  *    30. C
+RESULT                                     F      11. B*    16. C    22. C
+RPL                                        D      14.  *    57.      58.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+S1                                         X      24.  *    35.      44.      50.      59.      62.      64.  
+S10                                        X      65.  *    27.      29.      33.  
+S2                                         X      51.  *    37.      53.  
+S23                                        X      41.  *    46.  
+S3                                         X      54.  *    56.  
+S30                                        X      63.  *    48.  
+SECURITY                                   F       9. A*
+SEQ                                        F      15.  *
+TELE                                       D       9.  *    36.      39.      54.      55.      60.  
+TESTIT                                     X      22. C*    16. C
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+
+
+
+PAGE    3      APCNTENT.PLS IDE                                                                               03-22-04 14:49:45
+                                         
+
+TESTTWO                                    D      19. A*
+TITLTEXT                                   D       9. B*    19.      15. C
+TODAY                                      D       8. A*
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+

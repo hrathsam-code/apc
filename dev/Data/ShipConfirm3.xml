@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>1D6901A8E67FA1D5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+
+<?xml version="1.0"?>
+ <AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>1D6901A8E67FA1D5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+
+	<?xml version="1.0"?> <ShipmentConfirmRequest xml:lang="en-US"> <Request> <TransactionReference> <CustomerContext>Your Customer Context</CustomerContext> </TransactionReference> <RequestAction>ShipConfirm</RequestAction> <RequestOption>validate</RequestOption> </Request> <Shipment> <Shipper> <Name>Shipper Name</Name> <AttentionName>Shipper Attn Name</AttentionName> <CompanyDisplayableName>CompanyDisplayableName</CompanyDisplayableName> <PhoneNumber>1234567890</PhoneNumber> <ShipperNumber>Your Shipper Number</ShipperNumber> <TaxIdentificationNumber>1234567877</TaxIdentificationNumber> <Address> <AddressLine1>AddressLine1</AddressLine1> <City>City</City> <StateProvinceCode>StateProvinceCode</StateProvinceCode> <PostalCode>PostalCode</PostalCode> <CountryCode>CountryCode</CountryCode> </Address> </Shipper> <ShipTo> <CompanyName>CompanyName</CompanyName> <AttentionName>Ship To Attn Name</AttentionName> <PhoneNumber>1234567890</PhoneNumber> <Address> <AddressLine1>AddressLine1</AddressLine1> <City>City</City> <StateProvinceCode>StateProvinceCode</StateProvinceCode> <PostalCode>PostalCode</PostalCode> <CountryCode>CountryCode</CountryCode> </Address> </ShipTo> <ShipFrom> <CompanyName>CompanyName</CompanyName> <AttentionName>Ship From Attn Name</AttentionName> <PhoneNumber>1234567890</PhoneNumber> <Address> <AddressLine1>AddressLine1</AddressLine1> <City>City</City> <StateProvinceCode>StateProvinceCode</StateProvinceCode> <PostalCode>PostalCode</PostalCode> <CountryCode>CountryCode</CountryCode> </Address>
+</ShipFrom> <PaymentInformation> <Prepaid> <BillShipper> <AccountNumber>Your Account Number</AccountNumber> </BillShipper> </Prepaid> </PaymentInformation> <Service> <Code>01</Code> <Description>UPS Express</Description> </Service> <Package> <PackagingType> <Code>02</Code> <Description>Package</Description> </PackagingType> <Description>Priority</Description> <Dimensions> <UnitOfMeasurement> <Code>IN</Code> <Description>Inches</Description> </UnitOfMeasurement> <Length>5</Length> <Width>4</Width> <Height>2</Height> </Dimensions> <PackageWeight> <UnitOfMeasurement> <Code>LBS</Code> <Description>Pounds</Description> </UnitOfMeasurement> <Weight>11</Weight> </PackageWeight> </Package> </Shipment> <LabelSpecification> <LabelPrintMethod> <Code>GIF</Code> <Description>GIF</Description> </LabelPrintMethod> <LabelImageFormat> <Code>GIF</Code> <Description>GIF</Description> </LabelImageFormat> </LabelSpecification> </ShipmentConfirmRequest>
+
+

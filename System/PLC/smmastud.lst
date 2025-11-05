@@ -1,0 +1,271 @@
+
+
+
+PAGE    1      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:06
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "SMMASTUD.PLS","F:\PLC\SMMASTUD.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    6.    INCLUDE  A: ncommon.txt
+
+   Output: f:\plc\smmastud.plc                                                                                                                                                                                                                                       
+       668 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:48:06 14:48:07
+  00001CCC DATA;  00000C0E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:07
+                                         
+
+"                                          D     147.  *   491.     492.     493.     542.     547.     548.     549.  
+                                                     *   562.     569.     608.     609.  
+"&AddRec                                   D     171.  *
+"&Delete                                   D     170.  *
+"&Quit                                     D     173.  *
+"&Save                                     D     172.  *
+"A                                         D     369.  *   476.     589.     625.  
+"Ca&ncel                                   D     174.  *
+"Confirm Delete                            D     465.  *
+"DELETE THIS RECORD#                       D     465.  *
+"ERROR ON MENU MASTER FILE!                D     526.  *
+"HELVETICA                                 D     151.  *   153.     154.     155.     156.     157.     158.     159.  
+                                                     *   162.     163.     164.     165.     166.     167.     225.     272.  
+"HELVETICA(10,BOLD)                        D     152.  *
+"Menu Master File NOT FOUND!               D     520.  *
+"RECORD DELETED!                           D     472.  *
+"SMMENU                                    D     145.  *   510.     521.     527.     631.  
+"Sel&Menu                                  D     169.  *
+"Selection MUST BE NUMERIC.                D     434.  *
+"THIS IS A NEW PROGRAM ITEM                D     328.  *
+"U                                         D     380.  *   591.     627.  
+"X                                         D     221.  *   276.     370.     422.     449.     459.     478.     496.  
+                                                     *   530.     543.     545.     551.     577.     596.     614.  
+"You didn't change anything!               D     501.  *
+0                                          F     231.  *   282.  
+1                                          F     230.  *   281.     466.  
+2                                          F     409.  *   418.     428.     445.     455.  
+999                                        F     237.  *   290.     485.     537.  
+ACCTNUMB                                   D      14. A*
+ADDBUTTON                                  O 1    63.  *   171.     202.     213.     297.     572.  
+ADDKEY                                     X     326.  *   202.     572.  
+ADDLOOP                                    X     361.  *
+ADDOK                                      X     355.  *   350.  
+AFTRITM                                    F      46.  *   231.     236.     237.     282.     289.     290.     485.  
+                                                     *   488.     537.     539.  
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+BCKWARD                                    O 7    66.  *
+BDMNUIO                                    X     525.  *   481.     533.  
+BYPINS                                     X     237.  *
+BYPINSM                                    X     290.  *
+CHGFLAG                                    D      48.  *   370.     422.     449.     459.     478.     491.     530.  
+                                                     *   542.     547.     562.     569.     577.     608.     614.  
+CHKADD                                     X     346.  *   414.     441.  
+CHKSAV                                     X     577.  *   211.     326.  
+CLRADDS                                    X     557.  *   203.     212.     352.  
+CLRENTRY                                   X     561.  *   495.     550.  
+CNCLBUTTON                                 O 1    57.  *   174.     203.  
+COMPSYS                                    D      37.  *   279.     286.  
+CRMENU                                     X     225.  *   222.  
+CURRDATE                                   O16    82.  *   153.     188.  
+DA                                         O 5   102.  *   129.     133.     148.     149.  
+DATE6                                      D      10. A*
+
+
+
+PAGE    3      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:07
+                                         
+
+DDATA                                      D     103.  *   129.  
+DELET                                      X     465.  *   397.  
+DELTBUTTON                                 O 1    59.  *   170.     229.     277.     367.     397.     494.     570.  
+DIM3                                       D      10.  *   280.     349.  
+DISPVAR                                    X     384.  *
+DOSAVE                                     X     625.  *   621.  
+DOUPDT                                     X     601.  *   592.  
+DOWRIT                                     X     596.  *   590.  
+DUMPIT                                     X     605.  *   585.  
+ENDDEL                                     X     473.  *   467.  
+ENDLOOP                                    X     240.  *   234.  
+ENDLOOPM                                   X     293.  *   285.     287.  
+ENDUP                                      X     491.  *   473.  
+ENDWT                                      X     547.  *   544.     546.  
+ENTRY01                                    O 6    90.  *   162.     195.     260.     332.     356.     361.     385.  
+                                                     *   392.  
+ENTRY02                                    O 6    91.  *   163.     196.     261.     333.     357.     362.     386.  
+                                                     *   393.     421.  
+ENTRY03                                    O 6    92.  *   164.     197.     334.     339.     340.     358.     363.  
+                                                     *   387.     394.     431.     435.     439.     563.  
+ENTRY04                                    O 6    93.  *   165.     198.     335.     364.     368.     388.     395.  
+                                                     *   399.     448.     564.  
+ENTRY05                                    O 6    94.  *   166.     199.     336.     365.     389.     396.     458.  
+                                                     *   565.  
+ENVS                                       D      11. A*
+EOJ                                        X     614.  *   201.  
+EOJFLAG                                    D      50.  *   496.     543.     551.  
+EOJOK                                      X     629.  *   499.     554.     615.     621.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EXITPNT                                    X     568.  *   502.  
+EXITSV1                                    X     607.  *   594.     599.     603.  
+FIRSTIME                                   D      17. A*
+FLD01TXT                                   D      73.  *   154.  
+FLD02TXT                                   D      74.  *   155.  
+FLD03TXT                                   D      75.  *   156.  
+FLD04TXT                                   D      76.  *   157.  
+FLD05TXT                                   D      77.  *   158.  
+FORWARD                                    O 7    65.  *
+FROMPGM                                    D      16. A*
+GETBUTTON                                  O 1    62.  *
+GETKEY                                     X     211.  *   200.     322.  
+GETMAST                                    X     307.  *   298.  
+GETMENU                                    X     253.  *   244.  
+ICONID1                                    F      67.  *
+ICONID2                                    F      68.  *
+INDXIT                                     X     143.  *   139.  
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOSW                                       D       9.  *
+IOTEST                                     D      26. A*
+
+
+
+PAGE    4      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:07
+                                         
+
+IOTYPE                                     D      27. A*
+K01                                        X     409.  *
+K01A                                       X     411.  *
+K02                                        X     418.  *
+K02A                                       X     420.  *
+K03                                        X     428.  *   339.  
+K03A                                       X     430.  *
+K04                                        X     445.  *   364.     395.  
+K04A                                       X     447.  *
+K05                                        X     455.  *   365.     396.  
+K05A                                       X     457.  *
+LOOP                                       X     184.  *
+MAINLINE                                   X     147.  *   139.  
+MASTFLAG                                   D      53.  *   221.     276.  
+MASTLST                                    O 4    98.  *   223.     224.     272.     289.     298.     309.     471.  
+                                                     *   486.     488.     539.  
+MASTNAM                                    D      24.  *
+MASTOPEN                                   X     515.  *   179.     268.  
+MASTOPND                                   X     523.  *   518.  
+MASTREC                                    D      22.  *   288.     289.     309.     310.     487.     488.     538.  
+                                                     *   539.  
+MENUBUTTON                                 O 1    56.  *   169.     200.  
+MENUCOD                                    D      36.  *   256.     258.     260.     262.     279.     330.     332.  
+                                                     *   347.  
+MENULST                                    O 4    97.  *   225.     236.     244.     254.     255.     259.  
+MENUMKEY                                   D      15.  *   278.     280.     312.     317.     347.     349.     469.  
+                                                     *   470.     534.  
+MENUMST                                    i      13.  *   280.     284.     317.     349.     470.     482.     516.  
+                                                     *   534.  
+MENUMSTN                                   D      14.  *   516.  
+MENUOPND                                   X     512.  *   507.  
+MENUREC                                    D      34.  *   235.     236.     255.     256.  
+MENUSKEY                                   D      29.  *   258.     278.  
+MENUSOPN                                   X     504.  *   178.     217.  
+MENUSYS                                    i      27.  *   233.     505.  
+MENUSYSN                                   D      28.  *   505.  
+MNUDESC                                    D      35.  *   256.     261.     263.     333.  
+MNUPRGDS                                   D      20.  *   284.     288.     310.     317.     389.     457.     458.  
+                                                     *   482.     487.     534.     538.     560.  
+MNUPRGNM                                   D      19.  *   284.     288.     310.     317.     388.     447.     448.  
+                                                     *   482.     487.     534.     538.     559.  
+MNUSELNO                                   D      18.  *   284.     288.     310.     312.     317.     331.     347.  
+                                                     *   358.     387.     430.     431.     432.     437.     438.     439.  
+                                                     *   469.     482.     487.     534.     538.     558.  
+MNUSYSID                                   D      17.  *   284.     286.     288.     310.     312.     317.     330.  
+                                                     *   469.     482.     487.     534.     538.     557.  
+MODIFY                                     X     379.  *   319.  
+MODIFYIT                                   X     314.  *
+MOV03                                      X     437.  *   433.  
+MSTDESC                                    D      23.  *
+MSYSDSC                                    D      32.  *   233.     235.     263.     357.     386.     420.     421.  
+MSYSID                                     D      31.  *   233.     235.     262.     356.     385.     411.     412.  
+MTABSETS                                   D      42.  *   272.  
+
+
+
+PAGE    5      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:07
+                                         
+
+NAMFLAG                                    D      49.  *   493.     548.  
+NDX                                        F      44.  *
+NEWKY01                                    O 6    95.  *   167.     337.     412.     567.  
+NEWKYPT                                    O16    88.  *   159.     566.  
+NEWKYTXT                                   D      78.  *   159.  
+NEWONE                                     X     328.  *
+NOCHG                                      X     501.  *   479.     531.  
+NOMAST                                     X     520.  *   515.  
+NOMENUS                                    X     509.  *   504.  
+NULL                                       X     141.  *   139.  
+NULLFLD                                    D      54.  *   331.     334.     335.     336.     337.     557.     558.  
+                                                     *   559.     560.     563.     564.     565.  
+NULLSAV                                    X     623.  *   621.  
+NULLSV1                                    X     587.  *   585.  
+NWK2                                       F      11.  *   437.     438.  
+OPMODE                                     D      52.  *   369.     380.     476.     492.     589.     591.     625.  
+                                                     *   627.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PRMT01                                     O16    83.  *   154.     189.  
+PRMT02                                     O16    84.  *   155.     190.  
+PRMT03                                     O16    85.  *   156.     191.  
+PRMT04                                     O16    86.  *   157.     192.  
+PRMT05                                     O16    87.  *   158.     193.  
+PROGNAME                                   O16    81.  *   151.     187.  
+PROGNTXT                                   D      72.  *   151.  
+QUITBUTTON                                 O 1    58.  *   173.     201.  
+REPLY                                      D       8.  *   147.  
+RESULT                                     F     100.  *   133.     139.     200.     201.     202.     203.     244.  
+                                                     *   255.     321.     328.     339.     351.     364.     365.     366.  
+                                                     *   395.     396.     397.     398.     409.     418.     428.     434.  
+                                                     *   445.     455.     465.     466.     472.     501.     509.     520.  
+                                                     *   526.     572.     579.     585.     616.     621.  
+RESULTR                                    F     101.  *   298.     309.     471.     486.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVE                                       X     476.  *   366.     398.  
+SAVEBOX                                    O 5   114.  *   175.     579.     607.     616.  
+SAVEBUTTON                                 O 1    60.  *
+SAVEIT                                     X     589.  *   585.  
+SDATA                                      D     115.  *   175.  
+SECURITY                                   F       9. A*
+SP1                                        D      39.  *   256.     310.  
+SPACE                                      D      38.  *
+START                                      X     181.  *
+TAB                                        D      40.  *   235.     288.     487.     538.  
+TABSETS                                    D      41.  *   225.  
+TESTIT                                     X     139.  *   133.  
+TESTONE                                    D      18. A*
+TESTSAV                                    X     621.  *   616.  
+TESTSV1                                    X     585.  *   579.  
+TESTTHRE                                   D      20. A*
+
+
+
+PAGE    6      SMMASTUD.PLS IDE                                                                               03-22-04 14:48:07
+                                         
+
+TESTTWO                                    D      19. A*
+TITLE                                      O16    80.  *   152.     186.  
+TITLTXT                                    D      71.  *   152.  
+TODAY                                      D       8. A*   153.  
+UPDAT                                      X     478.  *   601.     628.  
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+WRITBUTTON                                 O 1    61.  *   172.     366.     398.     571.  
+WRITE                                      X     530.  *   477.     597.     626.  
+XDX                                        F      45.  *   230.     238.     281.     291.  
+XITFLAG                                    D      51.  *   545.     549.     596.     609.  
+0                                          I     213.  *   297.  
+

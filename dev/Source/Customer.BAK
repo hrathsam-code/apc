@@ -1,0 +1,135 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Customer.FD                                                    ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %ifndef           $CustomerVAR
+$CustomerVAR          equate            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+Customer            record
+Account             DIM       4
+CUSTSTTS            DIM       1         STATUS OF ACCT: A=OPEN, C=MODIFIED, D=DELETED
+Name                DIM       30
+Address1            DIM       25
+City                DIM       20
+State               DIM       2
+Zip                 FORM      5
+CUSTCRED            FORM      6         CREDIT LIMIT IN DOLLARS
+CUSTCATG            DIM       1         PAYMENT CATEGORY: P=POOR, OTHERWISE OK
+LSTSALDT            DIM       6         LAST SALE DATE
+LSTPAYDT            DIM       6         LAST PAYMENT DATE
+LSTSALPR            FORM      5.2       LAST INVOICE AMOUNT
+LSTPAYPR            FORM      5.2       LAST PAYMENT AMOUNT
+COMMCODE            DIM       4         COMMISSION CODE
+CURNTDUE            FORM      6.2       CURRENT DUE AMOUNT    (1-30 DAYS OLD)
+PD01TO30            FORM      6.2       PAST DUE 1-30         (31-60 DAYS OLD)
+PD31TO60            FORM      6.2       PAST DUE 31-60        (61-90 DAYS OLD)
+PD61TO90            FORM      6.2       PAST DUE 61-90        (91-120 DAYS OLD)
+PDOVR90             FORM      6.2       PAST DUE 91+          (121+   DAYS OLD)
+MTDCASH             FORM      6.2
+MTDCRED             FORM      5.2
+                    recordend
+
+TempCustomer       record            like       Customer
+OrigCustomer       record            like       Customer
+SaveCustomer       record            like       Customer
+.
+.
+. File Keys and file labels
+. -------------------------
+.
+CustomerK1SIZE        const             "4"                                      //Length of the Key variable)
+CustomerK2SIZE        const             "34"                                     //Length of the Key variable 2)
+CustomerK3SIZE        const             "6"                                      //Length of the Key variable 2)
+.
+. By Entity, Seq major, seq minor
+.
+CustomerI1DEF         init              "-N,1-4"                                 //Index definitions for Key 1)
+.
+. By Entity, Year, period, seq Major, Seq Minor
+.
+CustomerI2DEF         init              "-N,6-35,1-4"                            //Index definitions for Key 2)
+. By Entity, Year, period, seq Major, Seq Minor
+.
+CustomerI3DEF         init              "-N,81-82,1-4"                           //Index definitions for Key 2)
+.
+CustomerFileSize      const             "191"                                    //Length of each Record)
+
+CustomerKY            dim               CustomerK1SIZE                              //The Actual 'Key' variable)
+CustomerKY2           dim               CustomerK2SIZE                              //The Actual 'Key' variable)
+CustomerKY3           dim               CustomerK3SIZE                              //The Actual 'Key' variable)
+
+CustomerPROG          init              "Program Name"
+CustomerDESC          init              "Customer description"                      //Description of the Master files
+CustomerTITLE         init              "Record Title"                           //Description used later for headers, etc)
+CustomerHELP          init              "Customer.HLP"                              //Name of the Help file for later purposes)
+
+CustomerTXTNM         init              "accounts.txt"                            //Actual Text Filename  (i.e. CUSTFL.TXT)
+CustomerISI1NM        init              "accounts.new"                            //Actual ISI Filename   (i.e. CUSTFL.ISI)
+CustomerISI2NM        init              "acctsnam.new"                            //Actual ISI Filename
+CustomerISI3NM        init              "acctstat.new"                            //Actual ISI Filename
+
+CustomerFLST          filelist
+                   %ifdef            CustomerKY
+CustomerFL            ifile             Name=CustomerISI1NM,DUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY2
+CustomerFL2           ifile             Name=CustomerISI2NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY3
+CustomerFL3           ifile             Name=CustomerISI3NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY4
+CustomerFL4           ifile             Name=CustomerISI4NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY5
+CustomerFL5           ifile             Name=CustomerISI5NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY6
+CustomerFL6           ifile             Name=CustomerISI6NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY7
+CustomerFL7           ifile             Name=CustomerISI7NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY8
+CustomerFL8           ifile             Name=CustomerISI8NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            CustomerKY9
+CustomerFL9           ifile             Name=CustomerISI9NM,NODUP,NOPATH,UPPER
+                   %endif
+                   filelistend
+                   %endif
+
+                   %ifndef           $CustomerIO
+                     include           Customer.IO
+                   %endif

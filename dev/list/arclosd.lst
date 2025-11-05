@@ -1,0 +1,25 @@
+
+
+
+PAGE    1      arclosd                                                                                        02-11-19 11:35:37
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP arclosd -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    9.    INCLUDE  B: common.txt
+   46.    INCLUDE  C: rcvbles.txt
+   54.    INCLUDE  D: custmast.txt
+   71.    INCLUDE  E: invctabl.txt
+  299.    INCLUDE  F: custio.txt
+  300.    INCLUDE  G: rcvblsio.txt
+  307.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\arclosd.plc                                                                                                                                                                                                                                    
+       639 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:37 11:35:37
+  00002094 DATA;  00000662  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

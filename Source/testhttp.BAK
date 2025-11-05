@@ -1,0 +1,47 @@
+                    include            workvar.inc
+Quote1              init               34
+..HostName            init               "https://wwwcie.ups.com/ups.app/xml/XAV"
+HostName            init               "wwwcie.ups.com"
+ResourcePath        init               "/ups.app/xml/XAV"
+PostMessage         dim                1000
+OutputString        dim                1000
+
+                    pack               PostMessage from "<?xml version= ",Quote1,"1.0",Quote1," ?> ":
+                                       "<AddressValidationRequest xml:lang='en-US'> ":
+                                       "<Request> ":
+                                       "<TransactionReference> ":
+                                       "<CustomerContext> Customer Context </CustomerContext> ":
+                                       "</TransactionReference> ":
+                                       "<RequestAction>AV</RequestAction> ":
+                                       "</Request> ":
+                                       "<Address> ":
+                                       "1 Meade ":
+                                       "<City>Bethpage</City> ":
+                                       "<StateProvinceCode>NY</StateProvinceCode> ":
+                                       "<PostalCode>11714</PostalCode> ":
+                                       "</Address> ":
+                                       "</AddressValidationRequest> "
+
+                    clear              PostMessage
+results             dim                10000
+HttpResults         dim                10000
+HttpTrace           dim                10000
+HttpError           dim                10000
+SSLError            dim                10000
+
+                    http               HostName,ResourcePath,*HttpResult=results:                  //*FileName=OutputString,
+..                                                *PostMessage=PostMessage:
+.                                                *Port=443:
+                                                *Flags=8:
+                                                *result=HttpResults,*Trace=HttpTrace,*Error=HttpError
+
+                    getmode            *LastSSLError=SSLError
+
+
+
+
+
+
+
+.."<?xml version="1.0" ?> <AddressValidationRequest xml:lang='en-US'> <Request> <TransactionReference> <CustomerContext> Customer Context </CustomerContext> </TransactionReference> <RequestAction>AV</RequestAction> </Request> <Address> 1 Meade
+.<City>Bethpage</City> <StateProvinceCode>NY</StateProvinceCode> <PostalCode>11714</PostalCode> </Address> "</AddressValidationRequest>

@@ -1,0 +1,29 @@
+. =============================================================================
+. 
+.   SYSTEM:      ACCOUNTS PAYABLE
+.   FILE NAME:   PAYMENTS HISTORY FILE
+.   FILE ID:     APPAIDFL
+.   FILE ORGAN:  ISAM   (1-19)
+.   SPACE COMP:  NO
+. 
+.   RECORD LENGTH = 83 BYTES,  RECORD COMPRESSED, ISAM ADDED
+. 
+TRNKEY   DIM       19             TRANSACTION KEY
+TRNKEY2  DIM       19             TEST TRANSACTION KEY
+. 
+TACCN    DIM       6              TRANSACTION VENDOR NUMBER   (RECORD KEY)
+TYEAR    DIM       2              TRANSACTION YEAR             (RECORD KEY)
+TMON     DIM       2              TRANSACTION MONTH            (RECORD KEY)
+TDAY     DIM       2              TRANSACTION DAY              (RECORD KEY)
+TINVNO   DIM       6              INVOICE NUMBER               (RECORD KEY)
+TCNT     FORM      1              INVOICE COUNTER              (RECORD KEY)
+TDESC    DIM       20             DESCRIPTION
+TAMT     FORM      6.2            TRANSACTION AMOUNT
+TLDDAY   DIM       8              LAST DISCOUNT DAY 
+TDISA    FORM      4.2            DISCOUNT AMOUNT
+CKNUMBER DIM       6              CHECK NUMBER OF PAYMENT
+TPAIDDT  DIM       8
+TDCODE   DIM       6              PRIMARY DISTRIBUTION CODE
+. 
+. =============================================================================
+. 

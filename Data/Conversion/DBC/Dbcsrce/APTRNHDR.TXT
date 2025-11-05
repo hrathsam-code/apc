@@ -1,0 +1,18 @@
+APTRANFL FILE      UNCOMPRESSED
+SEQ      FORM      "-1"
+TACCN    INIT      "000000"
+TMON     INIT      "00"
+TDAY     INIT      "00"
+TYEAR    INIT      "00"
+TINVNO   INIT      "0000000"
+DESC     DIM       20
+AMT      FORM      "000000.00"
+LDDAY    INIT      "00/00/00"
+DISA     FORM      4.2
+         PREP      APTRANFL,"APTRANFL"
+         KEYIN     *R,*P1:24,"COMPANY NAME = ",DESC
+         WRITE     APTRANFL,SEQ;TACCN,TMON,TDAY,TYEAR,TINVNO,DESC,AMT,LDDAY:
+                   DISA
+         WEOF      APTRANFL,SEQ
+         CLOSE     APTRANFL
+         STOP

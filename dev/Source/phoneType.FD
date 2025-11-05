@@ -1,0 +1,105 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    PhoneType.FD                                                   ;
+;                                                                             ;
+;   AUTHOR:                                                                   ;
+;                                                                             ;
+;     DATE:    02/28/2005 AT 10:55PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/28/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+                   %ifndef           $PhoneTypeVAR
+$PhoneTypeVAR          equate            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field            Type            Length    From - To        Description
+.-----------------------------------------------------------------------------------------
+PhoneType        record
+Type                DIM               1        1 - 1
+Description         DIM               20       2 - 21
+Use_Extension       FORM              1       22 - 22
+                    RECORDEND
+
+TempPhoneType       record            like       PhoneType
+OrigPhoneType       record            like       PhoneType
+SavePhoneType       record            like       PhoneType
+.
+.
+. File Keys and file labels
+. -------------------------
+.
+PhoneTypeK1SIZE        const             "1"                                       //Length of the Key variable)
+.
+. By Entity, Seq major, seq minor
+.
+PhoneTypeI1DEF         init              "-N,1-1"                                   //Index definitions for Key 1)
+.
+PhoneTypeFileSize      const             "35"                                       //Length of each Record)
+
+PhoneTypeKY            dim               PhoneTypeK1SIZE                              //The Actual 'Key' variable)
+
+PhoneTypePROG          init              "Program Name"
+PhoneTypeDESC          init              "PhoneType description"                      //Description of the Master files
+PhoneTypeTITLE         init              "Record Title"                           //Description used later for headers, etc)
+PhoneTypeHELP          init              "PhoneType.HLP"                              //Name of the Help file for later purposes)
+
+PhoneTypeTXTNM         init              "$DataDir\","PhoneType.TXT"                 //Actual Text Filename  (i.e. CUSTFL.TXT)
+PhoneTypeISI1NM        init              "$DataDir\","PhoneType.ISI"                 //Actual ISI Filename   (i.e. CUSTFL.ISI)
+PhoneTypeISI2NM        init              "$DataDir\","PhoneType2.ISI"                //Actual ISI Filename
+
+PhoneTypeFLST          filelist
+                   %ifdef            PhoneTypeKY
+PhoneTypeFL            ifile             Name=PhoneTypeISI1NM,DUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY2
+PhoneTypeFL2           ifile             Name=PhoneTypeISI2NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY3
+PhoneTypeFL3           ifile             Name=PhoneTypeISI3NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY4
+PhoneTypeFL4           ifile             Name=PhoneTypeISI4NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY5
+PhoneTypeFL5           ifile             Name=PhoneTypeISI5NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY6
+PhoneTypeFL6           ifile             Name=PhoneTypeISI6NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY7
+PhoneTypeFL7           ifile             Name=PhoneTypeISI7NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY8
+PhoneTypeFL8           ifile             Name=PhoneTypeISI8NM,NODUP,NOPATH,UPPER
+                   %endif
+
+                   %ifdef            PhoneTypeKY9
+PhoneTypeFL9           ifile             Name=PhoneTypeISI9NM,NODUP,NOPATH,UPPER
+                   %endif
+                   filelistend
+                   %endif
+
+                   %ifndef           $PhoneTypeIO
+                     include           PhoneType.IO
+                   %endif

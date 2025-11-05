@@ -1,0 +1,4 @@
+NOTE       9302
+CAU       23346
+Degree     2584
+PreTic     1557

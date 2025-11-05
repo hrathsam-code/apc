@@ -1,0 +1,125 @@
+. MASMENU - SYSTEM INITIALIZATION
+.
+. MODIFIED 9/20/82 TO TEST COMPANY AND DIRECT ACCORDINGLY
+. 
+         INCLUDE   NCOMMON.TXT
+.
+INDEX    FORM      2                   USER SELECTION VARIABLE
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+ANSWER   DIM       8
+PORTX    DIM       2
+COMPFORM FORM      1
+COMPDISP INIT      "CO= "
+. 
+.         INCLUDE   LOGDATA.TXT
+. 
+PROGRAM  DIM       8
+. ROLLNAME INIT      "ROLLFILE/SYST:W"
+.
+DCOMPANY DIM       15
+SCRTITL  INIT      "APC COMPONENTS APPLICATIONS"
+TITLTXT  DIM       50
+PRMPTTXT INIT      "Selection by number"
+TITLE    STATTEXT
+PROMPT   STATTEXT
+SELCT    EDITTEXT
++................................................................
+. MAINLINE
+.
+         SETMODE   *LTGRAY=ON,*3D=ON
+*................................................................
+. THIS MENU REQUIRES A SECURITY CLEARANCE OF AT LEAST 1
+.
+.
+ 
+DNY      MOVE      "APC COMPONENTS APPLICATIONS"  TO DCOMPANY
+         GOTO      DISPLAY
+.
+. DISPLAY THE MENU
+.
+DISPLAY  PACK      TITLTXT WITH SCRTITL,DCOMPANY
+        CREATE    TITLE=1:2:1:52,TITLTXT,"TIMES(9,BOLD)",BORDER,STYLE=3DOUT
+        CREATE    PROMPT=11:13:1:20,PRMPTTXT,"TIMES(10,BOLD)",BORDER,STYLE=3DOUT
+        CREATE    SELCT=11:13:24:27,FONT="TIMES(9)",BORDER        
+         DISPLAY   *BGCOLOR=*YELLOW,*ES,*BLACK:
+                   *P63:2,"Today is ",TODAY:
+                   *P01:03,"( 1) ":
+                   "DISPLAY PROCESSING SYSTEMS":
+                   *P01:04,"( 2) ":
+                   "OPERATOR LOG-ON":
+                   *P01:05,"( 3) ":
+                   "DATASHARE SHUTDOWN - DOS RETURN":
+                   *P01:20,"VERSION 5.0 - 03/26/96",*BLUE
+         ACTIVATE  TITLE
+         ACTIVATE  PROMPT
+         ACTIVATE  SELCT
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN     *P41:12,"Enter (99) to leave this menu.":
+                   *P25:12,INDEX
+         COMPARE   "1" TO INDEX
+         GOTO      GETINDEX IF LESS
+         COMPARE   "99" TO INDEX
+         STOP      IF EQUAL
+         COMPARE   "45" TO INDEX
+         GOTO      ASKPGM IF EQUAL
+         COMPARE   "50" TO INDEX
+         GOTO      ASKPGM IF EQUAL
+         COMPARE   "04" TO INDEX
+         GOTO      GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE ROUTINE INDICATED BY THE INDEX
+.
+         TRAP      BADCHAIN IF CFAIL
+         CLOCK     TIME TO TIME
+         BRANCH    INDEX OF APPMENU1:  DISPLAY PROCESSING SYSTEMS
+                            ANSWER1:  OPERATOR LOG-ON
+                            EXIT   RETURN TO OPERATING SYSTEM
+         GOTO      GETINDEX
+*................................................................
+ASKPGM   TRAP      BADCHAIN IF CFAIL
+        
+GETPGM   KEYIN     *P01:24,*EL,"ENTER PGM NAME ",PROGRAM
+         CHAIN     PROGRAM
+         GOTO      GETINDEX
+BREACH   BEEP
+         DISPLAY   *P01:22,*EL,*HON,"S E C U R I T Y   V I O L A T I O N":
+                   "  - YOU ARE CAUGHT!":
+                   *P01:23,"YOU HAVE BEEN LOGGED IN VIOLATION!",*HOFF,*W3
+         DISPLAY   *P01:23,*EF
+         GOTO      ANSWER1
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN INSTRUCTIONS
+*................................................................
+. DISPLAY PROCESSING SYSTEMS
+.
+APPMENU1
+.
+         CHAIN     "APPMENU1"
+         GOTO      GETINDEX
+. 
+*................................................................
+. OPERATOR LOG-ON
+.
+ANSWER1  
+         CLEAR     ANSWER
+         APPEND    "ANSWER"  TO ANSWER
+
+RESETANS RESET     ANSWER
+         CHAIN     ANSWER
+         GOTO      GETINDEX
+*................................................................
+. RETURN TO OPERATING SYSTEM
+.
+EXIT     
+         SHUTDOWN   
+         GOTO      GETINDEX
+.
+.
+.................................................................
+

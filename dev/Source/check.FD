@@ -1,0 +1,108 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Check.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-14-2019 At 12:05                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              10001   07-05-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;
+                     %IFNDEF $CheckVAR
+$CheckVAR                        EQUATE         1
+;
+;
+;         Field Definitions
+;================================================================================================;
+;
+;
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+Check                            RECORD
+Entity                           Dim                8                   1 - 8        //1 - 8
+SubEntity                        Dim                8                   9 - 16       //9 - 16
+Vendor                           Dim                6                  17 - 22       //17 - 22
+BankCode                         Dim                6                  23 - 28       //23 - 28
+CheckNo                          Form               10                 29 - 38       //29 - 38
+CheckDate                        Dim                8                  39 - 46       //39 - 46
+Year                             Dim                4                  47 - 50       //47 - 50
+Month                            Dim                2                  51 - 52       //51 - 52
+CheckAmount                      Form               10.2               53 - 65       //53 - 65       //Check Amount = GrossAmou
+DiscAmt                          Form               7.2                66 - 75       //66 - 75
+GrossAmount                      Form               10.2               76 - 88       //76 - 88       //HR 6/1/2005
+CheckFlag                        Dim                1                  89 - 89       //89 - 89       //M = Manual
+Printed                          Form               1                  90 - 90       //90 - 90       //0=Not Printed, 1=Printed
+SeqMajor                         Form               7                  91 - 97       //91 - 97
+VoidedFlag                       Form               1                  98 - 98       //98 - 98
+VoidedDate                       Dim                8                  99 - 106      //99 - 106
+TransDate                        Dim                8                 107 - 114      //107 - 114
+Memo                             Dim                60                115 - 174      //115 - 174
+CheckSeqMajor                    Form               7                 175 - 181      //115 - 174
+                                 RECORDEND
+;
+;======================================================================================;
+TempCheck                           record          like   Check
+OrigCheck                           record          like   Check
+SaveCheck                           record          like   Check
+;======================================================================================;
+;
+; File Keys and File Labels
+; --------------------------------------------------
+CheckTXTNM                          INIT             "CheckFL"
+CheckISI1NM                         INIT             "CheckFL.ISI"
+CheckISI2NM                         INIT             "CheckFL2.ISI"
+CheckISI3NM                         INIT             "CheckFL3.ISI"
+CheckI1DEF                           init            "-n,z,y,1-8,23-28,29-38"
+CheckI2DEF                           init            "-n,z,y,1-8,17-22,39-46,91-97"
+CheckI3DEF                           init            "-n,z,y,1-8,39-46,29-38,17-22,23-28"
+;
+; By Entity, BankCode, CheckNo
+; 1-8, 23-28, 29-38
+;
+CheckKY                          DIM                24
+;
+; By Entity, Vendor, CheckDate, SeqMajor
+; 1-8, 17-22, 39-46, 91-97
+;
+CheckKY2                         DIM                29
+;
+; By Entity, CheckDate, CheckNo, Vendor, BankCode
+; 1-8, 39-46, 29-38, 17-22, 23-28
+;
+CheckKY3                         DIM                38
+;=============================================================================;
+;
+CheckFLST                         FILELIST
+CheckFL                             IFILE              name="CheckFL.ISI",FIX=190,NODUP,NOPATH
+CheckFL2                            IFILE              name="CheckFL2.ISI",FIX=190,NODUP,NOPATH
+CheckFL3                            IFILE              name="CheckFL3.ISI",FIX=190,NODUP,NOPATH
+                                    FILELISTEND
+
+CheckFileSize       CONST      "190"
+
+CheckProg           INIT       "Check Program"
+CheckDesc           INIT       "Check Maintenance"
+CheckTITLE          INIT       "Check Record"
+CheckHelp           INIT       "Check.HLP"
+
+
+
+
+          %ENDIF          //End of FD Include File
+
+
+          %IFNDEF $CheckVARIO
+            INCLUDE Check.IO
+          %ENDIF          //End of IO Include File

@@ -1,0 +1,122 @@
+. DATASHARE MASTER PROGRAM FOR LOGGING ERRORS
+.
+*................................................................
+. NOTE:	MODIFIED 9/18/82 AS FOLLOWS*
+. 
+.	REMOVE THE TIMEOUT FUNCTION IN THE ERROR ROUTINE!
+.	MAKE THE OPERATOR LOOK AT THE MESSAGE AND WRITE	IT DOWN!
+.	CARRY DATE6 BY MAKING IT A NON-INITIALIZED FIELD IN USER DATA AREA
+.	ENABLE THE LOGGING FILE	AND WRITE TO IT!  9/18/82
+.----------------------------------------------------------------
+. 
+. COMMON AREA
+. THIS AREA GETS OVERWRITTEN WITH AN 11-BYTE CHARACTER STRING
+. VARIABLE WHEN	AN ERROR OCCURS
+.
+. NOTE:	"ERROR"	USES THE SAME NUMBER OF	BYTES OF USERS DATA AREA
+.	AS THE VARIABLES "PORTN" AND "TODAY" DEFINED IN	COMMON
+. 
+ERROR	 DIM	   *30		       ERROR MESSAGE
+. 
+. ERROR	= (2-12-1 or 15	ACTUAL BYTES OF	STORAGE, SHOWN DIM 12)
+. 
+. NOTE THAT IF NO DATASHARE ERROR HAS OCCURRED,	THE CONTENTS OF	
+.	    THE	FIELD CALLED  -	ERROR -	ARE AS FOLLOWS:
+. 
+.	PORTN -	FROM ANSWER PROGRAM (2-1-1 or  4 BYTES)	 and
+.	TODAY -	FROM ANSWER PROGRAM (2-8-1 or 11 BYTES)
+.     ------------TOTAL	FIELD SIZE----------  15 BYTES	--------
+. 
+TODAY	 DIM	   *8
+SECURITY FORM	   *1		       USER'S SECURITY CLEARANCE
+DATE6	 DIM	   *6		       CARRIED FROM ANSWER PROGRAM 9/18/82
+*................................................................
+	 INCLUDE   XCOMMON.TXT
+*................................................................
+ANSWER	 DIM	   8
+NAME	 DIM	   8
+TIME	 INIT	   "hh:mm:ss"	       hours:minutes:seconds
+CWK1	 DIM	   1		       WORK AREA: CHAR.TYPE,LEN=1
+CWK2	 DIM	   2		       WORK AREA: CHAR.TYPE,LEN=2
+CWK11	 INIT	   "	       "       CHARACTER, LENGTH 11
+.
+PORTN	 FORM	   2
+.
+	 INCLUDE   LOGDATA.TXT
+. 
+PORTX	 INIT	   " 4"		  NOTE MODIFY AS NECESSARY FOR EACH PORT
+*................................................................
+. SEE IF THERE ARE ANY DATASHARE ERRORS.
+. IF NO	ERROR OCCURED, THE 2-BYTE PORT NUMBER WILL BE MOVED INTO
+. THE WORK AREA.  IN THIS CASE,	THE 9TH	CHARACTER OF CWK11 WILL
+. STILL	BE A BLANK.
+. IF AN	ERROR OCCURED, THE 11-BYTE ERROR MESSAGE WILL BE MOVED
+. INTO CWK11.  IN THIS CASE, THE 9TH CHARACTER OF CWK11	WILL BE
+. AN ASTERISK.
+. BY CHECKING THE 9TH CHARACTER, IT CAN	BE DETERMINED WHETHER AN
+. ERROR	OCCURED	OR NOT.
+.
+.	 DISPLAY   *P1:1,*ES,*P1:4,"MASTER PROGRAM IS NOW ACTIVE",*W2
+.
+	 MOVE	   ERROR TO CWK11
+	 RESET	   CWK11 TO 9
+	 CMATCH	   "*" TO CWK11
+	 GOTO	   MASMENU IF NOT EQUAL
+.
+	 INCLUDE   LOGIO/TEXT
+*................................................................
+. SINCE	THE DATE PASSED	IN COMMON HAS BEEN OVERWRITTEN,	GET THE
+. JULIAN DATE AND USE THAT FOR LOGGING
+. 
+	 CLOCK	   DATE	TO TODAY
+.
+*................................................................
+. WRITE	THE LOG-OFF
+.
+	 CLOCK	   TIME	TO TIME
+	 MOVE	   "ERROR" TO LOGTYPE
+	 MOVE	   ERROR TO LOGINFO
+...	 CALL	   LOGWRITE
+*................................................................
+. GIVE THE USER	A CHANCE TO LOOK AT THE	SCREEN BEFORE ABORTING
+.
+. MODIFIED GREATLY 9/18/82  
+. 
+	 BEEP
+	 DISPLAY   *P1:23,*EF,*IN,"UNTRAPPED DATASHARE ERROR AT	",TIME:
+		   *P40:23,"NOTE ERROR=	",ERROR," FOR REFERENCE"
+	 KEYIN	   *P1:24,"TAP ENTER AFTER MESSAGE RECORDED! ",CWK1
+*................................................................
+. CHAIN	TO THE APPROPRIATE ANSWER PROGRAM
+.
+LOGOFF	 TRAPCLR   PARITY    (NOP)
+.
+BUILDANS CLEAR	   ANSWER		  BUILD	THE NAME
+	 APPEND	   "ANSWER" TO ANSWER	  FORM:	ANSWERn
+	 RESET	   ANSWER
+	 TRAP	   BADANS IF CFAIL
+	 CHAIN	   ANSWER
+*................................................................
+. ANSWER PROGRAM COULD NOT BE FOUND
+.
+BADANS	 DISPLAY   *P58:1,*EL,"	 The system program":
+		   *P58:2,*EL,"	 #"",*+,ANSWER,"#" could not":
+		   *P58:3,*EL,"	 be found!  Consult":
+		   *P58:4,*EL,"	 your programmer."
+	 GOTO	   HANG
+*................................................................
+. CHAIN	TO THE MASTER MENU
+.
+MASMENU	 TRAP	   BADMASM IF CFAIL
+	 CLEAR	   NAME
+	 APPEND	   "MASMENU" TO	NAME
+	 RESET	   NAME
+	 CHAIN	   NAME
+*................................................................
+. THE MASTER MENU COULD	NOT BE FOUND
+.
+BADMASM	 DISPLAY   *P58:1,"  The system	program":
+		   *P58:2,"  #"MASMENU#" could not":
+		   *P58:3,"  found!  Consult":
+		   *P58:4,"  your programmer."
+	 GOTO	   HANG

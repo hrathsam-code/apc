@@ -1,0 +1,130 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    ARTRN.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-22-2019 At 15:31                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00105   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $ARTRNVAR
+$ARTRNVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+ARTRN                            RECORD
+Entity                           Dim                8                   1 - 8        //1 - 8
+SubEntity                        Dim                8                   9 - 16       //9 - 16
+CustomerID                       Dim                10                 17 - 26       //17 - 26
+Reference                        Dim                10                 27 - 36       //27 - 36
+CustomerPO                       Dim                20                 37 - 56       //37 - 56
+EntryDate                        Dim                8                  57 - 64       //57 - 64            CCYYMMDD format
+TransDate                        Dim                8                  65 - 72       //65 - 72            CCYYMMDD format
+BillDate                         Dim                8                  73 - 80       //73 - 80            CCYYMMDD format
+DueDate                          Dim                8                  81 - 88       //81 - 88            CCYYMMDD format
+OrigAmt                          Form               7.2                89 - 98       //89 - 98
+Balance                          Form               7.2                99 - 108      //99 - 108
+NonDiscAmt                       Form               7.2               109 - 118      //109 - 118
+DiscDate                         Dim                8                 119 - 126      //119 - 126           CCYYMMDD format
+DiscPct                          Form               3.2               127 - 132      //127 - 132
+DiscAmt                          Form               7.2               133 - 142      //133 - 142
+Memo                             Dim                20                143 - 162      //143 - 162
+ARAccount                        Dim                8                 163 - 170      //163 - 170
+AgainstInv                       Dim                10                171 - 180      //171 - 180
+SeqMajor                         Form               7                 181 - 187      //181 - 187
+InvCredit                        Dim                1                 188 - 188      //188 - 188           //1=Hold, 0=released
+ClosedFlag                       Dim                1                 189 - 189      //189 - 189           //O=Open, C=Closed
+OrderNumber                      Dim                10                190 - 199      //190 - 199
+SalesAmt                         Form               7.2               200 - 209      //200 - 209
+TaxAmount                        Form               7.2               210 - 219      //2
+TransTime                        Dim                4                 220 - 223
+                                 RECORDEND
+;
+;======================================================================================;
+TempARTRN                           record          like   ARTRN                           
+OrigARTRN                           record          like   ARTRN                           
+SaveARTRN                           record          like   ARTRN                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+ARTRNTXTNM                          INIT         "ARTRNFL"
+ARTRNISI1NM                         INIT               "ARTRNFL.ISI"
+ARTRNISI2NM                         INIT               "$Datadir\ARTRNFL2.ISI"
+ARTRNISI3NM                         INIT               "ARTRNFL3.ISI"
+ARTRNISI4NM                         INIT               "ARTRNFL4.ISI"
+ARTRNISI5NM                         INIT               "ARTRNFL5.ISI"
+ARTRNI1DEF                           init            "-u,z,y,1-8,17-26,27-36"
+ARTRNI2DEF                           init            "-n,u,z,y,1-8,181-187"
+ARTRNI3DEF                           init            "-n,u,z,y,1-8,17-26,189-189,65-72,181-187"
+ARTRNI4DEF                           init            "-n,u,z,y,1-8,189-189,17-26,65-72,181-187"
+ARTRNI5DEF                           init            "-n,u,z,y,1-8,188-188,27-36,181-187"
+;
+; By Entity, CustomerID, Reference
+; 1-8, 17-26, 27-36
+;
+ARTRNKY                          DIM                28
+;
+; By Entity, SeqMajor
+; 1-8, 181-187
+;
+ARTRNKY2                         DIM                15
+;
+; By Entity, CustomerID, ClosedFlag, TransDate, SeqMajor
+; 1-8, 17-26, 189-189, 65-72, 181-187
+;
+ARTRNKY3                         DIM                34
+;
+; By Entity, ClosedFlag, CustomerID, TransDate, SeqMajor
+; 1-8, 189-189, 17-26, 65-72, 181-187
+;
+ARTRNKY4                         DIM                34
+;
+; By Entity, InvCredit, Reference, SeqMajor
+; 1-8, 188-188, 27-36, 181-187
+;
+ARTRNKY5                         DIM                26
+;=============================================================================;
+;
+ARTRNFLST                         FILELIST
+ARTRNFL                             IFILE              name="ARTRNFL.ISI",FIX=300,UPPER,NOPATH
+ARTRNFL2                            IFILE              name="$Datadir\ARTRNFL2.ISI",FIX=300,NODUP,UPPER,NOPATH
+ARTRNFL3                            IFILE              name="ARTRNFL3.ISI",FIX=300,NODUP,UPPER,NOPATH
+ARTRNFL4                            IFILE              name="ARTRNFL4.ISI",FIX=300,NODUP,UPPER,NOPATH
+ARTRNFL5                            IFILE              name="ARTRNFL5.ISI",FIX=300,NODUP,UPPER,NOPATH
+                                    FILELISTEND
+ 
+ARTRNFileSize       CONST      "300"
+ 
+ARTRNProg           INIT       "ARTRN Program"
+ARTRNDesc           INIT       "ARTRN Maintenance"
+ARTRNTITLE          INIT       "ARTRN Record"
+ARTRNHelp           INIT       "ARTRN.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $ARTRNVARIO
+            INCLUDE ARTRN.IO 
+          %ENDIF          //End of IO Include File

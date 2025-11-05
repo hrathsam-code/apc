@@ -1,0 +1,27 @@
+
+
+
+PAGE    1      poentry                                                                                        02-11-19 15:45:40
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP poentry 
+
+    4.    INCLUDE  A: common.txt
+   54.    INCLUDE  B: part.txt
+   58.    INCLUDE  C: contfile.txt
+   63.    INCLUDE  D: splopnfd.txt
+   14. D                              DBOX     DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   97.    INCLUDE  E: custmast.txt
+  113.    INCLUDE  F: rcvbles.txt
+ 1043.    INCLUDE  G: poupdsq.txt
+ 1105.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\poentry.plc                                                                                                                                                                                                                                    
+      1512 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 15:45:40 15:45:40
+  00004110 DATA;  00001286  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

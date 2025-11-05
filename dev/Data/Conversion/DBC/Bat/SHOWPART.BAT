@@ -1,0 +1,3 @@
+@ECHO OFF
+CD DBC
+DBC.BAT

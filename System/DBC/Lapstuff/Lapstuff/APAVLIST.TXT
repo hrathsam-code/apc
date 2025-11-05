@@ -1,0 +1,65 @@
+. 
+. 
+. APVLIST - PRINT LISTING OF VENDORS - 
+. 
+         INCLUDE   COMMON
+. 
+         INC       APMASTFD
+APMASTER IFILE     KEYL=31,UNCOMPRESSED
+APCONTFL IFILE     KEYL=3,UNCOMPRESSED
+CONTNM   DIM       20
+TELE     DIM       12
+CONTFLG  INIT      " "
+OPTION   FORM      1
+BACCNO   DIM       6
+EACCNO   DIM       6
+REPLY    DIM       1
+CNTPRT   INIT      "N"
+TIME     INIT      "HH/MM/SS "
+PAGES    FORM      3
+LINES    FORM      2
+VENDCNT  FORM      3
+. 
+         DISPLAY   *ES,*P01:10,"PRINT ACCOUNTS PAYABLE VENDOR LISTING":
+                               " (IN NAME SEQUENCE)"
+. 
+         CLOCK     TIME TO TIME
+. 
+         OPEN      APMASTER,"APALFMST/ISAM"
+. 
+         CALL      HDR
+A0       MOVE      "000000",ACCKEY
+         READ      APMASTER,ACCKEY;ACCNO
+         MATCH     ACCKEY TO ACCNO
+         GOTO      A1 IF EQUAL
+. 
+A1       TRAPCLR   PARITY
+         INC       APMASTKS
+         GOTO      EOJ IF OVER
+A1B      CALL      APRT
+         GOTO      A1
+. 
+APRT     PRINT     *1,ACCNO,*8,NAME,*35,ADD1, "  ",ADD2:
+                   *80,CITY,*100,STATE,*106,ZIP,*116,TELEFONE
+         ADD       "1"  TO  LINES
+         COMPARE   "54" TO  LINES
+         CALL      HDR IF EQUAL
+         ADD       "1"  TO  VENDCNT
+         RETURN
+. 
+HDR      PRINT     *F
+         ADD       "1" TO PAGES
+         PRINT     *20,"ACCOUNTS PAYABLE SYSTEM - VENDOR MASTER ":
+                       "LISTING",*98,TODAY,"  ",TIME," PAGE ",PAGES
+         PRINT     *30,"(IN SEQUENCE BY VENDOR NAME)"
+         PRINT     " "
+         PRINT     *1,"VEND.  NAME   ",*35,"ADDRESS",*80,"CITY":
+                   *98,"STATE",*107,"ZIP",*118,"TEL. NO."
+         PRINT     " "
+         MOVE      "5" TO LINES
+         RETURN
+. 
+EOJ      CLOSE     APMASTER
+         PRINT     *C,*L,*L,"TOTAL VENDORS ON FILE = ",VENDCNT
+         RELEASE
+         CHAIN     "APMENU1"

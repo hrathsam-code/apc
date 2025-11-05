@@ -1,0 +1,98 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Batch.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-16-2019 At 17:26                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00101   07-05-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $BatchVAR
+$BatchVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+Batch                            RECORD
+Entity                           Dim                10                  1 - 10
+SubEntity                        Dim                10                 11 - 20
+BatchID                          Form               9                  21 - 29
+BatchDate                        Dim                8                  30 - 37
+BatchTime                        Dim                4                  38 - 41
+SeqNo                            Form               9                  42 - 50
+BatchTotal                       Form               9.2                51 - 62
+PostedFlag                       Form               1                  63 - 63       //Used to signify if batch is Posted
+PostedDate                       Dim                8                  64 - 71
+                                 RECORDEND
+;
+;======================================================================================;
+TempBatch                           record          like   Batch                           
+OrigBatch                           record          like   Batch                           
+SaveBatch                           record          like   Batch                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+BatchTXTNM                          INIT         "Batch"
+BatchISI1NM                         INIT               "Batch.ISI"
+BatchISI2NM                         INIT               "Batch2.ISI"
+BatchISI3NM                         INIT               "Batch3.ISI"
+BatchI1DEF                           init            "-n,u,z,y,1-10,21-29"
+BatchI2DEF                           init            "-n,z,y,1-10,42-50"
+BatchI3DEF                           init            "-n,z,y,1-10,30-37,42-50"
+.
+. By Entity, BatchID
+. 1-10, 21-29
+.
+BatchKY                          DIM                19
+.
+. By Entity, SeqNo
+. 1-10, 42-50
+.
+BatchKY2                         DIM                19
+.
+. By Entity, BatchDate, SeqNo
+. 1-10, 30-37, 42-50
+.
+BatchKY3                         DIM                27
+;=============================================================================;
+;
+BatchFLST                         FILELIST
+BatchFL                             IFILE              name="Batch.ISI",FIX=140,NODUP,UPPER,NOPATH
+BatchFL2                            IFILE              name="Batch2.ISI",FIX=140,NODUP,NOPATH
+BatchFL3                            IFILE              name="Batch3.ISI",FIX=140,NODUP,NOPATH
+                                    FILELISTEND
+ 
+BatchFileSize       CONST      "140"
+ 
+BatchProg           INIT       "Batch Program"
+BatchDesc           INIT       "Batch Maintenance"
+BatchTITLE          INIT       "Batch Record"
+BatchHelp           INIT       "Batch.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $BatchVARIO
+            INCLUDE Batch.IO 
+          %ENDIF          //End of IO Include File

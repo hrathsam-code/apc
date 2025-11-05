@@ -1,0 +1,87 @@
+ INDEX  -Qharry1.log ARFILE.TXT, ARFileNew.ISI -P8X,9-12,6, 1-5 
+Invalid primary key information.
+ INDEX  -Qharry1.log ACCOUNTS.TXT, ACCTSNAM.NEW -6-35, 1-4 
+Unable to determine record length for fixed record length file: ACCOUNTS.TXT
+ INDEX  -Qharry1.log ACCOUNTS.TXT, ACCTSNAM.NEW -6-35, 1-4 
+Unable to determine record length for fixed record length file: ACCOUNTS.TXT
+ INDEX  -Qharry1.log ACCOUNTS.TXT, ACCTSNAM.NEW -6-35, 1-4 
+Unable to determine record length for fixed record length file: ACCOUNTS.TXT
+ INDEX  -Qharry1.log ACCOUNTS.TXT,ACCTSNAM.NEW, L189 -6-35, 1-4 
+Indexing ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+A record longer than 65533 bytes was found. INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT,ACCTSNAM.NEW, L189 -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Data file has variable length records.
+Data file is not in the correct format.  Index file will be deleted.
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 16:52:04  Stop time = 16:52:04  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 16:52:34  Stop time = 16:52:34  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 16:52:50  Stop time = 16:52:50  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 16:54:26  Stop time = 16:54:26  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 16:59:50  Stop time = 16:59:51  Elapsed time = 00:00:01
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 17:02:53  Stop time = 17:02:53  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 17:03:53  Stop time = 17:03:53  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 17:05:12  Stop time = 17:05:12  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 17:06:20  Stop time = 17:06:20  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 18:32:00  Stop time = 18:32:00  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 18:39:48  Stop time = 18:39:48  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 18:40:20  Stop time = 18:40:21  Elapsed time = 00:00:01
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 18:41:35  Stop time = 18:41:35  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 19:02:50  Stop time = 19:02:50  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 19:03:32  Stop time = 19:03:32  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 19:04:34  Stop time = 19:04:34  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 19:06:41  Stop time = 19:06:41  Elapsed time = 00:00:00
+ INDEX  -Qharry1.log C:\apc\data\ACCOUNTS.TXT, c:\apc\data\ACCTSNAM.NEW -6-35, 1-4 
+Indexing C:\APC\DATA\ACCOUNTS.TXT into C:\APC\DATA\ACCTSNAM.NEW
+2592 records, 0 deleted entries
+Start time = 19:07:10  Stop time = 19:07:10  Elapsed time = 00:00:00

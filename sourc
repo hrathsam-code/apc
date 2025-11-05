@@ -1,0 +1,7710 @@
+.  PRINT ACCOUNTS BY SELECTED STATE
+.
+         INCLUDE   COMMON
+. 
+ACCOUNTS IFILE     KEYL=6,UNCOMPRESSED
+NAME     INIT      "ACCTSTAT.ISI"
+. 
+REPLY    DIM       1
+. 
+         INCLUDE   CUSTMAST
+. 
+. ........WORK AREA FOR SECOND ADDRESS
+. 
+NAME2    DIM       30
+ADDR2    DIM       25
+ADDR22   DIM       25
+CITY2    DIM       20
+STATE2   DIM        2
+ZIP2     FORM       5
+KEY2     DIM        6
+. 
+. 
+KEYCNT   FORM       "0000"
+RECCNT   FORM       "0000"
+. 
+READFLAG DIM       1
+ACCTFLAG DIM       1
+TWOUP    DIM       1
+ALLACCT  DIM       1
+P2FLAG   DIM       1
+. 
+STATE    DIM       2
+STATEKEY DIM       6
+LINES    FORM      2
+
+.
+TIME     INIT      "HH/MM/SS"
++............................................................
+.
+.
+ 	 INCLUDE   CALLERR1
+         MOVE      "CUSTOMER LIST SELECTED STATE" TO TITLTEXT
+         INCLUDE   CALLERR2
+
+
+ 
+         CLOCK     TIME TO TIME
+         MOVE      "58"  TO LINES
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:1,"PRINT CUSTOMER LIST - BY STATE"
+         KEYIN     *P1:23,*EL,"NOTE.... OK TO PRINT ON 80 COLS",REPLY
+
+PROCEED  TRAPCLR   IO
+. 
+         TRAP      NOCUST IF IO
+         OPEN      ACCOUNTS,NAME
+.
+         GOTO      PRINTALL
+NOCUST   BEEP
+         DISPLAY   *P01:12,*EL,"DISK NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         CHAIN     "ACCTMNU1"
+. 
+STARTIT  KEYIN     *P01:12,*EF,*P01:12,"PRINT (1) or (2) LABELS PER CUSTOMER":
+                   " ? ",TWOUP
+         RESET     TWOUP
+         GOTO      STARTIT IF EOS
+         CMATCH    "2" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         CMATCH    "1" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         BEEP
+         GOTO      STARTIT
+.
+ACCTPT   PRINT     *C,*L,*L,*L,*L
+         KEYIN     *P01:12,*EL,"PRINT ACCOUNT NUMBER ON THE LABEL ? ":
+                               "Y or N ",ACCTFLAG
+         RESET     ACCTFLAG
+         GOTO      ACCTPT IF EOS
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         BEEP
+         GOTO      ACCTPT
+.
+PRINTALL KEYIN     *P01:12,*EL,"ENTER THE STATE CODE (ie. NY) ",STATE
+         RESET     STATE
+         GOTO      PRINTALL IF EOS
+.
+SETRANGE CLEAR     STATEKEY
+         APPEND    STATE TO STATEKEY
+         APPEND    "    " TO STATEKEY
+         RESET     STATEKEY TO 1
+         READ      ACCOUNTS,STATEKEY;CUSTKEY
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    ACCOUNTS;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                             CUSTCITY,CUSTSTAT,CUSTZIP
+*............................................................
+. TEST FOR END OF FILE
+         GOTO      EOJRTN IF OVER 
+.
+         MATCH     STATE  TO CUSTSTAT
+         GOTO      EOJRTN IF NOT EQUAL   (SINCE WE PRIMED THE READS!)
+. 
+OKAY   
+         ADD       "1" TO RECCNT
+         DISPLAY   *P1:20,"PRINTING ",RECCNT:
+                   "  OF ",STATE
+.
+         MOVE      CUSTNAME TO NAME2
+         MOVE      CUSTADDR TO ADDR2
+         MOVE      CUSTCITY TO CITY2
+         MOVE      CUSTSTAT TO STATE2
+         MOVE      CUSTZIP  TO ZIP2
+         MOVE      CUSTKEY  TO KEY2
+. 
+PRINTEM  COMPARE   "55" TO LINES
+         CALL      HEADER IF NOT LESS
+.
+         PRINT     *1,CUSTNAME:
+                   *34,CUSTADDR:
+                   *55,CUSTCITY:
+                   *72,CUSTSTAT:
+                   *75,CUSTZIP
+         ADD       "1" TO LINES
+         GOTO      READ
+. 
+EOJRTN   BEEP
+         MOVE      "  " TO STATE
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"PRINT MORE STATES ? (Y/N) ",REPLY
+         DISPLAY   *P1:23,*EL
+         CMATCH    "Y",REPLY
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      EOJRTN IF NOT EQUAL
+.
+         RELEASE
+         CHAIN     "ACCTMNU1"
+.
+HEADER   PRINT     *F,*5,"APC COMPONENTS - CUSTOMER":
+                   " LIST BY SELECTED STATE (":
+                   STATE,")":
+                   *65,"AS OF ",TODAY
+         PRINT     " "
+         PRINT     *1,"NAME":
+                   *34,"ADDRESS":
+                   *55,"CITY":
+                   *72,"ST":
+                   *76,"ZIP"
+                  PRINT     " "
+         MOVE      "4" TO LINES
+         RETURN
+
+.
+*............................................................
+.  ACCOUNT MASTER LISTING  -  ACCOUNT NUMBER ORDER
+. 
+. WRITTEN BY R BACHARACH, MICRO SYSTEMS CONSULTANTS
+.                         41 TEELE DRIVE
+.                         CORAM, NY 11727
+.                         (516) 698-5577
+. 
+         INCLUDE   COMMON
+. 
+NAME     INIT      "ACCTSTAT.ISI"
+CUSTFILE IFILE     KEYL=6,UNCOMPRESSED
+REPLY    DIM       1
+SWMR     FORM      "0"         '1'=MATCHING RECORD
+SW1P     FORM      "1"         '1'=FIRST CYCLE
+LINECT   FORM      3           LINE COUNTER
+PAGE     FORM      3           PAGE NUMBER
+RID01    FORM      "0"         RECORD TYPE 01
+LR       FORM      "0"         '1'=LAST RECORD PENDING
+LRTOT    FORM      5          GRAND TOTAL
+INREC1   DIM       127     INPUT WORK AREA
+*............................................................
+         INCLUDE   CUSTMAST
+.
+DUMMFLD  DIM       35
+PCUSTZIP DIM       5
+.
+NWFLD1   DIM        1         5 -  5   ACCOUNT STATUS CODE        1.0
+COMP     DIM       3          INPUT COMPANY TO BE PRINTED
+. 
+REPTITL  INIT      "AMERICAN PRECISION PRODUCTS"
+COMPVAR  DIM       27
+. 
+TIME     INIT      "hh/mm/s"
+SAVESTAT DIM       2
+STATACCT FORM      5
+.
+DASHLINE INIT      "---------------------------------------------"
+FIRST    INIT      "1"
+READKY   INIT      "AL    "
+.
+PMM      DIM       2
+PDD      DIM       2
+PYY      DIM       2
+SMM      DIM       2
+SDD      DIM       2
+SYY      DIM       2
+. 
++............................................................
+. MAINLINE FOLLOWS
+.
+         INCLUDE   CALLERR1
+         MOVE      "ACCOUNT LIST BY STATE" TO TITLTEXT
+         INCLUDE   CALLERR2
+ 
+         CLOCK     TIME TO TIME
+. 
+. FILE OPENING SEQUENCE
+         TRAP      NOFILE    IF IO
+         OPEN      CUSTFILE,NAME
+         MOVE      "APP"  TO  COMP
+MOVREP   MOVE      REPTITL TO COMPVAR
+CONT1    TRAPCLR   PARITY        (NOP)
+         CALL      HEADER
+.
+         MOVE      " " TO REPLY
+         TRAPCLR   IO
+         TRAP      READ IF IO
+         READ      CUSTFILE,READKY;DUMMFLD
+         GOTO      READ
+         GOTO      READ IF OVER
+. 
+NOFILE   BEEP
+         DISPLAY   *ES,"ACCOUNT FILE IS NOT ON-LINE - JOB ABORTING",*W,*W
+         BEEP
+         CHAIN     "ACCTMNU1"
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ      INCLUDE   CUSTRDKS
+.
+         GOTO      EOJ IF OVER
+.
+         CMATCH    "1",FIRST
+         GOTO      CHKSTAT IF NOT EQUAL
+         MOVE      CUSTSTAT TO SAVESTAT
+         MOVE      " "      TO FIRST
+.
+*............................................................
+. TEST FOR END OF FILE
+. IF END OF FILE: TURN ON LR AND L1-L9
+.
+CHKSTAT  MATCH     CUSTSTAT TO SAVESTAT
+         CALL      BRKSTAT  IF NOT EQUAL
+.
+DETCALC  ADD       "1" TO LRTOT
+*............................................................
+. HEADING AND DETAIL OUTPUT
+.
+DETOUT   COMPARE   "50" TO LINECT
+         CALL      HEADER IF NOT LESS
+.
+         MOVE      CUSTZIP TO PCUSTZIP
+         REP       " 0" IN PCUSTZIP
+.
+         MOVE      LSTSALDT TO SMM
+         RESET     LSTSALDT TO 3
+         MOVE      LSTSALDT TO SDD
+         RESET     LSTSALDT TO 5
+         MOVE      LSTSALDT TO SYY
+         RESET     LSTSALDT TO 1
+.
+         MOVE      LSTPAYDT TO PMM
+         RESET     LSTPAYDT TO 3
+         MOVE      LSTPAYDT TO PDD
+         RESET     LSTPAYDT TO 5
+         MOVE      LSTPAYDT TO PYY
+         RESET     LSTPAYDT TO 1
+.
+         REP       " 0" IN SMM
+         REP       " 0" IN PMM
+.
+.
+*............................................................
+         PRINT       *1,CUSTKEY:   ACCOUNT NUMBER             4.0
+                     *8,CUSTNAME:
+                    *45,CUSTADDR:
+                    *73,CUSTCITY:
+                    *98,CUSTSTAT:
+                    *104,PCUSTZIP
+......                   *114,SMM,"/",SDD,"/",SYY:
+......                   *124,PMM,"/",PDD,"/",PYY
+.
+         ADD       "1" TO LINECT
+         ADD       "1" TO STATACCT
+         MOVE      CUSTSTAT TO SAVESTAT
+*............................................................
+. TURN OFF R.I.D. & ALL L-INDICATORS
+.
+TURNOFF  MOVE      "0" TO SW1P
+         MOVE      "0" TO RID01
+*............................................................
+. GO READ ANOTHER RECORD
+.
+         GOTO      READ
+. 
+*............................................................
+. PAGE HEADING ROUTINE
+.
+HEADER   ADD       "1" TO PAGE
+         PRINT     *F,*C,*L,*L:
+                   *38,"ACCOUNT FILE MASTER LISTING":
+                       "  (NUMERICALLY WITHIN STATE)":
+                   *100,"PAGE ",PAGE:
+                   *117,"AS OF ",TODAY
+         PRINT     *51,COMPVAR,*C,*L,*L
+         MOVE      "0" TO LINECT
+         PRINT     *1,"ACCT.":
+                   *10,"NAME":
+                   *45,"ADDRESS":
+                   *73,"CITY":
+                   *98,"ST":
+                   *105,"ZIP"
+......                  *116,"LAST":
+......                  *126,"LAST"
+         PRINT     *2,"NO.",*105,"CODE":
+                   *C,*L
+.......                  *116,"SALE",*124,"PAYMENT":
+.
+         RETURN
+.
+BRKSTAT  COMPARE   "48",LINECT
+         CALL      HEADER IF NOT LESS
+         PRINT     *C,*L,DASHLINE,DASHLINE,DASHLINE
+         PRINT     *1,"TOTAL ACCOUNTS FOR STATE OF ",SAVESTAT:
+                      " = ",STATACCT
+         PRINT     *1,DASHLINE,DASHLINE,DASHLINE
+         PRINT     *1," "
+         MOVE      "00000" TO STATACCT
+         MOVE      CUSTSTAT TO SAVESTAT
+         ADD       "6" TO LINECT
+         RETURN
+.
+*............................................................
+. TOTAL OUTPUT
+.
+TOTOUT   TRAPCLR   PARITY  (NOP)
+         CALL      BRKSTAT
+         COMPARE   "1" TO LR
+         RETURN    IF NOT EQUAL
+         PRINT    *C,*L,*L,*20,"TOTAL CUSTOMERS ON FILE  ",LRTOT,*C,*L
+         ADD       "2" TO LINECT
+         RETURN
+*............................................................
+. END OF JOB
+.
+EOJ      CALL      TOTOUT
+         PRINT     *F
+         CLOSE     CUSTFILE
+         RELEASE
+         CHAIN     "ACCTMNU1"
+. 
+. 
+. CORPCTLS - CORPORATE EDP CONTROLS MODULE
+.
+	 INCLUDE   MSCBRAG.TXT
+. 
+. COMPILING THIS PROGRAM REQUIRES THAT THE FILES:  "COMMON/TXT",
+. "LOGDATA/TXT"	AND "LOGIO/TXT"	EXIST ON ANY DRIVE WHICH IS ON-
+. LINE.	 THESE INCLUSION FILES CONTAIN THE INFORMATION COMMON TO
+. ALL OF THE SYSTEM PROGRAMS.
+.
+	 INCLUDE   COMMON.TXT
+INDEX	 FORM	   2		       USER SELECTION VARIABLE
+TIME	 INIT	   "hh:mm:ss"	       hours:minutes:seconds
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY	CLEARANCE OF AT	LEAST 7
+.
+*................................................................
+. DISPLAY THE MENU
+.
+	 CLOCK	   TIME	TO TIME
+	 DISPLAY   *ES:
+		   *HON:
+		   " APC COMPONENTS - CORPORATE	EDP ":
+		   "CONTROLS	  ":
+		   "Today is ",TODAY:
+		   *HOFF:
+		   *P01:03,"( 1) ":
+		   "UPDATE CORPORATE CONTROL RECORDS":
+		   *P01:04,"( 2) ":
+		   "INQUIRY OF CORPORATE EDP CONTROLS":
+		   *P01:05,"( 3) ":
+		   "SELECT NEW PROCESSING SYSTEM":
+		   *EL
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN	   *P1:12,*EL,*HON,"Selection by number":
+		   *P25:12,"__",*P25:12,INDEX
+	 COMPARE   "1" TO INDEX
+	 GOTO	   GETINDEX IF LESS
+	 COMPARE   "04"	TO INDEX
+	 GOTO	   GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE	ROUTINE	INDICATED BY THE INDEX
+.
+	 TRAP	   BADCHAIN IF CFAIL
+	 CLOCK	   TIME	TO TIME
+	 BRANCH	   INDEX OF CTLUDPGM:  UPDATE CORPORATE	CONTROL	R
+			    CTLINQ:  INQUIRY OF	CORPORATE EDP CON
+			    LIBMENU1   SELECT NEW PROCESSING SYST
+	 GOTO	   GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN	INSTRUCTIONS
+*................................................................
+. UPDATE CORPORATE CONTROL RECORDS
+.
+CTLUDPGM CHAIN	   "CTLUDPGM"
+	 GOTO	   GETINDEX
+*................................................................
+. INQUIRY OF CORPORATE EDP CONTROLS
+.
+CTLINQ	 CHAIN	   "CTLINQ"
+	 GOTO	   GETINDEX
+*................................................................
+. PRINT	CORPORATE EDP CONTROL REPORT
+.
+CTLPRINT CHAIN	   "CTLPRINT"
+	 GOTO	   GETINDEX
+*................................................................
+. SELECT NEW PROCESSING	SYSTEM
+.
+LIBMENU1 CHAIN	   "ANSWER"
+	 GOTO	   GETINDEX
+. CTLINQ - CORPORATE CONTROLS INQUIRY PROGRAM
+. 
+. WRITTEN BY R BACHARACH, MICRO	SYSTEMS	CONSULTANTS
+.			  41 TEELE DRIVE
+.			  CORAM, NEW YORK 11727
+.			  (516)	698-9648
+. 
+	 INCLUDE   COMMON.TXT
+NAME	 INIT	   "F:\DATA\CONTROLS.ISI"
+REPLY	 DIM	   1
+LASTCMD	 INIT	   " "	(LAST COMMAND EXECUTED)
+INPUT	 IFILE	   KEYL=3
+SWITCH	 FORM	   1 (ONE-SHOT)
+PRIMEKEY DIM	   3
+*............................................................
+.FIELD	 TYPE	   LENGTH    FROM-TO   DESCRIPTION
+.-----	 ----	   ------    -------   -----------
+FIELD01	 DIM	    3	       1-  3   COMPANY ISAM KEY
+FIELD02	 DIM	    8	       4- 11   DATE OF LAST UPDATE
+NFIELD03 FORM	    5		       (NUMERIC	WORK FIELD)
+FIELD03	 DIM	    5	      12- 16   NEXT INVOICE NUMBER	  5.0
+NFIELD04 FORM	    4		       (NUMERIC	WORK FIELD)
+FIELD04	 DIM	    4	      17- 20   NEXT P.O. NUMBER		  4.0
+NFIELD05 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD05	 DIM	   10	      21- 30   DAILY INVENTORY $ RECEIVED 7.2
+NFIELD06 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD06	 DIM	   10	      31- 40   DAILY INVENTORY $ SOLD	  7.2
+NFIELD07 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD07	 DIM	   10	      41- 50   DAILY CASH RECEIVED/PROCES 7.2
+NFIELD08 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD08	 DIM	   10	      51- 60   MTD INVENTORY $ RECEIVED	  7.2
+NFIELD09 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD09	 DIM	   10	      61- 70   MTD INVENTORY $ SOLD	  7.2
+NFIELD10 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD10	 DIM	   10	      71- 80   MTD CASH	RECEIVED/PROCESSE 7.2
+NFIELD11 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD11	 DIM	   11	      81- 91   YTD INVENTORY VALUE RECEIV 8.2
+NFIELD12 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD12	 DIM	   11	      92-102   YTD INVENTORY VALUE SOLD	  8.2
+NFIELD13 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD13	 DIM	   11	     103-113   YTD CASH	RECEIVED/PROCESSE 8.2
+WORK03	 DIM	    3
+WORK04	 DIM	    4
+WORK05	 DIM	    5
+WORK08	 DIM	    8
+WORK10	 DIM	   10
+WORK11	 DIM	   11
+SAVE	 DIM	   11
++............................................................
+. MAINLINE FOLLOWS
+. FILE OPENING SEQUENCE
+*............................................................
+. OPEN INPUT FILE
+	 TRAP	   NOFILE IF IO
+	 OPEN	   INPUT,NAME
+	 GOTO	   OPENED
+NOFILE	 BEEP
+	 DISPLAY   *ES,*P01:12,"WARNING! WARNING! WARNING!":
+		   *N,"THE EDP CONTROLS	FILE IS	MISSING":
+		   *N,"NOTIFY R. BACHARACH, MICRO SYSTEMS CONSULTANTS":
+		      "	IMMEDIATELY ",*W,*W
+	 GOTO	   NOFILE
+. 
+OPENED	 TRAPCLR   IO
+*............................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+LOOP	 DISPLAY   *ES:
+		   *HON:
+		   *P16:01,"CORPORATE CONTROL DATA FOR APC":
+			   " COMPONENTS":
+		   *HOFF:
+		   *P01:03,"COMPANY: APP   DATE: ________   LAST INVOICE## ":
+		   "_____   LAST P.O.##	____":
+		   *P24:05,"DAILY CONTROL INFORMATION":
+		   *P16:07,"INVENTORY VALUE RECEIVED:	__________":
+		   *P16:08,"INVENTORY VALUE SOLD:	__________":
+		   *P16:09,"CASH RECEIVED/PROCESSED:	__________":
+		   *P18:11,"MONTH-TO-DATE CONTROL INFORMATION":
+		   *P16:13,"INVENTORY VALUE RECEIVED:	__________":
+		   *P16:14,"INVENTORY VALUE SOLD:	__________":
+		   *P16:15,"CASH RECEIVED/PROCESSED:	__________":
+		   *P19:17,"YEAR-TO-DATE CONTROL INFORMATION":
+		   *P16:19,"INVENTORY VALUE RECEIVED:	___________":
+		   *P16:20,"INVENTORY VALUE SOLD:	___________":
+		   *P16:21,"CASH RECEIVED/PROCESSED:	___________":
+		   *EL
+*............................................................
+. GET COMMAND
+	 TABPAGE   ****
+*............................................................
+. GET A	RECORD
+GET	 MOVE	   "APP" TO PRIMEKEY
+	 CMATCH	   " " TO PRIMEKEY
+	 GOTO	   EOJ IF  EOS
+. 
+.   CHECK THE KEY VALUE	FOR DISPLAY TITLE
+. 
+	 MATCH	   "APP" TO PRIMEKEY
+	 CALL	   MOVAPP IF EQUAL
+GET1	 READ	   INPUT,PRIMEKEY;FIELD01:
+		   FIELD02:
+		   FIELD03:
+		   FIELD04:
+		   FIELD05:
+		   FIELD06:
+		   FIELD07:
+		   FIELD08:
+		   FIELD09:
+		   FIELD10:
+		   FIELD11:
+		   FIELD12:
+		   FIELD13
+  	 GOTO	   DISPVAR IF NOT OVER
+	 BEEP
+	 DISPLAY   *P63:23,"RECORD NOT FOUND",*W,*W
+	 MOVE	   " " TO LASTCMD
+	 GOTO	   LOOP
+MOVAPP	 DISPLAY   *P43:01,*HON,"   APC	COMPONENTS  ",*HOFF
+	 RETURN
+*............................................................
+. DISPLAY VARIABLES
+DISPVAR	 DISPLAY   *P63:24,*EL:
+		   *P10:03,FIELD01:
+		   *P22:03,FIELD02:
+		   *P47:03,FIELD03:
+		   *P66:03,FIELD04:
+		   *P44:07,FIELD05:
+		   *P44:08,FIELD06:
+		   *P44:09,FIELD07:
+		   *P44:13,FIELD08:
+		   *P44:14,FIELD09:
+		   *P44:15,FIELD10:
+		   *P44:19,FIELD11:
+		   *P44:20,FIELD12:
+		   *P44:21,FIELD13:
+		   *P10:23,"PRESS ENTER	KEY TO TERMINATE THIS PROGRAM"
+	 KEYIN	   REPLY
+*............................................................
+. END OF JOB
+EOJ	 CHAIN	   "CORPCTLS"
+. 
+.  CTLUDPGM -  CORPORATE EDP CONTROLS UPDATE PROGRAM
+. 
+. WRITTEN BY R.	BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.			    41 TEELE DRIVE
+.			    CORAM, NEW YORK 11727
+.			    (516) 698-9648
+	 INCLUDE   COMMON
+. 
+NAME	 INIT	   "F:\DATA\CONTROLS.ISI"
+REPLY	 DIM	   1
+INFILE	 FORM	   "1"	(1/2 CURRENT INPUT)
+LASTCMD	 INIT	   " "	(LAST COMMAND EXECUTED)
+INPUT	 IFILE	   KEYL=3,UNCOMPRESSED	 (ISAM INPUT )
+SWITCH	 FORM	   1 (ONE-SHOT)
+PRIMEKEY DIM	   3
+*............................................................
+.FIELD	 TYPE	   LENGTH    FROM-TO   DESCRIPTION
+.-----	 ----	   ------    -------   -----------
+FIELD01	 DIM	    3	       1-  3   COMPANY ISAM KEY
+FIELD02	 DIM	    8	       4- 11   DATE OF LAST UPDATE
+NFIELD03 FORM	    5		       (NUMERIC	WORK FIELD)
+FIELD03	 DIM	    5	      12- 16   NEXT INVOICE NUMBER	  5.0
+NFIELD04 FORM	    4		       (NUMERIC	WORK FIELD)
+FIELD04	 DIM	    4	      17- 20   NEXT P.O. NUMBER		  4.0
+NFIELD05 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD05	 DIM	   10	      21- 30   DAILY INVENTORY $ RECEIVED 7.2
+NFIELD06 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD06	 DIM	   10	      31- 40   DAILY INVENTORY $ SOLD	  7.2
+NFIELD07 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD07	 DIM	   10	      41- 50   DAILY CASH RECEIVED/PROCES 7.2
+NFIELD08 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD08	 DIM	   10	      51- 60   MTD INVENTORY $ RECEIVED	  7.2
+NFIELD09 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD09	 DIM	   10	      61- 70   MTD INVENTORY $ SOLD	  7.2
+NFIELD10 FORM	    7.2		       (NUMERIC	WORK FIELD)
+FIELD10	 DIM	   10	      71- 80   MTD CASH	RECEIVED/PROCESSE 7.2
+NFIELD11 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD11	 DIM	   11	      81- 91   YTD INVENTORY VALUE RECEIV 8.2
+NFIELD12 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD12	 DIM	   11	      92-102   YTD INVENTORY VALUE SOLD	  8.2
+NFIELD13 FORM	    8.2		       (NUMERIC	WORK FIELD)
+FIELD13	 DIM	   11	     103-113   YTD CASH	RECEIVED/PROCESSE 8.2
+WORK03	 DIM	    3
+WORK04	 DIM	    4
+WORK05	 DIM	    5
+WORK08	 DIM	    8
+WORK10	 DIM	   10
+WORK11	 DIM	   11
+SAVE	 DIM	   11
+. 
+TIME	 INIT	   "HH/MM/SS"
+. 
++............................................................
+. MAINLINE FOLLOWS
+. FILE OPENING SEQUENCE
+. 
+	 CLOCK	   TIME	TO TIME
+. 
+	 DISPLAY   *ES,*P01:12," A P C	COMPONENTS INC.	- CORPORATE ":
+		       "EDP CONTROLS UPDATE PROGRAM":
+		   *P01:14,"WARNING!  USING THIS PROGRAM TO ALTER THE DATA":
+			   " IN	THE EDP	CONTROLS RECORD":
+		   *N,"MAY ADVERSELY AFFECT YOUR INTERNAL AUDIT	TRAIL":
+		   *N,"PLEASE USE THIS PROGRAM ONLY IN THE EVENT THAT":
+		      "	AN ERROR HAS BEEN DETECTED THAT	":
+		   *N,"REQUIRES	YOU TO MODIFY THIS DATA":
+		   *P01:19,"FAILURE TO USE THIS	PROGRAM	PROPERLY":
+		   " WILL DEFINITELY CAUSE IMBALANCES":
+		   *N,"IN YOUR MONTH-END/YEAR-END CLOSE, OR BOTH"
+	 KEYIN	   *P01:24,"IF YOU STILL WISH TO UPDATE	THE DATA,":
+			   " KEY Y ",REPLY
+	 CMATCH	   "Y" TO REPLY
+	 GOTO	   EOJ IF NOT EQUAL
+*............................................................
+. OPEN INPUT FILE
+	 TRAP	   NOFILE IF IO
+	 OPEN	   INPUT,NAME
+	 GOTO	   OPENED
+NOFILE	 BEEP
+	 DISPLAY   *ES,"WARNING! WARNING! WARNING!":
+		   *N,"THE A P C CORPORATE EDP CONTROLS	FILE IS	MISSING":
+		   *N,"CALL R BACHARACH, MICRO SYSTEMS CONSULTANTS",*W4
+	 GOTO	   NOFILE
+OPENED	 TRAPCLR   IO
+*............................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+	 DISPLAY   *ES:
+		   *HON:
+		   *P16:01,"CORPORATE CONTROL DATA FOR	 ** A P	C  INDUS":
+			   "TRIES, INC.	",*HOFF:
+		   *P01:03,"COMPANY: APP   DATE: ________   LAST INVOICE## ":
+		   "_____   LAST P.O.##	____":
+		   *P24:05,"DAILY CONTROL INFORMATION":
+		   *P16:07,"INVENTORY VALUE RECEIVED:	__________":
+		   *P16:08,"INVENTORY VALUE SOLD:	__________":
+		   *P16:09,"CASH RECEIVED/PROCESSED:	__________":
+		   *P18:11,"MONTH-TO-DATE CONTROL INFORMATION":
+		   *P16:13,"INVENTORY VALUE RECEIVED:	__________":
+		   *P16:14,"INVENTORY VALUE SOLD:	__________":
+		   *P16:15,"CASH RECEIVED/PROCESSED:	__________":
+		   *P19:17,"YEAR-TO-DATE CONTROL INFORMATION":
+		   *P16:19,"INVENTORY VALUE RECEIVED:	___________":
+		   *P16:20,"INVENTORY VALUE SOLD:	___________":
+		   *P16:21,"CASH RECEIVED/PROCESSED:	___________":
+		   *EL
+*............................................................
+. GET COMMAND
+	 TABPAGE   ****
+LOOP	 DISPLAY   *P1:23,*EL,"(G)et Record  (C)hange Record  (E)nd Job"
+GETCMD	 KEYIN	   *P70:23,"_",*P70:23,REPLY
+	 CMATCH	   "E" TO REPLY
+	 GOTO	   GETCMD IF EOS
+	 GOTO	   EOJ IF EQUAL
+	 CMATCH	   "G" TO REPLY
+	 GOTO	   GET IF EQUAL
+	 CMATCH	   "C" TO REPLY
+	 GOTO	   CHANGE IF EQUAL
+	 BEEP
+	 GOTO	   GETCMD
+*............................................................
+. GET A	RECORD
+GET	 CMATCH	   " " TO LASTCMD
+	 CALL	   WRITE IF NOT	EQUAL
+	 MOVE	   "G" TO LASTCMD
+. 
+	 MOVE	   "APP" TO PRIMEKEY
+	 CMATCH	   " " TO PRIMEKEY
+	 GOTO	   GET IF EOS
+	 MOVE	   "1" TO INFILE
+	 CALL	   MOVLIB
+GET1	 READ	   INPUT,PRIMEKEY;FIELD01:
+		   FIELD02:
+		   FIELD03:
+		   FIELD04:
+		   FIELD05:
+		   FIELD06:
+		   FIELD07:
+		   FIELD08:
+		   FIELD09:
+		   FIELD10:
+		   FIELD11:
+		   FIELD12:
+		   FIELD13
+	 GOTO	   DISPVAR IF NOT OVER
+	 BEEP
+	 DISPLAY   *P63:23,"RECORD NOT FOUND",*W,*W
+	 MOVE	   " " TO LASTCMD
+	 GOTO	   LOOP
+. 
+MOVLIB	 DISPLAY   *P43:01,*HON,"  A P C  COMPONENTS  INC.   ",*HOFF
+	 RETURN
+*............................................................
+. DISPLAY VARIABLES
+DISPVAR	 DISPLAY   *P63:24,*EL:
+		   *P10:03,FIELD01:
+		   *P22:03,FIELD02:
+		   *P47:03,FIELD03:
+		   *P66:03,FIELD04:
+		   *P44:07,FIELD05:
+		   *P44:08,FIELD06:
+		   *P44:09,FIELD07:
+		   *P44:13,FIELD08:
+		   *P44:14,FIELD09:
+		   *P44:15,FIELD10:
+		   *P44:19,FIELD11:
+		   *P44:20,FIELD12:
+		   *P44:21,FIELD13
+	 GOTO	   LOOP
+*............................................................
+. KEYIN	VARIABLES
+CHANGE	 CMATCH	   " " TO LASTCMD
+	 GOTO	   LOOP	IF EQUAL
+*............................................................
+. COMPANY ISAM KEY
+. (R	)
+	 DISPLAY   *P10:03,FIELD01
+. 
+.   NOTE THAT THE KEY MAY  N O T BE CHANGED
+*............................................................
+. DATE OF LAST UPDATE
+. (	)
+K02	 MOVE	   FIELD02 TO SAVE
+K02K	 KEYIN	   *P22:03,WORK08
+	 CMATCH	   " " TO WORK08
+	 GOTO	   K02A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD02
+	 DISPLAY   *P22:03,FIELD02
+	 GOTO	   K03
+K02A	 CLEAR	   FIELD02
+	 MOVE	   WORK08 TO FIELD02
+*............................................................
+. NEXT INVOICE NUMBER	     5.0
+. ( N	)
+K03	 MOVE	   FIELD03 TO SAVE
+K03K	 KEYIN	   *P47:03,WORK05
+	 CMATCH	   " " TO WORK05
+	 GOTO	   K03A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD03
+	 DISPLAY   *P47:03,FIELD03
+	 GOTO	   K04
+K03A	 CLEAR	   FIELD03
+	 MOVE	   WORK05 TO FIELD03
+K03B	 MOVE	   "0" TO NFIELD03
+	 CMATCH	   " " TO FIELD03
+	 GOTO	   K03C	IF EOS
+	 TYPE	   FIELD03     (NUMERIC	FIELD)
+	 GOTO	   K03K	IF NOT EQUAL
+	 MOVE	   FIELD03 TO NFIELD03
+K03C	 MOVE	   NFIELD03 TO FIELD03
+	 DISPLAY   *P47:03,FIELD03
+*............................................................
+. NEXT P.O. NUMBER	     4.0
+. ( N	)
+K04	 MOVE	   FIELD04 TO SAVE
+K04K	 KEYIN	   *P66:03,WORK04
+	 CMATCH	   " " TO WORK04
+	 GOTO	   K04A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD04
+	 DISPLAY   *P66:03,FIELD04
+	 GOTO	   K05
+K04A	 CLEAR	   FIELD04
+	 MOVE	   WORK04 TO FIELD04
+K04B	 MOVE	   "0" TO NFIELD04
+	 CMATCH	   " " TO FIELD04
+	 GOTO	   K04C	IF EOS
+	 TYPE	   FIELD04     (NUMERIC	FIELD)
+	 GOTO	   K04K	IF NOT EQUAL
+	 MOVE	   FIELD04 TO NFIELD04
+K04C	 MOVE	   NFIELD04 TO FIELD04
+	 DISPLAY   *P66:03,FIELD04
+*............................................................
+. DAILY	INVENTORY $ RECEIVED 7.2
+. ( N	)
+K05	 MOVE	   FIELD05 TO SAVE
+K05K	 KEYIN	   *P44:07,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K05A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD05
+	 DISPLAY   *P44:07,FIELD05
+	 GOTO	   K06
+K05A	 CLEAR	   FIELD05
+	 MOVE	   WORK10 TO FIELD05
+K05B	 MOVE	   "0" TO NFIELD05
+	 CMATCH	   " " TO FIELD05
+	 GOTO	   K05C	IF EOS
+	 TYPE	   FIELD05     (NUMERIC	FIELD)
+	 GOTO	   K05K	IF NOT EQUAL
+	 MOVE	   FIELD05 TO NFIELD05
+K05C	 MOVE	   NFIELD05 TO FIELD05
+	 DISPLAY   *P44:07,FIELD05
+*............................................................
+. DAILY	INVENTORY $ SOLD     7.2
+. ( N	)
+K06	 MOVE	   FIELD06 TO SAVE
+K06K	 KEYIN	   *P44:08,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K06A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD06
+	 DISPLAY   *P44:08,FIELD06
+	 GOTO	   K07
+K06A	 CLEAR	   FIELD06
+	 MOVE	   WORK10 TO FIELD06
+K06B	 MOVE	   "0" TO NFIELD06
+	 CMATCH	   " " TO FIELD06
+	 GOTO	   K06C	IF EOS
+	 TYPE	   FIELD06     (NUMERIC	FIELD)
+	 GOTO	   K06K	IF NOT EQUAL
+	 MOVE	   FIELD06 TO NFIELD06
+K06C	 MOVE	   NFIELD06 TO FIELD06
+	 DISPLAY   *P44:08,FIELD06
+*............................................................
+. DAILY	CASH RECEIVED/PROCES 7.2
+. ( N	)
+K07	 MOVE	   FIELD07 TO SAVE
+K07K	 KEYIN	   *P44:09,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K07A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD07
+	 DISPLAY   *P44:09,FIELD07
+	 GOTO	   K08
+K07A	 CLEAR	   FIELD07
+	 MOVE	   WORK10 TO FIELD07
+K07B	 MOVE	   "0" TO NFIELD07
+	 CMATCH	   " " TO FIELD07
+	 GOTO	   K07C	IF EOS
+	 TYPE	   FIELD07     (NUMERIC	FIELD)
+	 GOTO	   K07K	IF NOT EQUAL
+	 MOVE	   FIELD07 TO NFIELD07
+K07C	 MOVE	   NFIELD07 TO FIELD07
+	 DISPLAY   *P44:09,FIELD07
+*............................................................
+. MTD INVENTORY	$ RECEIVED   7.2
+. ( N	)
+K08	 MOVE	   FIELD08 TO SAVE
+K08K	 KEYIN	   *P44:13,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K08A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD08
+	 DISPLAY   *P44:13,FIELD08
+	 GOTO	   K09
+K08A	 CLEAR	   FIELD08
+	 MOVE	   WORK10 TO FIELD08
+K08B	 MOVE	   "0" TO NFIELD08
+	 CMATCH	   " " TO FIELD08
+	 GOTO	   K08C	IF EOS
+	 TYPE	   FIELD08     (NUMERIC	FIELD)
+	 GOTO	   K08K	IF NOT EQUAL
+	 MOVE	   FIELD08 TO NFIELD08
+K08C	 MOVE	   NFIELD08 TO FIELD08
+	 DISPLAY   *P44:13,FIELD08
+*............................................................
+. MTD INVENTORY	$ SOLD	     7.2
+. ( N	)
+K09	 MOVE	   FIELD09 TO SAVE
+K09K	 KEYIN	   *P44:14,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K09A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD09
+	 DISPLAY   *P44:14,FIELD09
+	 GOTO	   K10
+K09A	 CLEAR	   FIELD09
+	 MOVE	   WORK10 TO FIELD09
+K09B	 MOVE	   "0" TO NFIELD09
+	 CMATCH	   " " TO FIELD09
+	 GOTO	   K09C	IF EOS
+	 TYPE	   FIELD09     (NUMERIC	FIELD)
+	 GOTO	   K09K	IF NOT EQUAL
+	 MOVE	   FIELD09 TO NFIELD09
+K09C	 MOVE	   NFIELD09 TO FIELD09
+	 DISPLAY   *P44:14,FIELD09
+*............................................................
+. MTD CASH RECEIVED/PROCESSE 7.2
+. ( N	)
+K10	 MOVE	   FIELD10 TO SAVE
+K10K	 KEYIN	   *P44:15,WORK10
+	 CMATCH	   " " TO WORK10
+	 GOTO	   K10A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD10
+	 DISPLAY   *P44:15,FIELD10
+	 GOTO	   K11
+K10A	 CLEAR	   FIELD10
+	 MOVE	   WORK10 TO FIELD10
+K10B	 MOVE	   "0" TO NFIELD10
+	 CMATCH	   " " TO FIELD10
+	 GOTO	   K10C	IF EOS
+	 TYPE	   FIELD10     (NUMERIC	FIELD)
+	 GOTO	   K10K	IF NOT EQUAL
+	 MOVE	   FIELD10 TO NFIELD10
+K10C	 MOVE	   NFIELD10 TO FIELD10
+	 DISPLAY   *P44:15,FIELD10
+*............................................................
+. YTD INVENTORY	VALUE RECEIV 8.2
+. ( N	)
+K11	 MOVE	   FIELD11 TO SAVE
+K11K	 KEYIN	   *P44:19,WORK11
+	 CMATCH	   " " TO WORK11
+	 GOTO	   K11A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD11
+	 DISPLAY   *P44:19,FIELD11
+	 GOTO	   K12
+K11A	 CLEAR	   FIELD11
+	 MOVE	   WORK11 TO FIELD11
+K11B	 MOVE	   "0" TO NFIELD11
+	 CMATCH	   " " TO FIELD11
+	 GOTO	   K11C	IF EOS
+	 TYPE	   FIELD11     (NUMERIC	FIELD)
+	 GOTO	   K11K	IF NOT EQUAL
+	 MOVE	   FIELD11 TO NFIELD11
+K11C	 MOVE	   NFIELD11 TO FIELD11
+	 DISPLAY   *P44:19,FIELD11
+*............................................................
+. YTD INVENTORY	VALUE SOLD   8.2
+. ( N	)
+K12	 MOVE	   FIELD12 TO SAVE
+K12K	 KEYIN	   *P44:20,WORK11
+	 CMATCH	   " " TO WORK11
+	 GOTO	   K12A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD12
+	 DISPLAY   *P44:20,FIELD12
+	 GOTO	   K13
+K12A	 CLEAR	   FIELD12
+	 MOVE	   WORK11 TO FIELD12
+K12B	 MOVE	   "0" TO NFIELD12
+	 CMATCH	   " " TO FIELD12
+	 GOTO	   K12C	IF EOS
+	 TYPE	   FIELD12     (NUMERIC	FIELD)
+	 GOTO	   K12K	IF NOT EQUAL
+	 MOVE	   FIELD12 TO NFIELD12
+K12C	 MOVE	   NFIELD12 TO FIELD12
+	 DISPLAY   *P44:20,FIELD12
+*............................................................
+. YTD CASH RECEIVED/PROCESSE 8.2
+. ( N	)
+K13	 MOVE	   FIELD13 TO SAVE
+K13K	 KEYIN	   *P44:21,WORK11
+	 CMATCH	   " " TO WORK11
+	 GOTO	   K13A	IF NOT EOS
+	 MOVE	   SAVE	TO FIELD13
+	 DISPLAY   *P44:21,FIELD13
+	 GOTO	   LOOP
+K13A	 CLEAR	   FIELD13
+	 MOVE	   WORK11 TO FIELD13
+K13B	 MOVE	   "0" TO NFIELD13
+	 CMATCH	   " " TO FIELD13
+	 GOTO	   K13C	IF EOS
+	 TYPE	   FIELD13     (NUMERIC	FIELD)
+	 GOTO	   K13K	IF NOT EQUAL
+	 MOVE	   FIELD13 TO NFIELD13
+K13C	 MOVE	   NFIELD13 TO FIELD13
+	 DISPLAY   *P44:21,FIELD13
+	 GOTO	   LOOP
+*............................................................
+. DISK-WRITE SEQUENCE
+WRITE	 UPDATE	   INPUT;FIELD01:     COMPANY ISAM KEY
+		   FIELD02:	DATE OF	LAST UPDATE
+		   FIELD03:	NEXT INVOICE NUMBER	   5.0
+		   FIELD04:	NEXT P.O. NUMBER	   4.0
+		   FIELD05:	DAILY INVENTORY	$ RECEIVED 7.2
+		   FIELD06:	DAILY INVENTORY	$ SOLD	   7.2
+		   FIELD07:	DAILY CASH RECEIVED/PROCES 7.2
+		   FIELD08:	MTD INVENTORY $	RECEIVED   7.2
+		   FIELD09:	MTD INVENTORY $	SOLD	   7.2
+		   FIELD10:	MTD CASH RECEIVED/PROCESSE 7.2
+		   FIELD11:	YTD INVENTORY VALUE RECEIV 8.2
+		   FIELD12:	YTD INVENTORY VALUE SOLD   8.2
+		   FIELD13	YTD CASH RECEIVED/PROCESSE 8.2
+	 RETURN
+*............................................................
+. END OF JOB
+EOJ	 CMATCH	   " " TO LASTCMD
+	 CALL	   WRITE IF NOT	EQUAL
+	 CHAIN	   "CORPCTLS"
+. 
+.  PRINT LABELS FROM ACCOUNT MASTER FILE
+. 
+. WRITTEN BY R BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                          41 TEELE DRIVE
+.                          CORAM, NEW YORK 11727
+.                          (516) 698-5577
+         INCLUDE   COMMON
+. 
+ACCOUNTS IFILE     KEYL=4,UNCOMPRESSED
+NAME     INIT      "ACCOUNTS.ISI"
+. 
+REPLY    DIM       1
+. 
+         INCLUDE   CUSTMAST
+. 
+. ........WORK AREA FOR SECOND ADDRESS
+. 
+NAME2    DIM       30
+ADDR2    DIM       25
+ADDR22   DIM       25
+CITY2    DIM       20
+STATE2   DIM        2
+ZIP2     FORM       5
+KEY2     DIM        4
+. 
+. 
+KEYCNT   FORM       "0000"
+RECCNT   FORM       "0000"
+. 
+. 
+NUMKEY   FORM      4
+READFLAG DIM       1
+ACCTFLAG DIM       1
+TWOUP    DIM       1
+ALLACCT  DIM       1
+P2FLAG   DIM       1
+. 
+. 
+TIME     INIT      "HH/MM/SS"
++............................................................
+.
+. 
+	INCLUDE		CALLERR1
+
+        MOVE            "CUSTOMER LABEL PRINT" TO TITLTEXT
+
+        INCLUDE         CALLERR2
+
+
+         CLOCK     TIME TO TIME
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:12,"PRINT CUSTOMER LABELS":
+                   *P01:14,"NOTE..THIS PROGRAM USES 2-UP PIN-FED CONTINUOUS ":
+                           "LABELS":
+                   *W,*W,*W
+         DISPLAY *ES,*P01:24,"PLEASE FOLLOW THESE INSTRUCTIONS...CAREFULLY":
+                    *C,*R," LIFT THE PRINTER COVER":
+                    *C,*R," PULL THE BLUE LEVER FORWARD":
+                   *C,*R," OPEN THE PAPER FEEDER COVERS":
+                   *C,*R," DROP THE CURRENT FORM OUT OF THE PRINTER":
+                   *C,*R," LOAD THE LABELS ON THE PRINTER":
+                   *C,*R," SLIDE THE RIGHT FEEDER TOWARDS THE LEFT":
+                   *C,*R," FEED THE LABELS UP INTO THE PRINTER":
+                   *C,*R," CLOSE THE PAPER FEEDER COVERS"
+         KEYIN     *C,*R,"......HIT ENTER FOR YOUR ":
+                   "NEXT INSTRUCTIONS",REPLY
+         KEYIN     *ES,*P01:24,"OKAY NOW...... WE`RE ALMOST THERE!":
+                   *C,*R,"WE WILL NOW POSITION THE LABELS.":
+                 *C,*R,"AND ALIGN LEFT EDGE 5 LINES TO THE RIGHT OF MINUS 10":
+                   *C,*R," LOCK THE PAPER FEEDERS":
+                   *C,*R," PUSH THE BLUE LEVER TOWARDS THE REAR":
+                   *C,*R," RESET THE FORMS THICKNESS LEVER TO SETTING 3":
+                 *C,*R,"NOW PUSH THE ROUND KNOB ON THE PAPER FEEDER SHAFT IN":
+                 *C,*R,"AND ROTATE IT CLOCKWISE UNTIL THE PERFORATION IS JUST":
+                   *C,*R,"AT THE TOP OF THE PRINT HEAD":
+                *C,*R," CLOSE THE PRINTER COVER AND HIT THE ENTER KEY",REPLY
+         KEYIN     *ES,*P24:12,"HIT THE ENTER KEY TO PROCEED!",REPLY
+PROCEED  TRAPCLR   IO
+. 
+         TRAP      NOCUST IF IO
+         OPEN      ACCOUNTS,NAME
+.
+         GOTO      STARTIT
+NOCUST   BEEP
+         DISPLAY   *P01:12,*EL,"DISK NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         CHAIN     "ACCTMNU1"
+. 
+STARTIT  KEYIN     *P01:12,*EF,*P01:12,"PRINT (1) or (2) LABELS PER CUSTOMER":
+                   " ? ",TWOUP
+         RESET     TWOUP
+         GOTO      STARTIT IF EOS
+         CMATCH    "2" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         CMATCH    "1" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         BEEP
+         GOTO      STARTIT
+ACCTPT   KEYIN     *P01:12,*EL,"PRINT ACCOUNT NUMBER ON THE LABEL ? ":
+                               "Y or N ",ACCTFLAG
+         RESET     ACCTFLAG
+         GOTO      ACCTPT IF EOS
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         BEEP
+         GOTO      ACCTPT
+PRINTALL GOTO      NXT1
+         KEYIN     *P01:12,*EL,"PRINT ALL THE ACCOUNTS (within company) ",REPLY
+         RESET     REPLY
+         GOTO      PRINTALL IF EOS
+         CMATCH    "Y" TO REPLY
+         GOTO      NXT1 IF EQUAL
+         CMATCH    "N" TO REPLY
+         GOTO      PKEY IF EQUAL
+         BEEP
+         GOTO      PRINTALL
+PKEY     KEYIN     *P01:12,*EL,"HOW MANY  (1 TO 9999) ",KEYCNT
+NXT1     TRAPCLR   PARITY            (NOP)
+. 
+..SETRANGE READ      ACCOUNTS,CUSTKEY;CUSTKEY      SET FILE AT APPROPRIATE PT
+.......        PRINT     *C,*L,*L,*L,*L
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    ACCOUNTS;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                             CUSTCITY,CUSTSTAT,CUSTZIP
+*............................................................
+. TEST FOR END OF FILE
+         GOTO      EOJSET IF OVER
+. 
+.   BYPASS THE DELETED CUSTOMERS
+. 
+         CMATCH    "D" TO  CUSTSTTS
+         GOTO      READ IF  EQUAL
+. 
+OKAY     MOVE      "X" TO READFLAG           INDICATE FOR EOJSET
+         ADD       "1" TO RECCNT
+         COMPARE   "0"    TO KEYCNT
+         GOTO      MATCHX IF EQUAL
+         COMPARE   RECCNT TO KEYCNT
+         GOTO      EOJSET IF  LESS
+MATCHX   CMATCH    "X"  TO P2FLAG
+         GOTO      PRINTEM IF EQUAL
+*............................................................
+         MOVE      CUSTNAME TO NAME2
+         MOVE      CUSTADDR TO ADDR2
+         MOVE      CUSTCITY TO CITY2
+         MOVE      CUSTSTAT TO STATE2
+         MOVE      CUSTZIP  TO ZIP2
+         MOVE      CUSTKEY  TO KEY2
+. 
+. DETERMINE IF PRINTING 2-UP OR 2 CUSTOMERS PER LINE
+. 
+         CMATCH    "2" TO TWOUP
+         GOTO      PRINTEM IF EQUAL
+         MOVE      "X" TO P2FLAG
+         GOTO      READ
+. 
+. 
+PRINTEM  PRINT     *1,CUSTNAME,*38,NAME2
+         PRINT     *1,CUSTADDR,*38,ADDR2
+.
+. IN HERE ADD THE LOGIC TO PRINT THE SECOND LINE OF THE ADDRESS
+.
+..........................................        PRINT     *1,CUSTADR2,*38,ADD
+.................................................................
+         PRINT     *1,CUSTCITY,*22,CUSTSTAT,*25,*ZF,CUSTZIP:
+                   *38,CITY2,*59,STATE2,*62,*ZF,ZIP2
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      SPACE1 IF NOT EQUAL
+         PRINT     *1,"(",CUSTKEY,")",*38,"(",KEY2,")"
+.................
+         GOTO      SPACEOUT
+SPACE1   PRINT     *1," "
+................
+SPACEOUT PRINT     *1,"ATTENTION: PURCHASING",*38,"ATTENTION: PURCHASING"
+         PRINT     " "
+         GOTO      TESTS
+TESTS    MOVE      " " TO P2FLAG
+         MOVE      " " TO READFLAG
+         CMATCH    "Q" TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         GOTO      READ
+. 
+EOJSET   CMATCH    " " TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         MOVE      "Q"    TO READFLAG
+         GOTO      PRINTEM
+EOJRTN   BEEP
+         DISPLAY   *ES,*P01:12,"TALK ABOUT A TYPING SAVINGS!",*W,*W
+         BEEP
+         RELEASE
+         CHAIN     "ACCTMNU1"
+.
+*............................................................
+.  PRINT LABELS BY SELECTED STATE
+.
+         INCLUDE   COMMON
+. 
+ACCOUNTS IFILE     KEYL=6,UNCOMPRESSED
+NAME     INIT      "ACCTSTAT.ISI"
+. 
+REPLY    DIM       1
+. 
+         INCLUDE   CUSTMAST
+. 
+. ........WORK AREA FOR SECOND ADDRESS
+. 
+NAME2    DIM       30
+ADDR2    DIM       25
+ADDR22   DIM       25
+CITY2    DIM       20
+STATE2   DIM        2
+ZIP2     FORM       5
+KEY2     DIM        6
+. 
+. 
+KEYCNT   FORM       "0000"
+RECCNT   FORM       "0000"
+. 
+READFLAG DIM       1
+ACCTFLAG DIM       1
+TWOUP    DIM       1
+ALLACCT  DIM       1
+P2FLAG   DIM       1
+. 
+STATE    DIM       2
+STATEKEY DIM       6
+. 
+TIME     INIT      "HH/MM/SS"
++............................................................
+.
+. 
+ 	 INCLUDE    CALLERR1
+ 
+         MOVE       "CUSTOMER LABELS BY STATE" TO TITLTEXT
+
+         INCLUDE    CALLERR2
+
+         CLOCK     TIME TO TIME
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:12,"PRINT CUSTOMER LABELS - BY STATE":
+                   *P01:14,"NOTE..THIS PROGRAM USES 2-UP PIN-FED CONTINUOUS ":
+                           "LABELS":
+                   *W,*W,*W
+         DISPLAY *ES,*P01:24,"PLEASE FOLLOW THESE INSTRUCTIONS...CAREFULLY":
+                    *C,*R," LIFT THE PRINTER COVER":
+                   *C,*R," REMOVE THE CURRENT FORM FROM THE PRINTER":
+                   *C,*R," LOAD THE LABELS ON THE PRINTER"
+         KEYIN     *C,*R,"......HIT ENTER FOR YOUR ":
+                   "NEXT INSTRUCTIONS",REPLY
+         KEYIN     *ES,*P01:24,"OKAY NOW...... WE`RE ALMOST THERE!":
+                   *C,*R,"WE WILL NOW POSITION THE LABELS.":
+                 *C,*R,"AND ALIGN LEFT EDGE 5 LINES TO THE RIGHT OF MINUS 10":
+                   *C,*R," RESET THE FORMS THICKNESS LEVER TO SETTING 3":
+                 *C,*R,"NOW PUSH THE ROUND KNOB ON THE PAPER FEEDER SHAFT IN":
+                 *C,*R,"AND ROTATE IT CLOCKWISE UNTIL THE PERFORATION IS JUST":
+                   *C,*R,"AT THE TOP OF THE PRINT HEAD":
+                *C,*R," CLOSE THE PRINTER COVER AND HIT THE ENTER KEY",REPLY
+         KEYIN     *ES,*P24:12,"HIT THE ENTER KEY TO PROCEED!",REPLY
+PROCEED  TRAPCLR   IO
+. 
+         TRAP      NOCUST IF IO
+         OPEN      ACCOUNTS,NAME
+.
+         GOTO      STARTIT
+NOCUST   BEEP
+         DISPLAY   *P01:12,*EL,"DISK NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         CHAIN     "ACCTMNU1"
+. 
+STARTIT  KEYIN     *P01:12,*EF,*P01:12,"PRINT (1) or (2) LABELS PER CUSTOMER":
+                   " ? ",TWOUP
+         RESET     TWOUP
+         GOTO      STARTIT IF EOS
+         CMATCH    "2" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         CMATCH    "1" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         BEEP
+         GOTO      STARTIT
+.
+ACCTPT   PRINT     *C,*L,*L,*L,*L
+         KEYIN     *P01:12,*EL,"PRINT ACCOUNT NUMBER ON THE LABEL ? ":
+                               "Y or N ",ACCTFLAG
+         RESET     ACCTFLAG
+         GOTO      ACCTPT IF EOS
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         BEEP
+         GOTO      ACCTPT
+PRINTALL KEYIN     *P01:12,*EL,"ENTER THE STATE CODE (ie. NY) ",STATE
+         RESET     STATE
+         GOTO      PRINTALL IF EOS
+.
+SETRANGE CLEAR     STATEKEY
+         APPEND    STATE TO STATEKEY
+         APPEND    "    " TO STATEKEY
+         RESET     STATEKEY TO 1
+         READ      ACCOUNTS,STATEKEY;CUSTKEY
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    ACCOUNTS;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                             CUSTCITY,CUSTSTAT,CUSTZIP
+*............................................................
+. TEST FOR END OF FILE
+         GOTO      EOJSET IF OVER
+. 
+.   BYPASS THE DELETED CUSTOMERS
+. 
+         CMATCH    "D" TO  CUSTSTTS
+         GOTO      READ IF  EQUAL
+.
+         MATCH     STATE TO CUSTSTAT
+         GOTO      EOJSET   IF NOT EQUAL   (SINCE WE PRIMED THE READS!)
+.
+. 
+OKAY     MOVE      "X" TO READFLAG           INDICATE FOR EOJSET
+         ADD       "1" TO RECCNT
+         COMPARE   "0"    TO KEYCNT
+         GOTO      MATCHX IF EQUAL
+         COMPARE   RECCNT TO KEYCNT
+         GOTO      EOJSET IF  LESS
+MATCHX   CMATCH    "X"  TO P2FLAG
+         GOTO      PRINTEM IF EQUAL
+*............................................................
+         MOVE      CUSTNAME TO NAME2
+         MOVE      CUSTADDR TO ADDR2
+         MOVE      CUSTCITY TO CITY2
+         MOVE      CUSTSTAT TO STATE2
+         MOVE      CUSTZIP  TO ZIP2
+         MOVE      CUSTKEY  TO KEY2
+. 
+. DETERMINE IF PRINTING 2-UP OR 2 CUSTOMERS PER LINE
+. 
+         CMATCH    "2" TO TWOUP
+         GOTO      PRINTEM IF EQUAL
+         MOVE      "X" TO P2FLAG
+         GOTO      READ
+. 
+. 
+PRINTEM  PRINT     *1,CUSTNAME,*38,NAME2
+         PRINT     *1,CUSTADDR,*38,ADDR2
+.
+. IN HERE ADD THE LOGIC TO PRINT THE SECOND LINE OF THE ADDRESS
+.
+...............        PRINT     *1,CUSTADR2,*38,ADDR22
+.
+         PRINT     *1,CUSTCITY,*22,CUSTSTAT,*25,*ZF,CUSTZIP:
+                   *38,CITY2,*59,STATE2,*62,*ZF,ZIP2
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      SPACEOUT IF NOT EQUAL
+         PRINT     *1,"(",CUSTKEY,")",*38,"(",KEY2,")"
+...........      PRINT     *C,*L
+         PRINT     " "
+         GOTO      TESTS
+SPACEOUT PRINT     *C,*L,*L
+TESTS    MOVE      " " TO P2FLAG
+         MOVE      " " TO READFLAG
+         CMATCH    "Q" TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         GOTO      READ
+. 
+EOJSET   CMATCH    " " TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         MOVE      "Q"    TO READFLAG
+         GOTO      PRINTEM
+EOJRTN   BEEP
+         MOVE      "  " TO STATE
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"PRINT MORE STATES ? (Y/N) ",REPLY
+         DISPLAY   *P1:23,*EL
+         CMATCH    "Y",REPLY
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      EOJRTN IF NOT EQUAL
+.
+         RELEASE
+         CHAIN     "ACCTMNU1"
+.
+*............................................................
+.....................................................................
+. MSAL/TXT - DISPLAY PARTS/PURCHASE/SALES HISTORY FILES	 .
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+.....................................................................
+. 
+. MODIFY 4/18/84 TO REQUIRE THAT A VALID PART NUMBER BE	ENTERED
+.		 AND DISPLAYED PRIOR TO	ALLOWING GENERIC DISPLAYS
+. 
+. 
+	 INCLUDE   COMMON.TXT
+. 
+IOSW	 DIM	   1
+ALLSW	 DIM	   1
+XREF1	 DIM	   20
+XREF2	 DIM	   20
+. 
+APMASTER IFILE	   KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	   KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+. 
+CINDX1	 FORM	   3
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+PORTX	 DIM	   2
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+SAVEPART DIM	   20
+DISPQTY	 FORM	   5
+STOPSW	 DIM	   1
+. 
+.....................................................
+.
+
+	 INCLUDE   CALLERR1.INC
+         MOVE      "DISPLAY SALES HISTORY" TO TITLTEXT
+         INCLUDE   CALLERR2.INC
+ 
+DISPLAY	 DISPLAY   *ES,*P06:01,*HON,"INVENTORY HISTORY SYSTEM -	SALES HISTORY":
+		   " DISPLAY PROGRAM	 ",TODAY,*HOFF:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION":
+		   *P25:05,"SALE/QUOTATION HISTORY":
+		   *P01:06,"TYP	PURCHASE ORDER##    UOP	QUANTITY    PRICE   ":
+			   "DATE VND/CST##  NAME":
+		   *P13:20,"TYPE CODES",*P50:20,"UNIT OF PURCHASE":
+		   *P01:21,"S=SALE	Q=QUOTE	TO CUSTOMER":
+		   *P41:21,"EA=EACH,C=HUND,M=THOU,OZ=OUNCE,LB=POUND":
+		   *P41:22,"BG=BAG,BX=BOX,FT=FOOT"
+. 
+	 GOTO	   START
+. 
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSSALEIO.TXT
+. 
+	 INCLUDE   MSPOIO.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+. 
+START	 CALL	   CLRTRAPS
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+	 MOVE	   PORTN  TO  PORTX
+	 REP	   " 0"	  IN  PORTX
+. 
+NAMEOK	 CALL	   OPENCUST
+	 CALL	   MSPTOPEN
+	 CALL	   MSSLOPEN
+. 
+	 OPEN	   APMASTER,"APMASTER.ISI"
+. 
+DOMORE	 CALL	   CLRPART
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	DISPLAY	PART / F3 FOR ":
+		   "NEXT PART /	F5 TO TERMINATE	",*HOFF,REPLY
+. 
+	 MOVE	   " " TO ALLSW
+	 GOTO	   RDKSALL  IF	F3
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 CALL	   CLRPART
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+	 GOTO	   EOJ	IF  F5
+. 
+...............	   MOVE	     MSPARTNO  TO  SAVEPART
+. 
+	 DISPLAY   *P01:03,MSPARTNO
+.
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+. 
+................... CALL      MSPTREAD
+. 
+	 INCLUDE   MSPTSIO.TXT
+. 
+	 GOTO	   INVALID  IF	OVER
+. 
+.  4/18/84 SAVE	PART NUMBER HERE TO TRIGGER GENERIC SEARCH
+. 
+	 MOVE	   MSPARTKY TO	SAVEPART
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   DISPPART  IF	 EQUAL
+. 
+INVALID	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID PART NUMBER!  TRY AGAIN! ":
+		   *HOFF,*W3,*P1:23,*EL
+	 GOTO	   DOMORE
+. 
+RDKSALL	 CMOVE	   "A"	TO  ALLSW
+. 
+READKS	 CALL	   MSPTRDKS
+	 CMATCH	   "M",IOSW
+	 GOTO	   EOJ IF EQUAL	   (THAT MEANS THERE AREN'T ANY	MORE PARTS)
+. 
+. NOW CHECK IF THE PART	WHICH HAS BEEN READ KEY	SEQUENTIALLY IS	A MATCH
+. WITH THE PORTION OF THE KEY VALUE WHICH WAS ENTERED!
+. 
+	 CMATCH	   "A",ALLSW
+	 GOTO	   DISPPART IF EQUAL
+. 
+	 MATCH	   SAVEPART TO MSPARTNO
+	 GOTO	   DISPPART IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A BREAK ON THE GENERIC KEY VALUE
+. SO GO	TO DETERMINE IF	USER IS	DONE
+. 
+	 GOTO	   DOMORE
+. 
+. 
+DISPPART DISPLAY   *P01:03,MSPARTNO:
+		   *P31:03,MSXRFPT1:
+		   *P61:03,MSXRFPT2:
+		   *P06:04,MSSIZE:
+		   *P50:04,MSDESC
+. 
+	 MOVE	   MSXRFPT1  TO	 XREF1
+	 MOVE	   MSXRFPT2  TO	 XREF2
+. 
+	 MOVE	   "6"	TO  NROW
+	 GOTO	   DATAIN
+. 
+. 
+CLRPART	 DISPLAY   *P01:03,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+	 MOVE	   " " TO XREF1
+	 MOVE	   " " TO XREF2
+	 MOVE	   " " TO STOPSW
+	 CALL	   RECYCLE
+	 RETURN
+. 
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+. 
+. NOTE READ THE	PURCHASES FILE,	FOLLOWED BY THE	SALES FILE
+. FOR ALL OCCURRENCES, BEGINNING WITH THE KEYED	PART NUMBER
+. AND FOLLOWED BY THE FIRST CROSS REFERENCE PART NUMBER,
+. THEN THE SECOND CROSS	REFERENCE PART NUMBER
+. 
+GETDATA	 GOTO	   GETSALES
+. 
+STOPDISP KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	SEE MORE DATA, F3 FOR ":
+				   "NEW	PART":
+		   *HOFF,REPLY
+.
+	 GOTO	   SETSTOP IF F3
+	 GOTO	   FKEYOK IF F1
+	 BEEP
+	 GOTO	   STOPDISP
+.
+SETSTOP	 MOVE	   "S",STOPSW
+.
+FKEYOK	 CALL	   RECYCLE
+	 RETURN
+. 
+GETSALES CLEAR	   MSSALEKY
+	 APPEND	   MSPARTNO  TO	 MSSALEKY
+	 APPEND	   "	     "	TO  MSSALEKY
+	 RESET	   MSSALEKY
+	 READ	   MSSALEFL,MSSALEKY;MSSLPART
+. 
+SLLOOP1	 CALL	   MSSLRDKS
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   PO2 IF NOT EQUAL
+. 
+	 MATCH	   MSSLPART TO MSPARTNO
+	 GOTO	   PO2 IF NOT EQUAL
+. 
+. 2/5/86 BYPASS	RECORD IF MSSLTYPE = "*"
+.
+	 CMATCH	   "*" TO MSSLTYPE
+	 GOTO	   SLLOOP1 IF EQUAL
+.
+	 MOVE	   MSSLQTY  TO	DISPQTY
+. 
+. 
+	 DISPLAY   *P2:NROW,MSSLTYPE,*P5:NROW,MSSLNUMB:
+		   *P25:NROW,MSSLUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSSLPRC,*P47:NROW,MSSLDATE:
+		   *P54:NROW,MSSLCUST,*P61:NROW,MSSLCNAM
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 CALL	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+.
+	 MATCH	   "S",STOPSW
+	 GOTO	   PARTIN IF EQUAL
+.
+	 GOTO	   SLLOOP1
+. 
+. 
+. NOW CHECK IF ANY CROSS-REFERENCE PARTS EXIST!
+. 
+PO2	 MOVE	   MSPARTNO  TO	 SAVEPART
+	 CMATCH	   " " TO XREF1
+	 GOTO	   CHECKPT2 IF EOS
+	 GOTO	   CHECKPT2 IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A CROSS-REFERENCE PART NUMBER!
+. SO GET CHASE IT!
+. 
+	 MOVE	   XREF1  TO  MSPARTKY
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   CHECKPT2  IF	 NOT  EQUAL
+	 CALL	   POSLLOOP
+	 GOTO	   CHECKPT2
+. 
+. FALLTHRU MEANS WE HAVE FOUND A VALID CROSS-REFERENCE PART NUMBER
+. 
+POSLLOOP GOTO	   SL2
+. 
+SL2	 CLEAR	   MSSALEKY
+	 APPEND	   MSPARTNO  TO	 MSSALEKY
+	 APPEND	   "	     "	 TO  MSSALEKY
+	 RESET	   MSSALEKY
+	 READ	   MSSALEFL,MSSALEKY;MSSLPART
+. 
+SLLOOP2	 CALL	   MSSLRDKS
+	 CMATCH	   "H",IOSW
+	 GOTO	   POSLRTRN  IF	 NOT  EQUAL  (IE END OF	FILE)
+	 MATCH	   MSSLPART  TO	 MSPARTNO
+	 GOTO	   POSLRTRN  IF	 NOT  EQUAL
+. 
+. 2/5/86 BYPASS	REC IF MSSLTYPE	= "*"
+.
+	 CMATCH	   "*" TO MSSLTYPE
+	 GOTO	   SLLOOP2 IF EQUAL
+.
+. 
+	 MOVE	   MSSLQTY  TO	DISPQTY
+. 
+	 DISPLAY   *P2:NROW,MSSLTYPE,*P5:NROW,MSSLNUMB:
+		   *P25:NROW,MSSLUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSSLPRC,*P47:NROW,MSSLDATE:
+		   *P54:NROW,MSSLCUST,*P61:NROW,MSSLCNAM
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 CALL	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+.
+	 MATCH	   "S",STOPSW
+	 GOTO	   PARTIN IF EQUAL
+	 GOTO	   SLLOOP2
+. 
+POSLRTRN RETURN
+. 
+CHECKPT2 CMATCH	   " " TO XREF2
+	 CALL	   STOPDISP  IF	 EOS
+	 CALL	   STOPDISP  IF	 EQUAL
+	 CMATCH	   " " TO XREF2
+	 GOTO	   RESTRPRT  IF	EQUAL
+. 
+	 MOVE	   XREF2    TO	MSPARTKY
+. 
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   RESTRPRT  IF	 NOT  EQUAL
+. 
+	 CALL	   POSLLOOP
+	 CALL	   STOPDISP
+. 
+RESTRPRT MOVE	   SAVEPART  TO	 MSPARTKY
+	 CALL	   MSPTREAD	 (TO RESTORE THE POSITION IN FILE)
+. 
+. NOW FALLTHRU TO DOMORE AND CHECK THE GENERIC SEARCH!
+. 
+	 GOTO	   DOMORE
+. ...........
+	 GOTO	   EOJ	IF F5
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+    	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+GPO	 DISPLAY   *P01:23,*EL
+	 KEYIN	   *P05:NROW,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 MOVE	   "EA"	 TO  UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2:
+		   *HOFF,*P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 MOVE	   "0.00"  TO  QTYIN
+	 KEYIN	   *P28:NROW,*RV,QTYIN
+	 DISPLAY   *P28:NROW,QTYIN
+. 
+PRCIN	 MOVE	   "0.00"  TO  PRCIN
+	 KEYIN	   *P38:NROW,*RV,PRCIN
+	 DISPLAY   *P38:NROW,PRCIN
+. 
+DATEIN	 MOVE	   "83"	 TO  YIN
+	 MOVE	   "01"	 TO  MIN
+	 MOVE	   "01"	 TO  DIN
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "13"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   YIN	TO  FORM2
+	 COMPARE   "80"	TO  FORM2
+	 GOTO	   DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+	 RESET	   TODAY  TO  7
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+	 RESET	   TODAY  TO  4
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*W2,*P1:23,*HOFF,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 MOVE	   "000000"  TO	 VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*W2,*P1:23,*HOFF,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*W2,*P1:23,*HOFF,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P60:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",REPLY,*HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:NROW,*EL
+	 SUBTRACT  "1" FROM NROW
+	 GOTO	   DATAIN
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   MSPARTNO  TO	 MSSLPART
+	 MOVE	   DT6	     TO	 MSSLJULD
+	 MOVE	   "000"     TO	 MSSLSUFX
+	 MOVE	   TYPEIN    TO	 MSSLTYPE
+	 MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+	 CLEAR	   MSSALEKY
+	 APPEND	   MSSLPART  TO	 MSSALEKY
+. 
+. NOTE....IS MSSLJULD /	DT6  IN	 YY/MM/DD ORDER	? ? ?
+. 
+	 APPEND	   MSSLJULD  TO	 MSSALEKY
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+WCUSTREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 TRAP	   BUMPCSUF IF IO
+......	 WRITE	   NSALES,MSSALEKY;MSSALEKY,MSSLTYPE,MSSLNUMB,MSSLUOP:
+......				   MSSLQTY,MSSLDATE,MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+	 CMATCH	   "X",IOSW
+	 GOTO	   WCUSTREC IF EQUAL
+	 CMOVE	   " " TO IOSW
+. 
+	 CALL	   CLRTRAPS
+	 CALL	   MSSLWRIT
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",REPLY,*HOFF
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+	 GOTO	   DATAIN
+. 
+BUMPCSUF MOVE	   MSSLSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSSLSUFX
+	 REP	   " 0"	     IN	 MSSLSUFX
+. 
+	 RESET	   MSSALEKY  TO	 26
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 RESET	   MSSALEKY  TO	 29
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+	 MOVE	   "X" TO IOSW
+	 RETURN
+. 
+. 
+PORECS	 TRAPCLR   PARITY
+GETSTUFF TRAPCLR   PARITY
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY INQUIRY",*W2,*HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+.................................................................
+. MSEOD/TXT - PROGRAM PROCESSES	END-OF-DAY FOR DATA ENTRY FILES
+	 INCLUDE   MSCBRAG.TXT
+.................................................................
+. 
+	 INCLUDE   COMMON
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+PAGES	 FORM	   3
+. 
+NPARTSFL IFILE	   KEYL=20,UNCOMPRESSED
+NPARTSNM INIT	   "C:\DBC\NEWPARTS.ISI"
+. 
+TERMINAL DIM	   2
+TIME	 INIT	   "HH/MM/SSS"
+LINES	 FORM	   2
+REPLY	 DIM	   1
+WHO	 DIM	   20
+WHOCNT	 FORM	   4
+ROLLNAME INIT	   "C:\DBC\ROLLFILE.SYS"
+. 
+START	 DISPLAY   *ES,*P1:1,*HON,"INVENTORY HISTORY END-OF-DAY	PROCESSING":
+			     *HOFF
+. 
+	 MOVE	   "000" TO PAGES
+	 CLOCK	   TIME	 TO TIME
+	 CLOCK	   DATE	 TO TODAY
+	 CALL	   HEADER
+. 
+	 OPEN	   NPARTSFL,NPARTSNM
+	 MOVE	   "0"	 TO WHOCNT
+	 CALL	   LOOP01
+. 
+	 ROLLOUT   "CHAIN SORTHIST.CHN",ROLLNAME
+.
+	 DISPLAY   *P1:16,*EL,*HON,"SALES AND PURCHASING DATA SORTED ":
+		   "FOR	LISTING",*HOFF,*W4
+.
+	 CHAIN	   "MSEODPRT"
+.
+.....	     ROLLOUT   "CHAIN MSFLBILD",ROLLNAME
+. 
+.....	     BEEP
+....	    DISPLAY   *ES,*P1:4,*HON,"NEW PARTS	DATA ENTRY FILE	PREPARED ",*W5:
+....		      *HOFF
+.
+BYPASS	 CHAIN	   "MSHISTRY"
+. 
+LOOP01	 READKS	   NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+	 GOTO	   LOOPEND IF OVER
+.
+	 CMATCH	   "X",MSSTATUS
+	 GOTO	   LOOP01 IF EQUAL
+.
+	 PRINT	   *1,MSPARTNO,*22,MSSIZE,*55,MSDESC,*88,MSXRFPT1:
+		   *110,MSXRFPT2
+	 ADD	   "1"	TO  WHOCNT
+	 ADD	   "1"	TO  LINES
+	 COMPARE   "53",LINES
+	 CALL	   HEADER  IF  EQUAL
+	 GOTO	   LOOP01
+	 RETURN
+. 
+LOOPEND	 PRINT	   *C,*L,*L,"**	END OF DATA ENTRY ":
+		   "FOR	",WHO,"	** TOTAL RECORDS ENTERED = ":
+		   WHOCNT," ** "
+	 RETURN
+. 
+HEADER	 ADD	   "1"	TO  PAGES
+	 PRINT	   *F,*25,"INVENTORY DATA ENTRY	VALIDATION LIST":
+		   *80," AS OF ",TODAY,"  TIME ",TIME,"	 PAGE ",PAGES
+. 
+	 PRINT	   " "
+	 PRINT	   *1,"PART NUMBER",*22,"SIZE",*55,"DESCRIPTION":
+		   *88,"CROSS-REFERENCE	1",*110,"CROSS-REFERENCE 2"
+	 PRINT	   " "
+	 MOVE	   "4"	TO  LINES
+	 RETURN
+. 
+. 
+.....................................................................
+. MSHSTDE/TXT -	ADD DATA TO   PARTS/PURCHASE/SALES HISTORY FILES  .
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+. THIS PROGRAM PERMITS ISAM-ADD	DATA ENTRY OF  PO/SALES	HISTORY
+.....................................................................
+. 
+	 INCLUDE   COMMON
+. 
+IOSW	 DIM	   1
+. 
+APMASTER IFILE	    KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	    KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+.
+NPURCH	 IFILE	   KEYL=29,UNCOMPRESSED
+NPURCHNM INIT	   "NEWPURCH.ISI"
+.
+NSALES	 IFILE	   KEYL=29,UNCOMPRESSED
+NSALESNM INIT	   "NEWSALES.ISI"
+.
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+	 INCLUDE   DATETBLZ.TXT
+. 
+. 
+. 
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+. 
+WHO	 DIM	   25
+PORTX	 DIM	   2
+. 
+Z28	 INIT	   "0000000000000000000000000000"
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+DISPQTY	 FORM	   5
+. 
+.....................................................
+. 
+	 INCLUDE   CALLERR1.INC
+         MOVE      "ADD PO/SALES HISTORY" TO TITLTEXT
+         INCLUDE   CALLERR2.INC
+
+
+DISPLAY	 DISPLAY   *ES,*P09:01,"INVENTORY HISTORY SYSTEM - ADD PO/SALES":
+		   " DATA  ",*P73:01,TODAY:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION":
+		   *P25:05,"PURCHASE/SALE/QUOTATION HISTORY":
+		   *P01:06,"TYP	PURCHASE ORDER##    UOP	QUANTITY    PRICE   ":
+			   "DATE VND/CST##  NAME":
+		   *P13:21,"TYPE CODES",*P50:21,"UNIT OF PURCHASE":
+		   *P01:22,"P=PURCHASE	R=VENDOR QUOTATION":
+		   *P41:22,"EA=EACH,C=HUND,M=THOU,OZ=OUNCE,LB=POUND":
+		   *P01:23,"S=SALE	Q=QUOTE	TO CUSTOMER":
+		   *P41:23,"BG=BAG,BX=BOX,FT=FOOT"
+. 
+	 GOTO	   START
+. 
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSSLIO2.TXT
+. 
+	 INCLUDE   MSPOIO2.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+. 
+START	 CALL	   CLRTRAPS
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+	 MOVE	   PORTN  TO  PORTX
+	 REP	   " 0"	  IN  PORTX
+. 
+NAMEOK	 CALL	   OPENCUST
+	 CALL	   MSPTOPEN
+	 CALL	   MSSLOPEN
+	 CALL	   MSPOOPEN
+. 
+	 OPEN	   NSALES,NSALESNM
+	 OPEN	   NPURCH,NPURCHNM
+	 OPEN	   APMASTER,"APMASTER.ISI"
+. 
+DOMORE	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	ENTER PO/SALES / F5 TO ":
+		   "TERMINATE ",*HOFF,REPLY
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 GOTO	   CLRPART
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+. 
+	 GOTO	   EOJ	IF  F5
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+.......................	      CALL	MSPTREAD
+. 
+	 INCLUDE   MSPTSIO.TXT
+. 
+	 GOTO	   INVALID  IF	OVER
+. 
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   PRTDSP   IF	EQUAL
+. 
+	 BEEP	   
+INVALID	 DISPLAY   *P1:23,*EL,*HON,"INVALID PART NUMBER! - TRY AGAIN! ":
+		   *HOFF,*W3,*P1:23,*EL
+	 GOTO	   DOMORE
+. 
+PRTDSP	 DISPLAY   *P01:03,MSPARTNO
+	 DISPLAY   *P31:03,MSXRFPT1
+. 
+	 DISPLAY   *P61:03,MSXRFPT2
+. 
+	 DISPLAY   *P06:04,MSSIZE
+. 
+	 DISPLAY   *P50:04,MSDESC
+. 
+PARTOK	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"CORRECT PART ? (Y/N) ",*HOFF,REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   WRITPART  IF	 EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CLRPART IF EQUAL
+	 BEEP
+	 GOTO	   PARTOK
+. 
+CLRPART	 DISPLAY   *P01:03,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+	 CALL	   RECYCLE
+	 GOTO	   PARTIN1
+. 
+WRITPART CALL	   CLRTRAPS
+	 MOVE	   "6"	TO  NROW
+	 GOTO	   MOREDATA
+. 
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+GETDATA	 KEYIN	   *P02:NROW,TYPEIN
+	 GOTO	   EOJ	IF F5
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+GPO	 DISPLAY   *P01:23,*EL
+	 KEYIN	   *P05:NROW,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 MOVE	   "EA"	 TO  UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2,*HOFF:
+		   *P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 MOVE	   "0.00"  TO  QTYIN
+	 KEYIN	   *P30:NROW,*RV,QTYIN
+. 
+. ............................................
+. CLEAR	LINE FROM POSITION 27
+. 
+	 DISPLAY   *P27:NROW,*EL
+. ............................................
+. 
+	 MOVE	   QTYIN   TO  DISPQTY
+	 DISPLAY   *P28:NROW,DISPQTY,*P36:NROW,*EL
+. 
+PRCIN	 MOVE	   "0.00"  TO  PRCIN
+	 KEYIN	   *P37:NROW,*RV,PRCIN
+	 DISPLAY   *P37:NROW,PRCIN
+. 
+DATEIN	 MOVE	   "83"	 TO  YIN
+	 MOVE	   "01"	 TO  MIN
+	 MOVE	   "01"	 TO  DIN
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "13"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+...         MOVE      YIN  TO  FORM2
+...         COMPARE   "80" TO  FORM2
+...         GOTO      DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+	 RESET	   TODAY  TO  5
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+	 RESET	   TODAY  TO  3
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*W2,*HOFF,*P1:23,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 MOVE	   "000000"  TO	 VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*W2,*HOFF,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*W2,*HOFF,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P61:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",*HOFF,REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:NROW,*EL
+	 SUBTRACT  "1" FROM NROW
+	 GOTO	   DATAIN
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   MSPARTNO  TO	 MSSLPART
+	 MOVE	   DT6	     TO	 MSSLJULD
+	 MOVE	   "100"     TO	 MSSLSUFX
+	 MOVE	   TYPEIN    TO	 MSSLTYPE
+	 MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+	 CLEAR	   MSSALEKY
+	 APPEND	   MSSLPART  TO	 MSSALEKY
+. 
+. NOTE....IS MSSLJULD /	DT6  IN	 YY/MM/DD ORDER	? ? ?
+. 
+	 APPEND	   MSSLJULD  TO	 MSSALEKY
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+WCUSTREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+. 
+	 TRAP	   BUMPCSUF IF IO
+	 CALL	   MSSLWRIT
+. 
+	 CMATCH	   "X",IOSW
+	 GOTO	   WCUSTREC IF EQUAL
+	 CMOVE	   " " TO IOSW
+.
+	 FILEPI	   1;NSALES
+	 WRITE	   NSALES,MSSALEKY;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+				   MSSLNUMB,MSSLUOP:
+				   MSSLQTY,MSSLDATE,MSSLPRC,MSSLCNAM
+.
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",*HOFF,REPLY
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+. 
+BUMPCSUF MOVE	   MSSLSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSSLSUFX
+	 REP	   " 0"	     IN	 MSSLSUFX
+. 
+	 RESET	   MSSALEKY  TO	 26
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 RESET	   MSSALEKY  TO	 29
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+	 MOVE	   "X" TO IOSW
+	 RETURN
+. 
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY DATA ENTRY",*W2:
+		   *HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+............................................................................
+. MSPORECS/TXT - INCLUDE MODULE	TO WRITE PURCHASE HISTORY RECORDS
+. 
+PORECS	 TRAPCLR   IO
+MSPORECS MOVE	   MSPARTNO  TO	 MSPOPART
+	 MOVE	   DT6	     TO	 MSPOJULD
+	 MOVE	   "100"     TO	 MSPOSUFX
+	 MOVE	   TYPEIN    TO	 MSPOTYPE
+	 MOVE	   POIN	     TO	 MSPONUMB
+	 MOVE	   UOPIN     TO	 MSPOUOP
+	 MOVE	   QTYIN     TO	 MSPOQTY
+	 MOVE	   PRCIN     TO	 MSPOPRC
+	 MOVE	   DATEIN    TO	 MSPODATE
+	 MOVE	   VENDIN    TO	 MSPOVEND
+	 MOVE	   NAMEIN    TO	 MSPOVNAM
+	 CLEAR	   MSPOKEY
+	 APPEND	   MSPOPART  TO	 MSPOKEY
+. 
+. NOTE....IS MSSLJULD /	DT6  IN	 YY/MM/DD ORDER	? ? ?
+. 
+	 APPEND	   MSPOJULD  TO	 MSPOKEY
+	 APPEND	   MSPOSUFX  TO	 MSPOKEY
+	 LENSET	   MSPOKEY
+	 RESET	   MSPOKEY  TO	1
+. 
+WVENDREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 TRAP	   BUMPVSUF IF IO
+	 CALL	   MSPOWRIT
+. 
+	 CMATCH	   "X",IOSW
+	 GOTO	   WVENDREC IF EQUAL   (TRY TO WRITE AGAIN!)
+	 CMOVE	   " " TO IOSW
+. 
+	 FILEPI	   1;NPURCH
+	 WRITE	   NPURCH,MSPOKEY;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+				  MSPONUMB,MSPOUOP:
+				  MSPOQTY,MSPODATE,MSPOPRC,MSPOVNAM
+.
+	 GOTO	   MOREDATA
+. 
+BUMPVSUF MOVE	   MSPOSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSPOSUFX
+	 REP	   " 0"	     IN	 MSPOSUFX
+. 
+	 RESET	   MSPOKEY  TO	26
+	 APPEND	   MSPOSUFX  TO	 MSPOKEY
+	 RESET	   MSPOKEY  TO	29
+	 LENSET	   MSPOKEY
+	 RESET	   MSPOKEY  TO	1
+. 
+	 MOVE	   "X" TO  IOSW
+	 RETURN
+. 
+.............................................................................
+. 
+.....................................................................
+. MSPARTDE/TXT - CREATE	INITIAL	PARTS/PURCHASE/SALES HISTORY FILES  .
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+. THIS PROGRAM PERMITS ISAM-ADD	DATA ENTRY OF NEW PART NUMBERS,	AND .
+. ASSOCIATED PURCHASE/SALE/QUOTATION HISTORY TO	TEMPORARY ISAM WORK .
+. FILES	AS FOLLOWS:						    .
+.								    .
+. NPARTS(nn)/ISI, NPURCH(nn)/ISI, NSALES(nn)/ISI..NOTE (nn) = PORTN .
+.								    .
+. THESE	ISAM FILES WILL	BE SAPPED BY AN	AUTOMATED PROCEDURE TO THE  .
+. FOLLOWING PERMANENT MASTER FILES:				    .
+.								    .
+. MSPARTFL/ISI,	  MSPURCHS/ISI,	  MSSALES/ISI			    .
+.								    .
+. THE TEMPORARY	DATA ENTRY FILES WILL THEN BE LISTED BY	PROGRAM	    .
+. MSPLIST/DBC, AND WILL	THEN BE	KILLED,	PREPPED	AND REINDEXED	    .
+.....................................................................
+. 
+. MODIFIED 4/7/84 TO MOVE THE UOP FIELD	LEFT ONE POSITION
+. 
+. 
+	 INCLUDE   COMMON.TXT
+. 
+IOSW	 DIM	   1
+. 
+APMASTER IFILE	    KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	    KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+	 INCLUDE   DATETBLZ.TXT
+. 
+. 
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+NPARTS	 IFILE	    KEYL=20,UNCOMPRESSED
+NPARTSNM INIT	   "NEWPARTS.ISI"
+. 
+NPURCH	 IFILE	    KEYL=29,UNCOMPRESSED
+NPURCHNM INIT	   "NEWPURCH.ISI"
+. 
+NSALES	 IFILE	    KEYL=29,UNCOMPRESSED
+NSALESNM INIT	   "NEWSALES.ISI"
+. 
+WHO	 DIM	   25
+PORTX	 DIM	   2
+. 
+Z28	 INIT	   "0000000000000000000000000000"
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+DISPQTY	 FORM	   5
+DUMMYRD	 DIM	   25
+. 
+.....................................................
+. 
+
+         INCLUDE  CALLERR1.INC
+          MOVE    "ENTER NEW PART NUMBERS" TO TITLTEXT
+         INCLUDE  CALLER2.INC
+
+
+
+DISPLAY	 DISPLAY   *ES,*P09:01,"INVENTORY HISTORY SYSTEM - INITIAL DATA":
+		   " ENTRY PROGRAM",*P73:01,TODAY:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION":
+		   *P25:05,"PURCHASE/SALE/QUOTATION HISTORY":
+		   *P01:06,"TYP	PURCHASE ORDER##    UOP	QUANTITY    PRICE   ":
+			   "DATE VND/CST##  NAME":
+		   *P13:20,"TYPE CODES",*P50:20,"UNIT OF PURCHASE":
+		   *P01:21,"P=PURCHASE	R=VENDOR QUOTATION":
+		   *P41:21,"EA=EACH,C=HUND,M=THOU,OZ=OUNCE,LB=POUND":
+		   *P01:22,"S=SALE	Q=QUOTE	TO CUSTOMER":
+		   *P41:22,"BG=BAG,BX=BOX,FT=FOOT"
+. 
+WHOISIT	 MOVE	   " " TO WHO
+	 MOVE	   "DATA ENTRY OPERATOR" TO WHO
+	 GOTO	   START
+. 
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSSALEIO.TXT
+. 
+	 INCLUDE   MSPOIO.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+.
+START	 CALL	   CLRTRAPS
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+	 MOVE	   "OPEN"    TO	 IOTYPE
+	 MOVE	   NPARTSNM  TO	 IOERFILE
+	 OPEN	   NPARTS,NPARTSNM
+. 
+	 MOVE	   NPURCHNM  TO	 IOERFILE
+	 OPEN	   NPURCH,NPURCHNM
+. 
+	 MOVE	   NSALESNM  TO	 IOERFILE
+	 OPEN	   NSALES,NSALESNM
+. 
+. NOW SET THE NAME RECORD ON EACH FILE
+. 
+	 MOVE	   Z28	TO  MSPARTKY
+	 CALL	   CLRTRAPS
+	 MOVE	   NPARTSNM TO	IOERFILE
+	 MOVE	   "READ"   TO	IOTYPE
+. 
+	 TRAP	   STDIOERR IF	IO
+	 TRAP	   STDRANGE IF	RANGE
+	 TRAP	   STDFMTER IF	FORMAT
+	 TRAP	   STDPARER IF	PARITY
+. 
+	 READ	   NPARTS,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE:
+				   MSXRFPT1,MSXRFPT2
+	 GOTO	   NAMEOK   IF	NOT  OVER  (RECORD ALREADY EXISTS!)
+. 
+. FALLTHRU MEANS NO ZERO RECORD	EXISTS,	THEREFORE, THIS	IS THE INITIAL ENTRY
+. 
+	 MOVE	   "X"	TO  MSSTATUS
+	 MOVE	   Z28	TO  MSPARTNO
+	 MOVE	   WHO	TO  MSSIZE
+	 MOVE	   " "	TO  MSDESC
+	 MOVE	   " "	TO  MSXRFPT1
+	 MOVE	   " "	TO  MSXRFPT2
+	 MOVE	   "WRITE"  TO	IOTYPE
+. 
+. NOW ADD PART RECORD HEADER
+. 
+	 TRAPCLR   IO
+	 TRAP	   AAA IF IO
+	 FILEPI	   1;NPARTS
+	 WRITE	   NPARTS,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+				    MSXRFPT1,MSXRFPT2
+. 
+AAA	 MOVE	   Z28	TO  MSPOKEY
+	 MOVE	   "0.00"   TO	MSPOQTY
+	 MOVE	   "0.00"   TO	MSPOPRC
+	 MOVE	   " "	    TO	MSPOTYPE
+	 MOVE	   WHO	    TO	MSPONUMB
+	 MOVE	   "  "	    TO	MSPOUOP
+	 MOVE	   "000000" TO	MSPODATE
+	 MOVE	   "000000" TO	MSPOVEND
+. 
+. NOW ADD PO FILE HEADER
+. 
+	 TRAPCLR   IO
+	 TRAP	   BBB IF IO
+	 FILEPI	   1;NPURCH
+	 WRITE	   NPURCH,MSPOKEY;MSPOKEY,MSPOTYPE,MSPONUMB,MSPOUOP:
+				  MSPOQTY,MSPODATE,MSPOPRC,MSPOVNAM
+. 
+BBB	 MOVE	   Z28	TO  MSSALEKY
+	 MOVE	   "0.00"   TO	MSSLQTY
+	 MOVE	   "0.00"   TO	MSSLPRC
+	 MOVE	   " "	    TO	MSSLTYPE
+	 MOVE	   WHO	    TO	MSSLNUMB
+	 MOVE	   "  "	    TO	MSSLUOP
+	 MOVE	   "000000" TO	MSSLDATE
+	 MOVE	   "000000" TO	MSSLCUST
+. 
+. NOW ADD SALES	FILE HEADER
+. 
+	 TRAPCLR   IO
+	 TRAP	   NAMEOK IF IO
+	 FILEPI	   1;NSALES
+	 WRITE	   NSALES,MSSALEKY;MSSALEKY,MSSLTYPE,MSSLNUMB,MSSLUOP:
+				   MSSLQTY,MSSLDATE,MSSLPRC,MSSLCNAM
+. 
+NAMEOK	 CALL	   OPENCUST
+	 CALL	   MSPTOPEN
+	 CALL	   MSSLOPEN
+	 CALL	   MSPOOPEN
+. 
+...
+	 OPEN	   APMASTER,"APMASTER.ISI"
+. 
+DOMORE	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	ENTER NEW PART / F5 TO ":
+		   "TERMINATE ",*HOFF,REPLY
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 GOTO	   CLRPART
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+	 DISPLAY   *P01:03,MSPARTNO
+. 
+	 GOTO	   EOJ	IF  F5
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   " " TO MSXRFPT1
+	 KEYIN	   *P31:03,*RV,MSXRFPT1
+	 DISPLAY   *P31:03,MSXRFPT1
+. 
+	 MOVE	   " " TO MSXRFPT2
+	 KEYIN	   *P61:03,*RV,MSXRFPT2
+	 DISPLAY   *P61:03,MSXRFPT2
+. 
+	 MOVE	   " " TO MSSIZE
+	 KEYIN	   *P06:04,MSSIZE
+	 DISPLAY   *P06:04,MSSIZE
+. 
+	 MOVE	   " " TO MSDESC
+	 KEYIN	   *P50:04,MSDESC
+	 DISPLAY   *P50:04,MSDESC
+. 
+PARTOK	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"ALL	PART DATA CORRECT ? (Y/N) ",REPLY:
+		   *HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   WRITPART  IF	 EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CLRPART IF EQUAL
+	 BEEP
+	 GOTO	   PARTOK
+. 
+CLRPART	 DISPLAY   *P01:03,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+	 CALL	   RECYCLE
+	 GOTO	   PARTIN1
+. 
+WRITPART CALL	   CLRTRAPS
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+.
+....................	  CALL	    MSPTREAD
+.
+	 FILEPI	   1;MSPARTFL
+	 READ	   MSPARTFL,MSPARTKY;DUMMYRD
+.
+	 GOTO	   DUPEPART  IF	 NOT  OVER
+	 CALL	   CLRTRAPS
+	 TRAP	   DUPEPART IF IO
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+	 TRAP	   STDPARER IF PARITY
+. 
+	 MOVE	   "WRITE"  TO	IOTYPE
+	 MOVE	   MSPARTNM TO	IOERFILE
+	 MOVE	   MSPARTNO TO MSPARTKY
+	 MOVE	   "A"	    TO MSSTATUS
+. 
+	 FILEPI	   1;NPARTS
+	 WRITE	   NPARTS,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+				   MSXRFPT1,MSXRFPT2
+. 
+	 CALL	   MSPTWRIT
+. 
+. 
+	 MOVE	   "6"	TO  NROW
+. 
+	 GOTO	   MOREDATA
+. 
+DUPEPART BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"PART ",MSPARTKY," ALREADY ON FILE! ":
+		   *HOFF,*W2,*EL
+	 GOTO	   DOMORE
+. 
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+GETDATA	 KEYIN	   *P02:NROW,TYPEIN
+	 GOTO	   EOJ	IF F5
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+GPO	 DISPLAY   *P01:23,*EL
+	 KEYIN	   *P05:NROW,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 MOVE	   "EA"	 TO  UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+ 	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2:
+		   *HOFF,*P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 MOVE	   "0.00"  TO  QTYIN
+	 KEYIN	   *P30:NROW,*RV,QTYIN
+. 
+	 MOVE	   QTYIN   TO  DISPQTY
+. 
+. ......................................................
+. 4/18/84 CLEAR	TO END OF LINE TO PROPERLY DISPLAY DATA
+. 
+	 DISPLAY   *P27:NROW,*EL
+. ......................................................
+. 
+	 DISPLAY   *P28:NROW,DISPQTY,*P36:NROW,*EL
+. 
+PRCIN	 MOVE	   "0.00"  TO  PRCIN
+	 KEYIN	   *P37:NROW,*RV,PRCIN
+	 DISPLAY   *P37:NROW,PRCIN
+. 
+DATEIN   MOVE      "00"  TO  YIN
+	 MOVE	   "01"	 TO  MIN
+	 MOVE	   "01"	 TO  DIN
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "13"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+...         MOVE      YIN  TO  FORM2
+...         COMPARE   "80" TO  FORM2
+...         GOTO      DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+	 RESET	   TODAY  TO  5
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+	 RESET	   TODAY  TO  3
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*HOFF,*W2,*P1:23,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 MOVE	   "000000"  TO	 VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*HOFF,*W2,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*HOFF,*W2,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P61:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",*HOFF,REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:NROW,*EL
+	 SUBTRACT  "1" FROM NROW
+	 GOTO	   DATAIN
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   MSPARTNO  TO	 MSSLPART
+	 MOVE	   DT6	     TO	 MSSLJULD
+	 MOVE	   "000"     TO	 MSSLSUFX
+	 MOVE	   TYPEIN    TO	 MSSLTYPE
+	 MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+	 CLEAR	   MSSALEKY
+	 APPEND	   MSSLPART  TO	 MSSALEKY
+. 
+. NOTE.... MSSLJULD / DT6  IN  YY/MM/DD	ORDER
+. 
+	 APPEND	   MSSLJULD  TO	 MSSALEKY
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+WCUSTREC CALL	   CLRTRAPS
+. 
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDRANGE IF RANGE
+	 TRAP	   BUMPCSUF IF IO
+.
+	 FILEPI	   1;MSSALEFL
+	 WRITE	   MSSALEFL,MSSALEKY;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+				     MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+				     MSSLCUST,MSSLPRC,MSSLCNAM
+.
+	 FILEPI	   1;NSALES
+	 WRITE	   NSALES,MSSALEKY;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+				     MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+				     MSSLPRC,MSSLCNAM
+	 CMOVE	   " " TO IOSW
+. 
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",*HOFF,REPLY
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+	 GOTO	   DATAIN
+. 
+BUMPCSUF MOVE	   MSSLSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSSLSUFX
+	 REP	   " 0"	     IN	 MSSLSUFX
+. 
+	 RESET	   MSSALEKY  TO	 26
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 RESET	   MSSALEKY  TO	 29
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+	 MOVE	   "X" TO IOSW
+	 RETURN
+. 
+PORECS	 INCLUDE   MSPORECS.TXT
+. 
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY DATA ENTRY",*W2:
+		   *HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+.................................................................
+. MSPARTLS/TXT - PRINTS	INVENTORY PART MASTER LISTING
+	 INCLUDE   MSCBRAG.TXT
+.................................................................
+. 
+	 INCLUDE   COMMON.TXT
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+PAGES	 FORM	   4
+. 
+NPARTSFL IFILE	    KEYL=20,UNCOMPRESSED
+PARTS	 INIT	   "MSPARTFL.ISI"
+. 
+TERMINAL DIM	   2
+TIME	 INIT	   "HH/MM/SSS"
+LINES	 FORM	   2
+REPLY	 DIM	   1
+WHO	 DIM	   20
+WHOCNT	 FORM	   6
+.
+STARTKEY DIM	   20
+.
+
+         INCLUDE   CALLERR1.INC
+         MOVE      "PRINT INVENTORY MASTER LIST"  TO TITLTEXT
+         INCLUDE   CALLERR2.INC
+ 
+START	 DISPLAY   *ES,*P1:1,*HON,"INVENTORY HISTORY MASTER LISTING",*HOFF
+. 
+	 MOVE	   "000" TO PAGES
+	 CLOCK	   TIME	 TO TIME
+. 
+	 OPEN	   NPARTSFL,PARTS
+	 MOVE	   "01"	 TO  TERMINAL
+	 MOVE	   "0"	 TO WHOCNT
+	 CALL	   HEADER
+.
+PRINTWAT MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,"PRINT (A)ll or (S)tart from P/N ",REPLY
+	 MATCH	   "A",REPLY
+	 GOTO	   DOIT	IF EQUAL
+.
+	 MATCH	   "S",REPLY
+	 GOTO	   GIMMEKEY IF EQUAL
+.
+	 BEEP
+	 GOTO	   PRINTWAT
+.
+GIMMEKEY MOVE	   "			"  TO  STARTKEY
+	 KEYIN	   *P1:20,"ENTER PART NUMBER TO	START FROM: ",STARTKEY
+	 RESET	   STARTKEY TO 20
+	 LENSET	   STARTKEY
+	 RESET	   STARTKEY TO 1
+.
+	 READ	   NPARTSFL,STARTKEY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+			    MSXRFPT1,MSXRFPT2
+	 GOTO	   PRTS
+.
+DOIT	 CALL	   LP1
+	 GOTO	   BYPASS
+.
+..............................................................
+.
+BYPASS	 CHAIN	   "MSHISTRY"
+. 
+.......................................................................
+. 
+LOOP01	 READKS	   NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+	 MOVE	   MSSIZE  TO  WHO
+	 CALL	   HEADER
+. 
+LP1	 READKS	   NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+	 GOTO	   LOOPEND IF OVER
+.
+PRTS	 PRINT	   *1,MSPARTNO,*22,MSSIZE,*55,MSDESC,*88,MSXRFPT1:
+		   *110,MSXRFPT2
+	 ADD	   "1"	TO  WHOCNT
+	 ADD	   "1"	TO  LINES
+	 COMPARE   "53",LINES
+	 CALL	   HEADER  IF  EQUAL
+	 GOTO	   LP1
+	 RETURN
+. 
+LOOPEND	 PRINT	   *C,*L,*L,"**	END OF INVENTORY MASTER	LIST ":
+		   " **	TOTAL RECORDS ENTERED =	":
+		   WHOCNT," ** "
+	 RETURN
+. 
+HEADER	 ADD	   "1"	TO  PAGES
+	 PRINT	   *F,*20,"INVENTORY MASTER FILE LISTING":
+		   *88," AS OF ",TODAY,"  TIME ",TIME,"	PAGE ",PAGES
+. 
+	 PRINT	   " "
+	 PRINT	   *1,"PART NUMBER",*22,"SIZE",*55,"DESCRIPTION":
+		   *88,"CROSS-REFERENCE	1",*110,"CROSS-REFERENCE 2"
+	 PRINT	   " "
+	 MOVE	   "4"	TO  LINES
+	 RETURN
+. 
+. 
+.....................................................................
+. MSPTUPDT/TXT - UPDATE/MODIFY PARTS HISTORY MASTER FILE
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+. THIS PROGRAM PERMITS ISAM UPDATE OF  PART NUMBERS, AND .
+. 
+	 INCLUDE   COMMON
+. 
+IOSW	 DIM	   1
+. 
+APMASTER IFILE	    KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	   KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+	 INCLUDE   DATETBLZ.TXT
+. 
+. 
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+NPARTS	 IFILE	    KEYL=20,UNCOMPRESSED
+
+NPARTSNM INIT	   "NPARTS.ISI"
+. 
+NPURCH	 IFILE	    KEYL=29,UNCOMPRESSED
+
+NPURCHNM INIT	   "NPURCH.ISI"
+. 
+NSALES	 IFILE	    KEYL=29,UNCOMPRESSED
+
+NSALESNM INIT	   "NSALES.ISI"
+. 
+WHO	 DIM	   25
+PORTX	 DIM	   2
+. 
+Z28	 INIT	   "0000000000000000000000000000"
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+DISPQTY	 FORM	   5
+. 
+.....................................................
+. 
+	 INCLUDE   CALLERR1.INC
+         MOVE      "MODIFY PART RECORDS" TO TITLTEXT
+         INCLUDE   CALLERR2.INC
+
+DISPLAY
+
+
+
+	 DISPLAY   *ES,*P09:01,"INVENTORY HISTORY SYSTEM - MODIFY PART":
+		   "S MASTER PROGRAM",*P73:01,TODAY:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION"
+. 
+	 GOTO	   START
+.
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSPOIO.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+. 
+. 
+	 INCLUDE   MSSALEIO.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+START	 CALL	   CLRTRAPS
+. 
+	 GOTO	   NAMEOK
+. 
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+...	   MOVE	     PORTN  TO	PORTX
+...	   REP	     " 0"   IN	PORTX
+. 
+...	   RESET     NPARTSNM TO 6
+...	   APPEND    PORTX    TO NPARTSNM
+...	   RESET     NPARTSNM TO 12
+...	   LENSET    NPARTSNM
+...	   RESET     NPARTSNM
+. 
+...	   RESET     NPURCHNM TO 6
+...	   APPEND    PORTX    TO NPURCHNM
+...	   RESET     NPURCHNM TO 12
+...	   LENSET    NPURCHNM
+...	   RESET     NPURCHNM
+. 
+...	   RESET     NSALESNM TO 6
+...	   APPEND    PORTX    TO NSALESNM
+...	   RESET     NSALESNM TO 12
+...	   LENSET    NSALESNM
+...	   RESET     NSALESNM
+. 
+	 MOVE	   "OPEN"    TO	 IOTYPE
+	 MOVE	   NPARTSNM  TO	 IOERFILE
+	 OPEN	   NPARTS,NPARTSNM
+. 
+	 MOVE	   NPURCHNM  TO	 IOERFILE
+	 OPEN	   NPURCH,NPURCHNM
+. 
+	 MOVE	   NSALESNM  TO	 IOERFILE
+	 OPEN	   NSALES,NSALESNM
+. 
+. NOW SET THE NAME RECORD ON EACH FILE
+. 
+	 MOVE	   Z28	TO  MSPARTKY
+	 CALL	   CLRTRAPS
+	 MOVE	   NPARTSNM TO	IOERFILE
+	 MOVE	   "READ"   TO	IOTYPE
+. 
+	 TRAP	   STDIOERR IF	IO
+	 TRAP	   STDRANGE IF	RANGE
+	 TRAP	   STDFMTER IF	FORMAT
+	 TRAP	   STDPARER IF	PARITY
+. 
+	 READ	   NPARTS,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE
+	 GOTO	   NAMEOK   IF	NOT  OVER  (RECORD ALREADY EXISTS!)
+. 
+. FALLTHRU MEANS NO ZERO RECORD	EXISTS,	THEREFORE, THIS	IS THE INITIAL ENTRY
+. 
+	 MOVE	   "X"	TO  MSSTATUS
+	 MOVE	   Z28	TO  MSPARTNO
+	 MOVE	   WHO	TO  MSSIZE
+	 MOVE	   " "	TO  MSDESC
+	 MOVE	   " "	TO  MSXRFPT1
+	 MOVE	   " "	TO  MSXRFPT2
+	 MOVE	   "WRITE"  TO	IOTYPE
+. 
+. NOW ADD PART RECORD HEADER
+. 
+	 WRITE	   NPARTS,MSPARTKY;MSSTATUS,MSPARTNO,MSSIZE,MSDESC:
+				    MSXRFPT1,MSXRFPT2
+. 
+	 MOVE	   Z28	TO  MSPOKEY
+	 MOVE	   "0.00"   TO	MSPOQTY
+	 MOVE	   "0.00"   TO	MSPOPRC
+	 MOVE	   " "	    TO	MSPOTYPE
+	 MOVE	   WHO	    TO	MSPONUMB
+	 MOVE	   "  "	    TO	MSPOUOP
+	 MOVE	   "000000" TO	MSPODATE
+	 MOVE	   "000000" TO	MSPOVEND
+. 
+. NOW ADD PO FILE HEADER
+. 
+	 WRITE	   NPURCH,MSPOKEY;MSPOKEY,MSPOTYPE,MSPONUMB,MSPOUOP:
+				  MSPOQTY,MSPODATE,MSPOVEND,MSPOPRC,MSPOVNAM
+. 
+	 MOVE	   Z28	TO  MSSALEKY
+	 MOVE	   "0.00"   TO	MSSLQTY
+	 MOVE	   "0.00"   TO	MSSLPRC
+	 MOVE	   " "	    TO	MSSLTYPE
+	 MOVE	   WHO	    TO	MSSLNUMB
+	 MOVE	   "  "	    TO	MSSLUOP
+	 MOVE	   "000000" TO	MSSLDATE
+	 MOVE	   "000000" TO	MSSLCUST
+. 
+. NOW ADD SALES	FILE HEADER
+. 
+	 WRITE	   NSALES,MSSALEKY;MSSALEKY,MSSLTYPE,MSSLNUMB,MSSLUOP:
+				   MSSLQTY,MSSLDATE,MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+NAMEOK	 CALL	   MSPTOPEN
+. 
+DOMORE	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	ENTER PART NUMBER / F5 TO ":
+		   "TERMINATE ",*HOFF,REPLY
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 GOTO	   CLRPART
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+	 DISPLAY   *P01:03,MSPARTNO
+. 
+	 GOTO	   EOJ	IF  F5
+	 GOTO	   DOMORE  IF  F1
+	 GOTO	   DOMORE  IF  F2
+	 GOTO	   DOMORE  IF  F3
+	 GOTO	   DOMORE  IF  F4
+. 
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+. 
+	 INCLUDE   MSPTSIO.TXT
+. 
+................... CALL      MSPTREAD
+. 
+	 GOTO	   INVALID IF  OVER
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   PRTDSP  IF  EQUAL
+. 
+	 BEEP
+INVALID	 DISPLAY   *P1:23,*EL,*HON,"INVALID PART NUMBER! - TRY AGAIN! ":
+		   *HOFF,*W3,*P1:23,*EL
+	 GOTO	   DOMORE
+. 
+. 
+PRTDSP	 DISPLAY   *P01:03,MSPARTNO,*P31:03,MSXRFPT1,*P61:03,MSXRFPT2:
+		   *P06:04,MSSIZE,*P50:04,MSDESC
+.
+DELETE	 MOVE	   " " TO REPLY
+...........	   GOTO	     CHANGEIT
+.
+	 BEEP
+	 KEYIN	   *P1:23,*EL,*HON,"DELETE THIS	PART ?	(Y/N) ",REPLY,*HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   DELETEIT IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHANGEIT IF EQUAL
+	 BEEP
+	 GOTO	   DELETE
+.
+DELETEIT MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"ARE	YOU SURE ? (Y/N) ",REPLY,*HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   DELETE IF NOT EQUAL
+.
+DELET1	 DELETE	   MSPARTFL,MSPARTKY
+	 DISPLAY   *P1:23,*EL,*HON,"RECORD SUCCESSFULLY	DELETED! ",*HOFF,*W2
+	 DISPLAY   *P1:23,*EL
+	 GOTO	   DOMORE
+.
+. 
+CHANGEIT DISPLAY   *P1:23,*EL
+	 DISPLAY   *P31:03,MSXRFPT1
+	 KEYIN	   *P31:03,*RV,MSXRFPT1
+. 
+	 DISPLAY   *P61:03,MSXRFPT2
+	 KEYIN	   *P61:03,*RV,MSXRFPT2
+. 
+	 DISPLAY   *P06:04,MSSIZE
+	 KEYIN	   *P06:04,*RV,MSSIZE
+. 
+	 DISPLAY   *P50:04,MSDESC
+	 KEYIN	   *P50:04,*RV,MSDESC
+. 
+PARTOK	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"ALL	PART DATA CORRECT ? (Y/N) ",*HOFF,REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   WRITPART  IF	 EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CLRPART IF EQUAL
+	 BEEP
+	 GOTO	   PARTOK
+. 
+CLRPART	 DISPLAY   *P01:03,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+....	 CALL	   RECYCLE
+	 GOTO	   PARTIN1
+. 
+WRITPART CALL	   CLRTRAPS
+	 CALL	   MSPTUPDT
+	 CMATCH	   "H",IOSW
+	 GOTO	   DOMORE  IF  EQUAL
+	 BEEP	   
+	 DISPLAY   *P1:23,*EF,*HON,"I/O	ERROR ON REWRITE OF PART ",MSPARTKY
+	 KEYIN	   *P1:23,*HON,"IT MAY BE NECESSARY TO RE-INDEX	THE INVENT":
+		   "ORY	HISTORY	FILES!",*HOFF,REPLY
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+. ......................................................................
+. 
+	 MOVE	   "6"	TO  NROW
+. 
+	 GOTO	   MOREDATA
+. 
+DUPEPART BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"PART ",MSPARTKY," ALREADY ON FILE! ":
+		   *HOFF,*W2,*EL
+	 GOTO	   DOMORE
+. 
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+GETDATA	 KEYIN	   *P02:NROW,TYPEIN
+	 GOTO	   EOJ	IF F5
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+GPO	 DISPLAY   *P01:23,*EL
+	 KEYIN	   *P05:NROW,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 MOVE	   "EA"	 TO  UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2:
+		   *HOFF,*P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 MOVE	   "0.00"  TO  QTYIN
+	 KEYIN	   *P28:NROW,*RV,QTYIN
+. 
+	 MOVE	   QTYIN   TO  DISPQTY
+	 DISPLAY   *P28:NROW,DISPQTY
+. 
+PRCIN	 MOVE	   "0.00"  TO  PRCIN
+	 KEYIN	   *P37:NROW,*RV,PRCIN
+	 DISPLAY   *P37:NROW,PRCIN
+. 
+DATEIN	 MOVE	   "83"	 TO  YIN
+	 MOVE	   "01"	 TO  MIN
+	 MOVE	   "01"	 TO  DIN
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "13"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   YIN	TO  FORM2
+	 COMPARE   "80"	TO  FORM2
+	 GOTO	   DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+	 RESET	   TODAY  TO  7
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+	 RESET	   TODAY  TO  4
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*HOFF,*W2,*P1:23,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 MOVE	   "000000"  TO	 VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*HOFF,*W2,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*HOFF,*W2,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P61:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",*HOFF,REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:NROW,*EL
+	 SUBTRACT  "1" FROM NROW
+	 GOTO	   DATAIN
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   MSPARTNO  TO	 MSSLPART
+	 MOVE	   DT6	     TO	 MSSLJULD
+	 MOVE	   "000"     TO	 MSSLSUFX
+	 MOVE	   TYPEIN    TO	 MSSLTYPE
+	 MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+	 CLEAR	   MSSALEKY
+	 APPEND	   MSSLPART  TO	 MSSALEKY
+. 
+. NOTE....IS MSSLJULD /	DT6  IN	 YY/MM/DD ORDER	? ? ?
+. 
+	 APPEND	   MSSLJULD  TO	 MSSALEKY
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+WCUSTREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 TRAP	   BUMPCSUF IF IO
+	 WRITE	   NSALES,MSSALEKY;MSSALEKY,MSSLTYPE,MSSLNUMB,MSSLUOP:
+				   MSSLQTY,MSSLDATE,MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+	 CMATCH	   "X",IOSW
+	 GOTO	   WCUSTREC IF EQUAL
+	 CMOVE	   " " TO IOSW
+. 
+	 CALL	   CLRTRAPS
+	 CALL	   MSSLWRIT
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",*HOFF,REPLY
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+	 GOTO	   DATAIN
+. 
+BUMPCSUF MOVE	   MSSLSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSSLSUFX
+	 REP	   " 0"	     IN	 MSSLSUFX
+. 
+	 RESET	   MSSALEKY  TO	 26
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 RESET	   MSSALEKY  TO	 29
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+	 MOVE	   "X" TO IOSW
+	 RETURN
+. 
+PORECS	 INCLUDE   MSPORECS.TXT
+. 
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY PARTS UPDATE",*W2:
+		   *HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+.....................................................................
+. MSSHOW/TXT - DISPLAY PARTS/PURCHASE/SALES HISTORY FILES  .
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+. THIS PROGRAM PERMITS INQUIRY DISPLAY OF PART NUMBERS,	AND .
+. ASSOCIATED PURCHASE/QUOTATION	HISTORY	. .
+.								    .
+.....................................................................
+. 
+. MODIFY 4/18/84 TO REQUIRE THAT A VALID PART NUMBER BE	ENTERED
+.		 AND DISPLAYED PRIOR TO	ALLOWING GENERIC DISPLAYS
+. 
+. 
+	 INCLUDE   COMMON.TXT
+. 
+IOSW	 DIM	   1
+ALLSW	 DIM	   1
+XREF1	 DIM	   20
+XREF2	 DIM	   20
+. 
+APMASTER IFILE	   KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	   KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+. 
+CINDX1	 FORM	   3
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+PORTX	 DIM	   2
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+SAVEPART DIM	   20
+DISPQTY	 FORM	   5
+STOPSW	 DIM	   1
+. 
+.....................................................
+. 
+
+	 INCLUDE   CALLERR1.INC
+         MOVE      "DISPLAY PURCHASE HISTORY"  TO  TITLTEXT
+         INCLUDE   CALLERR2.INC
+
+
+DISPLAY	 DISPLAY   *ES,*P05:01,*HON,"INVENTORY HISTORY SYSTEM -	PURCHASE INQU":
+		   "IRY	DISPLAY	PROGRAM",*HOFF,*P73:01,TODAY:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION":
+		   *P27:05,"PURCHASE/QUOTATION HISTORY":
+		   *P01:06,"TYP	PURCHASE ORDER##    UOP	QUANTITY    PRICE   ":
+			   "DATE VND/CST##  NAME":
+		   *P13:20,"TYPE CODES",*P50:20,"UNIT OF PURCHASE":
+		   *P01:21,"P=PURCHASE	R=VENDOR QUOTATION":
+		   *P41:21,"EA=EACH,C=HUND,M=THOU,OZ=OUNCE,LB=POUND":
+		   *P41:22,"BG=BAG,BX=BOX,FT=FOOT"
+. 
+	 GOTO	   START
+. 
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSSALEIO.TXT
+. 
+	 INCLUDE   MSPOIO.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+. 
+START	 CALL	   CLRTRAPS
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+	 MOVE	   PORTN  TO  PORTX
+	 REP	   " 0"	  IN  PORTX
+. 
+NAMEOK	 CALL	   OPENCUST
+	 CALL	   MSPTOPEN
+	 CALL	   MSPOOPEN
+. 
+	 OPEN	   APMASTER,"APMASTER.ISI"
+. 
+DOMORE	 CALL	   CLRPART
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	DISPLAY	PART / F3 FOR ":
+		   "NEXT PART /	F5 TO TERMINATE	",*HOFF,REPLY
+. 
+	 MOVE	   " " TO ALLSW
+	 GOTO	   RDKSALL  IF	F3
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 CALL	   CLRPART
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+	 GOTO	   EOJ	IF  F5
+. 
+	 DISPLAY   *P01:03,MSPARTNO
+.
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+. 
+	 INCLUDE   MSPTSIO.TXT
+. 
+	 GOTO	   INVALID  IF	OVER
+. 
+.  4/18/84 SAVE	PART NUMBER HERE TO TRIGGER GENERIC SEARCH
+. 
+	 MOVE	   MSPARTKY TO	SAVEPART
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   DISPPART  IF	 EQUAL
+. 
+INVALID	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID PART NUMBER!  TRY AGAIN! ":
+		   *HOFF,*W3,*P1:23,*EL
+	 GOTO	   DOMORE
+. 
+RDKSALL	 CMOVE	   "A"	TO  ALLSW
+. 
+READKS	 CALL	   MSPTRDKS
+	 CMATCH	   "M",IOSW
+	 GOTO	   EOJ IF EQUAL	   (THAT MEANS THERE AREN'T ANY	MORE PARTS)
+. 
+. NOW CHECK IF THE PART	WHICH HAS BEEN READ KEY	SEQUENTIALLY IS	A MATCH
+. WITH THE PORTION OF THE KEY VALUE WHICH WAS ENTERED!
+. 
+	 CMATCH	   "A",ALLSW
+	 GOTO	   DISPPART IF EQUAL
+. 
+	 MATCH	   SAVEPART TO MSPARTNO
+	 GOTO	   DISPPART IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A BREAK ON THE GENERIC KEY VALUE
+. SO GO	TO DETERMINE IF	USER IS	DONE
+. 
+	 GOTO	   DOMORE
+. 
+. 
+DISPPART DISPLAY   *P01:03,MSPARTNO:
+		   *P31:03,MSXRFPT1:
+		   *P61:03,MSXRFPT2:
+		   *P06:04,MSSIZE:
+		   *P50:04,MSDESC
+. 
+	 MOVE	   MSXRFPT1  TO	 XREF1
+	 MOVE	   MSXRFPT2  TO	 XREF2
+. 
+	 MOVE	   "6"	TO  NROW
+	 GOTO	   DATAIN
+. 
+. 
+CLRPART	 DISPLAY   *P01:03,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+	 MOVE	   " " TO XREF1
+	 MOVE	   " " TO XREF2
+	 MOVE	   " " TO STOPSW
+	 CALL	   RECYCLE
+	 RETURN
+. 
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "21"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+. 
+. NOTE READ THE	PURCHASES FILE,	FOLLOWED BY THE	SALES FILE
+. FOR ALL OCCURRENCES, BEGINNING WITH THE KEYED	PART NUMBER
+. AND FOLLOWED BY THE FIRST CROSS REFERENCE PART NUMBER,
+. THEN THE SECOND CROSS	REFERENCE PART NUMBER
+. 
+GETDATA	 CLEAR	   MSPOKEY
+	 APPEND	   MSPARTNO  TO	 MSPOKEY
+	 APPEND	   "	     "	 TO  MSPOKEY
+	 RESET	   MSPOKEY
+	 READ	   MSPURCHS,MSPOKEY;MSPOPART
+. 
+POLOOP1	 CALL	   MSPORDKS
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   GETSALES IF NOT EQUAL
+. 
+	 MATCH	   MSPOPART TO MSPARTNO
+	 GOTO	   GETSALES IF NOT EQUAL   (NO MORE FOR	THIS PART)
+. 
+.
+. 2/5/86 BYPASS	RECORD IF MSPOTYPE = "*"
+.
+	 CMATCH	   "*" TO MSPOTYPE
+	 GOTO	   POLOOP1 IF EQUAL
+.
+................
+	 MOVE	   MSPOQTY  TO DISPQTY
+. 
+	 DISPLAY   *P1:NROW,*HON,"*",MSPOTYPE,*P5:NROW,MSPONUMB:
+		   *P25:NROW,MSPOUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSPOPRC,*P47:NROW,MSPODATE:
+		   *P54:NROW,MSPOVEND,*P61:NROW,MSPOVNAM,*HOFF
+. 
+	 ADD	   "1" TO NROW
+	 COMPARE   "20"	  TO  NROW
+. 
+. STOP AT NROW = 20
+. 
+	 CALL	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE    IF  NOT  LESS
+	 CMATCH	   "S",STOPSW
+	 GOTO	   PARTIN IF EQUAL
+	 GOTO	   POLOOP1
+. 
+STOPDISP KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	SEE MORE DATA, F3 FOR ":
+				   "NEW	PART":
+		   *HOFF,REPLY
+.
+	 GOTO	   SETSTOP IF F3
+	 GOTO	   FKEYOK IF F1
+	 BEEP
+	 GOTO	   STOPDISP
+.
+SETSTOP	 MOVE	   "S",STOPSW
+.
+FKEYOK	 CALL	   RECYCLE
+	 RETURN
+. 
+GETSALES GOTO	   PO2
+. NOW CHECK IF ANY CROSS-REFERENCE PARTS EXIST!
+. 
+PO2	 MOVE	   MSPARTNO  TO	 SAVEPART
+	 CMATCH	   " " TO XREF1
+	 GOTO	   CHECKPT2 IF EOS
+	 GOTO	   CHECKPT2 IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A CROSS-REFERENCE PART NUMBER!
+. SO GET CHASE IT!
+. 
+	 MOVE	   XREF1  TO  MSPARTKY
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   CHECKPT2  IF	 NOT  EQUAL
+	 CALL	   POSLLOOP
+	 GOTO	   CHECKPT2
+. 
+. FALLTHRU MEANS WE HAVE FOUND A VALID CROSS-REFERENCE PART NUMBER
+. 
+POSLLOOP CLEAR	   MSPOKEY
+	 APPEND	   MSPARTNO  TO	 MSPOKEY
+	 APPEND	   "	     "	 TO  MSPOKEY
+	 RESET	   MSPOKEY
+	 READ	   MSPURCHS,MSPOKEY;MSPOPART
+. 
+POLOOP2	 CALL	   MSPORDKS
+	 CMATCH	   "H",IOSW
+	 GOTO	   SL2 IF NOT EQUAL  (IE END OF	FILE)
+	 MATCH	   MSPOPART TO MSPARTNO
+	 GOTO	   SL2 IF NOT EQUAL
+.
+. 2/5/86 BYPASS	RECORD IF MSPOTYPE = "*"
+.
+. 
+	 CMATCH	   "*" TO MSPOTYPE
+	 GOTO	   POLOOP2 IF EQUAL
+......................
+	 MOVE	   MSPOQTY  TO	DISPQTY
+. 
+. 
+	 DISPLAY   *P1:NROW,*HON,"*",MSPOTYPE,*P5:NROW,MSPONUMB:
+		   *P25:NROW,MSPOUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSPOPRC,*P47:NROW,MSPODATE:
+		   *P54:NROW,MSPOVEND,*P61:NROW,MSPOVNAM,*HOFF
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 CALL	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+.
+	 MATCH	   "S",STOPSW
+	 GOTO	   PARTIN IF EQUAL
+.
+	 GOTO	   POLOOP2
+. 
+SL2	 GOTO	   POSLRTRN
+. 
+POSLRTRN RETURN
+. 
+CHECKPT2 CMATCH	   " " TO XREF2
+	 CALL	   STOPDISP  IF	 EOS
+	 CALL	   STOPDISP  IF	 EQUAL
+	 CMATCH	   " " TO XREF2
+	 GOTO	   RESTRPRT  IF	EQUAL
+. 
+	 MOVE	   XREF2    TO	MSPARTKY
+. 
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   RESTRPRT  IF	 NOT  EQUAL
+. 
+	 CALL	   POSLLOOP
+	 CALL	   STOPDISP
+. 
+RESTRPRT MOVE	   SAVEPART  TO	 MSPARTKY
+	 CALL	   MSPTREAD	 (TO RESTORE THE POSITION IN FILE)
+. 
+. NOW FALLTHRU TO DOMORE AND CHECK THE GENERIC SEARCH!
+. 
+	 GOTO	   DOMORE
+. ...........
+	 GOTO	   EOJ	IF F5
+	 CMATCH	   "P",TYPEIN
+ 	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+GPO	 DISPLAY   *P01:23,*EL
+	 KEYIN	   *P05:NROW,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 MOVE	   "EA"	 TO  UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2:
+		   *HOFF,*P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 MOVE	   "0.00"  TO  QTYIN
+	 KEYIN	   *P28:NROW,*RV,QTYIN
+	 DISPLAY   *P28:NROW,QTYIN
+. 
+PRCIN	 MOVE	   "0.00"  TO  PRCIN
+	 KEYIN	   *P38:NROW,*RV,PRCIN
+	 DISPLAY   *P38:NROW,PRCIN
+. 
+DATEIN	 MOVE	   "83"	 TO  YIN
+	 MOVE	   "01"	 TO  MIN
+	 MOVE	   "01"	 TO  DIN
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "13"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   YIN	TO  FORM2
+	 COMPARE   "80"	TO  FORM2
+	 GOTO	   DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+	 RESET	   TODAY  TO  7
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+	 RESET	   TODAY  TO  4
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*W2,*P1:23,*HOFF,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 MOVE	   "000000"  TO	 VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*W2,*P1:23,*HOFF,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*W2,*P1:23,*HOFF,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P60:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",REPLY,*HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:NROW,*EL
+	 SUBTRACT  "1" FROM NROW
+	 GOTO	   DATAIN
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   MSPARTNO  TO	 MSSLPART
+	 MOVE	   DT6	     TO	 MSSLJULD
+	 MOVE	   "000"     TO	 MSSLSUFX
+	 MOVE	   TYPEIN    TO	 MSSLTYPE
+	 MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+	 CLEAR	   MSSALEKY
+	 APPEND	   MSSLPART  TO	 MSSALEKY
+. 
+. NOTE....IS MSSLJULD /	DT6  IN	 YY/MM/DD ORDER	? ? ?
+. 
+	 APPEND	   MSSLJULD  TO	 MSSALEKY
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+WCUSTREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 TRAP	   BUMPCSUF IF IO
+......	 WRITE	   NSALES,MSSALEKY;MSSALEKY,MSSLTYPE,MSSLNUMB,MSSLUOP:
+......				   MSSLQTY,MSSLDATE,MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+	 CMATCH	   "X",IOSW
+	 GOTO	   WCUSTREC IF EQUAL
+	 CMOVE	   " " TO IOSW
+. 
+	 CALL	   CLRTRAPS
+	 CALL	   MSSLWRIT
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",REPLY,*HOFF
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+	 GOTO	   DATAIN
+. 
+BUMPCSUF MOVE	   MSSLSUFX  TO	 CINDX1
+	 ADD	   "1"	     TO	 CINDX1
+	 MOVE	   CINDX1    TO	 MSSLSUFX
+	 REP	   " 0"	     IN	 MSSLSUFX
+. 
+	 RESET	   MSSALEKY  TO	 26
+	 APPEND	   MSSLSUFX  TO	 MSSALEKY
+	 RESET	   MSSALEKY  TO	 29
+	 LENSET	   MSSALEKY
+	 RESET	   MSSALEKY  TO	 1
+. 
+	 MOVE	   "X" TO IOSW
+	 RETURN
+. 
+. 
+PORECS	 TRAPCLR   PARITY
+GETSTUFF TRAPCLR   PARITY
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY INQUIRY",*W2,*HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+.....................................................................
+. MSSLUPDT/TXT - MODIFY	PARTS/PURCHASE/SALES HISTORY FILES  .
+.								    .
+	 INCLUDE   MSCBRAG.TXT
+.								    .
+. THIS PROGRAM PERMITS INQUIRY MODIFICATIONS OF	PART NUMBERS, AND .
+. ASSOCIATED PURCHASE/SALE/QUOTATION HISTORY . .
+.								    .
+.....................................................................
+. 
+. MODIFY 4/18/84 TO REQUIRE THAT A VALID PART NUMBER BE	ENTERED
+.		 AND DISPLAYED PRIOR TO	ALLOWING GENERIC DISPLAYS
+. 
+. 
+	 INCLUDE   COMMON.TXT
+. 
+IOSW	 DIM	   1
+ALLSW	 DIM	   1
+XREF1	 DIM	   20
+XREF2	 DIM	   20
+. 
+APMASTER IFILE	    KEYL=6,UNCOMPRESSED
+. 
+CUSTFILE IFILE	    KEYL=4,UNCOMPRESSED
+CSTNAME	 INIT	   "ACCOUNTS.ISI"
+. 
+	 INCLUDE   MSPARTSF.TXT
+. 
+	 INCLUDE   MSPURCHF.TXT
+. 
+	 INCLUDE   MSSALESF.TXT
+. 
+. 
+CINDX1	 FORM	   3
+DT6	 DIM	   6
+MIN	 DIM	   2
+DIN	 DIM	   2
+YIN	 DIM	   2
+FORM2	 FORM	   2
+WHCH	 DIM	   1
+REPLY	 DIM	   1
+. 
+TYPEIN	 DIM	   1
+POIN	 DIM	   18
+UOPIN	 DIM	   2
+QTYIN	 FORM	   5.2
+PRCIN	 FORM	   5.2
+DATEIN	 DIM	   6
+VENDIN	 DIM	   6
+NAMEIN	 DIM	   20
+DNAME	 DIM	   20
+. 
+PORTX	 DIM	   2
+. 
+NROW	 FORM	   2
+NCOL	 FORM	   2
+. 
+	 INCLUDE   APMASTFD.TXT
+. 
+	 INCLUDE   CUSTMAST.TXT
+. 
+BLANK30	 INIT	   "				  "
+SAVEPART DIM	   20
+DISPQTY	 FORM	   5
+. 
+. KEYTABLE - THIS TABLE	STORES 14 KEYS FOR ACCESS / UPDATE OF RECORDS
+.	     IN	THE MSSALES / MSPURCHS/ISI FILES
+. 
+KEY01	 DIM	   30
+KEY02	 DIM	   30
+KEY03	 DIM	   30
+KEY04	 DIM	   30
+KEY05	 DIM	   30
+KEY06	 DIM	   30
+KEY07	 DIM	   30
+KEY08	 DIM	   30
+KEY09	 DIM	   30
+KEY10	 DIM	   30
+KEY11	 DIM	   30
+KEY12	 DIM	   30
+KEY13	 DIM	   30
+KEY14	 DIM	   30
+. 
+STOREKEY DIM	   30
+STORINDX FORM	   2
+LETTERS	 INIT	   "ABCDEFGHIJKLMN"
+LETRINDX FORM	   2
+DLETTER	 DIM	   1
+. 
+SCANKEY	 DIM	   30
+SCANINDX FORM	   2
+LASTKEY	 DIM	   30
+LOOPSW	 DIM	   1
+.....................................................
+. \
+
+	 INCLUDE   CALLERR1.INC
+         MOVE      "MODIFY SALES HISTORY"  TO  TITLTEXT
+         INCLUDE   CALLERR2.INC
+
+DISPLAY	DISPLAY	   *ES,*P09:01,"INVENTORY HISTORY SYSTEM - MODIFY HISTO":
+		   "RY PROGRAM",*P73:01,TODAY:
+		   *P01:02,"PART NUMBER",*P31:02,"CROSS-REF PART NO.1":
+		   *P61:02,"CROSS-REF PART NO.2":
+		   *P01:04,"SIZE",*P38:04,"DESCRIPTION":
+		   *P25:05,"PURCHASE/SALE/QUOTATION HISTORY":
+		   *P01:06,"TYP	PURCHASE ORDER##    UOP	QUANTITY    PRICE   ":
+			   "DATE VND/CST##  NAME":
+		   *P13:20,"TYPE CODES",*P50:20,"UNIT OF PURCHASE":
+		   *P01:21,"P=PURCHASE	R=VENDOR QUOTATION":
+		   *P41:21,"EA=EACH,C=HUND,M=THOU,OZ=OUNCE,LB=POUND":
+		   *P01:22,"S=SALE	Q=QUOTE	TO CUSTOMER":
+		   *P41:22,"BG=BAG,BX=BOX,FT=FOOT"
+. 
+	 GOTO	   START
+. 
+	 INCLUDE   MSPARTIO.TXT
+. 
+	 INCLUDE   MSSALEIO.TXT
+. 
+	 INCLUDE   MSPOIO.TXT
+. 
+	 INCLUDE   STDIOERR.TXT
+. 
+	 INCLUDE   STDFMTER.TXT
+. 
+	 INCLUDE   STDPARER.TXT
+. 
+	 INCLUDE   STDRANGE.TXT
+. 
+	 INCLUDE   CUSTIO.TXT
+. 
+START	 CALL	   CLRTRAPS
+. 
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDPARER IF PARITY
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+. 
+	 MOVE	   PORTN  TO  PORTX
+	 REP	   " 0"	  IN  PORTX
+. 
+NAMEOK	 CALL	   OPENCUST
+	 CALL	   MSPTOPEN
+	 CALL	   MSSLOPEN
+	 CALL	   MSPOOPEN
+. 
+	 OPEN	   APMASTER,"APMASTER.ISI"
+. 
+DOMORE	 CALL	   CLRPART
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 TO	DISPLAY	PART / F5 TO ":
+		   "TERMINATE ",*HOFF,REPLY
+. 
+	 MOVE	   " " TO ALLSW
+	 GOTO	   EOJ IF F5
+	 GOTO	   PARTIN IF F1
+	 BEEP
+	 GOTO	   DOMORE
+. 
+PARTIN	 CALL	   CLRPART
+	 CALL	   CLRTABLE
+. 
+PARTIN1	 KEYIN	   *P01:03,MSPARTNO
+	 GOTO	   EOJ	IF  F5
+. 
+...............	   MOVE	     MSPARTNO  TO  SAVEPART
+. 
+	 DISPLAY   *P01:03,MSPARTNO
+.
+	 DISPLAY   *P1:23,*EL
+. 
+	 MOVE	   MSPARTNO  TO	 MSPARTKY
+. 
+................... CALL      MSPTREAD
+. 
+	 INCLUDE   MSPTSIO.TXT
+. 
+	 GOTO	   INVALID  IF	OVER
+. 
+.  4/18/84 SAVE	PART NUMBER HERE TO TRIGGER GENERIC SEARCH
+. 
+	 MOVE	   MSPARTKY TO	SAVEPART
+. 
+	 CMATCH	   "H",IOSW
+	 GOTO	   DISPPART  IF	 EQUAL
+. 
+INVALID	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID PART NUMBER!  TRY AGAIN! ":
+		   *HOFF,*W3,*P1:23,*EL
+	 GOTO	   DOMORE
+. 
+RDKSALL	 CMOVE	   "A"	TO  ALLSW
+. 
+READKS	 CALL	   MSPTRDKS
+	 CMATCH	   "M",IOSW
+	 GOTO	   EOJ IF EQUAL	   (THAT MEANS THERE AREN'T ANY	MORE PARTS)
+. 
+. NOW CHECK IF THE PART	WHICH HAS BEEN READ KEY	SEQUENTIALLY IS	A MATCH
+. WITH THE PORTION OF THE KEY VALUE WHICH WAS ENTERED!
+. 
+	 CMATCH	   "A",ALLSW
+	 GOTO	   DISPPART IF EQUAL
+. 
+	 MATCH	   SAVEPART TO MSPARTNO
+	 GOTO	   DISPPART IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A BREAK ON THE GENERIC KEY VALUE
+. SO GO	TO DETERMINE IF	USER IS	DONE
+. 
+	 GOTO	   DOMORE
+. 
+. 
+DISPPART DISPLAY   *P01:03,MSPARTNO:
+		   *P31:03,MSXRFPT1:
+		   *P61:03,MSXRFPT2:
+		   *P06:04,MSSIZE:
+		   *P50:04,MSDESC
+. 
+	 MOVE	   MSXRFPT1  TO	 XREF1
+	 MOVE	   MSXRFPT2  TO	 XREF2
+. 
+	 MOVE	   "6"	TO  NROW
+	 GOTO	   DATAIN
+. 
+. 
+CLRPART	 DISPLAY   *P01:03,*HOFF,*EL,*P06:04,BLANK30,*P50:04,BLANK30
+	 MOVE	   " " TO MSPARTNO
+	 MOVE	   " " TO MSXRFPT1
+	 MOVE	   " " TO MSXRFPT2
+	 MOVE	   " " TO MSSIZE
+	 MOVE	   " " TO MSDESC
+	 MOVE	   " " TO XREF1
+	 MOVE	   " " TO XREF2
+	 CALL	   RECYCLE
+	 RETURN
+. 
+CLRTABLE MOVE	   "0"	TO  STORINDX
+CLRT	 ADD	   "1"	TO  STORINDX
+	 COMPARE   "15"	TO  STORINDX
+	 GOTO	   CLREXIT  IF	EQUAL
+. 
+	 MOVE	   BLANK30  TO	STOREKEY
+	 STORE	   STOREKEY INTO STORINDX OF KEY01,KEY02,KEY03,KEY04,KEY05:
+					     KEY06,KEY07,KEY08,KEY09,KEY10:
+					     KEY11,KEY12,KEY13,KEY14
+	 GOTO	   CLRT
+. 
+CLREXIT	 MOVE	   "0" TO STORINDX
+	 RETURN
+. 
+DATAIN	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 CALL	   RECYCLE  IF NOT LESS
+	 GOTO	   GETDATA
+. 
+RECYCLE	 MOVE	   "6"	TO  NROW
+	 RESET	   LETTERS
+	 MOVE	   " "	TO  DLETTER
+	 CALL	   CLRTABLE  (THIS IS TO RESET FOR 2ND AND SUBSEQUENT PAGES)
+RCYCLE	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   CYCLOUT  IF	EQUAL
+	 DISPLAY   *P01:NROW,*HOFF,*EL
+	 GOTO	   RCYCLE
+. 
+CYCLOUT	 MOVE	   "7"	TO  NROW
+	 RETURN
+. 
+. 
+. NOTE READ THE	PURCHASES FILE,	FOLLOWED BY THE	SALES FILE
+. FOR ALL OCCURRENCES, BEGINNING WITH THE KEYED	PART NUMBER
+. AND FOLLOWED BY THE FIRST CROSS REFERENCE PART NUMBER,
+. THEN THE SECOND CROSS	REFERENCE PART NUMBER
+. 
+GETDATA	 CLEAR	   MSPOKEY
+	 APPEND	   MSPARTNO  TO	 MSPOKEY
+	 APPEND	   "	     "	 TO  MSPOKEY
+	 RESET	   MSPOKEY
+	 READ	   MSPURCHS,MSPOKEY;MSPOPART
+. 
+POLOOP1	 CALL	   MSPORDKS
+. 
+	 CMOVE	   "P" TO LOOPSW
+	 CMATCH	   "H",IOSW
+	 GOTO	   GETSALES IF NOT EQUAL
+. 
+	 MATCH	   MSPOPART TO MSPARTNO
+	 GOTO	   GETSALES IF NOT EQUAL   (NO MORE FOR	THIS PART)
+.
+. NOTE 2/5/86 -	BYPASS RECORD IF CODED AS LOGICAL DELETE
+.		WITH AN	ASTERISK IN THE	POTYPE FIELD
+.
+	 CMATCH	   "*" TO MSPOTYPE
+	 GOTO	   POLOOP1 IF EQUAL
+................................................
+.
+. 
+. NOW STORE THE	KEY VALUE IN TABLE FOR LATER ACCESS AND	UPDATE
+. 
+SETTABLE CLEAR	   STOREKEY
+. 
+ST1	 APPEND	   MSPOTYPE  TO	 STOREKEY
+	 APPEND	   MSPOPART  TO	 STOREKEY
+	 APPEND	   MSPOJULD  TO	 STOREKEY
+	 APPEND	   MSPOSUFX  TO	 STOREKEY
+	 RESET	   STOREKEY  TO	 1
+	 MOVE	   STOREKEY  TO	 LASTKEY
+. 
+	 MOVE	   NROW	     TO	 STORINDX
+	 SUBTRACT  "6"	   FROM	 STORINDX
+. 
+	 STORE	   STOREKEY  INTO  STORINDX  OF	 KEY01,KEY02,KEY03,KEY04:
+						 KEY05,KEY06,KEY07,KEY08:
+						 KEY09,KEY10,KEY11,KEY12:
+						 KEY13,KEY14
+. 
+	 MOVE	   LETTERS  TO	DLETTER
+	 BUMP	   LETTERS	  (SET IT TO NEXT ONE)
+. 
+	 MOVE	   MSPOQTY  TO DISPQTY
+. 
+	 DISPLAY   *P1:NROW,DLETTER,"*",MSPOTYPE,*P5:NROW,MSPONUMB:
+		   *P25:NROW,MSPOUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSPOPRC,*P47:NROW,MSPODATE:
+		   *P54:NROW,MSPOVEND,*P61:NROW,MSPOVNAM
+. 
+	 ADD	   "1" TO NROW
+	 COMPARE   "20"	  TO  NROW
+. 
+. STOP AT NROW = 21
+. 
+	 GOTO	   STOPDISP IF EQUAL
+	 GOTO	   POLOOP1
+. 
+STOPDISP KEYIN	   *P1:22,*EL,*HON,"TO DISPLAY ADDITIONAL DATA PRESS F1	":
+		   *P1:23,*EL,"TO SELECT ITEM FOR MAINTENANCE  PRESS F3	":
+		   *HOFF,REPLY
+	 GOTO	   CHANGEIT IF F3
+	 GOTO	   SHWMOR IF F1
+	 BEEP
+	 GOTO	   STOPDISP
+.
+SHWMOR	 CALL	   RECYCLE
+	 CMATCH	   "P" TO LOOPSW
+	 GOTO	   POLOOP1 IF EQUAL
+	 CMATCH	   "S" TO LOOPSW
+	 GOTO	   SLLOOP1 IF EQUAL
+	 RETURN
+. 
+GETSALES CLEAR	   MSSALEKY
+. 
+	 APPEND	   MSPARTNO  TO	 MSSALEKY
+	 APPEND	   "	     "	TO  MSSALEKY
+	 RESET	   MSSALEKY
+	 READ	   MSSALEFL,MSSALEKY;MSSLPART
+. 
+SLLOOP1	 CALL	   MSSLRDKS
+	 CMOVE	   "S" TO LOOPSW
+. 
+	 MATCH	   MSSLPART TO MSPARTNO
+	 GOTO	   CHANGEIT IF NOT EQUAL
+. 
+. NOTE 2/5/86 -	BYPASS RECORD IF AN ASTERISK EXISTS IN THE SLTYPE FIELD
+.
+	 CMATCH	   "*" TO MSSLTYPE
+	 GOTO	   SLLOOP1 IF EQUAL
+.............................................
+.
+SETBLE	 CLEAR	   STOREKEY
+ST2	 APPEND	   MSSLTYPE TO STOREKEY
+	 APPEND	   MSSLPART TO STOREKEY
+	 APPEND	   MSSLJULD TO STOREKEY
+	 APPEND	   MSSLSUFX TO STOREKEY
+	 RESET	   STOREKEY TO 1
+	 MOVE	   STOREKEY TO LASTKEY
+. 
+	 MOVE	   NROW	    TO STORINDX
+	 SUBTRACT  "6"	  FROM STORINDX
+. 
+	 MOVE	   LETTERS  TO	DLETTER
+	 BUMP	   LETTERS	(INCREMENT LETTER)
+.
+	 STORE	   STOREKEY INTO STORINDX OF KEY01,KEY02,KEY03,KEY04,KEY05:
+					     KEY06,KEY07,KEY08,KEY09,KEY10:
+					     KEY11,KEY12,KEY13,KEY14
+. 
+	 MOVE	   MSSLQTY  TO	DISPQTY
+. 
+. 
+	 DISPLAY   *P1:NROW,DLETTER,*P3:NROW,MSSLTYPE,*P5:NROW,MSSLNUMB:
+		   *P25:NROW,MSSLUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSSLPRC,*P47:NROW,MSSLDATE:
+		   *P54:NROW,MSSLCUST,*P61:NROW,MSSLCNAM
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+	 GOTO	   SLLOOP1
+. 
+. 
+CHANGEIT BEEP
+	 MOVE	   "00"	TO NCOL
+.
+	 COMPARE   "9",SECURITY
+	 GOTO	   WHICHPT IF NOT EQUAL
+. 
+.	PRINT	  *1,"KEY01=",KEY01," KEY02=",KEY02," KEY03=",KEY03:
+.		     " KEY04=",KEY04
+.	PRINT	  *1,"KEY05=",KEY05," KEY06=",KEY06," KEY07=",KEY07:
+.		     " KEY08=",KEY08
+.	PRINT	  *1,"KEY09=",KEY09," KEY10=",KEY10," KEY11=",KEY11:
+.		     " KEY12=",KEY12
+.	PRINT	  *1,"KEY13=",KEY13," KEY14=",KEY14
+. 
+WHICHPT	 MOVE	   " " TO REPLY
+	 DISPLAY   *P1:22,*EL,*P1:23,*EL
+	 KEYIN	   *P1:23,"Select line by letter, press	F5 to finish":
+		   " or	F1 to display more ",*P70:23,REPLY
+	 GOTO	   DISPMORE IF F1
+	 GOTO	   DOMORE   IF F5
+. 
+	 MOVE	   "00"	TO SCANINDX
+	 RESET	   LETTERS TO 1
+. 
+LOOPSCAN ADD	   "1"	TO SCANINDX
+. 
+	 COMPARE   "15"	TO SCANINDX
+	 GOTO	   BADLTR  IF NOT LESS
+. 
+	 CMATCH	   LETTERS TO REPLY
+	 GOTO	   SCANLOAD IF EQUAL
+. 
+	 BUMP	   LETTERS
+	 GOTO	   LOOPSCAN
+. 
+. FALLTHRU IS A	MATCH ON LETTER, SO TAKE SCANINDX AND USE IT TO
+. LOAD KEY FROM	KEY TABLE
+. 
+SCANLOAD LOAD	   SCANKEY FROM	SCANINDX OF KEY01,KEY02,KEY03,KEY04:
+					    KEY05,KEY06,KEY07,KEY08:
+					    KEY09,KEY10,KEY11,KEY12:
+					    KEY13,KEY14
+. 
+CMARND	 MOVE	   SCANKEY TO TYPEIN
+. 
+	 COMPARE   "9",SECURITY
+	 GOTO	   CMARNDX IF NOT EQUAL
+	 DISPLAY   *P40:23,*EL,SCANKEY
+	 DISPLAY   *P75:23,TYPEIN,*W4
+	 KEYIN	   *P78:23,REPLY
+.
+CMARNDX	 MATCH	   BLANK30 TO SCANKEY
+	 GOTO	   BADLTR  IF EQUAL
+. 
+	 MOVE	   SCANINDX TO NROW
+	 ADD	   "6"	    TO NROW
+. 
+	 GOTO	   DELETE
+.....................................................................
+. 
+DISPMORE MOVE	   LASTKEY TO SCANKEY
+	 CMATCH	   "S",SCANKEY
+	 GOTO	   SETSALES IF EQUAL
+	 CMATCH	   "P",SCANKEY
+	 GOTO	   SETPURCH IF EQUAL
+	 BEEP
+	 KEYIN	   *P1:23,*HON,"E R R O	R  - TAP ENTER TO TERMINATE! ",REPLY:
+		   *HOFF
+	 CHAIN	   "MSHISTRY"
+. 
+SETSALES RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSSALEKY
+	 CALL	   MSSLREAD
+	 CALL	   RECYCLE
+	 RESET	   SCANKEY TO 1
+	 GOTO	   SLLOOP1     (THIS GETS US GOING AGAIN!)
+. 
+SETPURCH RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSPOKEY
+	 CALL	   MSPOREAD
+	 CALL	   RECYCLE
+	 RESET	   SCANKEY TO 1
+	 GOTO	   POLOOP1     (THIS GETS US GOING AGAIN!)
+. 
+. 
+BADLTR	 BEEP
+	 DISPLAY   *P1:23,*EL,"INVALID LETTER SELECTED,	RETRY! ",*W4
+	 GOTO	   WHICHPT
+. 
+. 
+. NOTE THAT THERE IS NO	NEED TO	RE-READ	THE PART FILE AS
+. THE PART IS THE SAME....
+. TO RESTORE THE READKS, MERELY	RESTORE	KEY14 AND READ,	FOLLOWED
+. BY READKS TO THE HISTORY FILE, EITHER	SALES OR PURCHASES
+. 
+. 
+. NOW CHECK IF ANY CROSS-REFERENCE PARTS EXIST!
+. 
+PO2	 MOVE	   MSPARTNO  TO	 SAVEPART
+	 CMATCH	   " " TO XREF1
+	 GOTO	   CHECKPT2 IF EOS
+	 GOTO	   CHECKPT2 IF EQUAL
+. 
+. FALLTHRU MEANS THERE IS A CROSS-REFERENCE PART NUMBER!
+. SO GET CHASE IT!
+. 
+	 MOVE	   XREF1  TO  MSPARTKY
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   CHECKPT2  IF	 NOT  EQUAL
+	 CALL	   POSLLOOP
+	 GOTO	   CHECKPT2
+. 
+. FALLTHRU MEANS WE HAVE FOUND A VALID CROSS-REFERENCE PART NUMBER
+. 
+POSLLOOP CLEAR	   MSPOKEY
+	 APPEND	   MSPARTNO  TO	 MSPOKEY
+	 APPEND	   "	     "	 TO  MSPOKEY
+	 RESET	   MSPOKEY
+	 READ	   MSPURCHS,MSPOKEY;MSPOPART
+. 
+POLOOP2	 CALL	   MSPORDKS
+	 CMATCH	   "H",IOSW
+	 GOTO	   SL2 IF NOT EQUAL  (IE END OF	FILE)
+	 MATCH	   MSPOPART TO MSPARTNO
+	 GOTO	   SL2 IF NOT EQUAL
+.
+.NOTE 2/5/86 - BYPASS RECORD IF	MSPOTYPE = "*"
+.
+	 CMATCH	   "*" TO MSPOTYPE
+	 GOTO	   POLOOP2 IF EQUAL
+. 
+	 MOVE	   MSPOQTY  TO	DISPQTY
+. 
+. 
+	 DISPLAY   *P1:NROW,*HON,"*",MSPOTYPE,*P5:NROW,MSPONUMB:
+		   *P25:NROW,MSPOUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSPOPRC,*P47:NROW,MSPODATE:
+		   *P54:NROW,MSPOVEND,*P61:NROW,MSPOVNAM,*HOFF
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+	 GOTO	   POLOOP2
+. 
+SL2	 CLEAR	   MSSALEKY
+	 APPEND	   MSPARTNO  TO	 MSSALEKY
+	 APPEND	   "	     "	 TO  MSSALEKY
+	 RESET	   MSSALEKY
+	 READ	   MSSALEFL,MSSALEKY;MSSLPART
+. 
+SLLOOP2	 CALL	   MSSLRDKS
+	 CMATCH	   "H",IOSW
+	 GOTO	   POSLRTRN  IF	 NOT  EQUAL  (IE END OF	FILE)
+	 MATCH	   MSSLPART  TO	 MSPARTNO
+	 GOTO	   POSLRTRN  IF	 NOT  EQUAL
+.
+.NOTE 2/5/86 - BYPASS RECORD IF	MSSLTYPE = "*"
+.
+	 CMATCH	   "*" TO MSSLTYPE
+	 GOTO	   SLLOOP2 IF EQUAL
+.
+..............................................
+. 
+	 MOVE	   MSSLQTY  TO	DISPQTY
+. 
+	 DISPLAY   *P2:NROW,MSSLTYPE,*P5:NROW,MSSLNUMB:
+		   *P25:NROW,MSSLUOP,*P29:NROW,DISPQTY:
+		   *P37:NROW,MSSLPRC,*P47:NROW,MSSLDATE:
+		   *P54:NROW,MSSLCUST,*P61:NROW,MSSLCNAM
+. 
+	 ADD	   "1"	TO  NROW
+	 COMPARE   "20"	TO  NROW
+	 GOTO	   STOPDISP IF EQUAL
+....	 CALL	   RECYCLE  IF	NOT  LESS
+	 GOTO	   SLLOOP2
+. 
+POSLRTRN RETURN
+. 
+CHECKPT2 CMATCH	   " " TO XREF2
+	 CALL	   STOPDISP  IF	 EOS
+	 CALL	   STOPDISP  IF	 EQUAL
+	 CMATCH	   " " TO XREF2
+	 GOTO	   RESTRPRT  IF	EQUAL
+. 
+	 MOVE	   XREF2    TO	MSPARTKY
+. 
+	 CALL	   MSPTREAD
+	 CMATCH	   "H",IOSW
+	 GOTO	   RESTRPRT  IF	 NOT  EQUAL
+. 
+	 CALL	   POSLLOOP
+	 CALL	   STOPDISP
+. 
+RESTRPRT MOVE	   SAVEPART  TO	 MSPARTKY
+	 CALL	   MSPTREAD	 (TO RESTORE THE POSITION IN FILE)
+. 
+. NOW FALLTHRU TO DOMORE AND CHECK THE GENERIC SEARCH!
+. 
+	 GOTO	   DOMORE
+. ...........
+	 GOTO	   EOJ	IF F5
+.
+.
+.
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 DISPLAY   *P02:NROW," "
+	 GOTO	   GETDATA
+. 
+DELETE	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,"DELETE THIS HISTORY RECORD ? (Y/N) ",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   GETRID IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   GPO IF EQUAL
+	 BEEP
+	 GOTO	   DELETE
+. 
+GETRID	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,"YOU REALLY WANT TO DELETE IT? (Y/N) ",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   DELOK IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   GETRID IF NOT EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,"I DIDN'T	THINK SO! ",*W3,*P1:23,*EL
+	 GOTO	   GPO
+. 
+DELOK	 CMATCH	   "S",TYPEIN
+	 GOTO	   DELETS IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   DELETS IF EQUAL
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   DELETP IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   DELETP IF EQUAL
+DELBEEP	 BEEP
+	 DISPLAY   *P1:23,*EL,"I DON'T KNOW WHAT TO DO!",*W2
+	 GOTO	   DELBEEP
+. 
+DELETS	 RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSSALEKY
+........	DELETE	  MSSALEFL,MSSALEKY
+	 CMOVE	   "*" TO MSSLTYPE
+	 CALL	   MSSLUPDT
+.
+	 BEEP
+	 DISPLAY   *P60:23,*EL,*HON,"RECORD DELETED",*HOFF,*W2:
+		   *P60:23,*EL
+.
+......................................
+	 RESET	   SCANKEY TO 1
+	 GOTO	   WHATNEXT
+. 
+DELETP	 RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSPOKEY
+........	DELETE	  MSPURCHS,MSPOKEY
+	 CMOVE	   "*" TO MSPOTYPE
+	 CALL	   MSPOUPDT
+................................
+	 BEEP	   
+	 DISPLAY   *P60:23,*EL,*HON,"RECORD DELETED",*HOFF,*W2:
+		   *P60:23,*EL
+.
+	 RESET	   SCANKEY TO 1
+	 GOTO	   WHATNEXT
+. 
+GPO	 DISPLAY   *P65:23,*EL,*P70:23,"TYPE=",TYPEIN,*W4
+	 CMATCH	   "S",TYPEIN
+	 GOTO	   MOVESALE IF EQUAL
+	 CMATCH	   "Q",TYPEIN
+	 GOTO	   MOVESALE IF EQUAL
+	 GOTO	   MOVEPO
+. 
+MOVESALE RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSSALEKY
+	 CALL	   CLRTRAPS
+	 CALL	   MSSLREAD
+	 RESET	   SCANKEY TO 1
+. 
+	 MOVE	   MSSLNUMB TO POIN
+	 MOVE	   MSSLUOP  TO UOPIN
+	 MOVE	   MSSLQTY  TO QTYIN
+	 MOVE	   MSSLQTY  TO DISPQTY
+	 MOVE	   MSSLPRC  TO PRCIN
+	 MOVE	   MSSLDATE TO DATEIN
+	 MOVE	   MSSLCUST TO VENDIN
+	 MOVE	   MSSLCNAM TO NAMEIN
+	 GOTO	   GPO1
+. 
+MOVEPO	 CMATCH	   "P",TYPEIN
+	 GOTO	   MVPO	IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   MVPO	IF EQUAL
+	 GOTO	   MOVESALE
+. 
+MVPO	 RESET	   SCANKEY TO 2
+	 MOVE	   SCANKEY TO MSPOKEY
+	 CALL	   CLRTRAPS
+	 CALL	   MSPOREAD
+	 RESET	   SCANKEY TO 1
+. 
+	 MOVE	   MSPONUMB TO POIN
+	 MOVE	   MSPOUOP  TO UOPIN
+	 MOVE	   MSPOQTY  TO QTYIN
+	 MOVE	   MSPOQTY  TO DISPQTY
+	 MOVE	   MSPODATE TO DATEIN
+	 MOVE	   MSPOVEND TO VENDIN
+	 MOVE	   MSPOPRC  TO PRCIN
+	 MOVE	   MSPOVNAM TO NAMEIN
+	 GOTO	   GPO1
+. 
+GPO1	 DISPLAY   *P01:23,*EL
+	 DISPLAY   *P05:NROW,POIN
+	 KEYIN	   *P05:NROW,*RV,POIN
+	 DISPLAY   *P05:NROW,POIN
+. 
+UOP	 DISPLAY   *P25:NROW,UOPIN
+	 KEYIN	   *P25:NROW,*RV,UOPIN
+. 
+. VALIDATE UNIT	OF PURCHASE CODE
+. 
+	 MATCH	   "EA"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "C"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 CMATCH	   "M"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "OZ"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "LB"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BG"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "BX"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 MATCH	   "FT"	TO UOPIN
+	 GOTO	   QTYIN   IF  EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"UNIT OF PURCHASE INVALID",*W2:
+		   *HOFF,*P1:23,*EL
+	 DISPLAY   *P25:NROW,"	"
+	 GOTO	   UOP
+. 
+QTYIN	 DISPLAY   *P29:NROW,DISPQTY
+	 KEYIN	   *P29:NROW,*RV,QTYIN
+	 MOVE	   QTYIN TO DISPQTY
+	 DISPLAY   *P29:NROW,DISPQTY
+. 
+PRCIN	 DISPLAY   *P37:NROW,PRCIN
+	 KEYIN	   *P37:NROW,*RV,PRCIN
+	 DISPLAY   *P37:NROW,PRCIN
+. 
+DATEIN	 DISPLAY   *P47:NROW,DATEIN
+	 MOVE	   DATEIN TO MIN
+	 RESET	   DATEIN TO 3
+	 MOVE	   DATEIN TO DIN
+	 RESET	   DATEIN TO 5
+	 MOVE	   DATEIN TO YIN
+	 RESET	   DATEIN TO 1
+	 KEYIN	   *P47:NROW,*RV,*DE,*+,MIN,*RV,*DE,*+,DIN,*RV,*DE,*-,YIN
+. 
+	 MOVE	   MIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+         COMPARE   "13" TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+	 MOVE	   DIN	TO  FORM2
+	 COMPARE   "01"	TO  FORM2
+	 GOTO	   DATERR   IF	LESS
+	 COMPARE   "32"	TO  FORM2
+	 GOTO	   DATERR   IF	NOT  LESS
+. 
+...         MOVE      YIN  TO  FORM2
+...         COMPARE   "80" TO  FORM2
+...         GOTO      DATERR  IF  LESS
+. 
+	 CLEAR	   DATEIN
+	 APPEND	   MIN	TO  DATEIN
+	 APPEND	   DIN	TO  DATEIN
+	 APPEND	   YIN	TO  DATEIN
+	 LENSET	   DATEIN
+	 RESET	   DATEIN
+	 REPLACE   " 0"	IN  DATEIN
+. 
+. NOW SET UP KEY FIELD KNOWN AS	DATEIN
+. 
+	 CLEAR	   DT6
+. 
+         RESET     TODAY  TO  5
+         APPEND    TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  2
+	 RESET	   TODAY  TO  1
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  4
+         RESET     TODAY  TO  3
+	 APPEND	   TODAY  TO  DT6
+. 
+	 RESET	   DT6	  TO  6
+	 LENSET	   DT6
+. 
+	 RESET	   DT6	  TO  1
+	 RESET	   TODAY  TO  1
+	 REP	   " 0"	  IN  DT6
+	 GOTO	   GVEND
+. 
+DATERR	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"INVALID DATE",*W2,*HOFF,*P1:23,*EL
+	 DISPLAY   *P47:NROW,"	    "
+	 GOTO	   DATEIN
+. 
+GVEND	 DISPLAY   *P54:NROW,VENDIN
+	 KEYIN	   *P54:NROW,*RV,*DE,VENDIN
+. 
+. NOTE ...  IF	ZERO IS	IN THE VENDOR CODE FIELD, IT MEANS THAT	NO VENDOR
+.	    CODE IS AVAILABLE, SO PERMIT KEYIN OF THE VENDOR NAME.
+. 
+	 MATCH	   "000000"  TO	 VENDIN
+	 GOTO	   NAMEIN    IF	 EQUAL
+. 
+. FALLTHRU MEANS THEY KEYED A VENDOR/CUSTOMER NUMBER
+. FIND OUT WHICH BY TYPE CODE
+. 
+WHICH	 CMATCH	   "P",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+	 CMATCH	   "R",TYPEIN
+	 GOTO	   VENDOR IF EQUAL
+. 
+. FALLTHRU IS CUSTOMER
+. 
+	 MOVE	   "C" TO WHCH
+     	 MOVE	   VENDIN TO CUSTKEY
+	 CALL	   GETCUST
+	 CMATCH	   "H",IOSW
+	 GOTO	   DCUST IF EQUAL
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"CUSTOMER NOT ON FILE",*W2,*HOFF,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+DCUST	 MOVE	   CUSTNAME TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VENDOR	 MOVE	   "V" TO WHCH
+	 MOVE	   VENDIN TO ACCKEY
+. 
+	 INCLUDE   APMASTRD.TXT
+. 
+	 GOTO	   VNDNG IF OVER
+	 MOVE	   NAME	 TO NAMEIN
+	 DISPLAY   *P61:NROW,NAMEIN
+	 GOTO	   CHKDATA
+. 
+VNDNG	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"VENDOR NOT ON FILE",*W2,*HOFF,*P1:23,*EL
+	 GOTO	   GVEND
+. 
+. 
+NAMEIN	 KEYIN	   *P60:NROW,*RV,NAMEIN
+	 CMATCH	   "P",TYPEIN
+	 GOTO	   NM1 IF EQUAL
+	 CMATCH	   "R",TYPEIN 
+	 GOTO	   NM1 IF EQUAL
+. 
+	 MOVE	   "C" TO WHCH
+	 GOTO	   CHKDATA
+. 
+NM1	 MOVE	   "V" TO WHCH
+. 
+CHKDATA	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"IS ALL DATA	CORRECT	(Y/N) ?	",REPLY:
+		   *HOFF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   RECORDS IF EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   CHKDATA IF NOT EQUAL
+. 
+. FALLTHRU IS BAD DATA
+. 
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P5:NROW,*EL
+	 GOTO	   GPO
+. 
+RECORDS	 CMATCH	   "V",WHCH
+	 GOTO	   PORECS IF EQUAL
+. 
+. FALLTHRU IS SLRECS - SALES OR	SALES QUOTATIONS
+. 
+CUSTOMER MOVE	   POIN	     TO	 MSSLNUMB
+	 MOVE	   UOPIN     TO	 MSSLUOP
+	 MOVE	   QTYIN     TO	 MSSLQTY
+	 MOVE	   PRCIN     TO	 MSSLPRC
+	 MOVE	   DATEIN    TO	 MSSLDATE
+	 MOVE	   VENDIN    TO	 MSSLCUST
+	 MOVE	   NAMEIN    TO	 MSSLCNAM
+. 
+WCUSTREC CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 CALL	   MSSLUPDT
+	 BEEP
+	 DISPLAY   *P1:23,*EL,*HON,"RECORD UPDATED SUCCESSFULLY! ",*W3:
+		   *HOFF,*P1:23,*EL
+	 MOVE	   "00"	TO SCANINDX
+	 MOVE	   " " TO SCANKEY
+	 RESET	   SCANKEY TO 1
+	 GOTO	   WHICHPT
+. 
+MOREDATA MOVE	   " " TO REPLY
+	 KEYIN	   *P1:23,*EL,*HON,"PRESS F1 FOR MORE HISTORY /	F5 IF ":
+		   "COMPLETE ",REPLY,*HOFF
+. 
+	 GOTO	   DATAIN   IF F1
+	 GOTO	   DOMORE   IF F5
+	 BEEP
+	 GOTO	   MOREDATA
+. 
+WHATNEXT GOTO	   MOREDATA
+. 
+CLEANUP	 DISPLAY   *P1:23,*EL
+	 MOVE	   " ",REPLY
+	 GOTO	   DATAIN
+. 
+PORECS	 TRAPCLR   PARITY
+	 MOVE	   POIN	   TO MSPONUMB
+	 MOVE	   UOPIN   TO MSPOUOP
+	 MOVE	   QTYIN   TO MSPOQTY
+	 MOVE	   DATEIN  TO MSPODATE
+	 MOVE	   VENDIN  TO MSPOVEND
+	 MOVE	   PRCIN   TO MSPOPRC
+	 MOVE	   NAMEIN  TO MSPOVNAM
+. 
+	 CALL	   CLRTRAPS
+	 MOVE	   " " TO IOSW
+	 CALL	   MSPOUPDT
+	 DISPLAY   *P1:23,*EL,*HON,"RECORD UPDATED SUCCESSFULLY	!",*W3:
+		   *HOFF,*P1:23,*EL
+	 MOVE	   "00"	TO SCANINDX
+	 MOVE	   " " TO SCANKEY
+	 RESET	   SCANKEY TO 1
+	 GOTO	   WHICHPT
+. 
+GETSTUFF TRAPCLR   PARITY
+EOJ	 DISPLAY   *P1:23,*EL,*HON,"END	OF INVENTORY HISTORY UPDATE",*W2:
+		   *HOFF
+. 
+	 CHAIN	   "MSHISTRY"
+. 
+.   PURCHASING SYSTEM ...  ENTER AND PRINT P.O.	DOCUMENT
+.   POENTRY.DBS	    WRITTEN  AUGUST 1999, R. BACHARACH
+. 
+	 INCLUDE   COMMON.TXT
+. 
+PASSCUST DIM	   30
+INVCNUMB DIM	    5
+PASSDT6	 DIM	   6
+PASSACCT DIM	   4
+PASSCOMP DIM	   1
+. 
+NINVCNO	 DIM	   5
+NEWFKEY	 DIM	   5
+RESULT	 FORM	   2
+DASH20	 INIT	   "--------------------"
+DDASH20	 INIT	   "===================="
+PURCHBY	 DIM	   20
+VIA	 DIM	   15
+PRTPONO	 FORM	   8
+.
+REPLY	 DIM	   1
+.FIELD	 TYPE	   LENGTH    FROM-TO   DESCRIPTION
+.-----	 ----	   ------    -------   -----------
+WORK01	 DIM	    1
+WORK02	 DIM	    2
+WORK03	 DIM	    3
+WORK04	 DIM	    4
+WORK08	 DIM	    8
+WORK10	 DIM	   10
+WORK09	 DIM	   9
+FIELD09	 DIM	   7
+NFIELD09 FORM	   7
+.
+DATE8	 DIM	   8		8 DIGIT	DATE WORK FIELD
+MM	 DIM	   2
+DD	 DIM	   2
+YY	 DIM	   2
+XMM	 DIM	   2
+XDD	 DIM	   2
+XYY	 DIM	   2
+FORM5	 FORM	   5
+. 
+DTYPE	 DIM	   8
+DSTAT	 DIM	   10
+INDX	 FORM	   2
+STARTKEY DIM	   5
+PP	 DIM	   1
+PC	 DIM	   1
+LINES	 FORM	   2
+PTERMS	 DIM	   18
+HDRSW	 DIM	   1
+PAGES	 FORM	   2
+. 
+	 INCLUDE   PART.TXT
+. 
+. CONTROL FILE AREA
+. 
+	 INCLUDE   CONTFILE.TXT
+. 
+NFIELD01 FORM	    4		       (NUMERIC	WORK FIELD)
+FIELD01	 DIM	    4
+. 
+	 INCLUDE   SPLOPNFD.TXT
+NFLD01	 FORM	   9
+FLD01	 DIM	   9
+. 
+MULTIFLG DIM	   1
+MULTIROW FORM	   2
+MULTICNT FORM	   2
+MULTIDSC DIM	   35
+MD1	 DIM	   35
+MD2	 DIM	   35
+MD3	 DIM	   35
+MD4	 DIM	   35
+MD5	 DIM	   35
+MD6	 DIM	   35
+MD7	 DIM	   35
+MD8	 DIM	   35
+MD9	 DIM	   35
+MD10	 DIM	   35
+EXTRA	 INIT	   "XXXXXXXXXXXXXXXXXXX"
+COMPLETE DIM	   1
+UOM	 DIM	   2
+PRODCODE DIM	   2
+SHIPNAME DIM	   30
+SHIPADDR DIM	   25
+SHIPYADR DIM	   25
+SHIPADR2 DIM	   25
+SHIPCITY DIM	   18
+SHIPSTAT DIM	   2
+SHIPZIP	 DIM	   5
+COMPLET	 DIM	   1
+. 
+NORMTERM INIT	   "2% 15 NET 30"
+NEWTERM	 DIM	   15
+. 
+	 INCLUDE   CUSTMAST.TXT
+
+DIMZIP	 DIM	   5
+.
+CLOSESW	 INIT	   " "
+. 
+PORTXX	 DIM	   12
+. 
+ADDKEY	 FORM	   8
+NEXTPO	 DIM	   8
+APP	 INIT	   "APP	    "
+DIM8	 DIM	   8
+ 
+.	
+.  WORK	 AREAS FOR INVOICE HEADER CREATION/WRITE
+. 
+	 INCLUDE   RCVBLES.TXT
+. 
+SAVE	 DIM	     10
+TOTDOLS	 FORM	     6.2
+FRGHT	 FORM	     2.2
+. 
+OLDDET	 DIM	   1
+IOSW	 DIM	   1
+LIBNET	 FORM	   7.2
+REPNET	 FORM	   7.2
+. 
++...........................................................
+. 
+DATE2X	 DIM	   2
+DATE2N	 FORM	   2
+. 
+. 
+INVCKEGS FORM	   7	 (ORDER	QTY)
+PCSSOLD	 FORM	   7	 (SHIPPED QTY)
+INVPCSKG FORM	   7	 (BACKORDER QTY)
+. 
+BUILDPT	 DIM	   7
+. 
+. RECORD ASSEMBLY AREA
+. 
+INVCNO	 DIM	   5		       INVC NUMBER
+INVCLINE DIM	   2		       INVC LINE NUMBER	SUFFIX FOR INDEXING
+. 
+INVLINES FORM	   "00"
+IRECCNTR FORM	   6
+DTLSTAT	 DIM	   1
+ILIVCNTR FORM	   3
+. 
+ROW	 FORM	   2		    USED TO ROLL DOWN THE KEYIN	STMT
+. 
+NFIELD04 FORM	    5.2		       (NUMERIC	WORK FIELD)
+FIELD04	 DIM	    8	      11- 18   PRICE LN	1		  5.2
+NFIELD03 FORM	    3
+FIELD03	 DIM	    3
+NFIELD02 FORM	    4
+FIELD02	 DIM	    4
+. 
+. EXTENSION CALCULATE WORK/DISPLAY AREA
+. 
+LNDOLS	 FORM	   5.2
+KEGQTY	 FORM	   9
+LINECOST FORM	   6.2
+KGSAVAIL FORM	   6
+CRAPMSG	 DIM	   18
+CALCFLD	 FORM	   8.3
+OLDFRGT	 FORM	   5.2
+. 
+FILLER	 INIT	   "........./........./........./........"
+FILLER2	 INIT	   "..............."
+.
+FORM3	 FORM	   3
+IPNSTDSX DIM	   6
+IPNSTDSN FORM	   6
+NONSTDSW DIM	   1
+SCANSW	 DIM	   1
+PARTUPSW DIM	   1
+. 
+KREPLY	 DIM	   1
+. 
+CHKPASS	 DIM	   5
+.  
+WEIGHT	 FORM	   6
+HDRCHGSW DIM	   1
+INVDTKEY DIM	   7
+. 
+OLDXTEND FORM	   6.2
+. 
+. 
+CALCNET	 FORM	   6.2
+FRTALLOW FORM	   5.2
+. 
+. NEW DIRECT-ACCESS FILE ADDED HERE TO ALLOW WRITING THE ENTIRE	INVOICE
+. TO ONE FILE FOR BALANCING AND	REVIEW/CORRECTION MODE
+. 
+TIMEDIM	 DIM	   8
+DAFILE	 FILE	   FIX=128,UNCOMPRESSED
+DANAME	 INIT	   "DAFILEXX.TXT"
+.
+PONUMBFL IFILE	   KEYL=8,UNCOMPRESSED
+PONAME	 INIT	   "NEXTPO.ISI"
+BUYER	 DIM	   25
+. 
+PFILE	 PFILE			  (SPOOL FILE)
+.
+DARECNO	 FORM	   "  -1"
+REC0	 FORM	   "0000"
+REC1	 FORM	   "0001"
+REC2	 FORM	   "0002"
+RECZERO	 FORM 	   "0000"
+RECCNTR	 FORM	   4
+RECLIMIT FORM	   "0099"
+CUSTN	 FORM	   4
+SPECMSG	 DIM	   80
+MSGFLAG	 DIM	   1
+PORTX	 DIM	   2
+SPECSW	 DIM	   1
+TIME	 INIT	   "HH/MM/SS"
+. 
+SEQ	 FORM	   "-1"
+SEQ3	 FORM	   "-3"
+. 
++........................................................................
+. 
+START	 DISPLAY   *ES,*P01:12,*HON,"PURCHASE ORDER ENTRY PROGRAM":
+		   *HOFF:
+		       *P01:14,"IF YOU HAVE COME HERE ERRONEOUSLY FROM THE ":
+			       "SYSTEM MENU PROGRAMS":
+		       *P01:15,"AND DO	N O T  HAVE ANY	 INVOICES TO ":
+			       "ENTER........":
+		       *P01:17,"YOU MAY	TERMINATE THIS PROGRAM BY PRESSING ":
+			       "THE   F5   KEY"
+	 KEYIN	   *P01:20,*HON,"KEY	 F5	TO  TERMINATE":
+		   *P01:21,"KEY	    ENTER  TO  ENTER P.O. ",REPLY:
+		   *HOFF
+. 
+	 GOTO	   MAINLINE  IF	 NOT  F5
+. 
+	 BEEP
+INDXIT	 DISPLAY   *HOFF,*ES
+	 BEEP
+	 CHAIN	   "ANSWER"
+.
+MAINLINE MOVE	   " " TO REPLY
+.
+.
+	 KEYIN	   *ES,*P1:4,*HON,"PURCHASE ORDER PROCESSING":
+		       *P1:6,"PRESS   (F3)   WHEN READY	",REPLY,*HOFF
+	 GOTO	   MAINLINE IF NOT F3
+. 
+MAINLIN1 DISPLAY   *HOFF,*ES
+.
+...	 INCLUDE   SPLOPNPR.TXT
+
+	 SPLOPEN   "LPT1:"
+
+.
+	 MOVE	   " ",REPLY
+	 MOVE	   " ",MSGFLAG
+	 MOVE	   " ",SPECMSG
+.
+	 MOVE	   TODAY TO MM
+	 MOVE	   TODAY TO XMM
+	 RESET	   TODAY TO 4
+	 MOVE	   TODAY TO DD
+	 MOVE	   TODAY TO XDD
+	 RESET	   TODAY TO 7
+	 MOVE	   TODAY TO YY
+	 MOVE	   TODAY TO XYY
+	 RESET	   TODAY TO 1
+. 
+. SET UP SIX DIGIT DATE
+. 
+	 MOVE	   TODAY TO INVDATE
+	 MOVE	   INVDATE  TO	PASSDT6	     PASS 6 DIGIT DATE TO DTL PGM
+	 GOTO	   ACCTOPEN
+.
+NOFILE	 DISPLAY   *ES,"FILES NOT ON LINE":
+		   *N,"JOB IS ABORTING"
+	 BEEP
+	 CHAIN	   "ANSWER"	     GO	BACK TO	DISPLAY	INVOICE	MENU
+*...........................................................
+. OPEN ISAM-LOOKUP FILE
+.
+ACCTOPEN TRAPCLR   IO
+. 
+. ........................................................................
+. NOW SET UP TO	EITHER OPEN OR PREPARE A NEW DATA ENTRY	BATCH FILE
+. WHOSE	NAME IS	IN THE FORM OF DAINVC##/TXT:NCLACCTS, WHERE ## IS A
+. REPLACED BY THE PORT NUMBER (HIGH ORDER ZERO FILLED) IN ORDER	TO PERMIT
+. BOTH TERMINALS TO DO DATA ENTRY
+. 
+. ........................................................................
+. 
+.
+PREPDA	 CLOCK	   TIME	 TO  TIMEDIM
+	 CLOCK	   PORT	 TO  PORTXX
+	 TRAPCLR   IO
+	 TRAP	   ENTRYFL IF IO
+	 PREPARE   DAFILE,DANAME
+.
+	 OPEN	   PONUMBFL,PONAME
+ 
+.
+ZERONETS TRAPCLR   IO		     (OKAY NOW LETS GO!)
+	 MOVE	   "A" TO INVCOMP
+	 GOTO	   WHATKIND
+.
+ENTRYFL	 BEEP
+	 DISPLAY   *P1:23,*EL,"UNABLE TO PREPARE PO ENTRY FILE ",*W5
+. 
+MNUCHAIN CHAIN	   "ANSWER"
+. 
+WHATKIND TRAPCLR IO
+*...........................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+.
+DISPLAY	 CLOCK	   TIME	TO TIME
+. 
+	 DISPLAY   *ES,*HON,*P11:1,"PURCHASE ORDER DATA":
+		   " ENTRY":
+		   *HOFF:
+		   *P1:2,"Buyer:":
+		   *P1:3,"Vendor:":
+		   *P1:4,"Addr1:":
+		   *P1:5,"Addr2:":
+		   *P1:6,"City":
+		   *P43:3,"Ship	To:"
+LOOP	 TRAPCLR   PARITY	(NOP)
+. 
+ORDERFOR MOVE	   "A" TO INVCOMP
+*...........................................................
+. 
+.  SET NORMAL INVOICE CONSTANTS	PRIOR TO DATA ENTRY
+. 
+............................................................
+K01	 MOVE	   "O"	TO  INVSTAT
+	 MOVE	   " "	TO  NEWTERM
+	 MOVE	   " "	TO  PTERMS
+	 MOVE	   INVCOMP  TO	PASSCOMP
+	 MOVE	   "I"	TO  INVTYPE
+	 MOVE	   "C"	TO  INVFOB
+	 MOVE	   " "	TO  INVCHECK
+	 MOVE	   " "	TO  INVMESG
+	 CLEAR	   INVORDNO
+	 MOVE	   " "	TO  MOREORDR
+	 MOVE	   "0"	    TO	 INVWGHT
+	 MOVE	   "0"	    TO	 CARTONS
+	 MOVE	   "000000.00"	 TO   INVTOTL
+	 MOVE	   "000000.00"	 TO   IAMTRCVD
+	 MOVE	   "0.00" TO LINEPRC
+	 MOVE	   "0.00" TO LINECOST
+	 MOVE	   "0.00" TO LNDOLS
+	 MOVE	   "C"	    TO	 COMPLET
+	 MOVE	   " " TO PURCHBY
+	 MOVE	   "UPS" TO VIA
+. KEYIN	VARIABLES SEQUENCE
+. 
+*...........................................................
+. ACCOUNT ID NUMBER
+. THIS FIELD IS	"BOTH" REQUIRED	& FILL-CONTROLLED
+. FIELD	TYPE IS	NUMERIC
+. FIELD	VALIDATION TYPE	IS ISAM-VERIFICATION
+.
+. 
+K01KA	 MOVE	   " " TO CUSTNAME
+  	 MOVE	   " " TO BUYER
+	 MOVE	   " " TO CUSTADDR
+	 MOVE	   " " TO CUSTCITY
+	 MOVE	   " " TO CUSTSTAT
+	 MOVE	   "0" TO CUSTZIP
+	
+K01K	 KEYIN	   *P11:2,*RV,BUYER
+	 DISPLAY   *P11:2,BUYER
+	 MOVE	   BUYER TO PURCHBY
+	 KEYIN	   *P11:3,CUSTNAME
+	 CMATCH	   " " TO CUSTNAME
+	 GOTO	   K01K	IF EOS
+.
+K01A	 KEYIN	   *P11:4,CUSTADDR
+	 KEYIN	   *P11:5,CUSTADR2
+.
+	 DISPLAY   *P11:4,CUSTADDR:
+		   *P11:5,CUSTADR2
+.
+K01B	 KEYIN	   *P11:6,CUSTCITY
+	 DISPLAY   *P11:6,CUSTCITY
+	 KEYIN	   *P32:6,CUSTSTAT
+	 DISPLAY   *P32:6,CUSTSTAT
+	 KEYIN	   *P35:6,DIMZIP
+	 DISPLAY   *P35:6,DIMZIP
+. 
+OKAYCOMP DISPLAY   *P11:3,CUSTNAME:
+		   *P11:4,CUSTADDR:
+		   *P11:5,CUSTADR2:
+		   *P11:6,CUSTCITY,*P32:6,CUSTSTAT,*P35:6,DIMZIP
+GETVIA	 DISPLAY   *P11:7,"SHIP	VIA",*P20:7,VIA
+	 KEYIN	   *P20:7,*RV,VIA
+	 DISPLAY   *P20:7,VIA
+. 
+. NOW ENTER TERMS 
+.
+GETTERMS MOVE	   "NET/30" TO PTERMS
+	 DISPLAY   *P1:22,*EF,"NORMAL TERMS ARE	",*P18:22,PTERMS
+	 KEYIN	   *P18:22,*RV,PTERMS
+	 DISPLAY   *P18:22,PTERMS
+.
+. NOW DISPLAY THE SHIP-TO DATA
+. 
+	 DISPLAY   *P51:3," APC	COMPONENTS, INC":
+		   *P51:4," 75 TOLEDO STREET":
+		   *P51:5," FARMINGDALE, NY 11735"
+. 
+ASKCUST	 KEYIN	   *P01:23,*EL,"ALL DATA CORRECT? (Y/N)	",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   PASSNAME  IF	 EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   K01K	IF EQUAL
+	 BEEP
+	 DISPLAY   *P01:23,*EL
+	 GOTO	   ASKCUST
+. 
+PASSNAME MOVE	   CUSTNAME TO PASSCUST
+.
+K03	 DISPLAY   *P01:23,*EL
+*...........................................................
+. CUSTOMER ORDER NUMBER
+K03K	
+	 CALL	   NEXTPONO 
+*...........................................................
+.     LOGIC CHANGE SEPTEMBER 20, 1999
+.
+COK	 GOTO	   RECYCLE
+. 
+.--------------------------------------------------------------------------
+. 
+NEXTPONO TRAPCLR   PARITY	     (WE ALREADY READ THE CONTROL FILE!)
+. 
+	 FILEPI	   8;PONUMBFL
+. 
+	 READ	   PONUMBFL,APP;DIM8,NEXTPO
+	 MOVE	   NEXTPO  TO ADDKEY
+	 ADD	   "1"	   TO ADDKEY
+	 MOVE	   ADDKEY  TO  NEXTPO
+	 REP	   " 0"	IN NEXTPO
+	 UPDATE	   PONUMBFL;DIM8,NEXTPO
+	 MOVE	   NEXTPO TO PRTPONO
+	 DISPLAY   *P52:2,*HON,"PO NUMBER:",PRTPONO,*HOFF
+.
+	 WRITE	   PONUMBFL,NEXTPO;NEXTPO,NEXTPO,CUSTNAME
+	 FILEPI	   0
+	 RETURN
+.	 
+*...........................................................
+. DISK-WRITE SEQUENCE
+.
+W1	 TRAPCLR   IO
+	 MOVE	   "0000"  TO RECCNTR
+	 TRAP	   BADDSK IF IO
+	 MOVE	   INVKEY    TO	  INVCNUMB
+	 MOVE	   CUSTNAME  TO	  PASSCUST
+	 MOVE	   INVTOTL   TO	  IDOLSLFT
+. 
+. CHECK	FOR OVERRIDE ON	SPECIAL	MESSAGE
+. 
+	 CMATCH	   "X",SPECSW
+	 GOTO	   MOVESPEC IF NOT EQUAL
+	 MOVE	   " " TO SPECSW
+	 GOTO	   W1A
+. 
+MOVESPEC MOVE	   SPECMSG   TO	  INVMESG
+. 
+. NOW WRITE TO THE NEW DA FILE FOR BATCH REVIEW/CORRECTION CAPABILITY
+. 
+W1A	 TRAPCLR   IO
+	 TRAPCLR   FORMAT
+	 TRAPCLR   RANGE
+	 TRAPCLR   PARITY
+	 TRAP	   BADDSK IF IO
+	 TRAP	   BUMFMT IF FORMAT
+.
+	 GOTO	   EOJ
+.
+BUMFMT	 BEEP
+	 DISPLAY   *P1:23,"FORMAT ERROR	ON WRITE TO DAFILE"
+	 GOTO	   EOJ
+.
+. 
+BADDSK	 BEEP
+	 DISPLAY   *ES,*P01:01,"BAD WRITE TO DISK, RECORD ZERO ON ":
+			       "INVOICE	DA FILE":
+		       *P01:03,"UNRECOVERABLE ERROR...CALL MICRO ":
+			       "SYSTEMS	CONSULTANTS",*W2
+	 GOTO	   BADDSK
+. 
+. ISAM DUPLICATE KEY TRAP
+.
+DUPKEY	 BEEP
+	 DISPLAY   *P01:23,"KEY	",INVKEY," ALREADY EXISTS! ":
+			   "ASSIGN A NEW ONE!",*W,*W,*W
+	 GOTO	   DUPKEY
+*...........................................................
+. END OF JOB SEQUENCE
+.
+EOJ	
+. 
+	 CMATCH	   "S"	TO  INVTYPE
+	 GOTO	   EOJ2	IF  NOT	EQUAL	(ITS NORMAL MERCHANDISE	INVOICE)
+	 GOTO	   UPDTSEQ
+. 
+. EOJ2 IS ONLY FOR NEW REGULAR MERCHANDISE PO'S
+. 
+EOJ2
+	 GOTO	   CHAINDET
+. 
+EOJOUT	 RELEASE
+	 CHAIN	   "ANSWER"
+.
+	 STOP
+.
+. FILE OPENING SEQUENCE
+CHAINDET MOVE	   " "	TO  KREPLY
+	 MOVE	   "0001" TO RECCNTR
+	 MOVE	   INVCNUMB TO CHKPASS
+	 RESET	   CHKPASS TO 5
+	 CMATCH	   " " TO CHKPASS
+	 GOTO	   CONTIN IF NOT EOS
+. 
+BADINVC	 BEEP
+	 DISPLAY   *ES,*P01:12,"SORRY..YOU HAVE	NOT GIVEN ME A INVOICE NUMBER":
+		       *P01:14,"  I CANNOT ALLOW YOU TO	CONTINUE",*W,*W
+    	 BEEP
+	 GOTO	   MAINLINE
+. 
+CONTIN	 RESET	   CHKPASS
+	 TYPE	   CHKPASS
+	 GOTO	   BADINVC IF NOT EQUAL
+	 GOTO	   HSKPG1
+. 
+HSKPG1	 TRAPCLR   IO
+	 MOVE	   "00"	TO INVLINES
+	 MOVE	   INVCNUMB TO INVKEY
+	 MOVE	   INVCNUMB TO INVCNO
+	 MOVE	   PASSDT6  TO	DATE2X
+TYPIT	 TYPE	   DATE2X
+	 GOTO	   DATEOK  IF  EQUAL
+	 BEEP
+KEYIT	 KEYIN	   *ES,*P01:12,"ENTER THE MONTH	AS TWO DIGITS,	SUCH AS	 09 ":
+		   "FOR	SEPT. ",*DE,DATE2X
+	 GOTO	   TYPIT
+. 
+DATEOK	 MOVE	   DATE2X  TO  DATE2N
+	 COMPARE   "0"	   TO  DATE2N
+	 GOTO	   KEYIT   IF  EQUAL
+	 GOTO	   KEYIT   IF  LESS
+	 COMPARE   "13"	   TO  DATE2N
+	 GOTO	   KEYIT   IF  NOT  LESS
+. 
+.  GOT A GOOD MONTH THERE
+. 
+	 MOVE	   DATE2N  TO  USAGINDX
+. 
+. USAGE	IS NOW SET UP FOR UPDATE
+. 
+*...........................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+.
+RECYCLE	 MOVE	   "8"	TO ROW
+	 DISPLAY   *P01:08,*EF:
+		   *HON:
+		   "QTY	ORD		       PART NUMBER		":
+		   "	  PRICE	 UOM EXTENSION	",*HOFF
+LOOP01	KEYIN	  *P01:23,*EL,*HON,"Press ENTER	to add data, F5	if ":
+			  "done	",REPLY,*HOFF
+	 GOTO	   BIGEOJ  IF  F5
+	 CMATCH	   " " TO REPLY
+	 GOTO	   LOOP01 IF NOT EOS
+	 DISPLAY   *P01:23,*EL
+*...........................................................
+. KEYIN	VARIABLES SEQUENCE
+	 ADD	   "01"	TO ROW
+	 COMPARE   "21"	TO ROW
+	 GOTO	   RECYCLE IF NOT LESS
+	 DISPLAY   *P01:ROW,"_______":
+			    *P15:ROW,"_________________________	  "
+			  
+*...........................................................
+. PART NO. 1
+. THIS FIELD IS	"BOTH" REQUIRED	& FILL-CONTROLLED
+. FIELD	TYPE IS	NUMERIC
+.
+	 MOVE	   "0" TO LNDOLS
+	 MOVE	   "0" TO KEGQTY
+	 MOVE	   "0" TO PCSSOLD
+	 MOVE	   "0" TO INVCKEGS
+	 MOVE	   "0" TO INVPCSKG
+	 MOVE	   "0" TO LINECOST
+*...........................................................
+. QUANTITY ORDERED	     4/23/83
+. FIELD	TYPE IS	NUMERIC
+.
+B03	 MOVE	   FIELD03 TO SAVE
+B03K	 KEYIN	   *P01:ROW,"_______  ":
+		   *P01:ROW,WORK09
+. 
+B03A	 CLEAR	   FIELD09
+	 MOVE	   WORK09 TO FIELD09
+B03B	 MOVE	   "0" TO NFIELD09
+	 TYPE	   FIELD09     (NUMERIC	FIELD)
+	 GOTO	   B03K	IF NOT EQUAL
+. 
+	 MOVE	   FIELD09 TO NFIELD09
+B03C	 MOVE	   NFIELD09 TO FIELD09
+	 DISPLAY   *P01:ROW,FIELD09
+. 
+	 MOVE	   NFIELD09 TO INVCKEGS
+	 MOVE	   INVCKEGS TO PCSSOLD
+. 
+. 
+	 GOTO	   GETPARTZ
+. ........................................
+. 
+. NOTE USE INVCKEGS FOR	QUANTITY ORDERED
+.      USE PCSSOLD  FOR	QUANTITY SHIPPED
+.      USE INVPCSKG FOR	QUANTITY BACKORDERED
+. 
+. 
+PCSKEG	 KEYIN	   *P10:ROW,"_______  ",*P10:ROW,PCSSOLD
+. 
+	 DISPLAY   *P10:ROW,PCSSOLD
+. 
+	 MOVE	   INVCKEGS TO KEGQTY
+	 SUBTRACT  PCSSOLD  FROM  KEGQTY
+	 MOVE	   KEGQTY   TO	  INVPCSKG
+	 DISPLAY   *P19:ROW,INVPCSKG
+	 GOTO	   GETPARTZ
+. 
+. 
+AHA	 BEEP
+	 GOTO	   AHA
+. 
+*.........................................................
+GETPARTZ MOVE	   "0" TO MULTICNT
+	 MOVE	   " " TO MULTIFLG
+	 DISPLAY   *P1:23,*HON,"PRESS F1 FOR MULTI-LINE	PART NUMBER":
+		   *HOFF
+	 KEYIN	   *P15:ROW,"___________________________________":
+		   *P15:ROW,MULTIDSC
+	 DISPLAY   *P15:ROW,MULTIDSC
+	 MOVE	   MULTIDSC TO MD1
+	 MOVE	   "1" TO MULTICNT
+	 GOTO	   MULTISET IF F1    (IF F1..THERE IS MULTI-LINE DESCRIPTION)
+.
+	 GOTO	   B04
+. 
+*..........................................................
+. 
+MULTISET MOVE	   "X" TO MULTIFLG
+	 BEEP
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:23,*HON,"MULTI-LINE (MAX	10) PART NUMBER",*W2,*HOFF
+	 GOTO	   B04
+...........................................................
+. 
+MULTIDSC MOVE	   ROW TO MULTIROW
+MULTILP	 ADD	   "1" TO MULTIROW
+	 COMPARE   "22"	  TO  MULTIROW
+	 CALL	   RESETROW   IF  NOT LESS
+	 KEYIN	   *P15:MULTIROW,"___________________________________":
+		   *P15:MULTIROW,MULTIDSC
+	 DISPLAY   *P15:MULTIROW,MULTIDSC
+	 RESET	   MULTIDSC
+	 GOTO	   B04 IF EOS	    (IF	NOTHING	ENTERED...FORGET IT!)
+	 ADD	   "1" TO MULTICNT
+	 STORE	   MULTIDSC INTO MULTICNT OF MD1,MD2,MD3,MD4,MD5:
+					     MD6,MD7,MD8,MD9,MD10
+. 
+	 COMPARE   "10"	TO MULTICNT
+	 GOTO	   MULTIRTN IF EQUAL
+. 
+	 GOTO	   MULTILP IF F1
+. 
+MULTIRTN MOVE	   MULTIROW  TO	 ROW	(LET PROGRAM KNOW!)
+	 RETURN			    (NO	MORE!)
+. 
+..............................................................
+. 
+RESETROW MOVE	   "10"	TO MULTIROW
+RESETLP	 ADD	   "1"	TO MULTIROW
+	 COMPARE   "21"	TO MULTIROW
+	 GOTO	   RESETOUT IF EQUAL
+	 DISPLAY   *P01:MULTIROW,*EL
+	 GOTO	   RESETLP
+RESETOUT MOVE	   "12"	TO MULTIROW
+	 MOVE	   "12"	TO ROW
+	 RETURN
+. 
+. 
+EXTEND	 RETURN
+WRTHDRIS RETURN
+. 
+. FALLTHRU IS NO MORE DESCRIPTIONS, SO GOTO B04
+*...........................................................
+. PRICE	LN 1
+. THIS FIELD IS	REQUIRED
+. FIELD	TYPE IS	NUMERIC
+. 
+B04	 MOVE	   FIELD04 TO SAVE
+	 GOTO	   B04K
+. 
+.	 KEYIN	   *P54:ROW,"__",*P54:ROW,PRODCODE
+.	 DISPLAY   *P54:ROW,PRODCODE
+.
+B04K	 KEYIN	   *P57:ROW,"________":
+		   *P57:ROW,WORK08
+	 CMATCH	   "<" TO WORK08
+	 GOTO	   B04K	IF EOS
+	 CMATCH	   ">" TO WORK08
+	 GOTO	   B04A	IF NOT EQUAL
+	 MOVE	   SAVE	TO FIELD04
+	 DISPLAY   *P57:ROW,FIELD04
+	 GOTO	   B04K
+B04A	 CLEAR	   FIELD04
+	 MOVE	   WORK08 TO FIELD04
+B04B	 MOVE	   "0" TO NFIELD04
+	 TYPE	   FIELD04     (NUMERIC	FIELD)
+	 GOTO	   B04K	IF NOT EQUAL
+	 MOVE	   FIELD04 TO NFIELD04
+B04C	 MOVE	   NFIELD04 TO FIELD04
+	 DISPLAY   *P57:ROW,FIELD04
+	 MOVE	   NFIELD04 TO LNDOLS	  (SELLING PRICE/UOM)
+. 
+. GET THE UNIT OF MEASURE
+. 
+UOM	 MOVE	   "  "	TO  UOM
+	 KEYIN	   *P66:ROW,UOM
+. 
+	 MATCH	   "GR"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "EA"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "M "	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "LT"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "LB"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "C "	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "FT"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "PK"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "BX"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "RD"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "NC"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 BEEP
+	 DISPLAY   *P66:ROW,"  "
+	 GOTO	   UOM
+. 
+DUOM	 DISPLAY   *P66:ROW,UOM
+. 
+. 
+CHK100X	 MATCH	   "C "	TO UOM
+	 GOTO	   CHK1000 IF NOT EQUAL
+	 MOVE	   PCSSOLD TO CALCFLD
+	 DIVIDE	   "100" INTO CALCFLD
+	 MULT	   LNDOLS BY CALCFLD
+	 MOVE	   CALCFLD TO LINECOST
+	 GOTO	   DSPCOSTX
+. 
+. 
+CHK1000	 MATCH	   "M "	TO UOM
+	 GOTO	   EACHX   IF NOT EQUAL
+	 MOVE	   PCSSOLD TO CALCFLD
+	 DIVIDE	   "1000"  INTO	CALCFLD
+	 MULT	   LNDOLS  BY	CALCFLD
+	 MOVE	   CALCFLD TO	LINECOST
+	 GOTO	   DSPCOSTX
+. 
+EACHX	 MOVE	   PCSSOLD TO LINECOST
+. 
+EACHXX	 MULT	   LNDOLS BY LINECOST
+. 
+DSPCOSTX DISPLAY   *P70:ROW,LINECOST
+. 
+. FIRST	CHECK IF THE LINE IS OKAY!
+. 
+CHKLINE	 BEEP
+	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:22,*EL,*HON,"IS DATA CORRECT ? (Y/N) ",REPLY,*HOFF
+	 DISPLAY   *P1:22,*EF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   CONTXX IF EQUAL
+. 
+	 CMATCH	   "N",REPLY
+	 GOTO	   LNRESET IF EQUAL
+	 BEEP
+	 GOTO	   CHKLINE
+. 
+LNRESET	 DISPLAY   *P1:ROW,*EL
+	 SUBTRACT  "1" FROM ROW
+	 GOTO	   LOOP01
+. 
+CONTXX	 ADD	   LINECOST TO TOTDOLS
+	 ADD	   LINECOST TO INVTOTL
+. 
+CHKMULTI CMATCH	   "X",MULTIFLG
+	 CALL	   MULTIDSC IF EQUAL	(GET THE EXTRA LINES)
+. 
+. NOTE IF EXTRA	DESCRIPTIVE LINES EXIST, THEN WRITE CONTINUATION RECORDS
+.      FOR DESCRIPTIVE DATA
+. 
+*...........................................................
+. 
+. DISK-WRITE SEQUENCE
+.
+LINEINCR ADD	   "01"	  TO INVLINES
+	 MOVE	   INVLINES  TO	 RECCNTR
+	 MOVE	   INVCNO    TO	 INVDTKEY
+	 RESET	   INVDTKEY  TO	 5
+	 APPEND	   INVLINES  TO	 INVDTKEY
+	 RESET	   INVDTKEY
+	 REP	   " 0"	IN INVDTKEY
+	 MOVE	   "X"	TO  DTLSTAT
+	 MOVE	   MD1	TO  MULTIDSC
+	 CALL	   PTDTLBK
+. 
+. NOW CHECK FOR	MULTI-DESCRIPTIVE LINES	AND WRITE MULTIPLE RECORDS NOW!
+. 
+	 CMATCH	   "X",MULTIFLG
+	 GOTO	   COMP99 IF NOT EQUAL
+. 
+. FALLTHRU MEANS WRITE CONTINUATION RECORDS
+. 
+. FIRST	ZERO OUT THE QTY AND PRICE FIELDS
+. 
+	 MOVE	   "0" TO INVCKEGS
+	 MOVE	   "0" TO INVPCSKG
+	 MOVE	   "0" TO PCSSOLD
+	 MOVE	   ".00"  TO LNDOLS
+	 MOVE	   ".00"  TO LINECOST
+. 
+. STORE	LOOP
+. 
+	 MOVE	   "1"	TO  INDX
+. 
+STORLOOP ADD	   "1"	TO  INDX    (STARTS AT MD2, INDX VALUE=2)
+	 COMPARE   INDX	TO  MULTICNT
+	 GOTO	   COMP99 IF  LESS
+. 
+	 LOAD	   MULTIDSC FROM INDX OF MD1,MD2,MD3,MD4,MD5,MD6:
+					 MD7,MD8,MD9,MD10
+. 
+	 ADD	   "01"	TO INVLINES
+	 MOVE	   INVLINES TO RECCNTR
+	 RESET	   INVDTKEY TO 5
+	 APPEND	   INVLINES TO INVDTKEY
+	 RESET	   INVDTKEY TO 1
+	 REP	   " 0"	IN INVDTKEY
+	 MOVE	   "*"	TO DTLSTAT
+	 CALL	   PTDTLBK
+	 GOTO	   STORLOOP
+. 
+............................................
+PTDTLBK	 TRAPCLR   IO
+	 TRAPCLR   PARITY
+	 TRAPCLR   FORMAT
+	 TRAPCLR   RANGE
+	 MOVE	   "WRITE" TO IOTYPE
+	 MOVE	   DANAME  TO IOERFILE
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+	 TRAP	   STDPARER IF PARITY
+	 MOVE	   RECCNTR  TO DARECNO
+	 ADD	   "1"	    TO DARECNO
+. 
+	 WRITE	   DAFILE,SEQ3;INVDTKEY:
+		   DTLSTAT:	     TEMPORARY STATUS CODE
+		   MULTIDSC:	    PART DESCRIPTION
+		   INVCKEGS:	    QTY	ORDERED
+		   INVPCSKG:	  QTY BACKORDERED
+		   PCSSOLD:	  TOTAL	PIECES SHIPPED
+		   LNDOLS:	    SELLING PRICE
+		   LINECOST:	    EXTENSION PRICE		    5.2
+		   UOM:		    UNIT OF MEASURE
+		   PRODCODE:	     PRODUCT CODE
+		   FILLER:
+		   FILLER2
+. 
+. NOW CLEAR ALL	NECESSARY FIELDS
+. 
+	 MOVE	   "0" TO LINECOST
+PTDTLRTN RETURN
+....................................................................
+. 
+COMP99	 COMPARE   "99"	 TO  INVLINES
+	 GOTO	   NINENINE  IF	 EQUAL	     (END THIS INVOICE...NOW!)
+	 GOTO	   LOOP01
+. 
+DETIOERR BEEP
+	 DISPLAY   *ES,*P01:12,"WRITE ERROR ON APP INVOICE DETAIL FILE":
+		       *P01:14,"PROGRAM	ABORTING",*W5
+	 BEEP
+	 GOTO	   INDXIT
+. 
+DADTLIO	 BEEP
+	 DISPLAY   *ES,*P01:12,"WRITE ERROR ON RECORD ",DARECNO:
+			       " OF INVOICE DA FILE":
+		       *P01:14,"UNRECOVERABLE ERROR - CALL MICRO SYSTEMS":
+			       " CONSULTANTS!"
+	 GOTO	   DADTLIO
+. 
+PUTSTDS	 GOTO	   COMP99
+. 
+NINENINE BEEP
+	 DISPLAY   *P01:23,*EL,"99 ITEMS KEYED FOR PO##	",NEXTPO:
+		     " I AM CLOSING THIS PURCHASE",*W,*W,*W
+	 BEEP
+	 GOTO	   BIGEOJ
+. 
+NOTFND	 BEEP
+	 DISPLAY   *P01:ROW,*EL
+	 DISPLAY   *P01:ROW,"INVALID PART NUMBER - PLEASE RESUBMIT",*W2
+	 SUBTRACT  "1" FROM ROW
+	 GOTO	   LOOP01
+. 
+*...........................................................
+. END OF JOB SEQUENCE
+.
+BIGEOJ	 TRAPCLR   IO
+	 TRAP	   NOINVOIC  IF	IO
+	 TRAPCLR   FORMAT
+	 TRAP	   STDFMTER  IF	FORMAT
+. 
+. FIRST	WRITE AN END-OF-FILE MARK ON THE BATCH
+. 
+	 ADD	    "01" TO DARECNO
+	 WEOF	   DAFILE,SEQ3
+. 
+. 
+. NOW SHOW THE SUBTOTAL	AND ENTER THE SHIP/HANDLING AMOUNT
+. 
+DSPTOTS	 DISPLAY   *P1:21,*EL,*P50:21,"SUBTOTAL",*P70:21,INVTOTL
+.
+	 KEYIN	   *P1:23,*EL,"TAP ENTER TO PROCEED ",REPLY
+	 DISPLAY   *P1:23,*EL
+	 GOTO	   SHOWTOTS
+. 
+XCRED	 CALL	   GTRCZRO
+	 MOVE	   LIBNET  TO  INVTOTL
+	 MOVE	   INVTOTL TO  IDOLSLFT
+. ....	 CALL	   CALCDATA
+	 SUBTRACT  "1"	      FROM  RECCNTR
+	 MOVE	   RECCNTR    TO    IRECCNTR
+	 MOVE	   RECCNTR    TO    ILIVCNTR
+	 CALL	   PTRCZRO
+.
+	 GOTO	   SHOWTOTS	 (DISPLAY FINAL	INVOICE	TOTALS)
+. 
+. THEN UPDATE RECORD ZERO WITH THE COUNTS PRIOR	TO REVIEW CYCLE
+. 
+GTRCZRO	 MOVE	   "DAREAD"  TO	IOTYPE
+	 READ	   DAFILE,SEQ3;INVKEY:
+				  INVTYPE:
+				  INVCOMP:
+				  INVSTAT:
+				  INVCUST:
+				  INVDATE:
+				  INVTOTL:
+				  INVORDNO:
+				  MOREORDR:
+				  INVSHIP:
+				  INVBLNO:
+				  INVFOB:
+				  FRGTRATE:
+				  INVWGHT:
+				  INVDTPAY:
+				  INVCHECK:
+				  IAMTRCVD:
+				  IDOLSLFT:
+				  INVMESG:
+				  IRECCNTR:
+				  ILIVCNTR
+. 
+	 GOTO	   NOINVOIC  IF	OVER
+	 MOVE	   "H"	TO   IOSW
+	 RETURN
+. 
+. ............................................
+. 
+PTRCZRO	 WRITE	   DAFILE,SEQ3;INVKEY:
+			   INVTYPE:
+			   INVCOMP:
+			   INVSTAT:
+			   INVCUST:
+			   INVDATE:
+			   INVTOTL:
+			   INVORDNO:
+			   MOREORDR:
+			   INVSHIP:
+			   INVBLNO:
+			   INVFOB:
+			   FRGTRATE:
+			   INVWGHT:
+			   INVDTPAY:
+			   INVCHECK:
+			   IAMTRCVD:
+			   IDOLSLFT:
+			   INVMESG:
+			   IRECCNTR:
+			   ILIVCNTR
+	 RETURN
+. .....................................................
+. 
+SHOWTOTS DISPLAY   *ES,*P01:12,"P.O. NUMBER ",INVKEY," TOTAL PURCHASE":
+			       ": $",TOTDOLS
+CHECKIT	 MOVE	   " ",REPLY
+	 BEEP
+	 KEYIN	   *P01:16,*EL,"IS THIS	P.O. CORRECT ?	(Y/N) ",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   UPDTSEQ IF EQUAL	 (NOW UPDATE ALL FILES!	7/81)
+. 
+	 CMATCH	   "N",REPLY
+	 GOTO	   UPDTSEQ IF EQUAL
+. 
+	 BEEP
+	 GOTO	   CHECKIT
+. 
+. THE FOLLOWING	ROUTINE	IS USED	TO RETRIEVE ALL	LINE ITEMS
+. ON THIS INVOICE AND TO MODIFY	THE STATUS CODE	FROM "X" TO "O"
+. 
+UPDTSEQ	 TRAPCLR   IO		     (NOW ADD THE UPDATE LOGIC)
+. 
+. WHAT MUST NOW	BE DONE	IS THE FOLLOWING:
+. 
+. 1.  WRITE THE	HEADER RECORD TO THE INVOICE MASTER FILE
+. 2.  LOOP THROUGH ALL THE DETAIL RECORDS, SELECTING ONLY THOSE
+.     WHICH HAVE A STATUS CODE OF "X", AND UPDATE THE INVENTORY	MASTER
+.     BY DECREMENTING THE ON-HAND QTY ACCORDING	TO THE PASSCOMP,
+.     THEN WRITE A RECORD ISAM TO THE INVOICE DETAIL FILE
+. 
+	 INCLUDE   POUPDSQ.TXT
+.
+WHERENOW  
+	 CLOSE	   DAFILE
+	 PREPARE   DAFILE,DANAME
+	 CLOSE	   DAFILE      (THIS DELETES THE FILE)
+. 
+CLEARMOV
+	 MOVE	   " " TO MD1
+	 MOVE	   " " TO MD2
+	 MOVE	   " " TO MD3
+	 MOVE	   " " TO MD4
+	 MOVE	   " " TO MD5
+	 MOVE	   " " TO MD6
+	 MOVE	   " " TO MD7
+	 MOVE	   " " TO MD8
+	 MOVE	   " " TO MD9
+	 MOVE	   " " TO MD10
+.......................................................................
+. 
+	 KEYIN	   *P01:16,*EF,"DO YOU HAVE ANY	MORE PURCHASES TO ADD":
+			       " AT THIS TIME ?	 (Y)es or (N)o	",REPLY
+	 CMATCH	   "Y" TO REPLY
+	 GOTO	   CHAINHDR IF EQUAL
+	 CMATCH	   "N" TO REPLY
+	 GOTO	   TAPTERM IF EQUAL
+.
+	BEEP
+	GOTO	   CLEARMOV
+.
+....TAPTERM  DISPLAY   *ES,*P01:12,"TOTAL PURCHASE AMOUNT:",REPNET
+...	   BEEP
+...	   KEYIN     *P01:20,"PRESS ENTER TO TERMINATE THIS PROGRAM",KREPLY
+. 
+TAPTERM	
+............... RELEASE
+	 SPLCLOSE
+.
+. 
+. ............................................................
+	 CHAIN	   "NEWMASTR"
+. 
+CHAINHDR PREPARE   DAFILE,DANAME (NOW PREPARE THE DATA FILE AGAIN)
+	 PRINT	   *F,"	"
+	 GOTO	   WHATKIND	 (GO BACK TO THE INVOICE HEADER	ENTRY)
+.  
+. 
+NOINVOIC BEEP
+	 DISPLAY   *ES,*P01:12,"DISK IO	ERROR ON ORDER TOTAL UPDATE":
+		       *N,"SERIOUS PROBLEM, CALL BOB BACHARACH,	MSC":
+		       *N,"803-366-3250",*W,*W,*W
+ 
+	 GOTO	   NOINVOIC
+. 
+.	 INCLUDE   STDIOERR.TXT
+. 
+.	 INCLUDE   STDFMTER.TXT
+. 
+.	 INCLUDE   STDRANGE.TXT
+. 
+.	 INCLUDE   STDPARER.TXT
+. 
+	 STOP
+ 
+STDIOERR STOP
+STDFMTER STOP
+STDRANGE STOP
+ 
+STDPARER 
+	 GOTO  STDIOERR
+.   QUOTATION SYSTEM - ENTRY AND PRINT OF QUOTATIONS
+.   QUOTNTRY.DBS     WRITTEN  OCTOBER 1999, R. BACHARACH
+. 
+	 INCLUDE   COMMON.TXT
+. 
+PASSCUST DIM	   30
+INVCNUMB DIM	    5
+PASSDT6	 DIM	   6
+PASSACCT DIM	   4
+PASSCOMP DIM	   1
+. 
+NINVCNO	 DIM	   5
+NEWFKEY	 DIM	   5
+RESULT	 FORM	   2
+DASH20	 INIT	   "--------------------"
+DDASH20	 INIT	   "===================="
+PURCHBY	 DIM	   20
+VIA	 DIM	   15
+PRTPONO	 FORM	   8
+.
+REPLY	 DIM	   1
+.FIELD	 TYPE	   LENGTH    FROM-TO   DESCRIPTION
+.-----	 ----	   ------    -------   -----------
+WORK01	 DIM	    1
+WORK02	 DIM	    2
+WORK03	 DIM	    3
+WORK04	 DIM	    4
+WORK08	 DIM	    8
+WORK10	 DIM	   10
+WORK09	 DIM	   9
+FIELD09	 DIM	   7
+NFIELD09 FORM	   7
+.
+DATE8	 DIM	   8		8 DIGIT	DATE WORK FIELD
+MM	 DIM	   2
+DD	 DIM	   2
+YY	 DIM	   2
+XMM	 DIM	   2
+XDD	 DIM	   2
+XYY	 DIM	   2
+FORM5	 FORM	   5
+. 
+DTYPE	 DIM	   8
+DSTAT	 DIM	   10
+INDX	 FORM	   2
+STARTKEY DIM	   5
+PP	 DIM	   1
+PC	 DIM	   1
+LINES	 FORM	   2
+PTERMS	 DIM	   18
+HDRSW	 DIM	   1
+PAGES	 FORM	   2
+. 
+	 INCLUDE   PART.TXT
+. 
+. CONTROL FILE AREA
+. 
+	 INCLUDE   CONTFILE.TXT
+. 
+NFIELD01 FORM	    4		       (NUMERIC	WORK FIELD)
+FIELD01	 DIM	    4
+. 
+	 INCLUDE   SPLOPNFD.TXT
+
+NFLD01	 FORM	   9
+FLD01	 DIM	   9
+. 
+MULTIFLG DIM	   1
+MULTIROW FORM	   2
+MULTICNT FORM	   2
+MULTIDSC DIM	   35
+MD1	 DIM	   35
+MD2	 DIM	   35
+MD3	 DIM	   35
+MD4	 DIM	   35
+MD5	 DIM	   35
+MD6	 DIM	   35
+MD7	 DIM	   35
+MD8	 DIM	   35
+MD9	 DIM	   35
+MD10	 DIM	   35
+EXTRA	 INIT	   "XXXXXXXXXXXXXXXXXXX"
+COMPLETE DIM	   1
+UOM	 DIM	   2
+PRODCODE DIM	   2
+SHIPNAME DIM	   30
+SHIPADDR DIM	   25
+SHIPYADR DIM	   25
+SHIPADR2 DIM	   25
+SHIPCITY DIM	   18
+SHIPSTAT DIM	   2
+SHIPZIP	 DIM	   5
+COMPLET	 DIM	   1
+. 
+NORMTERM INIT	   "2% 15 NET 30"
+NEWTERM	 DIM	   15
+. 
+	 INCLUDE   CUSTMAST.TXT
+DIMZIP	 DIM	   5
+.
+CLOSESW	 INIT	   " "
+. 
+PORTXX	 DIM	   12
+. 
+ADDKEY	 FORM	   8
+NEXTPO	 DIM	   8
+APP	 INIT	   "APP	    "
+DIM8	 DIM	   8
+ 
+.	
+.  WORK	 AREAS FOR INVOICE HEADER CREATION/WRITE
+. 
+	 INCLUDE   RCVBLES.TXT
+. 
+SAVE	 DIM	     10
+TOTDOLS	 FORM	     6.2
+FRGHT	 FORM	     2.2
+. 
+OLDDET	 DIM	   1
+IOSW	 DIM	   1
+LIBNET	 FORM	   7.2
+REPNET	 FORM	   7.2
+. 
++...........................................................
+. 
+DATE2X	 DIM	   2
+DATE2N	 FORM	   2
+. 
+. 
+INVCKEGS FORM	   7	 (ORDER	QTY)
+PCSSOLD	 FORM	   7	 (SHIPPED QTY)
+INVPCSKG FORM	   7	 (BACKORDER QTY)
+. 
+BUILDPT	 DIM	   7
+. 
+. RECORD ASSEMBLY AREA
+. 
+INVCNO	 DIM	   5		       INVC NUMBER
+INVCLINE DIM	   2		       INVC LINE NUMBER	SUFFIX FOR INDEXING
+. 
+INVLINES FORM	   "00"
+IRECCNTR FORM	   6
+DTLSTAT	 DIM	   1
+ILIVCNTR FORM	   3
+. 
+ROW	 FORM	   2		    USED TO ROLL DOWN THE KEYIN	STMT
+. 
+NFIELD04 FORM	    5.2		       (NUMERIC	WORK FIELD)
+FIELD04	 DIM	    8	      11- 18   PRICE LN	1		  5.2
+NFIELD03 FORM	    3
+FIELD03	 DIM	    3
+NFIELD02 FORM	    4
+FIELD02	 DIM	    4
+. 
+. EXTENSION CALCULATE WORK/DISPLAY AREA
+. 
+LNDOLS	 FORM	   5.2
+KEGQTY	 FORM	   9
+LINECOST FORM	   6.2
+KGSAVAIL FORM	   6
+CRAPMSG	 DIM	   18
+CALCFLD	 FORM	   8.3
+OLDFRGT	 FORM	   5.2
+. 
+FILLER	 INIT	   "........./........./........./........"
+FILLER2	 INIT	   "..............."
+.
+FORM3	 FORM	   3
+IPNSTDSX DIM	   6
+IPNSTDSN FORM	   6
+NONSTDSW DIM	   1
+SCANSW	 DIM	   1
+PARTUPSW DIM	   1
+. 
+KREPLY	 DIM	   1
+. 
+CHKPASS	 DIM	   5
+.  
+WEIGHT	 FORM	   6
+HDRCHGSW DIM	   1
+INVDTKEY DIM	   7
+. 
+OLDXTEND FORM	   6.2
+. 
+. 
+CALCNET	 FORM	   6.2
+FRTALLOW FORM	   5.2
+. 
+. NEW DIRECT-ACCESS FILE ADDED HERE TO ALLOW WRITING THE ENTIRE	INVOICE
+. TO ONE FILE FOR BALANCING AND	REVIEW/CORRECTION MODE
+. 
+TIMEDIM	 DIM	   8
+DAFILE	 FILE	   FIX=128,UNCOMPRESSED
+DANAME	 INIT	   "F:\DATA\QUOTEXX.TXT"
+.
+PONUMBFL IFILE	   KEYL=8,UNCOMPRESSED
+PONAME	 INIT	   "F:\DATA\NEXTQUOT.ISI"
+BUYER	 DIM	   25
+. 
+PFILE	 PFILE			  (SPOOL FILE)
+.
+DARECNO	 FORM	   "  -1"
+REC0	 FORM	   "0000"
+REC1	 FORM	   "0001"
+REC2	 FORM	   "0002"
+RECZERO	 FORM	   "0000"
+RECCNTR	 FORM	   4
+RECLIMIT FORM	   "0099"
+CUSTN	 FORM	   4
+SPECMSG	 DIM	   80
+MSGFLAG	 DIM	   1
+PORTX	 DIM	   2
+SPECSW	 DIM	   1
+TIME	 INIT	   "HH/MM/SS"
+. 
+SEQ	 FORM	   "-1"
+SEQ3	 FORM	   "-3"
+. 
++........................................................................
+. 
+START	 DISPLAY   *ES,*P01:12,*HON,"Q U O T A T I O N	ENTRY PROGRAM":
+		   *HOFF:
+		       *P01:14,"IF YOU HAVE COME HERE ERRONEOUSLY FROM THE ":
+			       "SYSTEM MENU PROGRAMS":
+		       *P01:15,"AND DO	N O T  HAVE ANY	 INVOICES TO ":
+			       "ENTER........":
+		       *P01:17,"YOU MAY	TERMINATE THIS PROGRAM BY PRESSING ":
+			       "THE   F5   KEY"
+	 KEYIN	   *P01:20,*HON,"KEY	 F5	TO  TERMINATE":
+		   *P01:21,"KEY	    ENTER  TO  ENTER QUOTE ",REPLY:
+		   *HOFF
+. 
+	 GOTO	   MAINLINE  IF	 NOT  F5
+. 
+	 BEEP
+INDXIT	 DISPLAY   *HOFF,*ES
+	 BEEP
+	 CHAIN	   "ANSWER"
+.
+MAINLINE MOVE	   " " TO REPLY
+.
+.
+	 KEYIN	   *ES,*P1:4,*HON,"QUOTATION PROCESSING":
+		       *P1:6,"PRESS   (F3)   WHEN READY	",REPLY,*HOFF
+	 GOTO	   MAINLINE IF NOT F3
+. 
+MAINLIN1 DISPLAY   *HOFF,*ES
+.
+..	 INCLUDE   SPLOPNPR.TXT
+.
+	 MOVE	   " ",REPLY
+	 MOVE	   " ",MSGFLAG
+	 MOVE	   " ",SPECMSG
+.
+	 MOVE	   TODAY TO MM
+	 MOVE	   TODAY TO XMM
+	 RESET	   TODAY TO 4
+	 MOVE	   TODAY TO DD
+	 MOVE	   TODAY TO XDD
+	 RESET	   TODAY TO 7
+	 MOVE	   TODAY TO YY
+	 MOVE	   TODAY TO XYY
+	 RESET	   TODAY TO 1
+. 
+. SET UP SIX DIGIT DATE
+. 
+	 MOVE	   TODAY TO INVDATE
+	 MOVE	   INVDATE  TO	PASSDT6	     PASS 6 DIGIT DATE TO DTL PGM
+	 GOTO	   ACCTOPEN
+.
+NOFILE	 DISPLAY   *ES,"FILES NOT ON LINE":
+		   *N,"JOB IS ABORTING"
+	 BEEP
+	 CHAIN	   "ANSWER"	     GO	BACK TO	DISPLAY	INVOICE	MENU
+*...........................................................
+. OPEN ISAM-LOOKUP FILE
+.
+ACCTOPEN TRAPCLR   IO
+. 
+. ........................................................................
+. NOW SET UP TO	EITHER OPEN OR PREPARE A NEW DATA ENTRY	BATCH FILE
+. WHOSE	NAME IS	IN THE FORM OF DAINVC##/TXT:NCLACCTS, WHERE ## IS A
+. REPLACED BY THE PORT NUMBER (HIGH ORDER ZERO FILLED) IN ORDER	TO PERMIT
+. BOTH TERMINALS TO DO DATA ENTRY
+. 
+. ........................................................................
+. 
+.
+PREPDA	 CLOCK	   TIME	 TO  TIMEDIM
+	 CLOCK	   PORT	 TO  PORTXX
+	 TRAPCLR   IO
+	 TRAP	   ENTRYFL IF IO
+	 PREPARE   DAFILE,DANAME
+.
+	 OPEN	   PONUMBFL,PONAME
+ 
+.
+ZERONETS TRAPCLR   IO		     (OKAY NOW LETS GO!)
+	 MOVE	   "A" TO INVCOMP
+	 GOTO	   WHATKIND
+.
+ENTRYFL	 BEEP
+	 DISPLAY   *P1:23,*EL,"UNABLE TO PREPARE PO ENTRY FILE ",*W5
+. 
+MNUCHAIN CHAIN	   "ANSWER"
+. 
+WHATKIND TRAPCLR IO
+*...........................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+.
+DISPLAY	 CLOCK	   TIME	TO TIME
+. 
+	 DISPLAY   *ES,*HON,*P11:1,"Q U	O T A T	I O N	DATA":
+		   " ENTRY":
+		   *HOFF:
+		   *P1:2,"Attn:":
+		   *P1:3,"Customer:":
+		   *P1:4,"Addr1:":
+		   *P1:5,"Addr2:":
+		   *P1:6,"City"
+LOOP	 TRAPCLR   PARITY	(NOP)
+. 
+ORDERFOR MOVE	   "A" TO INVCOMP
+*...........................................................
+. 
+.  SET NORMAL INVOICE CONSTANTS	PRIOR TO DATA ENTRY
+. 
+............................................................
+K01	 MOVE	   "O"	TO  INVSTAT
+	 MOVE	   NORMTERM  TO	 NEWTERM
+	 MOVE	   " "	TO  PTERMS
+	 MOVE	   INVCOMP  TO	PASSCOMP
+	 MOVE	   "I"	TO  INVTYPE
+	 MOVE	   "C"	TO  INVFOB
+	 MOVE	   " "	TO  INVCHECK
+	 MOVE	   " "	TO  INVMESG
+	 CLEAR	   INVORDNO
+	 MOVE	   " "	TO  MOREORDR
+	 MOVE	   "0"	    TO	 INVWGHT
+	 MOVE	   "0"	    TO	 CARTONS
+	 MOVE	   "000000.00"	 TO   INVTOTL
+	 MOVE	   "000000.00"	 TO   IAMTRCVD
+	 MOVE	   "0.00" TO LINEPRC
+	 MOVE	   "0.00" TO LINECOST
+	 MOVE	   "0.00" TO LNDOLS
+	 MOVE	   "C"	    TO	 COMPLET
+	 MOVE	   " " TO PURCHBY
+.....	     MOVE      "UPS" TO	VIA
+. KEYIN	VARIABLES SEQUENCE
+. 
+*...........................................................
+. ACCOUNT ID NUMBER
+. THIS FIELD IS	"BOTH" REQUIRED	& FILL-CONTROLLED
+. FIELD	TYPE IS	NUMERIC
+. FIELD	VALIDATION TYPE	IS ISAM-VERIFICATION
+.
+. 
+K01KA	 MOVE	   " " TO CUSTNAME
+	 MOVE	   " " TO BUYER
+	 MOVE	   " " TO CUSTADDR
+	 MOVE	   " " TO CUSTCITY
+	 MOVE	   " " TO CUSTSTAT
+	 MOVE	   "0" TO CUSTZIP
+	
+K01K	 KEYIN	   *P11:2,*RV,BUYER
+	 DISPLAY   *P11:2,BUYER
+	 MOVE	   BUYER TO PURCHBY
+	 KEYIN	   *P11:3,CUSTNAME
+	 CMATCH	   " " TO CUSTNAME
+	 GOTO	   K01K	IF EOS
+.
+K01A	 KEYIN	   *P11:4,CUSTADDR
+	 KEYIN	   *P11:5,CUSTADR2
+.
+	 DISPLAY   *P11:4,CUSTADDR:
+		   *P11:5,CUSTADR2
+.
+K01B	 KEYIN	   *P11:6,CUSTCITY
+	 DISPLAY   *P11:6,CUSTCITY
+	 KEYIN	   *P32:6,CUSTSTAT
+	 DISPLAY   *P32:6,CUSTSTAT
+	 KEYIN	   *P35:6,DIMZIP
+	 DISPLAY   *P35:6,DIMZIP
+. 
+OKAYCOMP DISPLAY   *P11:3,CUSTNAME:
+		   *P11:4,CUSTADDR:
+		   *P11:5,CUSTADR2:
+		   *P11:6,CUSTCITY,*P32:6,CUSTSTAT,*P35:6,DIMZIP
+.
+GETVIA	 DISPLAY   *P11:7,"SALESREP",*P20:7,VIA
+	 KEYIN	   *P20:7,*RV,VIA
+	 DISPLAY   *P20:7,VIA
+. 
+. NOW ENTER TERMS 
+.
+GETTERMS MOVE	   NORMTERM TO PTERMS
+	 DISPLAY   *P1:22,*EF,"NORMAL TERMS ARE	",*P18:22,PTERMS
+	 KEYIN	   *P18:22,*RV,PTERMS
+	 DISPLAY   *P18:22,PTERMS
+.
+ASKCUST	 KEYIN	   *P01:23,*EL,"ALL DATA CORRECT? (Y/N)	",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   PASSNAME  IF	 EQUAL
+	 CMATCH	   "N",REPLY
+	 GOTO	   K01K	IF EQUAL
+	 BEEP
+	 DISPLAY   *P01:23,*EL
+	 GOTO	   ASKCUST
+. 
+PASSNAME MOVE	   CUSTNAME TO PASSCUST
+.
+K03	 DISPLAY   *P01:23,*EL
+*...........................................................
+. CUSTOMER ORDER NUMBER
+K03K	
+	 CALL	   NEXTPONO 
+*...........................................................
+.     LOGIC CHANGE SEPTEMBER 20, 1999
+.
+COK	 GOTO	   RECYCLE
+. 
+.--------------------------------------------------------------------------
+. 
+NEXTPONO TRAPCLR   PARITY	     (WE ALREADY READ THE CONTROL FILE!)
+. 
+	 FILEPI	   8;PONUMBFL
+. 
+	 READ	   PONUMBFL,APP;DIM8,NEXTPO
+	 MOVE	   NEXTPO  TO ADDKEY
+	 ADD	   "1"	   TO ADDKEY
+	 MOVE	   ADDKEY  TO  NEXTPO
+	 REP	   " 0"	IN NEXTPO
+	 UPDATE	   PONUMBFL;DIM8,NEXTPO
+	 MOVE	   NEXTPO TO PRTPONO
+	 DISPLAY   *P52:2,*HON,"QUOTE##:",PRTPONO,*HOFF
+.
+	 WRITE	   PONUMBFL,NEXTPO;NEXTPO,NEXTPO,CUSTNAME
+	 FILEPI	   0
+	 RETURN
+.	 
+*...........................................................
+. DISK-WRITE SEQUENCE
+.
+W1	 TRAPCLR   IO
+	 MOVE	   "0000"  TO RECCNTR
+	 TRAP	   BADDSK IF IO
+	 MOVE	   INVKEY    TO	  INVCNUMB
+	 MOVE	   CUSTNAME  TO	  PASSCUST
+	 MOVE	   INVTOTL   TO	  IDOLSLFT
+. 
+. CHECK	FOR OVERRIDE ON	SPECIAL	MESSAGE
+. 
+	 CMATCH	   "X",SPECSW
+	 GOTO	   MOVESPEC IF NOT EQUAL
+	 MOVE	   " " TO SPECSW
+	 GOTO	   W1A
+. 
+MOVESPEC MOVE	   SPECMSG   TO	  INVMESG
+. 
+. NOW WRITE TO THE NEW DA FILE FOR BATCH REVIEW/CORRECTION CAPABILITY
+. 
+W1A	 TRAPCLR   IO
+	 TRAPCLR   FORMAT
+	 TRAPCLR   RANGE
+	 TRAPCLR   PARITY
+	 TRAP	   BADDSK IF IO
+	 TRAP	   BUMFMT IF FORMAT
+.
+	 GOTO	   EOJ
+.
+BUMFMT	 BEEP
+	 DISPLAY   *P1:23,"FORMAT ERROR	ON WRITE TO DAFILE"
+	 GOTO	   EOJ
+.
+. 
+BADDSK	 BEEP
+	 DISPLAY   *ES,*P01:01,"BAD WRITE TO DISK, RECORD ZERO ON ":
+			       "INVOICE	DA FILE":
+		       *P01:03,"UNRECOVERABLE ERROR...CALL MICRO ":
+			       "SYSTEMS	CONSULTANTS",*W2
+	 GOTO	   BADDSK
+. 
+. ISAM DUPLICATE KEY TRAP
+.
+DUPKEY	 BEEP
+	 DISPLAY   *P01:23,"KEY	",INVKEY," ALREADY EXISTS! ":
+			   "ASSIGN A NEW ONE!",*W,*W,*W
+	 GOTO	   DUPKEY
+*...........................................................
+. END OF JOB SEQUENCE
+.
+EOJ	
+. 
+	 CMATCH	   "S"	TO  INVTYPE
+	 GOTO	   EOJ2	IF  NOT	EQUAL	(ITS NORMAL MERCHANDISE	INVOICE)
+	 GOTO	   UPDTSEQ
+. 
+. EOJ2 IS ONLY FOR NEW REGULAR MERCHANDISE PO'S
+. 
+EOJ2
+	 GOTO	   CHAINDET
+. 
+EOJOUT	 RELEASE
+	 CHAIN	   "ANSWER"
+.
+	 STOP
+.
+. FILE OPENING SEQUENCE
+CHAINDET MOVE	   " "	TO  KREPLY
+	 MOVE	   "0001" TO RECCNTR
+	 MOVE	   INVCNUMB TO CHKPASS
+	 RESET	   CHKPASS TO 5
+	 CMATCH	   " " TO CHKPASS
+	 GOTO	   CONTIN IF NOT EOS
+. 
+BADINVC	 BEEP
+	 DISPLAY   *ES,*P01:12,"SORRY..YOU HAVE	NOT GIVEN ME A INVOICE NUMBER":
+		       *P01:14,"  I CANNOT ALLOW YOU TO	CONTINUE",*W,*W
+	 BEEP
+	 GOTO	   MAINLINE
+. 
+CONTIN	 RESET	   CHKPASS
+	 TYPE	   CHKPASS
+	 GOTO	   BADINVC IF NOT EQUAL
+	 GOTO	   HSKPG1
+. 
+HSKPG1	 TRAPCLR   IO
+	 MOVE	   "00"	TO INVLINES
+	 MOVE	   INVCNUMB TO INVKEY
+	 MOVE	   INVCNUMB TO INVCNO
+	 MOVE	   PASSDT6  TO	DATE2X
+TYPIT	 TYPE	   DATE2X
+	 GOTO	   DATEOK  IF  EQUAL
+	 BEEP
+KEYIT	 KEYIN	   *ES,*P01:12,"ENTER THE MONTH	AS TWO DIGITS,	SUCH AS	 09 ":
+		   "FOR	SEPT. ",*DE,DATE2X
+	 GOTO	   TYPIT
+. 
+DATEOK	 MOVE	   DATE2X  TO  DATE2N
+	 COMPARE   "0"	   TO  DATE2N
+	 GOTO	   KEYIT   IF  EQUAL
+	 GOTO	   KEYIT   IF  LESS
+	 COMPARE   "13"	   TO  DATE2N
+	 GOTO	   KEYIT   IF  NOT  LESS
+. 
+.  GOT A GOOD MONTH THERE
+. 
+	 MOVE	   DATE2N  TO  USAGINDX
+. 
+. USAGE	IS NOW SET UP FOR UPDATE
+. 
+*...........................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+.
+RECYCLE	 MOVE	   "8"	TO ROW
+	 DISPLAY   *P01:08,*EF:
+		   *HON:
+		   "QTY	ORD		       PART NUMBER		":
+		   "	  PRICE	 UOM EXTENSION	",*HOFF
+LOOP01	KEYIN	  *P01:23,*EL,*HON,"Press ENTER	to add data, F5	if ":
+			  "done	",REPLY,*HOFF
+	 GOTO	   BIGEOJ  IF  F5
+	 CMATCH	   " " TO REPLY
+	 GOTO	   LOOP01 IF NOT EOS
+	 DISPLAY   *P01:23,*EL
+*...........................................................
+. KEYIN	VARIABLES SEQUENCE
+	 ADD	   "01"	TO ROW
+	 COMPARE   "21"	TO ROW
+	 GOTO	   RECYCLE IF NOT LESS
+	 DISPLAY   *P01:ROW,"_______":
+			    *P15:ROW,"_________________________	  "
+			  
+*...........................................................
+. PART NO. 1
+. THIS FIELD IS	"BOTH" REQUIRED	& FILL-CONTROLLED
+. FIELD	TYPE IS	NUMERIC
+.
+	 MOVE	   "0" TO LNDOLS
+	 MOVE	   "0" TO KEGQTY
+	 MOVE	   "0" TO PCSSOLD
+	 MOVE	   "0" TO INVCKEGS
+	 MOVE	   "0" TO INVPCSKG
+	 MOVE	   "0" TO LINECOST
+*...........................................................
+. QUANTITY ORDERED	     4/23/83
+. FIELD	TYPE IS	NUMERIC
+.
+B03	 MOVE	   FIELD03 TO SAVE
+B03K	 KEYIN	   *P01:ROW,"_______  ":
+		   *P01:ROW,WORK09
+. 
+B03A	 CLEAR	   FIELD09
+	 MOVE	   WORK09 TO FIELD09
+B03B	 MOVE	   "0" TO NFIELD09
+	 TYPE	   FIELD09     (NUMERIC	FIELD)
+	 GOTO	   B03K	IF NOT EQUAL
+. 
+	 MOVE	   FIELD09 TO NFIELD09
+B03C	 MOVE	   NFIELD09 TO FIELD09
+	 DISPLAY   *P01:ROW,FIELD09
+. 
+	 MOVE	   NFIELD09 TO INVCKEGS
+	 MOVE	   INVCKEGS TO PCSSOLD
+. 
+. 
+	 GOTO	   GETPARTZ
+. ........................................
+. 
+. NOTE USE INVCKEGS FOR	QUANTITY ORDERED
+.      USE PCSSOLD  FOR	QUANTITY SHIPPED
+.      USE INVPCSKG FOR	QUANTITY BACKORDERED
+. 
+. 
+PCSKEG	 KEYIN	   *P10:ROW,"_______  ",*P10:ROW,PCSSOLD
+. 
+	 DISPLAY   *P10:ROW,PCSSOLD
+. 
+	 MOVE	   INVCKEGS TO KEGQTY
+	 SUBTRACT  PCSSOLD  FROM  KEGQTY
+	 MOVE	   KEGQTY   TO	  INVPCSKG
+	 DISPLAY   *P19:ROW,INVPCSKG
+	 GOTO	   GETPARTZ
+. 
+. 
+AHA	 BEEP
+	 GOTO	   AHA
+. 
+*.........................................................
+GETPARTZ MOVE	   "0" TO MULTICNT
+	 MOVE	   " " TO MULTIFLG
+	 DISPLAY   *P1:23,*HON,"PRESS F1 FOR MULTI-LINE	PART NUMBER":
+		   *HOFF
+	 KEYIN	   *P15:ROW,"___________________________________":
+		   *P15:ROW,MULTIDSC
+	 DISPLAY   *P15:ROW,MULTIDSC
+	 MOVE	   MULTIDSC TO MD1
+	 MOVE	   "1" TO MULTICNT
+	 GOTO	   MULTISET IF F1    (IF F1..THERE IS MULTI-LINE DESCRIPTION)
+.
+	 GOTO	   B04
+. 
+*..........................................................
+. 
+MULTISET MOVE	   "X" TO MULTIFLG
+	 BEEP
+	 DISPLAY   *P1:23,*EL
+	 DISPLAY   *P1:23,*HON,"MULTI-LINE (MAX	10) PART NUMBER",*W2,*HOFF
+	 GOTO	   B04
+...........................................................
+. 
+MULTIDSC MOVE	   ROW TO MULTIROW
+MULTILP	 ADD	   "1" TO MULTIROW
+	 COMPARE   "22"	  TO  MULTIROW
+	 CALL	   RESETROW   IF  NOT LESS
+	 KEYIN	   *P15:MULTIROW,"___________________________________":
+		   *P15:MULTIROW,MULTIDSC
+	 DISPLAY   *P15:MULTIROW,MULTIDSC
+	 RESET	   MULTIDSC
+	 GOTO	   B04 IF EOS	    (IF	NOTHING	ENTERED...FORGET IT!)
+	 ADD	   "1" TO MULTICNT
+	 STORE	   MULTIDSC INTO MULTICNT OF MD1,MD2,MD3,MD4,MD5:
+					     MD6,MD7,MD8,MD9,MD10
+. 
+	 COMPARE   "10"	TO MULTICNT
+	 GOTO	   MULTIRTN IF EQUAL
+. 
+	 GOTO	   MULTILP IF F1
+. 
+MULTIRTN MOVE	   MULTIROW  TO	 ROW	(LET PROGRAM KNOW!)
+	 RETURN			    (NO	MORE!)
+. 
+..............................................................
+. 
+RESETROW MOVE	   "10"	TO MULTIROW
+RESETLP	 ADD	   "1"	TO MULTIROW
+	 COMPARE   "21"	TO MULTIROW
+      	 GOTO	   RESETOUT IF EQUAL
+	 DISPLAY   *P01:MULTIROW,*EL
+	 GOTO	   RESETLP
+RESETOUT MOVE	   "12"	TO MULTIROW
+	 MOVE	   "12"	TO ROW
+	 RETURN
+. 
+. 
+EXTEND	 RETURN
+WRTHDRIS RETURN
+. 
+. FALLTHRU IS NO MORE DESCRIPTIONS, SO GOTO B04
+*...........................................................
+. PRICE	LN 1
+. THIS FIELD IS	REQUIRED
+. FIELD	TYPE IS	NUMERIC
+. 
+B04	 MOVE	   FIELD04 TO SAVE
+	 GOTO	   B04K
+. 
+.	 KEYIN	   *P54:ROW,"__",*P54:ROW,PRODCODE
+.	 DISPLAY   *P54:ROW,PRODCODE
+.
+B04K	 KEYIN	   *P57:ROW,"________":
+		   *P57:ROW,WORK08
+	 CMATCH	   "<" TO WORK08
+	 GOTO	   B04K	IF EOS
+	 CMATCH	   ">" TO WORK08
+	 GOTO	   B04A	IF NOT EQUAL
+	 MOVE	   SAVE	TO FIELD04
+	 DISPLAY   *P57:ROW,FIELD04
+	 GOTO	   B04K
+B04A	 CLEAR	   FIELD04
+	 MOVE	   WORK08 TO FIELD04
+B04B	 MOVE	   "0" TO NFIELD04
+	 TYPE	   FIELD04     (NUMERIC	FIELD)
+	 GOTO	   B04K	IF NOT EQUAL
+	 MOVE	   FIELD04 TO NFIELD04
+B04C	 MOVE	   NFIELD04 TO FIELD04
+	 DISPLAY   *P57:ROW,FIELD04
+	 MOVE	   NFIELD04 TO LNDOLS	  (SELLING PRICE/UOM)
+. 
+. GET THE UNIT OF MEASURE
+. 
+UOM	 MOVE	   "  "	TO  UOM
+	 KEYIN	   *P66:ROW,UOM
+. 
+	 MATCH	   "GR"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "EA"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "M "	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "LT"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "LB"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "C "	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "FT"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "PK"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "BX"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "RD"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 MATCH	   "NC"	TO UOM
+	 GOTO	   DUOM	IF EQUAL
+	 BEEP
+	 DISPLAY   *P66:ROW,"  "
+	 GOTO	   UOM
+. 
+DUOM	 DISPLAY   *P66:ROW,UOM
+. 
+. 
+CHK100X	 MATCH	   "C "	TO UOM
+	 GOTO	   CHK1000 IF NOT EQUAL
+	 MOVE	   PCSSOLD TO CALCFLD
+	 DIVIDE	   "100" INTO CALCFLD
+	 MULT	   LNDOLS BY CALCFLD
+	 MOVE	   CALCFLD TO LINECOST
+	 GOTO	   DSPCOSTX
+. 
+. 
+CHK1000	 MATCH	   "M "	TO UOM
+	 GOTO	   EACHX   IF NOT EQUAL
+	 MOVE	   PCSSOLD TO CALCFLD
+	 DIVIDE	   "1000"  INTO	CALCFLD
+	 MULT	   LNDOLS  BY	CALCFLD
+	 MOVE	   CALCFLD TO	LINECOST
+	 GOTO	   DSPCOSTX
+. 
+EACHX	 MOVE	   PCSSOLD TO LINECOST
+. 
+EACHXX	 MULT	   LNDOLS BY LINECOST
+. 
+DSPCOSTX DISPLAY   *P70:ROW,LINECOST
+. 
+. FIRST	CHECK IF THE LINE IS OKAY!
+. 
+CHKLINE	 BEEP
+	 MOVE	   " " TO REPLY
+	 KEYIN	   *P1:22,*EL,*HON,"IS DATA CORRECT ? (Y/N) ",REPLY,*HOFF
+	 DISPLAY   *P1:22,*EF
+	 CMATCH	   "Y",REPLY
+	 GOTO	   CONTXX IF EQUAL
+. 
+	 CMATCH	   "N",REPLY
+	 GOTO	   LNRESET IF EQUAL
+	 BEEP
+	 GOTO	   CHKLINE
+. 
+LNRESET	 DISPLAY   *P1:ROW,*EL
+	 SUBTRACT  "1" FROM ROW
+	 GOTO	   LOOP01
+. 
+CONTXX	 ADD	   LINECOST TO TOTDOLS
+	 ADD	   LINECOST TO INVTOTL
+. 
+CHKMULTI CMATCH	   "X",MULTIFLG
+	 CALL	   MULTIDSC IF EQUAL	(GET THE EXTRA LINES)
+. 
+. NOTE IF EXTRA	DESCRIPTIVE LINES EXIST, THEN WRITE CONTINUATION RECORDS
+.      FOR DESCRIPTIVE DATA
+. 
+*...........................................................
+. 
+. DISK-WRITE SEQUENCE
+.
+LINEINCR ADD	   "01"	  TO INVLINES
+	 MOVE	   INVLINES  TO	 RECCNTR
+	 MOVE	   INVCNO    TO	 INVDTKEY
+	 RESET	   INVDTKEY  TO	 5
+	 APPEND	   INVLINES  TO	 INVDTKEY
+	 RESET	   INVDTKEY
+	 REP	   " 0"	IN INVDTKEY
+	 MOVE	   "X"	TO  DTLSTAT
+	 MOVE	   MD1	TO  MULTIDSC
+	 CALL	   PTDTLBK
+. 
+. NOW CHECK FOR	MULTI-DESCRIPTIVE LINES	AND WRITE MULTIPLE RECORDS NOW!
+. 
+	 CMATCH	   "X",MULTIFLG
+	 GOTO	   COMP99 IF NOT EQUAL
+. 
+. FALLTHRU MEANS WRITE CONTINUATION RECORDS
+. 
+. FIRST	ZERO OUT THE QTY AND PRICE FIELDS
+. 
+	 MOVE	   "0" TO INVCKEGS
+	 MOVE	   "0" TO INVPCSKG
+	 MOVE	   "0" TO PCSSOLD
+	 MOVE	   ".00"  TO LNDOLS
+	 MOVE	   ".00"  TO LINECOST
+. 
+. STORE	LOOP
+. 
+	 MOVE	   "1"	TO  INDX
+. 
+STORLOOP ADD	   "1"	TO  INDX    (STARTS AT MD2, INDX VALUE=2)
+	 COMPARE   INDX	TO  MULTICNT
+	 GOTO	   COMP99 IF  LESS
+. 
+	 LOAD	   MULTIDSC FROM INDX OF MD1,MD2,MD3,MD4,MD5,MD6:
+					 MD7,MD8,MD9,MD10
+. 
+	 ADD	   "01"	TO INVLINES
+	 MOVE	   INVLINES TO RECCNTR
+	 RESET	   INVDTKEY TO 5
+	 APPEND	   INVLINES TO INVDTKEY
+	 RESET	   INVDTKEY TO 1
+	 REP	   " 0"	IN INVDTKEY
+	 MOVE	   "*"	TO DTLSTAT
+	 CALL	   PTDTLBK
+	 GOTO	   STORLOOP
+. 
+............................................
+PTDTLBK	 TRAPCLR   IO
+	 TRAPCLR   PARITY
+	 TRAPCLR   FORMAT
+	 TRAPCLR   RANGE
+	 MOVE	   "WRITE" TO IOTYPE
+	 MOVE	   DANAME  TO IOERFILE
+	 TRAP	   STDIOERR IF IO
+	 TRAP	   STDFMTER IF FORMAT
+	 TRAP	   STDRANGE IF RANGE
+	 TRAP	   STDPARER IF PARITY
+	 MOVE	   RECCNTR  TO DARECNO
+	 ADD	   "1"	    TO DARECNO
+. 
+	 WRITE	   DAFILE,SEQ3;INVDTKEY:
+		   DTLSTAT:	     TEMPORARY STATUS CODE
+		   MULTIDSC:	    PART DESCRIPTION
+		   INVCKEGS:	    QTY	ORDERED
+		   INVPCSKG:	  QTY BACKORDERED
+		   PCSSOLD:	  TOTAL	PIECES SHIPPED
+		   LNDOLS:	    SELLING PRICE
+		   LINECOST:	    EXTENSION PRICE		    5.2
+		   UOM:		    UNIT OF MEASURE
+		   PRODCODE:	     PRODUCT CODE
+		   FILLER:
+		   FILLER2
+. 
+. NOW CLEAR ALL	NECESSARY FIELDS
+. 
+	 MOVE	   "0" TO LINECOST
+PTDTLRTN RETURN
+....................................................................
+. 
+COMP99	 COMPARE   "99"	 TO  INVLINES
+	 GOTO	   NINENINE  IF	 EQUAL	     (END THIS INVOICE...NOW!)
+	 GOTO	   LOOP01
+. 
+DETIOERR BEEP
+	 DISPLAY   *ES,*P01:12,"WRITE ERROR ON APP INVOICE DETAIL FILE":
+		       *P01:14,"PROGRAM	ABORTING",*W5
+	 BEEP
+	 GOTO	   INDXIT
+. 
+DADTLIO	 BEEP
+	 DISPLAY   *ES,*P01:12,"WRITE ERROR ON RECORD ",DARECNO:
+			       " OF INVOICE DA FILE":
+		       *P01:14,"UNRECOVERABLE ERROR - CALL MICRO SYSTEMS":
+			       " CONSULTANTS!"
+	 GOTO	   DADTLIO
+. 
+PUTSTDS	 GOTO	   COMP99
+. 
+NINENINE BEEP
+	 DISPLAY   *P01:23,*EL,"99 ITEMS KEYED FOR PO##	",NEXTPO:
+		     " I AM CLOSING THIS PURCHASE",*W,*W,*W
+	 BEEP
+	 GOTO	   BIGEOJ
+. 
+NOTFND	 BEEP
+	 DISPLAY   *P01:ROW,*EL
+	 DISPLAY   *P01:ROW,"INVALID PART NUMBER - PLEASE RESUBMIT",*W2
+	 SUBTRACT  "1" FROM ROW
+	 GOTO	   LOOP01
+. 
+*...........................................................
+. END OF JOB SEQUENCE
+.
+BIGEOJ	 TRAPCLR   IO
+	 TRAP	   NOINVOIC  IF	IO
+	 TRAPCLR   FORMAT
+	 TRAP	   STDFMTER  IF	FORMAT
+. 
+. FIRST	WRITE AN END-OF-FILE MARK ON THE BATCH
+. 
+	 ADD	    "01" TO DARECNO
+	 WEOF	   DAFILE,SEQ3
+. 
+. 
+. NOW SHOW THE SUBTOTAL	AND ENTER THE SHIP/HANDLING AMOUNT
+. 
+DSPTOTS	 DISPLAY   *P1:21,*EL,*P50:21,"SUBTOTAL",*P70:21,INVTOTL
+.
+	 KEYIN	   *P1:23,*EL,"TAP ENTER TO PROCEED ",REPLY
+	 DISPLAY   *P1:23,*EL
+	 GOTO	   SHOWTOTS
+. 
+XCRED	 CALL	   GTRCZRO
+	 MOVE	   LIBNET  TO  INVTOTL
+	 MOVE	   INVTOTL TO  IDOLSLFT
+. ....	 CALL	   CALCDATA
+	 SUBTRACT  "1"	      FROM  RECCNTR
+	 MOVE	   RECCNTR    TO    IRECCNTR
+	 MOVE	   RECCNTR    TO    ILIVCNTR
+	 CALL	   PTRCZRO
+.
+	 GOTO	   SHOWTOTS	 (DISPLAY FINAL	INVOICE	TOTALS)
+. 
+. THEN UPDATE RECORD ZERO WITH THE COUNTS PRIOR	TO REVIEW CYCLE
+. 
+GTRCZRO	 MOVE	   "DAREAD"  TO	IOTYPE
+	 READ	   DAFILE,SEQ3;INVKEY:
+				  INVTYPE:
+				  INVCOMP:
+				  INVSTAT:
+				  INVCUST:
+				  INVDATE:
+				  INVTOTL:
+				  INVORDNO:
+				  MOREORDR:
+				  INVSHIP:
+				  INVBLNO:
+				  INVFOB:
+				  FRGTRATE:
+				  INVWGHT:
+				  INVDTPAY:
+				  INVCHECK:
+				  IAMTRCVD:
+				  IDOLSLFT:
+				  INVMESG:
+				  IRECCNTR:
+				  ILIVCNTR
+. 
+	 GOTO	   NOINVOIC  IF	OVER
+	 MOVE	   "H"	TO   IOSW
+	 RETURN
+. 
+. ............................................
+. 
+PTRCZRO	 WRITE	   DAFILE,SEQ3;INVKEY:
+			   INVTYPE:
+			   INVCOMP:
+			   INVSTAT:
+			   INVCUST:
+			   INVDATE:
+			   INVTOTL:
+			   INVORDNO:
+			   MOREORDR:
+			   INVSHIP:
+			   INVBLNO:
+			   INVFOB:
+			   FRGTRATE:
+			   INVWGHT:
+			   INVDTPAY:
+			   INVCHECK:
+			   IAMTRCVD:
+			   IDOLSLFT:
+			   INVMESG:
+			   IRECCNTR:
+			   ILIVCNTR
+	 RETURN
+. .....................................................
+. 
+SHOWTOTS DISPLAY   *ES,*P01:12,"QUOTE NUMBER ",INVKEY,"	TOTAL PURCHASE":
+			       ": $",TOTDOLS
+CHECKIT	 MOVE	   " ",REPLY
+	 BEEP
+	 KEYIN	   *P01:16,*EL,"IS THIS	QUOTE CORRECT ?	 (Y/N) ",REPLY
+	 CMATCH	   "Y",REPLY
+	 GOTO	   UPDTSEQ IF EQUAL	 (NOW UPDATE ALL FILES!	7/81)
+. 
+	 CMATCH	   "N",REPLY
+	 GOTO	   UPDTSEQ IF EQUAL
+. 
+	 BEEP
+	 GOTO	   CHECKIT
+. 
+. THE FOLLOWING	ROUTINE	IS USED	TO RETRIEVE ALL	LINE ITEMS
+. ON THIS INVOICE AND TO MODIFY	THE STATUS CODE	FROM "X" TO "O"
+. 
+UPDTSEQ	 TRAPCLR   IO		     (NOW ADD THE UPDATE LOGIC)
+. 
+. WHAT MUST NOW	BE DONE	IS THE FOLLOWING:
+. 
+. 1.  WRITE THE	HEADER RECORD TO THE INVOICE MASTER FILE
+. 2.  LOOP THROUGH ALL THE DETAIL RECORDS, SELECTING ONLY THOSE
+.     WHICH HAVE A STATUS CODE OF "X", AND UPDATE THE INVENTORY	MASTER
+.     BY DECREMENTING THE ON-HAND QTY ACCORDING	TO THE PASSCOMP,
+.     THEN WRITE A RECORD ISAM TO THE INVOICE DETAIL FILE
+.
+	 INCLUDE   SPLOPNPR.TXT
+ 
+	 INCLUDE   QUPDSQ.TXT
+.
+WHERENOW  
+	 CLOSE	   DAFILE
+	 PREPARE   DAFILE,DANAME
+	 CLOSE	   DAFILE      (THIS DELETES THE FILE)
+. 
+CLEARMOV
+	 MOVE	   " " TO MD1
+	 MOVE	   " " TO MD2
+	 MOVE	   " " TO MD3
+	 MOVE	   " " TO MD4
+	 MOVE	   " " TO MD5
+	 MOVE	   " " TO MD6
+	 MOVE	   " " TO MD7
+	 MOVE	   " " TO MD8
+	 MOVE	   " " TO MD9
+	 MOVE	   " " TO MD10
+.......................................................................
+. 
+	 KEYIN	   *P01:16,*EF,"DO YOU HAVE ANY	MORE QUOTATIONS	TO ADD":
+			       " AT THIS TIME ?	 (Y)es or (N)o	",REPLY
+	 CMATCH	   "Y" TO REPLY
+	 GOTO	   CHAINHDR IF EQUAL
+	 CMATCH	   "N" TO REPLY
+	 GOTO	   TAPTERM IF EQUAL
+.
+	BEEP
+	GOTO	   CLEARMOV
+.
+TAPTERM	 PRINT     *F," "
+	 SPLCLOSE
+	 CHAIN	   "ANSWER"
+. 
+CHAINHDR PREPARE   DAFILE,DANAME (NOW PREPARE THE DATA FILE AGAIN)
+	 PRINT	   *F,"	"
+	 SPLCLOSE
+	 GOTO	   WHATKIND	 (GO BACK TO THE INVOICE HEADER	ENTRY)
+.  
+. 
+NOINVOIC BEEP
+	 DISPLAY   *ES,*P01:12,"DISK IO	ERROR ON ORDER TOTAL UPDATE":
+		       *N,"SERIOUS PROBLEM, CALL BOB BACHARACH,	MSC":
+		       *N,"803-366-3250",*W,*W,*W
+ 
+	 GOTO	   NOINVOIC
+. 
+.	 INCLUDE   STDIOERR.TXT
+. 
+.	 INCLUDE   STDFMTER.TXT
+. 
+.	 INCLUDE   STDRANGE.TXT
+. 
+.	 INCLUDE   STDPARER.TXT
+. 
+	 STOP
+ 
+STDIOERR STOP
+STDFMTER STOP
+STDRANGE STOP
+ 
+STDPARER 
+	 GOTO  STDIOERR
+

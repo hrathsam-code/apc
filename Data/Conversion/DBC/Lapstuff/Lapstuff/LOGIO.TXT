@@ -1,0 +1,59 @@
+*................................................................
+. LOGIO - UPDATE THE SYSTEM LOG FILE -- INCLUSION FILE #2
+.
+. THIS FILE CONTAINS:  I.   A ROUTINE THAT OPENS THE SYSTEM LOG
+.                           FILE
+.                      II.  A SUBROUTINE THAT WRITES A LOG
+.                           ENTRY TO THE SYSTEM LOG FILE
+.* RESTRICTIONS:  -- THIS FILE MAY BE INCLUDED IN A PROGRAM ONLY
+.                   ONCE
+.                -- THIS FILE SHOULD BE INCLUDED IN A PROGRAM AT
+.                   THE POINT WHERE THE USER WISHES THE LOG FILE
+.                   TO BE OPENED
+*................................................................
+. I.  OPEN THE SYSTEM LOG FILE. 
+         TRAP      NOLOG IF IO
+         OPEN      LOGFILE,"LOGFILE"
+         TRAPCLR   IO
+         GOTO      LOGOPEN
+*................................................................
+. LOG FILE IS MISSING
+.
+. 
+NOLOG    DISPLAY   *P54:1,*EL,"  #"LOGFILE/ISI#" is missing!":
+                   *P54:2,*EL,"  The port number is ",PORTN
+HANG     GOTO      HANG
+*................................................................
+. II.  WRITE A LOG ENTRY TO THE SYSTEM LOG FILE
+.
+. PROCEDURE:  1. LOCK OUT ALL OTHER PORTS
+.             2. GET THE NUMBER OF LAST USED RECORD (RN)
+.             3. PUT AN EOF MARK IN RECORD RN+2 (THIS INSURES
+.                THAT THE EOF OF THE LOG FILE IS ALWAYS MARKED)
+.             4. PUT RN+1 IN THE LOG FILE AS THE LAST USED RECORD
+.             5. ALLOW OTHER PORTS TO EXECUTE
+.             6. WRITE THE LOG ENTRY TO RECORD RN+1 (NOTE THAT
+.                THIS OVERWRITES THE OLD END-OF-FILE MARK)
+. 
+LOGWRITE FILEPI    5;LOGFILE                1. LOCK OUT
+         READ      LOGFILE,ZERO;ASTERFLD,LOGRN    2. READ RN
+         ADD       "2" TO LOGRN
+         WEOF      LOGFILE,LOGRN            3. EOF AT RN+2
+         SUBTRACT  "1" FROM LOGRN
+         WRITE     LOGFILE,ZERO;ASTERFLD,LOGRN    4. PUT RN+1
+.
+. PI GOES TO 0 AT THIS POINT                5. ALLOW OTHER PORTS
+*................................................................
+. SEE DESCRIPTIONS IN DATA AREA             6. WRITE LOG ENTRY
+.
+         WRITE     LOGFILE,LOGRN;"       ",PORTN:
+                                  "  ",LOGTYPE:
+                                  "  ",TODAY:
+                                  "  ",TIME:
+                                  "  ",LOGINFO
+         RETURN
+*................................................................
+. NOTE:  THE "TRAPCLR PARITY" INSTRUCTION IS USED AS A "NOP"
+.        INSTRUCTION
+.
+LOGOPEN  TRAPCLR   PARITY

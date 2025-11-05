@@ -1,0 +1,23 @@
+
+
+
+PAGE    1      statemnt                                                                                       02-11-19 11:36:07
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP statemnt -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   23.    INCLUDE  A: common.txt
+   25.    INCLUDE  B: rcvbles.txt
+   30.    INCLUDE  C: datetblz.txt
+   36.    INCLUDE  D: custmast.txt
+  351.    INCLUDE  E: custio.txt
+  353.    INCLUDE  F: gtcustks.txt
+  355.    INCLUDE  G: rcvblsio.txt
+  357.    INCLUDE  H: stdtcalc.txt
+
+   Output: c:\apc\plc\statemnt.plc                                                                                                                                                                                                                                   
+       987 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:36:07 11:36:07
+  000024D0 DATA;  00000C26  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

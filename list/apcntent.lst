@@ -1,0 +1,21 @@
+
+
+
+PAGE    1      apcntent                                                                                       02-11-19 11:35:24
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apcntent -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    2.    INCLUDE  A: common.txt
+   17.    INCLUDE  B: callerr1.inc
+   12. B                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   21.    INCLUDE  C: callerr2.inc
+
+   Output: c:\apc\plc\apcntent.plc                                                                                                                                                                                                                                   
+       160 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:24 11:35:24
+  00000FD4 DATA;  000001B0  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

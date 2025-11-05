@@ -1,0 +1,1016 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    ARTRM                                                          ;
+;                                                                             ;
+;   AUTHOR:    HARRY RATHSAM                                                  ;
+;                                                                             ;
+;     DATE:    02/27/2015 AT 4:56PM                                           ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   02/27/2015   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+           INCLUDE           Common.INC
+           include                     WorkVar.inc
+#RESULT    FORM              1
+           GOTO              STARTPGM
+           INCLUDE           ARTRM.FD
+
+MAIN       PLFORM            ARTRM.PLF
+About      PLFORM            About.PLF
+DataMenu            plform             DataMenu
+
+.X FileMenu    menu
+.X ChangeMenu  menu
+.X HelpMenu    menu
+
+FileMenuTxt init      "&File;":
+                      "&Print;":
+                      "-;":
+                      "E&xit"
+
+ChngMenuTxt init      "&Edit;":
+                      "&New record;":
+                      "&Change Record;":
+                      "&Delete Record;":
+                      "&Save Record"
+
+HelpMenuTxt init      "&Help;":
+                      "F1 - Help with A//P Terms;":
+                      "-;":
+                      "&About Chiron Software"
+.
+STARTPGM   ROUTINE
+           INCLUDE           SECURITY.INC
+           MOVE              "1",ProgLoaded
+.
+. If we're unable to find the Help file, then we're going to simply just not make
+. the F1 Function key available to the Users
+.
+           MOVE              "AppDir;HELPDIR",EnvData
+           CLOCK             INI,EnvData
+           IF                NOT OVER
+             PACK              EnvData,EnvData,ARTRMHelp
+             TRAP              NOHELP IF OBJECT
+             SETMODE           *HELPLIB=EnvData
+             SETMODE           *F1HELP=ON
+             TRAPCLR           OBJECT
+             GOTO              OPENFILES
+NOHELP
+             NORETURN
+           ENDIF
+.
+OPENFILES
+           TRAP              NOFILE IF IO
+           CALL              OPENARTRM
+           TRAPCLR           IO
+
+ARTRMCOLL  COLLECTION
+ARTRMEDT   COLLECTION
+           LISTINS           ARTRMCOLL,EARTRMCode,EARTRMDesc,EARTRMNetDays:
+                                       EARTRMDiscDays
+
+           LISTINS           ARTRMEDT,EARTRMCode,EARTRMDesc,EARTRMNetDays:
+                                      EARTRMDiscDays
+.           winhide
+           FORMLOAD          MAIN
+           FORMLOAD          DataMenu,WMain
+
+           LOOP
+             WAITEVENT
+           REPEAT
+.
+. We never get here!!   Just in case though.... :-)
+.
+           STOP
+
+BROWSEFILE ROUTINE
+$SearchMethod       equ                1                    //1 = All, 2 = Specific
+
+                    %if                $SearchMethod = 1
+SEARCH              PLFORM             SEARCHAll.PLF
+                    %else
+.Search              plform             SearchSelection
+                    %endif
+           CALL                 OpenARTrm
+
+           FORMLOAD          SEARCH
+           RETURN
+
+INITSRCH
+           PACK              SearchTitle,ARTRMTitle," Search Window"
+           SETPROP           WSearch,Title=SearchTitle
+
+           CTADDCOL          "A/P Term Code",100,"Term Description",100:
+                             "Net Days",75,"Disc. Days",75:
+                             "Disc. %",75
+
+           move              " ",ARTRMKY
+           call              RDARTRM
+           loop
+             call              KSARTrm
+           until (ReturnFl = 1)
+           CTLoadRecord2     ARTRM,ARTRM,ARTRM.Code,ARTRM.Code,ARTRM.Desc,ARTRM.NetDays,ARTRM.DiscDays,ARTRM.DiscPerc
+             repeat
+             LVSearchPLB.SetItemState using *Index=0,*State=03,*StateMask=03
+             setprop                BSearchSelect,default=1
+             setfocus               LVSearchPLB
+
+           RETURN
+;==========================================================================================================
+OnClickARTRM
+                    F2SEARCH          EARtrmCode
+                    if                 (PassedVar="Y")
+                      call               MainValid
+                    endif
+                    return
+
+;==========================================================================================================
+.
+. Routines that operate the Main program
+.
+;==========================================================================================================
+ItemSelected
+                      LVSearchPLB.GetNextItem giving RowSelected using *Flags=02,*Start=FirstRow
+                    if                 (RowSelected != -1)
+                      LVSearchPLB.GetItemText giving $SearchKey using *Index=RowSelected,*SubItem=0
+                      MOVE               "Y",PassedVar
+                      DESTROY            WSearch
+                    endif
+
+                    RETURN
+
+..HR 9.30.2014           INCLUDE           ARTRM1.INC
+
+;=============================================================================
+#RES1      FORM              1
+#DIM1      DIM               1
+#DIM2      DIM               2
+#RES2      FORM              2
+#LEN1      FORM              3
+#MenuObj   Automation
+#MenuItem  DIM               25
+.
+.=============================================================================
+.
+MaintMenuOption
+                    CALL                 GetMenuName
+
+                    RETURN
+;==========================================================================================================
+MainValid
+           IF                (Status = 0)
+             GETCOUNT          EARTRMCODE
+             IF                (CharCount > 0)
+               GETITEM           EARTRMCODE,0,ARTRMKY
+               CALL              RDARTRM
+               IF               (RETURNFL = 1)
+                 PARAMTEXT        ARTRMTITLE,ARTRMKY,"",""
+                 ALERT            CAUTION,"^0: ^1 Not Found",#RES2,"Record does not exist"
+                 CALL             MAINRESET
+                 RETURN
+               ENDIF
+.
+. OK, we've been able to read the record and now let's show it on the screen.
+.
+               CALL              SETMAIN
+               MOVE              "3",Status                   .We've found a record
+               ENABLEITEM        BMainCHANGE
+               ENABLETOOL        ID_Change
+
+.               DISABLEITEM       BMainNEW
+.               DISABLETOOL       ID_New
+
+               ENABLEITEM        BMainDELETE
+               ENABLETOOL        ID_Delete
+
+               DISABLEITEM       EARTRMCODE
+               DISABLEITEM       Fill1
+.1               DISABLEITEM       ChangeMenu,1
+.1               ENABLEITEM        ChangeMenu,2
+.1               ENABLEITEM        ChangeMenu,3
+.1               DISABLEITEM       ChangeMenu,4
+               SETFOCUS          BMainChange
+             ENDIF
+           ENDIF
+           RETURN
+
+.=============================================================================
+. Initialize MAIN Form and setup the Menu's, Fields, Objects, Buttons, etc
+.
+MAININIT
+.           CREATE            WMAIN;HelpMenu,HelpMenuTxt
+.           CREATE            WMAIN;ChangeMenu,ChngMenuTxt
+.           CREATE            WMAIN;FileMenu,FileMenuTxt
+.
+.           ACTIVATE          HelpMenu,onClickMainWinHelpMenu,result
+.           ACTIVATE          ChangeMenu,onClickMainWinChangeMenu,result
+.           ACTIVATE          FileMenu,onClickMainWinFileMenu,result
+.
+. Set the SELECTALL property for the COLLECTION and then take care of
+. any ActiveX controls.
+.
+           SETPROP           ARTRMEDT,SELECTALL=$SelectAll
+.           SETPROP           EARTRMDiscPerc,*SelectOnFocus=$SelectAll
+.
+           CALL              MAINRESET
+           RETURN
+.=============================================================================
+. New Button is pressed
+.
+MAINNEW
+           IF                (Status = 2)      //Let's 'Save' this NEW Record
+             CALL              VALIDATE1     //Validate the data first
+.
+. Something's not right...Let's just return and wait until all the fields
+. have been validated
+.
+             IF                (ValidFlag = 1)
+               RETURN
+             ENDIF
+.
+. Get all of the fields from the Form into the proper RECORD
+.
+             CALL              GETMAIN
+.
+. Let's see if SOMEBODY else has entered/used this code before or let's just
+. see if this Code already exists in the system
+.
+             GETITEM           EARTRMCode,0,ARTRMKY
+             CALL              TSTARTRM
+             IF                (RETURNFL = 1)
+               CALL              WRTARTRM
+               CALL              MAINRESET
+               RETURN
+             ELSE
+               PARAMTEXT       ARTRMTITLE,ARTRMKY,"",""
+               BEEP
+               ALERT           Note,"^0 with code ^1 already exists. Please enter another code",result:
+                                    "Record already exists"
+               SETFOCUS        EARTRMCode
+             ENDIF                                //Valid record exists???
+           ELSE
+.
+. Enable all of the EditText fields and set the EditText fields
+. to Non Read-Only
+.
+             CALL              MainReset
+             MOVE              "2",Status
+             CALL              DisableRecordButtons
+
+             SETITEM           EARTRMNetDays,0,"0"
+             SETITEM           EARTRMDiscDays,0,"0"
+
+             ENABLEITEM        ARTRMEDT
+             DISABLEITEM       Fill1
+             %IFDEF            CBARTRMActive
+             ENABLEITEM        CBARTRMActive
+             %ENDIF
+
+             SETPROP           ARTRMEDT,READONLY=0
+             SETPROP           ARTRMEDT,BGCOLOR=$WINDOW
+.
+. We also need to set any ActiveX controls to the same properties
+.
+             SETPROP           EARTRMDiscPerc,Enabled=1
+             SETPROP           EARTRMDiscAmt,Enabled=1
+             SETPROP           EARTRMDiscPerc,BGColor=$Window
+             SETPROP           EARTRMDiscAmt,BGColor=$Window
+.
+. Setup any DEFAULT values
+.
+.             SETITEM           EARTRMDISCDAYS,0,"0"
+.
+. Disable & Enable the proper Buttons along with changing
+. the description of the Button's (i.e. Exit --> Change)
+.
+             DISABLEITEM       BMainCHANGE
+             DISABLETOOL       ID_Change
+
+             DISABLEITEM       BMainDELETE
+             DISABLETOOL       ID_Delete
+
+             SETITEM           BMainNEW,0,SaveTitle
+             ENABLETOOL        ID_Save
+
+             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+             DISABLETOOL       ID_New
+             DISABLETOOL       ID_Print
+.
+. Disable the Menu Items except for the 'Save' button
+.
+.1             DISABLEITEM       ChangeMenu,1
+.1             DISABLEITEM       ChangeMenu,2
+.1             DISABLEITEM       ChangeMenu,3
+.1             ENABLEITEM        ChangeMenu,4
+.
+. Set the Focus to the first field that we're going to be Entering
+.
+             SETFOCUS          EARTRMCode
+           ENDIF
+           RETURN
+.=============================================================================
+. Change/Save Button has been pressed
+.
+MAINCHANGE
+.
+. I'm only getting here if the Change Button has been selected.  Soooooo....Either the
+. Change Button has been pressed, or this button now reads 'Save'.  If it reads Save,
+. the Status flag will have been set to 1 the first time that this routine has been
+. reached.
+           IF                (Status = 1)                //'Save' button has been pressed
+             CALL              VALIDATE1
+             IF                (ValidFlag = 0)           //Great..All fields ARE valid!!!
+               CALL              GETMAIN                 //Get all of the fields
+               CALL              UPDARTRM                //Update the record
+               CALL              MAINRESET               //Reset the objects & fields
+             ENDIF
+             RETURN                                      //Voila...Either way, we're RETURNING
+           ENDIF
+           GETCOUNT          EARTRMCODE
+           IF                (Charcount > 0)
+             GETITEM           EARTRMCODE,0,ARTRMKY      //Read the Primary field ito the Key
+
+             CALL              RDARTRMLK               //Lock the record so that nobody uses it
+.
+. Just for arguments sake, let's just make sure that the record hasn't been deleted
+. by another user, AND...Let's make sure that it's not being used by another user
+. as well!!
+.
+             IF                (RETURNFL = 1)          //WHAT!!! Somebody deleted this record
+               BEEP
+               ALERT             STOP,"Record deleted by another User!!",RESULT
+               CALL              MAINRESET
+               RETURN
+             ENDIF
+.
+. Record is locked...Try again later
+.
+             IF                (RETURNFL = 2)          //WHAT!!! Somebody's locked the record
+               BEEP
+               ALERT             NOTE,"Record locked by another User..."::
+                                       "Try again later",RESULT,LOCKTITLE
+               RETURN
+             ENDIF
+.
+. OK, OK...We've gotten this far...The record is now locked and we
+. can safely change the Status to "Modify"
+.
+             MOVE              "1",Status                  //We've selected the Modify/Change Button
+             CALL              DisableRecordButtons
+.
+. Not only do we have a good record, but we've been able to 'Lock' the record
+. and now we're ready to proceed
+.
+. Enable the Entire Collection of EditText fields as well as setting the
+. background colors and making them Non Read-Only
+.
+             ENABLEITEM        ARTRMCOLL
+             DISABLEITEM       Fill1
+             %IFDEF            CBARTRMActive
+             ENABLEITEM        CBARTRMActive
+             %ENDIF
+             SETPROP           ARTRMCOLL,READONLY=0
+             SETPROP           ARTRMCOLL,BGCOLOR=$WINDOW
+.
+. OK, OK...What do we do with any ActiveX components. We've got to handle
+. them as well.  Let's change these to Non Read-Only and change the
+. Background colors as well
+.
+               SETPROP           EARTRMDiscPerc,Enabled=1
+               SETPROP           EARTRMDiscAmt,Enabled=1
+               SETPROP           EARTRMDiscPerc,BGColor=$Window
+               SETPROP           EARTRMDiscAmt,BGColor=$Window
+.
+. Change the Cancel button button to 'Save' and the 'Exit' button to Cancel
+.
+             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+             SETITEM           BMainCHANGE,0,SaveTitle
+             ENABLETOOL        ID_Save
+.
+             DISABLEITEM       BMainNew
+             DISABLETOOL       ID_New
+
+             ENABLETOOL        ID_Undo
+             DISABLETOOL       ID_Print
+
+.
+             SETFOCUS          EARTRMDesc               //Set the cursor to the next field
+             DISABLEITEM       EARTRMCODE               //and Disable the Primary Code
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainUndo
+. If I've click on the Undo/Reset button, I've already got the 'Key' based on
+. the fact that I'm changing a record that already exists and I loaded the
+. key the first time.  Soooooo....Simply 'Re-read' the record, Calll the
+. SetMain routine and Voila!!!!
+.
+           BEEP
+           ALERT             PLAIN,"Revert back to the 'Original' record",RESULT:
+                                   SureTitle
+           IF                (RESULT = 1)
+             CALL              RDARTRMLK
+             CALL              SetMain
+           ENDIF
+           RETURN
+.=============================================================================
+MainFind
+           FindSearch        EARTRMCode
+           IF                (PassedVar = "Y")
+             GETITEM           EARTRMCode,0,ARTRMKY
+             MOVE              $SearchKey,ARTRMKY
+             CALL              RDARTRM
+.
+. We've got a record thanks to our Trusy Search/Browse window. Let's
+. continue now by setting up the proper Code field and calling the
+. MainValid subroutine, that will take care of it for us.
+.
+             MOVE              "0",Status
+             SETITEM           EARTRMCode,0,ARTRM.Code
+             CALL              MainValid
+           ENDIF
+           SETFOCUS            EARTRMCode
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainFirst
+           CLEAR             ARTRMKY
+           FILL              FirstASCII,ARTRMKY
+           CALL              RDARTRM
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KSARTRM         . Try the 'next' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      FirstTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EARTRMCode,0,ARTRM.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Last record and display it
+.
+MainLast
+           CLEAR             ARTRMKY
+           FILL              LastASCII,ARTRMKY
+           CALL              RDARTRM
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KPARTRM         . Try the 'Previous' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      LastTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKP.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EARTRMCode,0,ARTRM.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Next record and display it
+.
+MainNext
+. We can't just do a simple READKS/READKP because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          EARTRMCode
+           IF                (CharCount <> 0)
+             GETITEM           EARTRMCode,0,ARTRMKY
+             CALL              RDARTRM
+           ENDIF
+.
+           CALL              KSARTRM         . Try the 'next' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"End of file has been reached.",RESULT:
+                                    NextTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EARTRMCode,0,ARTRM.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Previous record and display it
+.
+MainPrevious
+. We can't just do a simple 'READKS' because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          EARTRMCode
+           IF                (CharCount <> 0)
+             GETITEM           EARTRMCode,0,ARTRMKY
+             CALL              RDARTRM
+           ENDIF
+.
+           CALL              KPARTRM         . Try the 'Previous' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"Beginning of file has been reached...",RESULT:
+                                    PrevTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EARTRMCode,0,ARTRM.Code
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Save has been selected from the MENU vs. the Button
+.
+SAVEMODE
+.
+. OK...The 'Save' has been selected from the Menu rather than from the Save Button.
+. What to do, What to do??  Is this a Save to a 'NEW' record or is it a Save to a
+. 'CHANGED' record....
+. Let's check the 'Status' flag...1 is a Change record, 2 is a New Record
+.
+           BRANCH            Status,MainChange,MainNew
+           RETURN
+.=============================================================================
+. Routine to Validate the data from the Form
+.
+VALIDATE1
+           MOVE              "0",ValidFlag
+
+           GETITEM           EARTRMCode,0,TestChars
+           COUNT             CharCount,TestChars
+           IF                (CharCount = 0)
+             MOVE            "1",ValidFlag
+             BEEP
+             ALERT             CAUTION,"A Code must be entered into the system",RETURNFL,"Error in Field"
+             SETFOCUS          EARTRMCode
+             RETURN
+           ENDIF
+
+           GETITEM           EARTRMDesc,0,TestChars
+           COUNT             CharCount,TestChars
+           IF                (CharCount = 0)
+             MOVE            "1",ValidFlag
+             BEEP
+             ALERT             CAUTION,"A Description must be entered into the system",RETURNFL,"Error in Field"
+             SETFOCUS          EARTRMDesc
+             RETURN
+           ENDIF
+.
+. Everything's OK...Let's just return because the ValidFlag will be set to
+. Zero from the top of this routine.
+.
+           MOVE              "0",ValidFlag
+           RETURN
+.=============================================================================
+. Routine to 'Reset' everything which includes the Button's, Objects,
+. fields, etc.
+.
+MAINRESET
+           MOVE              "0",Status     //Reset the status to Not updating
+           UNLOCK            ARTRMFL
+.
+. Reset the fields to 'Blank' and DISABLE all of those fields as well
+           DELETEITEM        ARTRMCOLL,0
+           DISABLEITEM       ARTRMCOLL
+           SETPROP           ARTRMCOLL,READONLY=1
+           SETPROP           ARTRMCOLL,BGCOLOR=$BTNFACE
+           ENABLEITEM        Fill1
+.
+. Reset the Buttons for the Next record
+.
+           DISABLEITEM       BMainChange
+           DISABLETOOL       ID_Change
+
+           DISABLEITEM       BMainDELETE
+           DISABLETOOL       ID_Delete
+
+           SETITEM           BMainCHANGE,0,ChangeTitle
+
+           SETITEM           BMainNEW,0,NewTitle
+           ENABLETOOL        ID_New
+
+           ENABLEITEM        BMainNEW
+           SETITEM           BMainCancel,0,ExitTitle
+
+           DISABLETOOL       ID_Save
+           DISABLETOOL       ID_Undo
+           DISABLETOOL       ID_Cancel
+           ENABLETOOL        ID_Print
+
+           CALL              EnableRecordButtons
+.
+. Enable & Disable the proper Menu options
+.
+.X           ENABLEITEM        FileMenu,1
+.X           ENABLEITEM        ChangeMenu,1
+.X           DISABLEITEM       ChangeMenu,2
+.X           DISABLEITEM       ChangeMenu,3
+.X           DISABLEITEM       ChangeMenu,4
+.
+. Setup any ActiveX control fields to what they should be
+.
+           SETPROP           EARTRMDiscPerc,value=0
+           SETPROP           EARTRMDiscAmt,value=0
+.
+           SETPROP           EARTRMDiscPerc,Enabled=0
+           SETPROP           EARTRMDiscAmt,Enabled=0
+           SETPROP           EARTRMDiscPerc,BGColor=$BTNFACE
+           SETPROP           EARTRMDiscAmt,BGColor=$BTNFACE
+.
+. Setup the Primary field that is used for Entry purposes
+.
+           %IFDEF            CBARTRMActive
+           SETITEM           CBARTRMActive,0,0
+           DISABLEITEM       CBARTRMActive
+           %ENDIF
+
+           SETPROP           EARTRMCODE,READONLY=0
+           SETPROP           EARTRMCode,BGCOLOR=$WINDOW
+           ENABLEITEM        EARTRMCODE
+           SETFOCUS          EARTRMCODE
+           RETURN
+.=============================================================================
+. Cancel Button has been Clicked
+.
+MAINCLOSE
+.
+. Only display this message if I'm in either the Modify or New mode.  If not,
+. simply exit the program and proceed as normal
+.
+           IF                (Status <> 0)
+             BEEP
+             ALERT              PLAIN,"By Exiting the program now, your operation will be Cancelled?",RESULT:
+                                      "Are you sure?"
+             IF                 (RESULT = 1)
+               DESTROY         WMAIN      . Get rid of the Bank Window
+..               NORETURN                   . Get rid of the call to MAINCLOSE
+..               RETURN                     . Return to the Main calling routine
+              winshow
+              chain                    FromPgm
+              stop
+
+             ELSE
+               RETURN                     . Contine with standard operations
+             ENDIF
+           ENDIF
+           DESTROY         WMAIN          . Get rid of the Bank Window
+..           NORETURN                       . We don't need this call anymore
+..           RETURN
+              winshow
+              CHAIN             FROMPGM
+              STOP
+
+.=============================================================================
+. Cancel button has been pressed
+.
+MainCancel
+           IF                (Status = 0)      . They want to exit the program
+             DESTROY         WMAIN             . Get rid of the Main Window
+..             NORETURN
+..             RETURN
+              winshow
+...fubar              CHAIN             FROMPGM
+              stop
+
+           ELSE
+             IF                (Status = 1 OR Status = 2)  . Change/New Mode
+               BEEP
+               ALERT              PLAIN,"Do you wish to cancel this operation?",RETURNFL:
+                                        "Are you sure?"
+               IF                 (RETURNFL = 1)
+                 CALL               MAINRESET
+                 RETURN
+               ELSE
+                 RETURN
+               ENDIF
+             ELSE
+               CALL              MAINRESET
+             ENDIF
+             RETURN
+           ENDIF
+.=============================================================================
+. Delete Button has been Pressed
+.
+MainDelete
+           PARAMTEXT        ARTRM.Code,ARTRMTitle,"",""
+           BEEP
+           ALERT            PLAIN,"Do you wish to Delete the ^1: ^0 ?",#RES1,DelTitle
+           IF               (#RES1 = 1)
+             CALL             DELARTRM
+             ALERT            NOTE,"A/P Term Code ^0 has been deleted",#RES1,DelOKTitle
+             CALL             MAINRESET
+           ENDIF
+           RETURN
+.=============================================================================
+.
+. Setup all of the fields in the Form based upon the data record
+SETMAIN
+           SETITEM           EARTRMCode,0,ARTRM.CODE
+           SETITEM           EARTRMDesc,0,ARTRM.Desc
+           setprop          EARTRMNetDays,value=ARTRM.NetDays
+           setprop          EARTRMDiscDays,value=ARTRM.DiscDays
+           SETPROP           EARTRMDiscPerc,value=ARTRM.DiscPerc
+           SETPROP           EARTRMDiscAmt,value=ARTRM.DiscAmt
+           RETURN
+.=============================================================================
+. Retrieve all of the fields in the Form based upon the data record
+.
+GETMAIN
+          GETITEM          EARTRMCode,0,ARTRM.CODE
+          GETITEM          EARTRMDesc,0,ARTRM.Desc
+          getprop          EARTRMNetDays,value=ARTRM.NetDays
+          getprop          EARTRMDiscDays,value=ARTRM.DiscDays
+          GETPROP          EARTRMDiscPerc,value=ARTRM.DiscPerc
+          GETPROP          EARTRMDiscAmt,value=ARTRM.DiscAmt
+          RETURN
+
+.=============================================================================
+.Help Menu selection if required
+.
+MAINHELP
+          RETURN
+
+onClickMainWinChangeMenu
+           PERFORM           RESULT OF  MAINNEW,MAINCHANGE,MainDelete,SAVEMODE
+           RETURN
+.=============================================================================.
+onClickMainWinExitButton
+.
+. check to see if this is masquerading as a CANCEL button
+.
+           CALL              MainCancel
+           RETURN
+.=============================================================================.
+onClickMainWinFileMenu
+.
+. process a click on the file menu
+.
+           PERFORM           result of MainPrint,,MAINCLOSE
+           RETURN
+.=============================================================================.
+onClickMainWinHelpMenu
+           PERFORM           result of MAINHELP,MAINHELP,MAINAbout
+           RETURN
+.=============================================================================.
+. Display the Standard "About Box"
+.
+MAINAbout
+.
+. display an alert box describing the program
+.
+           FORMLOAD          About
+           RETURN
+.=============================================================================
+. Print Report option
+.
+MainPrint
+           CALL              PRTREPORT
+
+           RETURN
+MainToolBar
+           RETURN
+
+.=============================================================================
+. Disable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+DisableRecordButtons
+           DISABLETOOL       ID_First
+           DISABLETOOL       ID_Next
+           DISABLETOOL       ID_Previous
+           DISABLETOOL       ID_Last
+           DISABLETOOL       ID_Find
+           RETURN
+.=============================================================================
+. Enable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+EnableRecordButtons
+           ENABLETOOL        ID_First
+           ENABLETOOL        ID_Next
+           ENABLETOOL        ID_Previous
+           ENABLETOOL        ID_Last
+           ENABLETOOL        ID_Find
+           RETURN
+;=============================================================================
+
+NOFILE
+           NORETURN
+           ALERT             PLAIN,"A/P Terms Master file does not exist. Do you wish to create it?",#RESULT
+           IF                (#RESULT = 1)
+             CALL              PREPARTRM
+             GOTO              OPENFILES
+           ENDIF
+           STOP
+
+READOPT    DIM               12
+PAGED      DIM               4
+NEXTLINE   INIT              127
+PRTFILE    PFILE
+PRTCOUNT   FORM              6
+PRTCOUNTD  FORM              6
+PRGTITLE   INIT              "A/P Terms MAster Listing"
+PAGETITLE  DIM               60
+DIM500     DIM               500
+PRTWIDTH   FORM              8
+PRTHEIGHT  FORM              8
+DIM8       DIM               8
+COL        FORM              3
+ROW        FORM              3
+MAXROWS    FORM              3
+ACCT       DIM               9
+...TODAY8     DIM               8
+..TIME8      DIM               8
+NUM1       FORM              3
+NUM2       FORM              3
+ToCode     DIM               8
+.
+PRTREPORT
+ARTRMRPT   PLFORM            ARTRMRPT.PLF
+.           WINHIDE
+
+           CLOCK             DATE,TODAY8
+           CLOCK             TIME,TIME8
+
+           MOVE              "60",MAXROWS
+           MOVE              "0",PAGE
+           MOVE              "90",LINE
+
+           FORMLOAD          ARTRMRPT
+           LOOP
+             WAITEVENT
+           REPEAT
+
+           RETURN
+
+.           alert             note,"how???",returnfl
+.           LOOP                                              .Wait...and Wait...
+.             WAITEVENT                                       .
+.           REPEAT                                            .and wait
+
+START
+.
+.
+. Since we're dealing with a sorted file, we're going to read it in
+. Sequential order vs. Key Sequential.  Also, we must make sure that
+. we don't read any records that we're not supposed to based on the
+. code that was in the other program. (AP42.DBS)
+.
+
+           CLOCK             DATE,TODAY8
+           CLOCK             TIME,TIME8
+
+           MOVE              "60",MAXROWS
+           MOVE              "0",PAGE
+           MOVE              "90",LINE
+           MOVE              "0",PRTCOUNT
+.
+. Process all Vendors in Sorted Order
+.
+           MOVE              " ",ARTRMKY
+           FILL              LastASCII,ToCode
+
+           GETITEM           RAll,0,RETURNFL
+           BRANCH            RETURNFL OF ALL
+
+           GETITEM           EFromRange,0,ARTRMKY
+           GETITEM           EToRange,0,ToCode
+
+           IF                (ToCode < ARTRMKY)
+           BEEP
+           ALERT             STOP,"From Code cannot be less than the To Code",RETURNFL,"Range Error"
+           SETFOCUS          ETORANGE
+           RETURN
+           ENDIF
+
+ALL
+           TRAP              NOPRINT IF SPOOL
+           PRTOPEN           PRTFILE,"@?","A/P Term Code Listing"
+           TRAPCLR           IO
+
+           CALL              PRTHEADER2
+
+
+           CALL              RDARTRM
+           LOOP
+             CALL              KSARTRM
+           UNTIL             (RETURNFL = 1 OR ARTRM.Code > ToCode)
+             CALL              PRTLINE
+           REPEAT
+.
+. Print Totals line
+.
+           IF                (LINE + 4 > MAXROWS)
+             CALL              PRTHEADER
+           ENDIF
+           PRTPAGE           PRTFILE;*N=3,PRTCOUNT," A/P Term Records Printed"
+           PRTCLOSE          PRTFILE,MAXIMIZE=1
+           RETURN
+.
+. Print Each Detailed line
+.
+PRTLINE
+           ADD               "1",PRTCOUNT
+           MOVE              PRTCOUNT,PRTCOUNTD
+
+           IF                (LINE > MAXROWS)
+             CALL              PRTHEADER
+           ENDIF
+
+           MOVE              ARTRM.NETDAYS,NUM1
+           MOVE              ARTRM.DISCDAYS,NUM2
+
+           PRTPAGE           PRTFILE;*1,ARTRM.Code:
+                                     *16,ARTRM.Desc:
+                                     *Alignment=*Right:
+                                     *38,Num1:
+                                     *50,Num2:
+                                     *Alignment=*Decimal:
+                                     *61,ARTRM.DiscPerc:
+                                     *Alignment=*Left
+
+           ADD       "2" TO LINE
+           RETURN
+
+PRTHEADER
+           PRTPAGE           PRTFILE;*NEWPAGE;
+PRTHEADER2
+           CALC              COL=PRTWIDTH-15
+           ADD               "1",PAGE
+           MOVE              PAGE,PAGED
+.           SETITEM           EPage,0,PAGED
+
+           PRTPAGE           PRTFILE;*P1:63,*LINE=85:63:
+                             *N:
+                             *40,"Page :",*alignment=*left,PAGE:
+                             *P1:1:
+                             *P1:1,"Date : ",TODAY8:
+                             *BOLDON:
+                             *H=27,"Chiron Software & Services, Inc.",*BOLDOFF:
+                             *72,"APTERM":
+                             *N:
+                             *H=1,"Time : ",TIME8:
+                             *H=29,"A/P Term Code Master Listing":
+                             *72,"Accounts Payable":
+                             *N=2:
+                             *ULON:
+                             *H=1,"Term Code",*H=16,"Description":
+                             *H=33,"Net Days",*H=44,"Disc. Days":
+                             *H=57,"Disc. %":
+                             *ULOFF:
+                             *N
+
+           MOVE              "5",LINE
+           RETURN
+
+EXITASK
+           ALERT             PLAIN,"Are you sure you wish to exit this report?",#RESULT
+           IF                (#RESULT=1)
+             STOP
+           ENDIF
+           RETURN
+
+NOPRINT
+           TRAPCLR           SPOOL
+           NORETURN
+           RETURN
+;==========================================================================================================
+                    include            MenuDefs.INC

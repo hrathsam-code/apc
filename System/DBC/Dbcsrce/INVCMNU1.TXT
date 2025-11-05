@@ -1,0 +1,110 @@
+. INVCMNU1 - ORDER ENTRY PROCESSING FUNCTIONS
+.
+. WRITTEN BY R. BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                           41 TEELE DRIVE
+.                           CORAM, NY 11727
+.                           (516) 698-9648
+.
+. COMPILING THIS PROGRAM REQUIRES THAT THE FILES:  "COMMON/TXT",
+. "LOGDATA/TXT" AND "LOGIO/TXT" EXIST ON ANY DRIVE WHICH IS ON-
+. LINE.  THESE INCLUSION FILES CONTAIN THE INFORMATION COMMON TO
+. ALL OF THE SYSTEM PROGRAMS.
+.
+         INCLUDE   COMMON/TXT
+PRTCOMP  DIM       1
+INDEX    FORM      2                   USER SELECTION VARIABLE
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+         INCLUDE   LOGDATA/TXT
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY CLEARANCE OF AT LEAST 5
+.
+         COMPARE   "5" TO SECURITY
+         STOP      IF LESS
+         INCLUDE   LOGIO/TXT
+*................................................................
+. DISPLAY THE MENU
+.
+         DISPLAY   *ES:
+                   "ORDER ENTRY PROCESSING FUNCTIONS":
+                   *P51:1,"Today is ",TODAY:
+                   *P01:03,"( 1) ":
+                   "ENTER INVOICE DATA":
+                   *P01:04,"( 2) ":
+                   "CANCEL AN EXISTING ORDER":
+                   *P01:05,"( 3) ":
+                   *P01:06,"( 4) ":
+                   *P01:08,"( 6) ":
+                   *P01:09,"( 7) ":
+                   "SELECT NEW PROCESSING SYSTEM":
+                   *EL
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN     *P1:12,*EL,"Selection by number":
+                   *P25:12,"__",*P25:12,INDEX
+         COMPARE   "1" TO INDEX
+         GOTO      GETINDEX IF LESS
+         COMPARE   "08" TO INDEX
+         GOTO      GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE ROUTINE INDICATED BY THE INDEX
+.
+         TRAP      BADCHAIN IF CFAIL
+         CLOCK     TIME TO TIME
+         BRANCH    INDEX OF ORDENTRY:  ENTER A NEW ORDER
+                            ORDCANCL:  CANCEL AN EXISTING ORDER
+                            LIBINVPT:  PRINT LIBERTY INVOICES
+                            REPINVPT:  PRINT REPUBLIC INVOICES
+                            LIBLIST:  LIST  LIBERTY OPEN INVOICE
+                            REPLIST:  LIST REPUBLIC OPEN INVOICE
+                            LIBMENU1   SELECT NEW PROCESSING SYST
+         GOTO      GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CHAIN INSTRUCTIONS
+*................................................................
+. ENTER A NEW ORDER
+.
+ORDENTRY CHAIN     "ORDENTRY"
+         GOTO      GETINDEX
+*................................................................
+. CANCEL AN EXISTING ORDER
+.
+ORDCANCL CHAIN     "ORDCANCL"
+         GOTO      GETINDEX
+*................................................................
+. 
+. PRINT LIBERTY INVOICES
+.
+LIBINVPT MOVE      "L" TO PRTCOMP
+         CHAIN     "INVCPRNT"
+         GOTO      GETINDEX
+*................................................................
+. PRINT REPUBLIC INVOICES
+.
+REPINVPT MOVE      "R" TO PRTCOMP
+         CHAIN     "INVCPRNT"
+         GOTO      GETINDEX
+*................................................................
+. LIST  LIBERTY OPEN INVOICES
+.
+LIBLIST  MOVE      "L" TO TESTONE
+         CHAIN     "INVCLIST"
+         GOTO      GETINDEX
+*................................................................
+. LIST REPUBLIC OPEN INVOICES
+.
+REPLIST  MOVE      "R" TO TESTONE
+         CHAIN     "INVCLIST"
+         GOTO      GETINDEX
+*................................................................
+. SELECT NEW PROCESSING SYSTEM
+.
+LIBMENU1 CHAIN     "LIBMENU1"
+         GOTO      GETINDEX

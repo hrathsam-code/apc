@@ -1,0 +1,69 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    fixapduedate                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    03/21/2019 at 1:33pm                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   03/21/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+InvoiceDate         dim                8
+AgingDays           FORM               10             //HR 1/8/2004
+NewAgingDays        FORM               10
+DiscountDays        FORM               10             //HR 1/8/2004
+NewDiscountDays     FORM               10
+TodayDays           form               10
+
+
+                    include            WorkVar.inc
+                    include            APTRN.fd
+                    include            Vendor.fd
+                    include            ARTRM.FD
+
+                    call               OpenAPTRN
+                    call               OpenVendor
+                    call               OpenARTRM
+
+                    move               " ",VendorKY
+                    call               RDVendor
+
+                    loop
+                      call               KSVendor
+                    until (ReturnFl = 1)
+
+                    move               Vendor.TermCode,ARTRMKY
+                    call               RDARTRM
+
+                      PACKKEY            APTRNKY3,$Entity,Vendor.AccountNumber,"O"   //Open Only!!!!!
+.
+. Read through all of the Transactions looking for 'Open' transactions
+. only.  'Open' transactions are records that don't have a Zero balance.
+.
+                      CALL               RDAPTRN3
+                      LOOP
+                        CALL               KSAPTRN3
+                      UNTIL              (Returnfl = 1 or APTRN.Vendor != Vendor.AccountNumber or APTRN.ClosedFlag != "O"))
+                        move              APTRN.TransDate,InvoiceDate
+                        CALL              ConvDateToDays using InvoiceDate,TodayDays
+                        ADD               TodayDays,ARTRM.NetDays,NewAgingDays       //Calculate the new Invoice Due Dates, etc
+                        ADD               TodayDays,ARTRM.DiscDays,NewDiscountDays
+
+                        CALL              ConvDaysToDate using NewAgingDays,APTRN.DueDate
+                        CALL              ConvDaysToDate using NewDiscountDays,APTRN.DiscDate
+                        call              UPDAPTRN
+
+
+                    repeat

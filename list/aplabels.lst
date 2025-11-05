@@ -1,0 +1,29 @@
+
+
+
+PAGE    1      aplabels                                                                                       02-11-19 11:35:28
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP aplabels -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    3.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.txt
+    7.    INCLUDE  C: apmastfd.pls
+   27.    INCLUDE  D: callerr1.inc
+   12. D                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   31.    INCLUDE  E: callerr2.inc
+   50.                                         PRINT     *1," ",*FLUSH 
+                                                                      *WARNING*
+Warning: I/O control not implemented.
+   68.    INCLUDE  F: apmastks.pls
+  102.    INCLUDE  G: apmastrd.pls
+  107.    INCLUDE  H: apmastks.pls
+
+   Output: c:\apc\plc\aplabels.plc                                                                                                                                                                                                                                   
+       290 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:35:27 11:35:28
+  0000180C DATA;  000002E8  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

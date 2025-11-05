@@ -1,0 +1,96 @@
+<ShipmentConfirmRequest>
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Your Test Case Summary Description</CustomerContext>
+      <XpciVersion/>
+    </TransactionReference>
+    <RequestAction>ShipConfirm</RequestAction>
+    <RequestOption>validate</RequestOption>
+  </Request>
+  <LabelSpecification>
+    <LabelStockSize>
+      <Height>4</Height>
+      <Width>6</Width>
+    </LabelStockSize>
+    <LabelPrintMethod>
+      <Code>EPL</Code>
+      <Description>ZPL</Description>
+    </LabelPrintMethod>
+    <HTTPUserAgent>Mozilla/5.0</HTTPUserAgent>
+  </LabelSpecification>
+  <Shipment>
+    <RateInformation>
+      <NegotiatedRatesIndicator/>
+    </RateInformation>
+    <Shipper>
+      <Name>APC Components</Name>
+      <PhoneNumber>6312494079</PhoneNumber>
+      <ShipperNumber>156620</ShipperNumber>
+      <TaxIdentificationNumber>1234567890</TaxIdentificationNumber>
+      <Address>
+        <AddressLine1>75 TOLEDO ST</AddressLine1>
+        <City>FARMINGDALE</City>
+        <StateProvinceCode>NY</StateProvinceCode>
+        <PostalCode>11735</PostalCode>
+        <PostcodeExtendedLow>H</PostcodeExtendedLow>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </Shipper>
+    <ShipTo>
+      <CompanyName>BISCO INDUSTRIES</CompanyName>
+      <AttentionName>Eileen</AttentionName>
+      <PhoneNumber/>
+      <Address>
+        <AddressLine3/>
+        <AddressLine2/>
+        <AddressLine1>12 LINSCOTT ROAD</AddressLine1>
+        <City>WOBURN</City>
+        <StateProvinceCode>MA</StateProvinceCode>
+        <PostalCode>01801-2079</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipTo>
+    <ShipFrom>
+      <CompanyName>APC COMPONENTS</CompanyName>
+      <AttentionName>Ship From Attn Name</AttentionName>
+      <PhoneNumber>6312494079</PhoneNumber>
+      <TaxIdentificationNumber>1234567890</TaxIdentificationNumber>
+      <Address>
+        <AddressLine1>75 TOLEDO ST</AddressLine1>
+        <City>FARMINGDALE</City>
+        <StateProvinceCode>NY</StateProvinceCode>
+        <PostalCode>11735-6620</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipFrom>
+    <PaymentInformation>
+      <FreightCollect>
+        <BillReceiver>
+          <AccountNumber>936095</AccountNumber>
+          <Address>
+            <PostalCode>01801-2079</PostalCode>
+          </Address>
+        </BillReceiver>
+      </FreightCollect>
+    </PaymentInformation>
+    <Service>
+      <Code>03</Code>
+      <Description>UPS GROUND</Description>
+    </Service>
+    <Package>
+      <PackagingType>
+        <Code>02</Code>
+        <Description>Customer Supplied</Description>
+      </PackagingType>
+      <Description>Package Description</Description>
+      <ReferenceNumber>
+        <Code>00</Code>
+        <Value>Invoice No12345</Value>
+      </ReferenceNumber>
+      <PackageWeight>
+        <Weight>  3.50</Weight>
+      </PackageWeight>
+      <AdditionalHandling>0</AdditionalHandling>
+    </Package>
+  </Shipment>
+</ShipmentConfirmRequest>

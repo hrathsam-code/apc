@@ -1,0 +1,20 @@
+.
+. file definition for fast DB/C data field definition file
+.
+
+fdbcd.record	list
+fdbcd.file	char 8
+fdbcd.data	char 16
+fdbcd.fptr	char 16
+fdbcd.bptr	char 16
+fdbcd.desc	char 40
+fdbcd.type	char 8
+fdbcd.size	char 5
+fdbcd.repeatcnt	char 2
+		listend
+
+fdbcd		list
+		ifile fix=111, keylen=24
+		varlist fastdbc.syscode, "FASTD"
+		varlist fdbcd.file, fdbcd.data
+		listend

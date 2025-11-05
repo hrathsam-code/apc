@@ -1,0 +1,40 @@
+.......................
+. INVOICE TABLE       .
+.......................
+INVC1    DIM       6
+INVC2    DIM       6
+INVC3    DIM       6
+INVC4    DIM       6
+INVC5    DIM       6
+INVC6    DIM       6
+INVC7    DIM       6
+INVC8    DIM       6
+INVC9    DIM       6
+INVC10   DIM       6
+INVC11   DIM       6
+INVC12   DIM       6
+INVC13   DIM       6
+INVC14   DIM       6
+INVC15   DIM       6
+INVC16   DIM       6
+INVC17   DIM       6
+INVC18   DIM       6
+INVC19   DIM       6
+INVC20   DIM       6
+INVC21   DIM       6
+INVC22   DIM       6
+INVC23   DIM       6
+INVC24   DIM       6
+INVC25   DIM       6
+INVC26   DIM       6
+INVC27   DIM       6
+INVC28   DIM       6
+INVC29   DIM       6
+INVC30   DIM       6
+INVC31   DIM       6
+INVC32   DIM       6
+INVC33   DIM       6
+INVC34   DIM       6
+. 
+. END OF INVOICE NUMBER TABLE
+. 

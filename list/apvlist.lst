@@ -1,0 +1,19 @@
+
+
+
+PAGE    1      apvlist                                                                                        02-11-19 11:35:37
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apvlist -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    6.    INCLUDE  B: common.txt
+    8.    INCLUDE  C: apmastfd.pls
+   39.    INCLUDE  D: apmastks.pls
+
+   Output: c:\apc\plc\apvlist.plc                                                                                                                                                                                                                                    
+       162 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:37 11:35:37
+  0000117C DATA;  000000E2  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

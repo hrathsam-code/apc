@@ -1,0 +1,73 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CheckDetail.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    08-06-2019 At 17:46                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              10001   07-05-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CheckDetailVAR
+$CheckDetailVAR                  EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+CheckDetail                      RECORD
+Entity                           Dim                8                   1 - 8        //1 - 8
+SubEntity                        Dim                8                   9 - 16       //9 - 16
+BankCode                         Dim                6                  17 - 22       //17 - 22
+Vendor                           Dim                6                  23 - 28       //23 - 28
+CheckNo                          Form               10                 29 - 38       //29 - 38
+SeqMajor                         Form               7                  39 - 45       //39 - 45
+SeqMinor                         Form               3                  46 - 48       //46 - 48
+Voucher                          Form               7                  49 - 55       //49 - 55
+DiscAmt                          Form               5.2                56 - 63       //56 - 63
+GrossAmount                      Form               7.2                64 - 73       //64 - 73
+NetAmount                        Form               7.2                74 - 83       //74 - 83
+                                 RECORDEND
+;
+;======================================================================================;
+TempCheckDetail                     record          like   CheckDetail                     
+OrigCheckDetail                     record          like   CheckDetail                     
+SaveCheckDetail                     record          like   CheckDetail                     
+;======================================================================================;
+CheckDetailTXTNM                          INIT         ""
+;=============================================================================;
+;
+CheckDetailFLST                         FILELIST
+                                    FILELISTEND
+ 
+CheckDetailFileSize       CONST      "210"
+ 
+CheckDetailProg           INIT       "CheckDetail Program"
+CheckDetailDesc           INIT       "CheckDetail Maintenance"
+CheckDetailTITLE          INIT       "CheckDetail Record"
+CheckDetailHelp           INIT       "CheckDetail.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CheckDetailVARIO
+            INCLUDE CheckDetail.IO 
+          %ENDIF          //End of IO Include File

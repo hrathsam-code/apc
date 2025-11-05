@@ -1,0 +1,455 @@
+
+
+
+PAGE    1      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "CASHNTRY.PLS","F:\PLC\CASHNTRY.PLC",,c:\docume~1\lauraa~1\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+   11.    INCLUDE  A: common.txt
+   29.    INCLUDE  B: contfile.txt
+   50.    INCLUDE  C: rcvbcash.txt
+   60.    INCLUDE  D: f:\source.cnv\custmast.txt
+   81.    INCLUDE  E: invctbl2.txt
+  192.                                         TRAP      ARFILEOP IF IO
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  939.    INCLUDE  F: f:\source.cnv\custio.txt
+  940.    INCLUDE  G: contrlio.txt
+   57. G                                       RETURN 
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  941.    INCLUDE  H: rcvblsio.txt
+ 1038.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\cashntry.plc                                                                                                                                                                                                                                       
+      1436 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 13:17:45 13:17:45
+  00003294 DATA;  000012E8  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+"                                          D     358.  *
+"                                          D     405.  *   368.     385.     396.     560.     772.  
+" 0                                        D     244.  *   304.     307.     488.     832.     849.  
+"*OVERPAYMENT OF ACCT BAL.*                D     855.  *
+"-CREDIT-                                  D     854.  *
+"A                                         D     272.  *
+"A.P.C.                                    D     274.  *
+"APP                                       D     714.  *   819.  
+"ARFILE.ISI                                D     201.  *
+"ARFILEDT.ISI                              D     203.  *
+"ARMENU1                                   D     177.  *   197.     212.     233.     807.      15. H   995.  
+"C                                         D     576.  *   852.  
+"CRED                                      D     459.  *
+"E                                         D      85. H*
+"H                                         D       8. F*    28. F    43. F    31. G    55. G    34. H    48. H    69. H
+                                                     *    82. H
+"INVC                                      D     456.  *
+"M                                         D      32. F*    25. H    40. H    52. H
+"O                                         D     853.  *
+"P                                         D     956.  *
+"R                                         D     371.  *
+"W                                         D     972.  *
+"X                                         D     381.  *   507.     667.  
+-1                                         F     504.  *   641.  
+0                                          F     163.  *   369.     401.     461.     489.     538.     562.     655.  
+                                                     *   784.     785.     786.     787.     788.     789.     790.     791.  
+                                                     *   792.     793.     794.     795.     796.     797.     798.     799.  
+                                                     *   800.     801.     802.     803.     858.     859.    1035.  
+2                                          F     484.  *   653.  
+31                                         F     425.  *
+5                                          F     402.  *   465.     561.     658.     662.     804.  
+6                                          F     749.  *
+ACCTNUMB                                   D      14. A*
+ADDRCVB                                    X      38. H*   902.  
+ANSWER                                     D      22.  *   262.     263.     265.     352.     353.     619.     620.  
+                                                     *   622.     624.     630.     631.     633.     635.     772.     773.  
+                                                     *   774.     776.  
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+ARFILE                                     i      31.  *   201.     908.  
+ARFILEDT                                   i     120.  *   203.     920.  
+ARFILEOP                                   X     209.  *   192.  
+ARFILES                                    i      54.  *
+ARFILEXX                                   D      55.  *   199.  
+ASKPAY                                     X     619.  *   621.     627.  
+ASTERZ                                     X     694.  *   688.  
+BADCKWRT                                   X     992.  *   983.  
+BADCTLS                                    X     392.  *   384.     394.  
+BADCUST                                    X     389.  *   391.  
+BADSELCT                                   X     546.  *   602.  
+BLNK10                                     D     117.  *  1027.  
+BUCKS                                      X     346.  *
+CANTREAD                                   X     950.  *   953.  
+
+
+
+PAGE    3      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+CASHLEFT                                   F      93.  *   367.     369.     397.     574.     575.     615.     649.  
+                                                     *   672.     763.     799.     814.     862.     863.     957.     959.  
+                                                     *   964.     975.  
+CHAINBK                                    X     177.  *   172.  
+CHKACCT                                    D     131.  *   327.     984.  
+CHKAMNT                                    F     135.  *   329.     985.  
+CHKDATE                                    D     132.  *   312.     313.     314.     315.     316.     322.     984.  
+CHKFILE                                    i     122.  *   188.     984.  
+CHKFLKEY                                   D     129.  *   320.     321.     322.     323.     977.     978.     984.  
+CHKFLNAM                                   D     123.  *   188.  
+CHKINVC                                    D     134.  *   980.     984.  
+CHKNUMB                                    D     133.  *   328.     984.  
+CHKWOAMT                                   F     136.  *   979.     985.  
+CLEAREM                                    X     784.  *   777.  
+COMMCODE                                   D      26. D*    23. F    40. F
+CONTROLS                                   i       4. B*   719.     818.      11. G    16. G    42. G
+CRED                                       D      25.  *
+CREDDOLS                                   X     640.  *   451.  
+CREDEOJ                                    X     814.  *   528.  
+CREDSW                                     D     104.  *   576.     679.  
+CSHFILE                                    D      65.  *   156.     943.  
+CSTNAME                                    D      58.  *     7. F
+CTLCASH                                    F      16. B*   728.      22. G    48. G
+CTLDATE                                    D      11. B*   722.      17. G    43. G
+CTLINVC                                    F      12. B*   822.     824.      18. G    44. G
+CTLKEY                                     D      10. B*   714.     819.      16. G    42. G
+CTLMCASH                                   F      19. B*    25. G    51. G
+CTLMRCVD                                   F      17. B*    23. G    49. G
+CTLMSOLD                                   F      18. B*    24. G    50. G
+CTLNAME                                    D       5. B*    11. G
+CTLPONO                                    F      13. B*    19. G    45. G
+CTLRCVD                                    F      14. B*    20. G    46. G
+CTLRTRN                                    X      32. G*    56. G
+CTLSOLD                                    F      15. B*    21. G    47. G
+CTLSW                                      D      27.  *   381.     396.     726.  
+CTLYCASH                                   F      22. B*    28. G    54. G
+CTLYRCVD                                   F      20. B*    26. G    52. G
+CTLYSOLD                                   F      21. B*    27. G    53. G
+CURNTDUE                                   F      31. D*    24. F    41. F
+CUSTADDR                                   D      11. D*    19. F    37. F
+CUSTADR2                                   D      12. D*
+CUSTCATG                                   D      17. D*    21. F    38. F
+CUSTCITY                                   D      13. D*    20. F    38. F
+CUSTCRED                                   F      16. D*    20. F    38. F
+CUSTFILE                                   i      57.  *     7. F    19. F    37. F
+CUSTKEY                                    D       8. D*   254.     270.     321.     327.     594.      19. F    37. F
+CUSTN                                      F     101.  *
+CUSTNAME                                   D      10. D*   261.      19. F    37. F
+CUSTOKAY                                   X     262.  *   268.  
+CUSTSTAT                                   D      14. D*    20. F    38. F
+CUSTSTTS                                   D       9. D*    19. F    37. F
+CUSTZIP                                    F      15. D*    20. F    38. F
+D2                                         D     106.  *   487.     488.     494.     497.  
+
+
+
+PAGE    4      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+DAILYCSH                                   f      62.  *   156.     166.     943.     946.    1003.    1007.    1013.  
+                                                     *  1021.    1027.  
+DATE6                                      D      10. A*
+DATEKEY                                    D     118.  *   913.     914.     915.     916.     917.     918.     920.  
+DD                                         D     111.  *   240.     246.     916.  
+DEAD                                       X     700.  *   604.  
+DEBDOLS                                    X     645.  *   454.  
+DECREM                                     X     585.  *   542.     543.  
+DISPDOLS                                   X     648.  *   512.  
+DISPNAME                                   X     261.  *   257.  
+DLEFT                                      X     661.  *   656.  
+DOLRWORK                                   F      96.  *   495.     498.     501.     504.     640.     641.     642.  
+                                                     *   801.  
+DOLSPRGD                                   F      20.  *   785.  
+DRITE                                      X     657.  *
+DSPASTER                                   X     652.  *   694.     958.  
+DSPCOMP                                    D      89.  *   274.     277.  
+DUPINVC                                    X     935.  *   869.  
+ENDIT                                      X     807.  *   775.  
+ENVS                                       D      11. A*
+EOFRCVB                                    X      85. H*    81. H
+EOJ                                        X     763.  *   524.     970.  
+EOJ1                                       X     772.  *   764.     765.     779.     933.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+F3BRNCH                                    X     560.  *   532.  
+FIRSTDSP                                   X     215.  *   207.     805.  
+FIRSTIME                                   D      17. A*
+FORM4                                      F      97.  *   270.  
+FRGTRATE                                   F      44.  *   858.  
+FROMPGM                                    D      16. A*
+FULLPAGE                                   D     105.  *   507.     518.     560.  
+GETCTL                                     X      14. G*   721.     820.  
+GETCTLRC                                   X     721.  *
+GETCUST                                    X      16. F*   255.  
+GETOUT                                     X     233.  *   227.  
+GETRCVB                                    X      23. H*   416.     598.  
+IAMTPD1                                    F      28. C*   756.     788.      28. H    43. H    64. H    76. H
+IAMTPD2                                    F      29. C*   756.     789.      28. H    43. H    64. H    76. H
+IAMTPD3                                    F      30. C*   756.     790.      28. H    43. H    64. H    76. H
+IAMTPD4                                    F      31. C*   756.     791.      28. H    43. H    64. H    76. H
+IAMTPD5                                    F      32. C*   757.     792.      28. H    43. H    64. H    76. H
+IAMTRCVD                                   F      47.  *   861.  
+ICHK1                                      D      34. C*   754.      29. H    44. H    65. H    77. H
+ICHK2                                      D      35. C*   754.      29. H    44. H    65. H    77. H
+ICHK3                                      D      36. C*   754.      29. H    44. H    65. H    77. H
+ICHK4                                      D      37. C*   754.      29. H    44. H    65. H    77. H
+ICHK5                                      D      38. C*   754.      29. H    44. H    65. H    77. H
+ICNTR                                      F      94.  *   802.  
+IDOLSLFT                                   F      48. C*   501.     574.     575.     615.     640.     645.     671.  
+                                                     *   672.     684.     759.     793.     863.     925.      31. H    46. H
+
+
+
+PAGE    5      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+                                                     *    67. H    79. H   974.    1014.  
+IDTPD1                                     D      40. C*   755.      30. H    45. H    66. H    78. H
+IDTPD2                                     D      41. C*   755.      30. H    45. H    66. H    78. H
+IDTPD3                                     D      42. C*   755.      30. H    45. H    66. H    78. H
+IDTPD4                                     D      43. C*   755.      30. H    45. H    66. H    78. H
+IDTPD5                                     D      44. C*   755.      30. H    45. H    66. H    78. H
+IMATLS                                     F      46. C*
+INCR1                                      X     468.  *   466.  
+INCRITEM                                   X     461.  *   458.  
+INCRNUMB                                   X     822.  *   935.  
+INVBLNO                                    D      43.  *   857.  
+INVC                                       D      24.  *
+INVC1                                      D       4. E*   475.     585.  
+INVC10                                     D      13. E*   476.     586.  
+INVC11                                     D      14. E*   477.     587.  
+INVC12                                     D      15. E*   477.     587.  
+INVC13                                     D      16. E*   477.     587.  
+INVC14                                     D      17. E*   477.     587.  
+INVC15                                     D      18. E*   477.     587.  
+INVC16                                     D      19. E*   478.     588.  
+INVC17                                     D      20. E*   478.     588.  
+INVC18                                     D      21. E*   478.     588.  
+INVC19                                     D      22. E*   478.     588.  
+INVC2                                      D       5. E*   475.     585.  
+INVC20                                     D      23. E*   478.     588.  
+INVC21                                     D      24. E*   479.     589.  
+INVC22                                     D      25. E*   479.     589.  
+INVC23                                     D      26. E*   479.     589.  
+INVC24                                     D      27. E*   479.     589.  
+INVC25                                     D      28. E*   479.     589.  
+INVC26                                     D      29. E*   480.     590.  
+INVC27                                     D      30. E*   480.     590.  
+INVC28                                     D      31. E*   480.     590.  
+INVC29                                     D      32. E*   480.     590.  
+INVC3                                      D       6. E*   475.     585.  
+INVC30                                     D      33. E*   480.     590.  
+INVC31                                     D      34. E*   481.     591.  
+INVC32                                     D      35. E*   481.     591.  
+INVC33                                     D      36. E*   481.     591.  
+INVC34                                     D      37. E*   481.     591.  
+INVC4                                      D       7. E*   475.     585.  
+INVC5                                      D       8. E*   475.     585.  
+INVC6                                      D       9. E*   476.     586.  
+INVC7                                      D      10. E*   476.     586.  
+INVC8                                      D      11. E*   476.     586.  
+INVC9                                      D      12. E*   476.     586.  
+INVCHECK                                   D      39.  *   860.  
+INVCKEYZ                                   D      86.  *   403.     404.     405.     406.     407.     408.     413.  
+INVCLOOP                                   X     419.  *   441.     496.     499.     563.  
+INVCOMP                                    D      19. C*   836.      26. H    41. H    62. H    74. H  1015.  
+INVCUST                                    D      22. C*   444.     609.     851.     898.     925.      26. H    41. H
+                                                     *    62. H    74. H
+INVDATE                                    D      23. C*   494.     497.     838.     840.     841.     843.     844.  
+
+
+
+PAGE    6      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+                                                     *   845.     846.     847.     849.      27. H    42. H    63. H    75. H
+INVDTPAY                                   D      46.  *
+INVFOB                                     D      38.  *
+INVKEY                                     D      17. C*   472.     494.     497.     618.     702.     831.     832.  
+                                                     *   899.     908.     917.     924.      26. H    41. H    62. H    74. H
+                                                     *   977.     980.    1013.  
+INVMESG                                    D      48.  *
+INVNUMB                                    D      13. A*
+INVORDNO                                   D      40.  *   854.  
+INVSHIP                                    D      42.  *   856.  
+INVSTAT                                    D      20. C*   435.     437.     603.     667.     738.     853.      26. H
+                                                     *    41. H    62. H    74. H   956.     972.    1013.  
+INVTOTL                                    F      24. C*   794.     862.      27. H    42. H    63. H    75. H
+INVTYPE                                    D      18. C*   449.     457.     471.     502.     612.     852.      26. H
+                                                     *    41. H    62. H    74. H  1013.  
+INVWGHT                                    F      45.  *   859.  
+IOERFILE                                   D      28. A*
+IOSW                                       D      71.  *   256.     383.     385.     387.     430.     601.     687.  
+                                                     *     8. F    28. F    32. F    43. F    31. G    55. G    25. H    34. H
+                                                     *    40. H    48. H    52. H    69. H    82. H    85. H
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+IPACCT                                     D      18.  *   250.     251.     252.     254.     404.     444.     609.  
+                                                     *   851.    1013.  
+IPACCT                                     X     235.  *   229.     253.     259.     266.  
+IPAID                                      F      21.  *   671.     756.     759.     786.     814.     957.    1014.  
+IPCHECK                                    D      15.  *   291.     323.     328.     754.     860.     968.    1015.  
+IPCHKAMT                                   F      17.  *   292.     329.     335.     367.     708.     710.     728.  
+                                                     *   784.     861.    1015.  
+IPCOMP                                     D      88.  *   272.     836.  
+IPDTPAY                                    D      16.  *   295.     296.     298.     300.     303.     305.     306.  
+                                                     *   308.     309.     310.     334.     709.     755.    1015.  
+IPMNTS                                     F      26. C*   747.     758.     787.      27. H    42. H    63. H    75. H
+IPRGDTE                                    D      49. C*   740.      31. H    46. H    67. H    79. H   973.  
+ITEMCNT                                    F      75.  *   401.     424.     425.     440.     461.     475.     483.  
+                                                     *   487.     541.     562.     795.  
+ITEMN                                      F     102.  *   822.     823.     824.     831.  
+ITYPE                                      D      90.  *   456.     459.     495.     498.  
+KEYCHK                                     X     290.  *   299.     301.     344.     356.     361.  
+KILLIT                                     X     667.  *   582.     623.  
+LEFTSIDE                                   X     493.  *   490.  
+LIBIT                                      X     272.  *
+LINENUMB                                   D      91.  *   547.  
+LOOPBACK                                   X     440.  *
+LSTPAYDT                                   D      22. D*   709.      22. F    39. F
+LSTPAYPR                                   F      24. D*   710.      22. F    39. F
+LSTSALDT                                   D      21. D*    22. F    39. F
+LSTSALPR                                   F      23. D*    22. F    39. F
+MM                                         D     110.  *   238.     244.     245.     915.  
+MOREORDR                                   D      41.  *   855.  
+MTDCASH                                    F      39. D*   708.      25. F    42. F
+MTDCRED                                    F      40. D*    25. F    42. F
+NDD                                        D     139.  *   306.     307.     315.  
+
+
+
+PAGE    7      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+NEWPAGE                                    X     507.  *   426.  
+NGINVC                                     X     690.  *   692.  
+NMM                                        D     138.  *   303.     304.     314.  
+NOCHKS                                     X     194.  *   187.  
+NOCRED                                     X     552.  *
+NOCSHOPN                                   X     169.  *   155.  
+NOCTLS                                     X      34. G*    10. G    15. G    29. G    41. G
+NOCUSTFD                                   X      32. F*    27. F    36. F
+NOCUSTO                                    X      11. F*     6. F    17. F
+NODLYCSH                                   X     174.  *   165.  
+NOMORE                                     X     512.  *   431.     445.     539.     550.     558.     610.     625.  
+                                                     *   698.     706.     770.  
+NOMORKY                                    X     522.  *   519.  
+NONEGS                                     X     340.  *   337.  
+NORCVBHD                                   X      11. H*     7. H
+NOSLOTS                                    X     759.  *   750.  
+NOTCRED                                    X     454.  *   450.  
+NOTENUFF                                   X     628.  *   616.  
+NTNFKEY                                    X     630.  *   632.     638.  
+NUMBR                                      F     107.  *   522.     537.  
+NYY                                        D     140.  *   309.     313.  
+OKAYCOMP                                   X     274.  *
+OPENCTLS                                   X       9. G*   183.  
+OPENCUST                                   X       5. F*   181.  
+OPENRCVB                                   X       6. H*
+OPENZ                                      X     181.  *   167.     944.  
+OPENZZ                                     X     199.  *   191.  
+PARTIAL                                    X     956.  *   634.  
+PARTIAL1                                   X     957.  *   987.  
+PAYDATE                                    D     109.  *   237.     245.     246.     247.     248.     294.     295.  
+PD01TO30                                   F      32. D*    24. F    41. F
+PD31TO60                                   F      33. D*    24. F    41. F
+PD61TO90                                   F      34. D*    24. F    41. F
+PDOVR90                                    F      35. D*    25. F    42. F
+PMTINDX                                    F      99.  *   747.     748.     749.     754.     755.     756.     758.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+PREPCSH                                    X     943.  *
+PRTBYP                                     X     443.  *   436.     438.  
+PT2                                        F      77.  *   485.     489.     654.     655.     798.  
+PURGCRED                                   X     574.  *   613.  
+PURGITEM                                   X     686.  *   680.     682.  
+PUTAR                                      X     742.  *   739.  
+PUTCTL                                     X      40. G*   730.     825.  
+PUTCUST                                    X      35. F*   711.  
+PUTRCVB                                    X      60. H*   742.  
+PUTZCTL                                    X     730.  *   727.  
+RCVBFILE                                   i      13. C*   199.       8. H    26. H    41. H    62. H    74. H
+RCVBLOAD                                   X     745.  *   737.  
+RCVBNAME                                   D      14. C*     8. H
+RCVBRTRN                                   X      50. H*    53. H
+RCVBSKS                                    X      72. H*   428.  
+RCVDUPE                                    X      55. H*    39. H
+
+
+
+PAGE    8      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+RCVIOERR                                   X      17. H*    21. H    61. H    73. H
+RCVNTFD                                    X      52. H*    24. H    33. H    58. H
+READCSH                                    X     946.  *   947.  
+RECCNT                                     F     115.  *   166.    1007.    1008.    1013.    1020.    1021.    1026.  
+                                                     *  1027.  
+RECNO                                      F     116.  *   163.     166.  
+RECONSW                                    D     103.  *   368.     371.     681.  
+RECZERO                                    F     114.  *
+REPLY                                      D     100.  *   222.     226.     228.     286.     358.     359.     360.  
+                                                     *   362.  
+RITESIDE                                   X     497.  *   491.  
+ROW                                        F      69.  *   402.     465.     493.     494.     497.     561.     657.  
+                                                     *   658.     659.     661.     662.     663.     804.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SDLRTRN                                    X     505.  *   503.  
+SECNDDSP                                   X     220.  *   231.  
+SECURITY                                   F       9. A*
+SELECTED                                   F      92.  *   537.     538.     541.     585.     652.     803.  
+SEQ                                        F      67.  *   946.  
+SETCASH                                    X     367.  *   363.  
+SETDOLRS                                   X     501.  *   486.  
+SETTYPE                                    X     456.  *   452.  
+SHOWCOMP                                   X     276.  *
+STARTKEY                                   D      98.  *   413.     593.     594.     595.     596.     897.     898.  
+                                                     *   899.     900.      26. H    41. H
+STCSH1                                     X     381.  *   370.  
+SUBDOLS                                    X     684.  *
+TBLKEY                                     D      83.  *   470.     471.     472.     473.     475.     585.     595.  
+TERMNAT                                    X     954.  *   354.  
+TESTCNT                                    F      76.  *   483.     484.     485.     652.     653.     654.     657.  
+                                                     *   661.     797.  
+TESTONE                                    D      18. A*
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TITDISP                                    X     396.  *   388.  
+TITLE                                      X     358.  *   338.     365.  
+TODAY                                      D       8. A*   151.     216.     238.     239.     240.     241.     242.  
+                                                     *   243.     722.     740.     838.     839.     841.     842.     844.  
+                                                     *   848.     973.  
+TOTBAL                                     F      95.  *   642.     645.     648.     684.     800.     959.     969.  
+UPDTCTLS                                   X     714.  *   382.  
+UPDTCUST                                   X     708.  *   386.  
+UPDTINVC                                   X     737.  *   686.     966.  
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+WHATCOMP                                   X     270.  *   264.  
+WOAMOUNT                                   F      52.  *   796.     974.     975.     979.    1016.    1035.  
+WRITECSH                                   X    1003.  *   696.     932.     961.  
+WRITEOFF                                   X     972.  *   636.  
+
+
+
+PAGE    9      CASHNTRY.PLS IDE                                                                               03-27-04 13:17:45
+                                         
+
+WRKFLDS                                    D      79.  *   946.  
+XSTART                                     X     154.  *
+YES6                                       X     467.  *
+YY                                         D     112.  *   242.     247.     914.  
+ZERO                                       F      73.  *   335.     763.    1007.    1027.  
+

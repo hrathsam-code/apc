@@ -1,0 +1,428 @@
+
+
+
+PAGE    1      MSPURHST.DBS IDE                                                                               03-22-04 23:18:55
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "MSPURHST.DBS","F:\PLC\MSPURHST.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    4.    INCLUDE  A: f:\source\mscbrag.txt
+   15.    INCLUDE  B: common.txt
+   27.    INCLUDE  C: mspartsf.txt
+   29.    INCLUDE  D: mspurchf.txt
+   31.    INCLUDE  E: mssalesf.txt
+   58.    INCLUDE  F: apmastfd.txt
+   60.    INCLUDE  G: custmast.txt
+   70.    INCLUDE  H: callerr1.inc
+   72.    INCLUDE  I: callerr2.inc
+   90.    INCLUDE  J: mspartio.txt
+   92.    INCLUDE  K: mssaleio.txt
+   94.    INCLUDE  L: mspoio.txt
+   96.    INCLUDE  M: stdioerr.txt
+   98.    INCLUDE  N: stdfmter.txt
+  100.    INCLUDE  O: stdparer.txt
+  102.    INCLUDE  P: stdrange.txt
+  104.    INCLUDE  Q: custio.txt
+  144.    INCLUDE  R: msptsio.txt
+  363.                                         GOTO      EOJ  IF F5
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  507.    INCLUDE  S: apmastrd.txt
+  596.                                         GOTO      DATAIN
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\mspurhst.plc                                                                                                                                                                                                                                       
+      1405 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 23:18:55 23:18:56
+  00002C88 DATA;  00001500  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+"                                          D      30. I*
+"                                          D     230.  *   126.     195.     196.     197.     198.     199.     200.  
+                                                     *   201.     202.     303.     530.     571.     583.     593.  
+" 0                                        D     114.  *   442.     464.     601.  
+"000                                       D     551.  *
+"000000                                    D     472.  *   478.  
+"01                                        D     416.  *   417.  
+"83                                        D     415.  *
+"APMASTER.ISI                              D     120.  *
+"BG                                        D     395.  *
+"BX                                        D     397.  *
+"C                                         D     491.  *   525.  
+"DISPLAY PURCHASE HISTORY                  D      71.  *
+"EA                                        D     380.  *   385.  
+"FT                                        D     399.  *
+"H                                         D      19. J*    38. J    56. J    71. J    84. J   108. J   121. J   134. J
+                                                     *    15. K    36. K    60. K    75. K    95. K    15. L    36. L    60. L
+                                                     *    75. L    95. L     8. Q    28. Q    43. Q    17. R
+"LB                                        D     393.  *
+"M                                         D      15. J*    33. J    52. J    64. J    82. J    97. J   116. J   129. J
+                                                     *    13. K    30. K    50. K    69. K    89. K    13. L    30. L    50. L
+                                                     *    89. L    32. Q    11. R
+"MSHISTRY                                  D     617.  *
+"MSPARTFL.ISI                              D      16. J*    34. J    98. J   117. J   130. J
+"MSPARTFL/ISI                              D      12. R*
+"MSPTXREF.ISI                              D      53. J*    65. J
+"MSPURCHS.ISI                              D      11. L*
+"MSPURCHS/ISI                              D      28. L*    48. L    67. L    87. L
+"MSSALES.ISI                               D      11. K*
+"MSSALES/ISI                               D      28. K*    48. K    67. K    87. K
+"OPEN                                      D      17. J*    12. K    12. L
+"OZ                                        D     391.  *
+"READ                                      D      35. J*    54. J    29. K    29. L    13. R
+"READKS                                    D      66. J*    99. J    49. K    49. L
+"S                                         D     276.  *   332.  
+"UPDATE                                    D     131. J*    88. K    88. L
+"V                                         D     504.  *   528.  
+"WRITE                                     D     118. J*    68. K    68. L
+"X                                         D      69. L*   609.  
+0                                          F     407.  *   411.  
+1                                          F     421.  *   427.  
+13                                         F     423.  *
+20                                         F     214.  *   257.     328.  
+21                                         F     208.  *
+32                                         F     429.  *
+6                                          F     190.  *   212.  
+7                                          F     219.  *
+80                                         F     433.  *
+ACCKEY                                     D       9. F*   505.       2. S
+ACCNO                                      D      13. F*     2. S
+ACCST                                      D      21. F*     3. S
+ACCTNUMB                                   D      14. B*
+ADD1                                       D      15. F*     2. S
+
+
+
+PAGE    3      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+ADD2                                       D      16. F*     2. S
+ALLSW                                      D      18.  *   126.     160.     169.  
+APCONTRL                                   F      43. F*
+APMASTER                                   i      22.  *   120.       2. S
+APOVRFLG                                   D      10. F*
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+BLANK30                                    D      62.  *   194.  
+BUMPCSUF                                   X     598.  *   572.  
+CHECKPT2                                   X     341.  *   286.     287.     295.     297.  
+CHKDATA                                    X     530.  *   502.     512.     526.     535.  
+CINDX1                                     F      34.  *   598.     599.     600.  
+CITY                                       D      17. F*     2. S
+CLEANUP                                    X     592.  *
+CLRPART                                    X     194.  *   122.     133.  
+CLRTRAPS                                   X       7. J*   106.       6. R   570.     580.  
+COMMCODE                                   D      26. G*    23. Q    40. Q
+CONT                                       D      36. F*     5. S
+CRDRAT                                     D      22. F*     3. S
+CSTNAME                                    D      25.  *     7. Q
+CURNTDUE                                   F      31. G*    24. Q    41. Q
+CURR                                       F      26. F*     4. S
+CUSTADDR                                   D      11. G*    19. Q    37. Q
+CUSTADR2                                   D      12. G*
+CUSTCATG                                   D      17. G*    21. Q    38. Q
+CUSTCITY                                   D      13. G*    20. Q    38. Q
+CUSTCRED                                   F      16. G*    20. Q    38. Q
+CUSTFILE                                   i      24.  *     7. Q    19. Q    37. Q
+CUSTKEY                                    D       8. G*    19. Q    37. Q   492.  
+CUSTNAME                                   D      10. G*    19. Q    37. Q   500.  
+CUSTOMER                                   X     549.  *
+CUSTSTAT                                   D      14. G*    20. Q    38. Q
+CUSTSTTS                                   D       9. G*    19. Q    37. Q
+CUSTZIP                                    F      15. G*    20. Q    38. Q
+CYCLOUT                                    X     219.  *   215.  
+D                                          O 5    12. H*    13. I    16. I    31. I
+DATAIN                                     X     207.  *   191.     542.     587.     594.     596.  
+DATE6                                      D      10. B*
+DATEIN                                     D      48.  *   436.     437.     438.     439.     440.     441.     442.  
+                                                     *   557.  
+DATEIN                                     X     415.  *   470.  
+DATERR                                     X     467.  *   422.     424.     428.     430.     434.  
+DCUST                                      X     500.  *   495.  
+DDATA                                      D      13. H*    13. I
+DIN                                        D      37.  *   417.     418.     426.     438.  
+DISPLAY                                    X      75.  *
+DISPPART                                   X     181.  *   153.     170.     173.  
+DISPQTY                                    F      64.  *   249.     252.     319.     323.  
+DIVNO                                      D      35. F*     5. S
+DNAME                                      D      51.  *
+DOMORE                                     X     122.  *   131.     158.     178.     361.     588.  
+DT6                                        D      35.  *   446.     449.     451.     453.     455.     457.     459.  
+                                                     *   460.     462.     464.     550.  
+
+
+
+PAGE    4      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+ENVS                                       D      11. B*
+EOJ                                        X     615.  *   128.     136.     164.     363.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+EXT                                        D      34. F*     5. S
+FIRSTIME                                   D      17. B*
+FKEYOK                                     X     278.  *   272.  
+FORM2                                      F      39.  *   420.     421.     423.     426.     427.     429.     432.  
+                                                     *   433.  
+FROMPGM                                    D      16. B*    28. I
+FUT                                        D      38. F*     5. S
+GETCUST                                    X      16. Q*   493.  
+GETDATA                                    X     228.  *   210.     374.  
+GETSALES                                   X     281.  *   237.     240.  
+GETSTUFF                                   X     614.  *
+GPO                                        X     376.  *   365.     367.     369.     371.  
+GVEND                                      X     472.  *   465.     498.     516.  
+INDXIT                                     X      26. I*    22. I
+INVALID                                    X     155.  *   146.  
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*    16. J    34. J    53. J    65. J    98. J   117. J   130. J
+                                                     *    11. K    28. K    48. K    67. K    87. K    11. L    28. L    48. L
+                                                     *    67. L    87. L    10. M    11. N    11. O    11. P    12. R
+IOSW                                       D      17.  *    15. J    19. J    33. J    38. J    52. J    56. J    64. J
+                                                     *    71. J    82. J    84. J    97. J   108. J   116. J   121. J   129. J
+                                                     *   134. J    13. K    15. K    30. K    36. K    50. K    60. K    69. K
+                                                     *    75. K    89. K    95. K    13. L    15. L    30. L    36. L    50. L
+                                                     *    60. L    69. L    75. L    89. L    95. L     8. Q    28. Q    32. Q
+                                                     *    43. Q    11. R    17. R   152.     163.     236.     294.     308.  
+                                                     *   350.     494.     571.     576.     578.     609.  
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*    17. J    35. J    54. J    66. J    99. J   118. J   131. J
+                                                     *    12. K    29. K    49. K    68. K    88. K    12. L    29. L    49. L
+                                                     *    68. L    88. L    10. M    11. N    11. O    11. P    13. R
+LPAGE                                      F      44. F*
+LPAT                                       F      33. F*     5. S
+LSTPAYDT                                   D      22. G*    22. Q    39. Q
+LSTPAYPR                                   F      24. G*    22. Q    39. Q
+LSTSALDT                                   D      21. G*    22. Q    39. Q
+LSTSALPR                                   F      23. G*    22. Q    39. Q
+MAINLINE                                   X      30. I*    22. I
+MDAY                                       D      31. F*     4. S
+MIN                                        D      36.  *   416.     418.     420.     437.  
+MMON                                       D      30. F*     4. S
+MOREDATA                                   X     583.  *   590.  
+MSDESC                                     D      16. C*    36. J   101. J   119. J   132. J    14. R   185.     199.  
+MSPARTFL                                   i      10. C*    18. J    36. J   101. J   119. J   132. J    14. R
+MSPARTKY                                   D      20. C*    36. J    43. J   119. J   142.      14. R   150.     292.  
+                                                     *   347.     356.  
+MSPARTNM                                   D      11. C*    18. J
+MSPARTNO                                   D      14. C*    36. J   101. J   119. J   132. J   135.     138.     142.  
+
+
+
+PAGE    5      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+                                                     *    14. R   172.     181.     195.     229.     239.     284.     302.  
+                                                     *   310.     549.  
+MSPARTSV                                   D      21. C*
+MSPODATE                                   D      30. D*    33. L    53. L    72. L    92. L   253.     324.  
+MSPODUPE                                   X      78. L*    63. L
+MSPOJULD                                   D      17. D*    32. L    52. L    71. L    91. L
+MSPOKEY                                    D      36. D*    32. L    40. L    71. L   228.     229.     230.     231.  
+                                                     *   232.     301.     302.     303.     304.     305.  
+MSPONUMB                                   D      22. D*    33. L    53. L    72. L    92. L   251.     322.  
+MSPOOPEN                                   X       7. L*   118.  
+MSPOPART                                   D      16. D*    32. L    52. L    71. L    91. L   232.     239.     305.  
+                                                     *   310.  
+MSPOPRC                                    F      28. D*    34. L    54. L    73. L    93. L   253.     324.  
+MSPOQTY                                    F      26. D*    33. L    53. L    72. L    92. L   249.     319.  
+MSPORDKS                                   X      44. L*   234.     307.  
+MSPOREAD                                   X      24. L*
+MSPORTRN                                   X      17. L*    58. L
+MSPOSTAT                                   D      12. D*
+MSPOSUFX                                   D      18. D*    32. L    52. L    71. L    91. L
+MSPOTYPE                                   D      20. D*    32. L    52. L    71. L    91. L   245.     251.     316.  
+                                                     *   322.  
+MSPOUOP                                    D      24. D*    33. L    53. L    72. L    92. L   252.     323.  
+MSPOUPDT                                   X      83. L*
+MSPOVEND                                   D      32. D*    33. L    53. L    72. L    92. L   254.     325.  
+MSPOVNAM                                   D      34. D*    34. L    54. L    73. L    93. L   254.     325.  
+MSPOWRIT                                   X      63. L*
+MSPTNOTF                                   X      42. J*    29. J     7. R
+MSPTOPEN                                   X      14. J*   117.  
+MSPTRDKS                                   X      93. J*   162.  
+MSPTREAD                                   X      29. J*   293.     349.     357.  
+MSPTRTRN                                   X     109. J*    48. J    69. J   104. J
+MSPTSRD                                    X       6. R*
+MSPTUPDT                                   X     125. J*
+MSPTWRIT                                   X     112. J*
+MSPTXKY1                                   D      44. C*    55. J    67. J    83. J
+MSPTXKY2                                   D      45. C*    55. J    67. J    83. J
+MSPTXREF                                   i      39. C*    55. J    67. J    83. J
+MSPTXRNM                                   D      40. C*
+MSPURCHS                                   i       9. D*    14. L    31. L    32. L    51. L    52. L    70. L    71. L
+                                                     *    90. L    91. L   232.     305.  
+MSPURNM                                    D      10. D*    14. L
+MSSALEFL                                   i       9. E*    14. K    31. K    32. K    51. K    52. K    70. K    71. K
+                                                     *    90. K    91. K
+MSSALEKY                                   D      37. E*    32. K    40. K    71. K    79. K    79. L   560.     561.  
+                                                     *   565.     566.     567.     568.     603.     604.     605.     606.  
+                                                     *   607.  
+MSSALENM                                   D      10. E*    14. K
+MSSIZE                                     D      15. C*    36. J   101. J   119. J   132. J    14. R   184.     198.  
+MSSLCNAM                                   D      35. E*    34. K    54. K    73. K    93. K   559.  
+MSSLCUST                                   D      33. E*    34. K    54. K    73. K    93. K   558.  
+MSSLDATE                                   D      31. E*    33. K    53. K    72. K    92. K   557.  
+MSSLDUPE                                   X      78. K*    63. K
+MSSLJULD                                   D      17. E*    32. K    52. K    71. K    91. K   550.     565.  
+
+
+
+PAGE    6      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+MSSLNUMB                                   D      22. E*    33. K    53. K    72. K    92. K   553.  
+MSSLOPEN                                   X       7. K*
+MSSLPART                                   D      16. E*    32. K    52. K    71. K    91. K   549.     561.  
+MSSLPRC                                    F      29. E*    34. K    54. K    73. K    93. K   556.  
+MSSLQTY                                    F      27. E*    33. K    53. K    72. K    92. K   555.  
+MSSLRDKS                                   X      44. K*
+MSSLREAD                                   X      24. K*
+MSSLRTRN                                   X      17. K*    58. K
+MSSLSTAT                                   D      12. E*
+MSSLSUFX                                   D      18. E*    32. K    52. K    71. K    91. K   551.     566.     598.  
+                                                     *   600.     601.     604.  
+MSSLTYPE                                   D      20. E*    32. K    52. K    71. K    91. K   552.  
+MSSLUOP                                    D      24. E*    33. K    53. K    72. K    92. K   554.  
+MSSLUPDT                                   X      83. K*
+MSSLWRIT                                   X      63. K*   581.  
+MSSTATUS                                   D      13. C*    36. J   101. J   119. J   132. J    14. R
+MSXRFKEY                                   D      47. C*    55. J    83. J
+MSXRFPT1                                   D      17. C*    37. J   102. J   120. J   133. J    15. R   182.     187.  
+                                                     *   196.  
+MSXRFPT2                                   D      18. C*    37. J   102. J   120. J   133. J    15. R   183.     188.  
+                                                     *   197.  
+MSXRFRD                                    X      48. J*
+MSXRFRKS                                   X      60. J*
+MSXRFWRT                                   X      78. J*
+MTDC                                       F      28. F*     4. S
+MTDCASH                                    F      39. G*    25. Q    42. Q
+MTDCRED                                    F      40. G*    25. Q    42. Q
+MTDD                                       F      27. F*     4. S
+MYEAR                                      D      32. F*     4. S
+NAME                                       D      14. F*     2. S   510.  
+NAMEIN                                     D      50.  *   500.     501.     510.     511.     519.     559.  
+NAMEIN                                     X     519.  *   479.  
+NAMEOK                                     X     116.  *
+NCOL                                       F      56.  *
+NM1                                        X     528.  *   521.     523.  
+NOCUSTFD                                   X      32. Q*    27. Q    36. Q
+NOCUSTO                                    X      11. Q*     6. Q    17. Q
+NOMSPART                                   X      23. J*    14. J    26. J
+NOPOFND                                    X      39. L*    24. L    35. L
+NOPURCH                                    X      19. L*     7. L    22. L
+NOSALE                                     X      19. K*     7. K    22. K
+NOSLFND                                    X      39. K*    24. K    35. K
+NROW                                       F      55.  *   190.     207.     208.     212.     213.     214.     216.  
+                                                     *   219.     251.     252.     253.     254.     256.     257.     322.  
+                                                     *   323.     324.     325.     327.     328.     373.     377.     378.  
+                                                     *   381.     404.     408.     409.     412.     413.     418.     469.  
+                                                     *   473.     501.     511.     519.     540.     541.  
+NULL                                       X      24. I*    22. I
+OPENCUST                                   X       5. Q*   116.  
+OVR30                                      F      25. F*     3. S
+OVR60                                      F      24. F*     3. S
+OVR90                                      F      23. F*     3. S
+PARTIN                                     X     133.  *   129.     264.     333.  
+
+
+
+PAGE    7      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+PARTIN1                                    X     135.  *
+PD01TO30                                   F      32. G*    24. Q    41. Q
+PD31TO60                                   F      33. G*    24. Q    41. Q
+PD61TO90                                   F      34. G*    24. Q    41. Q
+PDOVR90                                    F      35. G*    25. Q    42. Q
+PO2                                        X     284.  *   281.  
+POIN                                       D      44.  *   377.     378.     553.  
+POLOOP1                                    X     234.  *   246.     265.  
+POLOOP2                                    X     307.  *   317.     335.  
+PONUMBS                                    D      12. B*
+PORECS                                     X     613.  *   545.  
+PORTN                                      D       7. B*   113.  
+PORTX                                      D      53.  *   113.     114.  
+POSLLOOP                                   X     301.  *   296.     353.  
+POSLRTRN                                   X     339.  *   337.  
+PRCIN                                      F      47.  *   411.     412.     413.     556.  
+PRCIN                                      X     411.  *
+PUTCUST                                    X      35. Q*
+QTYIN                                      F      46.  *   407.     408.     409.     555.  
+QTYIN                                      X     407.  *   386.     388.     390.     392.     394.     396.     398.  
+                                                     *   400.  
+RCYCLE                                     X     213.  *   217.  
+RDKSALL                                    X     160.  *   127.  
+READKS                                     X     162.  *
+RECORDS                                    X     544.  *   533.  
+RECYCLE                                    X     212.  *   203.     209.     278.  
+REPLY                                      D      41.  *    30. I   124.     269.     530.     531.     532.     534.  
+                                                     *   583.     585.     593.  
+RESTRPRT                                   X     356.  *   345.     351.  
+RESULT                                     F      11. H*    16. I    22. I
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVEPART                                   D      63.  *   150.     172.     284.     356.  
+SECURITY                                   F       9. B*
+SETSTOP                                    X     276.  *   271.  
+SL2                                        X     337.  *   309.     311.  
+START                                      X     106.  *    88.  
+STATE                                      D      18. F*     2. S
+STDFMTER                                   X       9. N*    30. J    49. J    61. J    79. J    94. J   115. J   128. J
+                                                     *     9. K    26. K    46. K    65. K    85. K     9. L    26. L    46. L
+                                                     *    65. L    85. L    14. N   110.       8. R
+STDIOERR                                   X       8. M*    60. J    93. J   112. J   125. J    44. K    83. K    44. L
+                                                     *    83. L    13. M   108.  
+STDPARER                                   X       9. O*    31. J    50. J    62. J    80. J    95. J   113. J   126. J
+                                                     *     8. K    25. K    45. K    64. K    84. K     8. L    25. L    45. L
+                                                     *    64. L    84. L    14. O   109.       9. R
+STDRANGE                                   X       9. P*    32. J    51. J    63. J    81. J    96. J   114. J   127. J
+                                                     *    10. K    27. K    47. K    66. K    86. K    10. L    27. L    47. L
+                                                     *    66. L    86. L    14. P   111.      10. R
+STOPDISP                                   X     267.  *   261.     274.     329.     342.     343.     354.  
+STOPSW                                     D      65.  *   202.     263.     276.     332.  
+TAXC                                       D      20. F*     3. S
+
+
+
+PAGE    8      MSPURHST.DBS IDE                                                                               03-22-04 23:18:57
+                                         
+
+TELEFONE                                   D      37. F*
+TESTIT                                     X      22. I*    16. I
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TITLTEXT                                   D       9. H*    71.      15. I
+TODAY                                      D       8. B*    76.     448.     449.     452.     453.     456.     457.  
+                                                     *   463.  
+TOTDUE                                     F      29. F*     4. S
+TYPEIN                                     D      43.  *   364.     366.     368.     370.     484.     486.     520.  
+                                                     *   522.     552.  
+UOP                                        X     380.  *   405.  
+UOPIN                                      D      45.  *   380.     381.     385.     387.     389.     391.     393.  
+                                                     *   395.     397.     399.     554.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDIN                                     D      49.  *   472.     473.     478.     492.     505.     558.  
+VENDNUMB                                   D      15. B*
+VENDOR                                     X     504.  *   485.     487.  
+VNDNG                                      X     514.  *   509.  
+WCUSTREC                                   X     570.  *   577.  
+WHCH                                       D      40.  *   491.     504.     525.     528.     544.  
+WHICH                                      X     484.  *
+XREF1                                      D      19.  *   187.     200.     285.     292.  
+XREF2                                      D      20.  *   188.     201.     341.     344.     347.  
+XRFEXIST                                   X      87. J*    78. J
+YIN                                        D      38.  *   415.     418.     432.     439.  
+ZIP                                        D      19. F*     2. S
+

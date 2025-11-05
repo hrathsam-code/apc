@@ -1,0 +1,52 @@
+
+
+
+PAGE    1      prtagear                                                                                       02-11-19 11:35:58
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP prtagear -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   40.    INCLUDE  A: common.inc
+   41.    INCLUDE  B: workvar.inc
+  284. B   INCLUDE  C: macrolib.inc
+  285. B   INCLUDE  D: users.fd
+   86. D    INCLUDE  E: users.io
+   84.    INCLUDE  F: artrn.fd
+  159. F   INCLUDE  G: artrn.io
+   86.    INCLUDE  H: cmpny.fd
+   89. H   INCLUDE  I: cmpny.io
+   89.    INCLUDE  J: sequence.fd
+   73. J   INCLUDE  K: sequence.io
+   90.    INCLUDE  L: cust.fd
+  187. L   INCLUDE  M: cust.io
+   92.    INCLUDE  N: printrtn.inc
+   76. N   INCLUDE  O: printvia.plf
+   77. N   INCLUDE  P: prntprog.plf
+  119. N   INCLUDE  Q: print.fd
+   85. Q    INCLUDE  R: print.io
+   94.    INCLUDE  S: splopnfd.txt
+   14. S                              DBOX     DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   96.    INCLUDE  T: prtagear.plf
+ 1368m C    00001A24                               MOVE              CustomerTITLE,#SearchFileName
+                                                                                  *ERROR*  
+Invalid OPERAND: Undefined variable 'CUSTOMERTITLE'.
+ 1368m C    00001AAA                               MOVE              CustomerTITLE,#SearchFileName
+                                                                                  *ERROR*  
+Invalid OPERAND: Undefined variable 'CUSTOMERTITLE'.
+ 1313m C  1 00001B4C                                 MOVE               CustomerTITLE,#SearchFileName
+                                                                                     *ERROR*  
+Invalid OPERAND: Undefined variable 'CUSTOMERTITLE'.
+ 1313m C  1 00001BF0                                 MOVE               CustomerTITLE,#SearchFileName
+                                                                                     *ERROR*  
+Invalid OPERAND: Undefined variable 'CUSTOMERTITLE'.
+  116.    INCLUDE  U: temporary.inc
+  138.    INCLUDE  V: splopnpr.txt
+
+   Output: c:\apc\plc\prtagear.plc                                                                                                                                                                                                                                   
+      8100 LINES;      4 ERRORS;      1 WARNINGS; Start/Stop: 11:35:58 11:35:59
+  00045A00 DATA;  00002610  CODE;   SYMBOL TABLE USAGE:  UDA:   1% EXE:   0%
+

@@ -1,0 +1,417 @@
+. NEWUSER - PROGRAM TO UPDATE THE LIST OF AUTHORIZED USERS
+.
+         INCLUDE   COMMON
+*................................................................
+CFILE    FILE
+SEQ      FORM      "-1"
+*................................................................
+USERS    IFILE       KEYL=9
+USERID   DIM       9
+NAME     DIM       20
+CLRANCE  FORM      1
+*................................................................
+NWK9     FORM      9
+CWK1     DIM       1
+REPLY    DIM       1
+INDEX    FORM      2                   USER SELECTION VARIABLE
+ROLLFILE INIT      "ROLLFILE/SYST:W"
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY CLEARANCE OF AT LEAST 8
+.
+.....    COMPARE   "8" TO SECURITY
+.....    STOP      IF LESS
+*................................................................
+. PREPARE THE CHAIN FILE
+.
+         GOTO      OPENUSER
+         TRAP      NOCHAIN IF IO
+         PREPARE   CFILE,"ROLCHAIN"
+         TRAPCLR   IO
+         WRITE     CFILE,SEQ;"//* TAP THE DISPLAY KEY TO ":
+                                "RE-ORGANIZE THE LIST OF ":
+                                "AUTHORIZED USERS"
+         WRITE     CFILE,SEQ;"//."
+         GOTO      OPENUSER
+*................................................................
+. CHAIN FILE COULD NOT BE CREATED
+.
+NOCHAIN  DISPLAY   *ES:
+                   *P20:4,"CHAIN FILE COULD NOT BE WRITTEN!":
+                   *W,*W
+         STOP
+*................................................................
+. OPEN THE FILE OF AUTHORIZED USERS
+.
+OPENUSER TRAP      NOUSER IF IO
+         OPEN      USERS,"USERS"
+         TRAPCLR   IO
+         GOTO      MENU
+*................................................................
+. FILE OF AUTHORIZED USERS NOT THERE
+.
+NOUSER   KEYIN     *ES:
+                   *P20:4,"The list of authorized users is":
+                   *P20:5,"missing.":
+                   *P1:12,"Do you want to create a new list? ":
+                   *EL,REPLY
+         CMATCH    "Y" TO REPLY
+         STOP      IF NOT EQUAL
+*................................................................
+. CREATE A NEW LIST OF AUTHORIZED USERS
+.
+         DISPLAY   *ES:
+                   *P20:4,"Writing the chain file."
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"//. BUILD THE FILE CONTAINING ":
+                                "THE LIST OF AUTHORIZED USERS"
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"BUILD USERS/DSP:W;!"
+         WRITE     CFILE,SEQ;"   SSN   USER'S NAME      ":
+                             "SECURITY"
+         WRITE     CFILE,SEQ;"(       )(                ":
+                             "  )_( . . ."
+         WRITE     CFILE,SEQ;"!"
+         CALL      CHAINROL
+         GOTO      OPENUSER
+*................................................................
+. DISPLAY THE MENU
+.
+MENU     DISPLAY   *ES:
+                   "PROGRAM TO UPDATE THE LIST OF AUTHORIZED USERS":
+                   *P51:1,"Today is ",TODAY:
+                   *P01:03,"( 1) ":
+                   "Authorize a new user":
+                   *P01:04,"( 2) ":
+                   "Modify a user's authorization":
+                   *P01:05,"( 3) ":
+                   "Remove a user from the list":
+                   *EL
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX KEYIN     *P1:12,*EL,"Selection by number":
+                   *P41:12,"Enter (99) to continue.":
+                   *P25:12,"__",*P25:12,INDEX
+         COMPARE   "1" TO INDEX
+         GOTO      GETINDEX IF LESS
+         COMPARE   "99" TO INDEX
+         GOTO      WRTCHAIN IF EQUAL
+         COMPARE   "04" TO INDEX
+         GOTO      GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE ROUTINE INDICATED BY THE INDEX
+.
+         BRANCH    INDEX OF ADD:  Authorize a new user
+                            CHANGE:  Modify a user's authorizatio
+                            DELETE   Remove a user from the list
+         GOTO      GETINDEX
+*................................................................
+. Authorize a new user
+.
+*................................................................
+. DISPLAY THE FORM
+.
+ADD      DISPLAY   *ES:
+                   *P25:6,"_________ ____________________ _"
+*................................................................
+. GET THE USER'S ID #
+.
+GETIDN   CALL      GETID
+         CMATCH    " " TO USERID
+         GOTO      GETNME IF NOT EOS
+*................................................................
+. ASK IF HE IS DONE WITH THIS ENTRY
+.
+         KEYIN     *P25:4,*EL:
+                   *P1:12,"Are you done? (Y/N) ",*EL,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      MENU IF EQUAL
+         GOTO      ADD
+*................................................................
+. GET THE USER'S NAME
+.
+GETNME   CALL      GETNAME
+         GOTO      GETCLR IF NOT EOS
+*................................................................
+. ASK IF DONE WITH THIS ENTRY
+.
+ASKDONEN KEYIN     *P1:12,"Do you want to re-enter the (I)dent":
+                   "ification number or the (N)ame? ",*EL,REPLY
+         CMATCH    "N" TO REPLY
+         GOTO      GETNME IF EQUAL
+         CMATCH    "I" TO REPLY
+         GOTO      GETIDN IF EQUAL
+         GOTO      ASKDONEN
+*................................................................
+. GET THE USER'S SECURITY CLEARANCE
+.
+GETCLR   CALL      GETCLEAR
+         COMPARE   "0" TO CLRANCE
+         GOTO      WRTNEWU IF NOT EQUAL
+*................................................................
+. ASK IF DONE WITH THIS ENTRY
+.
+ASKDONEC KEYIN     *P1:12,"Re-enter (I)d number, (N)ame, ":
+                   "(C)learance or enter (Z)ero clearance? ":
+                   *EL,REPLY
+         CMATCH    "I" TO REPLY
+         GOTO      GETIDN IF EQUAL
+         CMATCH    "N" TO REPLY
+         GOTO      GETNME IF EQUAL
+         CMATCH    "C" TO REPLY
+         GOTO      GETCLR IF EQUAL
+         CMATCH    "Z" TO REPLY
+         GOTO      ASKDONEC IF NOT EQUAL
+*................................................................
+. ADD THE USER TO THE LIST OF AUTHORIZED USERS
+.
+WRTNEWU  CALL      INSERT
+         GOTO      ADD
+*................................................................
+. Remove a user from the list
+.
+*................................................................
+. GET THE USER TO BE DELETED
+.
+DELETE   CALL      GETUSER
+         CMATCH    " " TO USERID
+         GOTO      VERIFY IF NOT EOS
+*................................................................
+. ASK IF DONE WITH THIS ENTRY
+.
+         KEYIN     *P1:12,"Are you done? (Y/N) ",*EL,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      MENU IF EQUAL
+         GOTO      DELETE
+*................................................................
+. MAKE SURE HE WANTS TO DELETE BEFORE REMOVING
+.
+VERIFY   KEYIN     *P1:12,"Is this the entry to be removed? ":
+                   *EL,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      DELETE IF NOT EQUAL
+*
+         DELETE    USERS,USERID
+         GOTO      DELETE
+*................................................................
+. Modify a user's authorization
+.
+*................................................................
+. GET THE ENTRY FROM THE LIST TO BE MODIFIED
+.
+CHANGE   CALL      GETUSER
+         CMATCH    " " TO USERID
+         GOTO      ASKMOD IF NOT EOS
+*................................................................
+. ASK IF DONE WITH ENTRY
+.
+         KEYIN     *P1:12,"Are you done? (Y/N) ",*EL,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      MENU IF EQUAL
+         GOTO      CHANGE
+*................................................................
+. FIND OUT WHAT HE WANTS TO DO WITH IT
+.
+ASKMOD   KEYIN     *P1:12,"(D)one, modify (I)d number, ":
+                   "modify (N)ame, or ":
+                   "modify security (C)learance? ",*EL,REPLY
+         CMATCH    "D" TO REPLY
+         GOTO      WRTMOD IF EQUAL
+         CMATCH    "I" TO REPLY
+         GOTO      IDMOD IF EQUAL
+         CMATCH    "N" TO REPLY
+         GOTO      NAMEMOD IF EQUAL
+         CMATCH    "C" TO REPLY
+         GOTO      CLRMOD IF EQUAL
+         GOTO      ASKMOD
+*................................................................
+. MODIFY THE SECURITY CLEARANCE
+.
+CLRMOD   CALL      GETCLEAR
+         COMPARE   "0" TO CLRANCE
+         GOTO      ASKMOD IF NOT EQUAL
+*................................................................
+. ASK IF DONE WITH ENTRY
+.
+ASKDONEZ KEYIN     *P1:12,"(D)one or enter (Z)ero security ":
+                   "clearance? ",*EL,REPLY
+         CMATCH    "D" TO REPLY
+         GOTO      WRTMOD IF EQUAL
+         CMATCH    "Z" TO REPLY
+         GOTO      ASKDONEZ IF NOT EQUAL
+         GOTO      ASKMOD
+*................................................................
+. MODIFY THE NAME
+.
+NAMEMOD  CALL      GETNAME
+         GOTO      ASKMOD IF NOT EOS
+*................................................................
+. ASK IF DONE WITH ENTRY
+.
+         KEYIN     *P1:12,"Are you done? (Y/N) ",*EL,REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      WRTMOD IF EQUAL
+         GOTO      ASKMOD
+*................................................................
+. MODIFY THE IDENTIFICATION NUMBER
+.
+*................................................................
+. DELETE THE OLD USER ID
+.
+IDMOD    DELETE    USERS,USERID
+*................................................................
+. GET THE NEW ID NUMBER
+.
+NEWID    CALL      GETID
+         CMATCH    " " TO USERID
+         GOTO      NEWID IF EOS
+*................................................................
+. INSERT THE NEW USER INTO THE LIST OF AUTHORIZED USERS
+.
+         CALL      INSERT
+         GOTO      CHANGE
+*................................................................
+. UPDATE THE ENTRY
+.
+WRTMOD   UPDATE    USERS;USERID,NAME,CLRANCE
+         GOTO      CHANGE
+*................................................................
+. WRITE THE CHAIN FILE
+.
+WRTCHAIN DISPLAY   *ES,*P25:4,"Writing the CHAIN file."
+         CALL      CHAINROL
+         STOP
++................................................................
+. GET THE USER'S ID NUMBER
+.
+GETID    CLEAR     USERID
+         KEYIN     *P25:4,"To exit, tap the ENTER key":
+                   *P25:6,"_________",*P1:12:
+                   "Enter the user's identification number.",*EL:
+                   *P25:6,NWK9:
+                   *P25:4,*EL
+         COMPARE   "0" TO NWK9
+         RETURN    IF EQUAL
+....     COMPARE   "100000000" TO NWK9
+....     GOTO      GETID IF LESS
+         MOVE      NWK9 TO USERID
+         RETURN
+*................................................................
+. GET THE USER'S SECURITY CLEARANCE
+.
+GETCLEAR KEYIN     *P25:4,"To exit, tap the ENTER key":
+                   *P56:6,"_",*P1:12:
+                   "Enter the user's security clearance.",*EL:
+                   *P56:6,CLRANCE:
+                   *P25:4,*EL
+         DISPLAY   *P56:6,CLRANCE
+         MOVE      CLRANCE TO CWK1
+         CMATCH    "-" TO CWK1
+         GOTO      GETCLEAR IF EQUAL
+         RETURN
+*................................................................
+. GET THE USER'S NAME
+.
+GETNAME  KEYIN     *P25:4,"To exit, tap the ENTER key":
+                   *P35:6,"____________________",*P1:12:
+                   "Enter the user's name.",*EL:
+                   *P35:6,*IT,NAME,*IN:
+                   *P25:4,*EL
+         DISPLAY   *P35:6,NAME
+         CMATCH    " " TO NAME
+         GOTO      GETNAME IF EQUAL
+         RETURN
+*................................................................
+. GET AND DISPLAY AN ENTRY FROM THE LIST OF AUTHORIZED USERS
+.
+*................................................................
+. GET THE USER'S ID #
+.
+GETUSER  DISPLAY   *ES
+         CALL      GETID
+         CMATCH    " " TO USERID
+         RETURN    IF EOS
+*................................................................
+. SEE IF THE USER IS ACTUALLY ON THE LIST
+.
+         READ      USERS,USERID;USERID,NAME,CLRANCE
+         GOTO      SHOWUSER IF NOT OVER
+*................................................................
+. USER NOT FOUND
+.
+         BEEP
+         DISPLAY   *P25:4,"That user could not be found",*EL:
+                   *W,*W
+         GOTO      GETUSER
+*................................................................
+. PUT THE ENTRY ONTO THE SCREEN
+.
+SHOWUSER DISPLAY   *ES,*P25:4,"That user is:":
+                   *P25:6,USERID," ",NAME," ",CLRANCE
+         RETURN
+*................................................................
+. INSERT A NEW USER INTO THE LIST OF AUTHORIZED USERS
+.
+INSERT   TRAP      NOWRITE IF IO
+         WRITE     USERS,USERID;NWK9,NAME,CLRANCE
+         TRAPCLR   IO
+         RETURN
+*................................................................
+. USER ID IS ALREADY IN USE
+.
+NOWRITE  BEEP
+         DISPLAY   *P1:12,*EL:
+                   *P25:4,"That user id. is already in use!",*EL:
+                   *W,*W,*W
+         RETURN
+*................................................................
+. WRITE THE CHAIN FILE
+*................................................................
+. WRITE REFORMAT LINES
+.
+CHAINROL WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"//. REFORMAT THE LIST OF ":
+                                "AUTHORIZED USERS"
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"REFORMAT USERS/DSP;R"
+*................................................................
+. WRITE THE INDEX LINES
+.
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"//. INDEX THE LIST OF ":
+                                "AUTHORIZED USERS"
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"INDEX USERS/DSP;1-9"
+*................................................................
+. WRITE ROLLOUT RETURN LINES
+.
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"//. RETURN TO DATASHARE"
+         WRITE     CFILE,SEQ;"//."
+         WRITE     CFILE,SEQ;"DATABUS ROLLFILE/SYST;ROLLBACK"
+*................................................................
+. WRITE EOF'S TO THE FILES
+.
+         WEOF      CFILE,SEQ
+*................................................................
+. ROLLOUT TO THE CHAIN FILE
+.
+         DISPLAY   *ES,*P25:4,"Rolling out to reorganize the":
+                   *P25:5,"file of authorized users."
+         TRAP      NOROLL IF CFAIL
+         ROLLOUT   "CHAIN ROLCHAIN",ROLLFILE
+         TRAPCLR   CFAIL
+         RETURN
+*................................................................
+. ROLLOUT NOT POSSIBLE
+.
+NOROLL   KEYIN     *ES:
+                   *P20:4,"The chain file has been written, but":
+                   *P20:5,"the rollout to it failed.  Use the":
+                   *P20:6,"following DOS command line to update":
+                   *P20:7,"the list of authorized users:":
+                   *P20:8,"#"CHAIN ROLCHAIN#"",REPLY
+         STOP

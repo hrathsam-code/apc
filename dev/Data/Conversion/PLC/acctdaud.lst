@@ -1,0 +1,236 @@
+
+
+
+PAGE    1      ACCTDAUD.PLS IDE                                                                               03-22-04 20:06:55
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "ACCTDAUD.PLS","F:\PLC\ACCTDAUD.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    3.    INCLUDE  A: f:\source\mscbrag.txt
+    5.    INCLUDE  B: common.pls
+   70.    INCLUDE  C: callerr1.inc
+   74.    INCLUDE  D: callerr2.inc
+  302.                                         KEYIN     *P21:07,*RV,TELEFONE
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\acctdaud.plc                                                                                                                                                                                                                                       
+       605 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 20:06:55 20:06:56
+  0000195C DATA;  00000916  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      ACCTDAUD.PLS IDE                                                                               03-22-04 20:06:56
+                                         
+
+"                                          D      30. D*   149.     193.  
+"000000                                    D     342.  *   379.  
+"C                                         D     215.  *
+"CUSTOMER FILE MAINTENANCE                 D      72.  *
+"D                                         D     217.  *
+"G                                         D     125.  *
+0                                          F     294.  *   317.     423.     443.     463.  
+1                                          F     129.  *   352.     360.     389.     397.  
+13                                         F     354.  *   391.  
+32                                         F     362.  *   399.  
+ACCTNUMB                                   D      14. B*
+ACCTSNM                                    D      13.  *
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+AWK2                                       D      62.  *
+CHANGE                                     X     171.  *   118.  
+COMMCODE                                   D      25.  *   143.     155.     197.     489.  
+COMMCODE                                   X     197.  *   186.  
+CURAMNT                                    D      42.  *   144.     167.     454.     458.     459.     461.     462.  
+                                                     *   464.     466.     468.     469.     470.     490.  
+CUSTADR2                                   D      64.  *   249.     250.  
+D                                          O 5    12. C*    13. D    16. D    31. D
+DATE6                                      D      10. B*
+DD                                         D      56.  *   341.     357.     359.     364.     365.     367.     368.  
+                                                     *   378.     394.     396.     401.     402.     404.     405.  
+DDATA                                      D      13. C*    13. D
+DELETE                                     X     182.  *   188.  
+DELETIT                                    X     190.  *   184.  
+DISPVAR                                    X     153.  *   146.  
+ENVS                                       D      11. B*
+EOJ                                        X     496.  *   114.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FIELD01                                    D      20.  *   130.     154.     176.     476.  
+FIELD02                                    D      24.  *   131.     200.     204.     205.     207.     208.     209.  
+                                                     *   211.     215.     217.     477.  
+FIELD03                                    D      26.  *   132.     156.     224.     228.     229.     231.     232.  
+                                                     *   478.  
+FIELD04                                    D      27.  *   133.     157.     236.     240.     241.     243.     244.  
+                                                     *   245.     479.  
+FIELD05                                    D      28.  *   134.     158.     255.     259.     260.     262.     263.  
+                                                     *   480.  
+FIELD06                                    D      29.  *   135.     159.     267.     271.     272.     274.     275.  
+                                                     *   276.     278.     481.  
+FIELD07                                    D      31.  *   136.     160.     282.     286.     287.     289.     290.  
+                                                     *   291.     293.     295.     297.     482.  
+FIELD08                                    D      33.  *   137.     161.     308.     312.     313.     315.     316.  
+                                                     *   318.     320.     322.     323.     324.     483.  
+FIELD09                                    D      34.  *   138.     162.     328.     332.     333.     335.     336.  
+                                                     *   484.  
+FIELD10                                    D      35.  *   139.     163.     340.     345.     346.     373.     485.  
+
+
+
+PAGE    3      ACCTDAUD.PLS IDE                                                                               03-22-04 20:06:56
+                                         
+
+FIELD11                                    D      36.  *   140.     164.     377.     382.     383.     410.     486.  
+FIELD12                                    D      38.  *   141.     165.     414.     418.     419.     421.     422.  
+                                                     *   424.     426.     428.     429.     430.     487.  
+FIELD13                                    D      40.  *   142.     166.     434.     438.     439.     441.     442.  
+                                                     *   444.     446.     448.     449.     450.     488.  
+FIELD62                                    D      65.  *
+FIRSTIME                                   D      17. B*
+FLD5PT2                                    F      66.  *
+FLD62                                      D      68.  *   145.     491.  
+FLD6PT2                                    F      67.  *
+FROMPGM                                    D      16. B*    28. D    87.     500.  
+GET                                        X     123.  *   116.  
+GET1                                       X     130.  *
+GETCMD                                     X     111.  *   113.     120.  
+GETKEY                                     X     126.  *   128.  
+INDXIT                                     X      26. D*    22. D
+INFILE                                     F       9.  *   129.  
+INPUT                                      i      11.  *    82.     130.     191.     476.     498.  
+INPUT2                                     i      12.  *
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+K01                                        X     176.  *
+K02                                        X     200.  *
+K02A                                       X     207.  *   203.  
+K02B                                       X     209.  *   206.  
+K02K                                       X     201.  *   210.     220.  
+K03                                        X     224.  *   198.     216.     218.  
+K03A                                       X     231.  *   227.  
+K03K                                       X     225.  *
+K04                                        X     236.  *   230.  
+K04A                                       X     243.  *   239.  
+K04B                                       X     249.  *
+K04K                                       X     237.  *
+K05                                        X     255.  *   242.     247.  
+K05A                                       X     262.  *   258.  
+K05K                                       X     256.  *
+K06                                        X     267.  *   261.  
+K06A                                       X     274.  *   270.  
+K06B                                       X     276.  *
+K06K                                       X     268.  *   277.  
+K07                                        X     282.  *   273.  
+K07A                                       X     289.  *   285.  
+K07B                                       X     291.  *
+K07K                                       X     283.  *   292.     296.  
+K08                                        X     308.  *   300.     304.  
+K08A                                       X     315.  *   311.  
+K08B                                       X     317.  *
+K08C                                       X     323.  *   319.  
+K08K                                       X     309.  *   321.  
+K09                                        X     328.  *   314.  
+K09A                                       X     335.  *   331.  
+
+
+
+PAGE    4      ACCTDAUD.PLS IDE                                                                               03-22-04 20:06:56
+                                         
+
+K09K                                       X     329.  *
+K10                                        X     340.  *   334.  
+K10A                                       X     348.  *   344.  
+K10D                                       X     368.  *   366.  
+K10K                                       X     341.  *   350.     353.     355.     358.     361.     363.     370.  
+K10S                                       X     373.  *
+K11                                        X     377.  *   347.  
+K11A                                       X     385.  *   381.  
+K11D                                       X     405.  *   403.  
+K11K                                       X     378.  *   387.     390.     392.     395.     398.     400.     407.  
+K11S                                       X     410.  *
+K12                                        X     414.  *   384.  
+K12A                                       X     421.  *   417.  
+K12B                                       X     423.  *
+K12C                                       X     429.  *   425.  
+K12K                                       X     415.  *   427.  
+K13                                        X     434.  *   420.  
+K13A                                       X     441.  *   437.  
+K13B                                       X     443.  *
+K13C                                       X     449.  *   445.  
+K13K                                       X     435.  *   447.  
+K14                                        X     454.  *   440.  
+K14A                                       X     461.  *   457.  
+K14B                                       X     463.  *
+K14C                                       X     469.  *   465.  
+K14K                                       X     455.  *   467.  
+LASTCMD                                    D      10.  *   123.     125.     149.     171.     193.     496.  
+LOOP                                       X     110.  *   150.     168.     172.     194.     460.     473.  
+MAINLINE                                   X      30. D*    22. D
+MM                                         D      55.  *   341.     343.     349.     351.     378.     380.     386.  
+                                                     *   388.  
+MMDDYY                                     D      58.  *   342.     348.     356.     368.     371.     372.     373.  
+                                                     *   379.     385.     393.     405.     408.     409.     410.  
+NAME                                       D       7.  *    82.  
+NCURAMNT                                   F      41.  *   463.     468.     469.  
+NFIELD01                                   F      19.  *
+NFIELD07                                   F      30.  *   294.  
+NFIELD08                                   F      32.  *   317.     322.     323.  
+NFIELD12                                   F      37.  *   423.     428.     429.  
+NFIELD13                                   F      39.  *   443.     448.     449.  
+NOFILE                                     X      85.  *    81.  
+NULL                                       X      24. D*    22. D
+NWK2                                       F      59.  *   351.     352.     354.     356.     359.     360.     362.  
+                                                     *   364.     388.     389.     391.     393.     396.     397.     399.  
+                                                     *   401.  
+OPENED                                     X      88.  *    84.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+PRIMEKEY                                   D      15.  *   126.     127.     130.     191.  
+REPLY                                      D       8.  *    30. D   111.     112.     115.     117.     182.     183.  
+                                                     *   185.  
+RESULT                                     F      11. C*    16. D    22. D
+S$CMDLIN                                   D       0.  *
+
+
+
+PAGE    5      ACCTDAUD.PLS IDE                                                                               03-22-04 20:06:56
+                                         
+
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVE                                       D      53.  *   200.     204.     224.     228.     236.     240.     255.  
+                                                     *   259.     267.     271.     282.     286.     308.     312.     328.  
+                                                     *   332.     340.     345.     377.     382.     414.     418.     434.  
+                                                     *   438.     454.     458.  
+SECURITY                                   F       9. B*
+SWITCH                                     F      14.  *
+TELEFONE                                   D      61.  *   302.     303.  
+TELEFONZ                                   X     300.  *   288.  
+TESTIT                                     X      22. D*    16. D
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TITLTEXT                                   D       9. C*    72.      15. D
+TODAY                                      D       8. B*
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+WORK01                                     D      43.  *   201.     202.     208.     329.     330.     336.  
+WORK02                                     D      44.  *   268.     269.     275.  
+WORK03                                     D      45.  *
+WORK05                                     D      46.  *   283.     284.     290.  
+WORK06                                     D      47.  *   309.     310.     316.  
+WORK08                                     D      48.  *   415.     416.     422.     435.     436.     442.  
+WORK09                                     D      49.  *   455.     456.     462.  
+WORK20                                     D      50.  *   256.     257.     263.  
+WORK25                                     D      51.  *   237.     238.     244.  
+WORK30                                     D      52.  *   225.     226.     232.  
+WRITE                                      X     476.  *   124.     497.  
+YY                                         D      57.  *   341.     369.     371.     378.     406.     408.  
+

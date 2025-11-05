@@ -1,0 +1,10 @@
+.            APPAIDWT/TXT  -  MODULE
+. 
+. THIS MODULE PERMITS A DIRECTED WRITE OF THE PAYMENTS HISTORY FILE
+. 
+         MOVE      DATE6  TO  TPAIDDT
+         WRITE     APPAIDFL,TRNKEY;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT:
+                                   TDESC,TAMT,TLDDAY,TDISA,CKNUMBZ:
+                                   TPAIDDT,TDCODE
+. 
+. -----------

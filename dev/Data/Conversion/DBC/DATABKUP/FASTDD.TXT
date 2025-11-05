@@ -1,0 +1,971 @@
+.
+. fast DB/C
+.
+
+.fastdbc.syscode	char 2
+.
+	inc fastdbc
+	inc fastcdef
+	inc fastfdef
+	inc fastddef
+	inc fasttdef
+
+pgmname		char 8
+work1		char 1
+work8		char 8
+work16		char 16
+work32		char 32
+work64		char 64
+work80		char 80
+workkey		char 100
+sysname		char 9
+filedot		char 9
+badtype		int 1
+wkfile		file var=256, uncomp, text
+seq			num "-1"
+dot			init "."
+label		char 20
+verb		char 64
+state		char 400
+window		char 600
+trap1		char 200
+screen2		char 6000
+trap2		char 200
+screen3		char 6000
+trap3		char 200
+recsize		int 3
+keysize		int 2
+keycnt		int 2
+keytot		int 2
+dataflds		char 16[200]
+datasize		int 3[200]
+datacnt		int 3
+worknum		int 2
+worksize		int 2
+temp		int 2
+olddata		char 16
+oldfptr		char 16
+oldbptr		char 16
+savdata		char 16
+badcodeflag	int 1
+keyinflag	int @
+h		int @
+v		int @
+charvar		char @
+validtype	char 8[7]
+filekey		char 8
+fieldskey	char 16
+
+	move "C" to validtype[1]
+	move "N" to validtype[2]
+	move "YN" to validtype[3]
+	move "MMDDYY" to validtype[4]
+	move "MMDDYYYY" to validtype[5]
+	move "YYMMDD" to validtype[6]
+	move "YYYYMMDD" to validtype[7]
+
+. assume that fastdbc1 has been preloaded
+	loadmod "fastdbc2<mainline>"
+
+	keyin *xfkeyon;
+
+	title center="FAST DB/C", right="Rev.020890"
+	call resetid
+
+	menu title="MENU":
+		item="Data dictionary", routine=datadict:
+		item="Generate", routine=gen:
+		item="Program editor", routine=editor:
+		item="Compile program", routine=compiler:
+		item="Execute program", routine=execution:
+		item="System parameters", routine=sysparms:
+		item="Reset system id", routine=resetid:
+		item="Quit", terminate=end
+
+	shutdown ""
+
+.
+. data dictionary maintenance
+.
+
+datadict
+	if (badcodeflag)
+		error text="INVALID SYSTEM CODE"
+		return
+	endif
+	statesave state
+	winsave window
+	trapsave trap1
+	trapclr all
+
+	loadmod "fastdbc2<fdbcfile>"
+
+	title left=sysname, center="DATA DICTIONARY - FILE DEFINITION MAINTAINENCE":
+		right="Rev.020890"
+
+	maint table=fdbcf, record=fdbcf.record, findkey=datadictgetkey:
+		optionsitem="DATA FIELDS  ctl-L", routine=fields, ctll:
+		autosave, makeview, put=datadictput
+
+	screen v=4, text="File code......................", field=fdbcf.file:
+		fieldexit=datadictfilex, nochange:
+		va=2, text="File name......................", field=fdbcf.name:
+		text="Description....................", field=fdbcf.desc:
+		text="File type..(D,T,S).............", field=fdbcf.type:
+		fieldexit=datadicttypex, fieldinit="D":
+		text="Access method..(I,S,R).........", field=fdbcf.access:
+		fieldexit=datadictaccessx, fieldinit="I":
+		text="Compressed(Y/N)................", field=fdbcf.compress, YN:
+		fieldinit="N":
+		text="Duplicate keys (Y/N)...........", field=fdbcf.dupkeys, YN:
+		fieldinit="N":
+		text="Alternate file code............", field=fdbcf.altcode:
+		va=2, text="File key(s)....................", repeatfield=fdbcf.keys:6:
+		viewdefaultha=3:
+		viewfield=fdbcf.file, viewdesc="FILE CODE", viewwidth=9:
+		viewfield=fdbcf.name, viewdesc="             NAME":
+		viewfield=fdbcf.type, viewdesc="TYPE", viewwidth=4:
+		viewfield=fdbcf.access, viewdesc="ACCESS", viewwidth=6:
+		viewfield=fdbcf.compress, viewdesc="COMP", viewwidth=4
+
+	action
+
+	display *resetsw, *es
+	title left=sysname, center="FAST DB/C", right="Rev.020890"
+	staterestore state
+	winrestore window
+	traprestore trap1
+
+	return
+
+datadictgetkey
+	clear filekey
+	dialog text="Enter file code...", field=filekey
+	if not eos
+		move filekey to fdbcf.file
+	else
+		setflag eos
+	endif
+	return
+
+datadictput
+	if (mnt.chgflag or mnt.newflag)
+		move "Y" to fdbcf.chgflag
+	endif
+	fastopen fdbcd
+	move fdbcf.file to fdbcd.file
+	fill " " into fdbcd.data
+	fastwrite fdbcd, fdbcd.record
+	fastclose fdbcd
+	return
+
+datadictfilex lroutine keyinflag, h, v
+	moveadr fdbcf.file to charvar
+	if (keyinflag)
+		loop
+			keyin *ph:v, "        ", *curson:
+				*edit, *ph:v, charvar, *cursoff;
+			fastreadpart fdbcf, fdbcf.record
+			break if over
+			beep
+			error text="RECORD ALREADY EXISTS"
+		repeat
+	else
+		display *ph:v, charvar;
+	endif
+	setflag not eos
+	return
+
+datadicttypex lroutine keyinflag, h, v
+	moveadr fdbcf.type to charvar
+	if (keyinflag)
+		loop
+			keyin *ph:v, " ", *uc, *curson, *edit, *ph:v, charvar:
+			*cursoff, *in;
+			break if (charvar = "D" or charvar = "T" or charvar = "S")
+			beep
+		repeat
+	else
+		display *ph:v, charvar;
+	endif
+	setflag not eos
+	return
+
+datadictaccessx lroutine keyinflag, h, v
+	moveadr fdbcf.access to charvar
+	if (keyinflag)
+		loop
+			keyin *ph:v, " ", *uc, *curson, *edit, *ph:v, charvar:
+			*cursoff, *in;
+			break if (charvar = "I" or charvar = "S" or charvar = "R")
+			beep
+		repeat
+	else
+		display *ph:v, charvar;
+	endif
+	setflag not eos
+	return
+
+.
+. maintenance for the fields
+.
+fields
+	if (not mnt.recflag)
+		message text="INVALID FILE CODE"
+		beep
+		set mnt.msgflag
+		return
+	endif
+	call maintrewrite
+	return if eos
+
+
+	scrnsave screen2
+	trapsave trap2
+	trapclr all
+
+	maintflgsave
+	loadmod "fastdbc2<fdbcdata>"
+
+	title left=sysname, center="DATA DICTIONARY - DATA FIELD DEFINITION MAINTAINENCE":
+		right="Rev.020890"
+
+	maint table=fdbcd, record=fdbcd.record, findkey=fieldsgetkey:
+		lookupitem="NEXT   ctl-N", routine=fieldsnext, ctln:
+		lookupitem="BACK   ctl-B", routine=fieldsback, ctlb:
+		modifyitem="DELETE ctl-D", routine=fieldsdel, ctld:
+		optionsitem="Data types    ctl-T", routine=types, ctlt:
+		nonext, noback, nodelete, add=fieldsaddx, addend=fieldsaddendx:
+		put=fieldsputx, autosave, makeview:
+	
+	screen	v=4, text="File code............", data=fdbcf.file:
+		va=2, text="Data field...........", field=fdbcd.data:
+		text="Description..........", field=fdbcd.desc:
+		text="Type.................", field=fdbcd.type, fieldexit=fieldstypex:
+		text="Size.................", field=fdbcd.size:
+		text="Repeat count.........", field=fdbcd.repeatcnt, de:
+		viewdefaultha=3:
+		viewfield=fdbcd.data, viewdesc="   DATA FIELD":
+		viewfield=fdbcd.type, viewdesc="  TYPE":
+		viewfield=fdbcd.size, viewdesc="SIZE":
+		viewfield=fdbcd.repeatcnt, viewdesc="REPEAT", viewwidth=6
+
+	fastopen fdbcd
+	move fdbcf.file to fdbcd.file
+	fill " " into fdbcd.data
+	fastread fdbcd, fdbcd.record
+	move fdbcd.fptr to oldfptr
+	fill " " into olddata
+
+	action
+
+	unload "fastdbc2<fdbcdata>"
+	maintflgrest
+	trapclr all
+	traprestore trap2
+	scrnrestore screen2
+	fastbuildkey fdbcf, fdbcf.record
+	return
+
+fieldsgetkey
+	clear fieldskey
+	dialog text="Enter field name...", field=fieldskey
+	if not eos
+		move fieldskey to fdbcd.data
+	else
+		setflag eos
+	endif
+	return
+
+fieldstypex lroutine keyinflag, h, v
+	moveadr fdbcd.type to charvar
+	if (keyinflag)
+		fastopen fdbct
+		loop
+			keyin *ph:v, "        ", *curson:
+				*uc, *edit, *ph:v, charvar, *cursoff, *in;
+			for worknum from 1 to 7
+				break if (squeeze charvar = validtype[worknum])
+			repeat
+			break if (worknum <= 7)
+			move charvar to fdbct.type
+			fastread fdbct, fdbct.record
+			break if not over
+			beep
+		repeat
+		fastclose fdbct
+	else
+		display *ph:v, charvar;
+	endif
+	setflag not eos
+	return
+
+fieldsnext
+	call maintrewrite
+	return if eos
+	if (squeeze fdbcd.fptr = "")
+		message text="NO NEXT RECORD"
+		beep
+		set mnt.msgflag
+	else
+		move fdbcd.fptr to fdbcd.data
+		fastread fdbcd, fdbcd.record
+		fastbuildkey fdbcd, fdbcd.record
+		screendisplay
+		set mnt.recflag
+	endif
+	return
+
+fieldsback
+	call maintrewrite
+	return if eos
+	if (squeeze fdbcd.bptr = "")
+		if (squeeze fdbcd.data <> "")
+			fill " " into fdbcd.data
+			fastread fdbcd, fdbcd.record
+			fastbuildkey fdbcd, fdbcd.record
+		endif
+		screenerase
+		clear mnt.recflag
+		message text="NO PREVIOUS RECORD"
+		beep
+		set mnt.msgflag
+	else
+		move fdbcd.bptr to fdbcd.data
+		fastread fdbcd, fdbcd.record
+		fastbuildkey fdbcd, fdbcd.record
+		screendisplay
+		set mnt.recflag
+	endif
+	return
+
+fieldsaddx
+	move fdbcd.fptr to oldfptr
+	move fdbcd.data to olddata
+	reset olddata
+	setflag not eos
+	return
+
+fieldsaddendx
+	if (squeeze fdbcd.data = "" or squeeze fdbcd.type = "" or squeeze fdbcd.size = "")
+		setflag eos
+	endif
+	return
+
+fieldsputx
+	if (mnt.newflag)
+		move fdbcf.file to fdbcd.file
+		fastreadpart fdbcd, fdbcd.record
+		if over
+			move olddata to fdbcd.bptr
+			move oldfptr to fdbcd.fptr
+			fastwrite fdbcd, fdbcd.record
+
+			move fdbcd.data to savdata
+			if (squeeze oldfptr <> "")
+				move oldfptr to fdbcd.data
+				fastread fdbcd, fdbcd.record
+				move savdata to fdbcd.bptr
+				fastupdate fdbcd, fdbcd.record
+			endif
+
+			move olddata to fdbcd.data
+			fastread fdbcd, fdbcd.record
+			move savdata to fdbcd.fptr
+			fastupdate fdbcd, fdbcd.record
+
+			move savdata to fdbcd.data
+			fastread fdbcd, fdbcd.record
+			clear mnt.newflag, mnt.chgflag
+			setflag not over
+
+			move "Y" to fdbcf.chgflag
+			fastupdate fdbcf, fdbcf.record
+		else
+			error text="RECORD ALREADY EXISTS"
+			setflag over
+		endif
+		setflag eos
+	else
+		setflag not eos
+		move "Y" to fdbcf.chgflag
+		fastupdate fdbcf, fdbcf.record
+	endif
+	return
+
+fieldsdel
+	if (mnt.recflag)
+		if (not mnt.newflag)
+			move fdbcd.data to olddata
+			move fdbcd.fptr to oldfptr
+			move fdbcd.bptr to oldbptr
+
+			fastdelete fdbcd
+
+			move oldfptr to fdbcd.data
+			fastread fdbcd, fdbcd.record
+			move oldbptr to fdbcd.bptr
+			fastupdate fdbcd, fdbcd.record
+
+			move oldbptr to fdbcd.data
+			fastread fdbcd, fdbcd.record
+			move oldfptr to fdbcd.fptr
+			fastupdate fdbcd, fdbcd.record
+		endif
+		screenerase
+		clear mnt.recflag, mnt.newflag, mnt.chgflag
+	else
+		message text="NO RECORD TO DELETE"
+		beep
+		set mnt.msgflag
+	endif
+	return
+.
+. maintenance for the types
+.
+types
+	scrnsave screen3
+	trapsave trap3
+	trapclr all
+	maintflgsave
+
+	loadmod "fastdbc2<fdbctype>"
+
+	title left=sysname, center="DATA DICTIONARY - DATA TYPE DEFINITION MAINTAINENCE":
+		right="Rev.020890"
+
+	maint table=fdbct, record=fdbct.record, findkey=typesgetkey, autosave:
+		makeview
+	
+	screen v=4, text="Type.................", field=fdbct.type:
+		va=2, text="Description..........", field=fdbct.desc:
+		text="Size.................", field=fdbct.size:
+		text="Repeat count.........", field=fdbct.repeatcnt, de:
+		viewdefaultha=5:
+		viewfield=fdbct.type, viewdesc="  TYPE":
+		viewfield=fdbct.atype, viewdesc="ACTUAL TYPE", viewwidth=11:
+		viewfield=fdbct.size, viewdesc="SIZE":
+		viewfield=fdbct.repeatcnt, viewdesc="REPEAT", viewwidth=6
+
+	action
+
+	unload "fastdbc2<fdbctype>"
+	maintflgrest
+	trapclr all
+	traprestore trap3
+	scrnrestore screen3
+	fastbuildkey fdbcd, fdbcd.record
+	return
+
+typesgetkey
+	dialog text="Enter the data type...", field=fdbct.type
+	return
+
+.
+. generate data definition includes and initial programs
+.
+
+gen
+	if (badcodeflag)
+		error text="INVALID SYSTEM CODE"
+		return
+	endif
+	loop
+		clear work1
+		display *uc;
+		dialog text="Generate Changed, One, or All  (C,O,A): ", field=work1
+		display *in;
+		return if over
+		return if eos
+		if (work1 = "C")
+			call genchg
+		else if (work1 = "O")
+			call genone
+			continue
+		else if (work1 = "A")
+			call genall
+		else
+			beep
+			continue
+		endif
+		break
+	repeat
+	return
+
+genone
+	clear fdbcf.file
+	dialog vert=15, text="Enter file definition to generate:  ", field=fdbcf.file
+	return if over
+	return if eos
+	fastopen fdbcf
+	fastread fdbcf, fdbcf.record
+	if over
+		error text="File code not found"
+		goto genone
+	endif
+	call gendef
+	fastclose fdbcf
+	return
+
+genchg
+	clear fdbcf.file
+	fastopen fdbcf
+	loop
+		fastreadnext fdbcf, fdbcf.record
+		return if over
+		call gendef if (fdbcf.chgflag = "Y")
+		move "N" to fdbcf.chgflag
+		fastupdate fdbcf, fdbcf.record
+	repeat
+	fastclose fdbcf
+
+
+genall
+	clear fdbcf.file
+	fastopen fdbcf
+	loop
+		fastreadnext fdbcf, fdbcf.record
+		return if over
+		call gendef
+	repeat
+	fastclose fdbcf
+
+.
+. generate initial maintenance program
+.
+
+genmnt
+	dialog text="Generate initial file maintenance program":
+		text="Enter file code:  ", field=fdbcf.file:
+		text="Enter program name:  ", field=pgmname
+	return if over
+	return if eos
+	move fdbcf.file to fdbcd.file
+	clear fdbcd.data
+	fastread fdbcd, fdbcd.record
+	if over
+		error text="Header record not found"
+		return
+	endif
+	chop fdbcf.file to fdbcf.file
+	move (pgmname + ".pgm") to work32
+	move ("Generating " + work32) to work64
+	message text=work64
+	prep wkfile, work32
+	call wtdot
+.	write wkfile, seq; ". FILE MAINTENANCE - ", fdbcf.desc
+	move (". FILE MAINTENANCE - " + squeeze fdbcf.desc) to work80
+	call wt80
+	call wtdot
+	call wtblank
+	write wkfile, seq;
+	clear label
+	write wkfile, seq; label, "include ", fdbcf.file, "def"
+	call wtblank
+	chop fdbcf.desc to fdbcf.desc
+	write wkfile, seq; label, "title center=#"", fdbcf.desc, " Maintenance#""
+	call wtblank
+	write wkfile, seq; label, "maint file=", fdbcf.file, ":"
+	write wkfile, seq; label, "        record=", fdbcf.file, ".record"
+	call wtblank
+	move "        screen  " to work16
+	loop
+		call readnextdata
+		return if eos
+		break if over
+		move fdbcd.data to work32
+		chop work32 to work32
+		if (fdbcd.fptr <> " ")
+			endset work32
+			append ":" to work32
+			reset work32
+		endif
+		write wkfile, seq; work16, "text=#"", fdbcd.desc:
+			"#", field=", work32
+		clear work16
+	repeat
+	return
+
+.
+. generate initial report program
+.
+
+genrpt
+	dialog text="Generate initial file print program":
+		text="Enter file code:  ", field=fdbcf.file
+	return if over
+
+	error text=">>> THIS FUNCTION IS NOT YET SUPPORTED <<<"
+
+	return
+
+.
+. editor
+.
+
+editor
+	dialog text="Enter program name to edit: ", field=pgmname
+	return if over
+	scan "." in pgmname
+	goto editor1 if eos
+	reset pgmname
+	move pgmname to work16
+	goto editor2
+editor1
+	reset pgmname
+	move (pgmname + ".prg") to work16
+editor2
+	move ("edit " + work16) to work32
+	scrnsave screen2
+	display *resetsw, *es
+	rollout work32
+	scrnrest screen2
+	return
+
+.
+. compiler
+.
+
+compiler
+	dialog text="Enter program name to compile: ", field=pgmname
+	return if over
+	scan "." in pgmname
+	goto compiler1 if eos
+	reset pgmname
+	move pgmname to work16
+	goto compiler2
+compiler1
+	reset pgmname
+	move (pgmname + ".prg") to work16
+compiler2
+	move ("dbcmp " + work16) to work32
+	scrnsave screen2
+	display *resetsw, *es
+	rollout work32
+	dialog horz=20, vert=23, text="Press any key to continue ", field=work1
+	scrnrest screen2
+	return
+
+.
+. execution
+.
+
+execution
+	dialog text="Enter program name to execute: ", field=pgmname
+	return if eos
+	return if over
+	trap execution1 if cfail
+	chain pgmname
+execution1
+	noreturn
+	error text="CHAIN FAILURE"
+	goto execution
+
+
+.
+. system parameter maintenance
+.
+
+sysparms
+	if (badcodeflag)
+		error text="INVALID SYSTEM CODE"
+		return
+	endif
+	fastopen fdbcc
+	fastread fdbcc, fdbcc.record
+	move ("System id: " + fastdbc.syscode) to work16
+	dialog text=work16, text="Description: ", field=fdbcc.desc
+	fastwrite fdbcc, fdbcc.record
+	fastclose fdbcc
+	return
+
+.
+. reset system id
+.
+
+resetid
+	clear badcodeflag
+	statesave state
+	winsave window
+	dialog horz=27, vert=18, text="Enter the system id: ", field=fastdbc.syscode
+	if eos
+		set badcodeflag
+		goto resetidend
+	endif
+	if (size fastdbc.syscode = 2)
+		fastopen fdbcc
+		goto resetidend if not over
+		dialog text="System code does not exist.  OK to create (Y/N) ? ":
+			yesno, required
+		if not equal
+			message horz=25, vert=15, text="Creating system files..."
+			trap resetbad1 if io
+			fastcreate fdbcc
+			fastcreate fdbcf
+			fastcreate fdbcd
+			fastcreate fdbct
+			trapclr io
+			messageerase
+			goto resetidend
+		endif
+	else
+		error text="INVALID SYSTEM CODE"
+	endif
+	clear fastdbc.syscode
+	goto resetid
+resetbad1
+	move ".txt" to work16
+	noreturn
+	goto resetbad
+resetbad2
+	move ".isi" to work16
+resetbad
+	messageerase
+	setlptr work32 to "7"
+	move work32 to work8
+	error text="Unable to create", h=19, v=1, text=work8, h=26, v=1, text=work16
+	clear fastdbc.syscode
+	goto resetid
+resetidend
+	move ("System " + fastdbc.syscode) to sysname
+	title left=sysname, center="FAST DB/C", right="Rev.020890"
+	staterestore state
+	winrestore window
+	return
+.
+. Quit fast programming
+.
+
+end
+	display *es
+	shutdown ""
+.
+. generate a file definition include
+.
+gendef
+	move fdbcf.file to fdbcd.file
+	clear fdbcd.data
+	fastopen fdbcd
+	fastread fdbcd, fdbcd.record
+	if over
+		error text="Header record not found"
+		return
+	endif
+	chop fdbcf.file to fdbcf.file
+	move (fdbcf.file + "def.txt") to work32
+	move ("Generating " + work32) to work64
+	message text=work64
+	prep wkfile, work32
+	call wtdot
+	move (". FILE DECLARATION - " + squeeze fdbcf.desc) to work80
+	call wt80
+	call wtdot
+	call wtblank
+	move (fdbcf.file + dot) to filedot
+	move (filedot + "record") to label
+	move "list" to verb
+	call wtverb
+	clear recsize, datacnt
+	loop
+		call readnextdata
+		return if eos
+		break if over
+		if (fdbcd.type = "C       ")
+			move ("char " + squeeze fdbcd.size) to verb
+			move (int squeeze fdbcd.size) to worknum
+		else if (fdbcd.type = "I       ")
+			move ("int " + squeeze fdbcd.size) to verb
+			move (int squeeze fdbcd.size) to worknum
+		else if (fdbcd.type = "YN      ")
+			move "char 1" to verb
+			move 1 to worknum
+		else if (fdbcd.type = "YYMMDD  " or fdbcd.type = "MMDDYY  ")
+			move "char 6" to verb
+			move 6 to worknum
+		else if (fdbcd.type = "MMDDYYYY" or fdbcd.type = "YYYYMMDD")
+			move "char 8" to verb
+			move 8 to worknum
+		else
+			if (fdbcd.type = "N       ")
+				move ("num " + squeeze fdbcd.size) to verb
+			else if (fdbcd.type = "F       ")
+				move ("float " + squeeze fdbcd.size) to verb
+			endif
+			move (int squeeze fdbcd.size) to worknum
+			scan "." in fdbcd.size
+			if equal
+				bump fdbcd.size
+				move fdbcd.size to work8
+				move (int squeeze work8 + 1 + worknum) to worknum
+			endif
+		endif
+		squeeze fdbcd.repeatcnt to fdbcd.repeatcnt
+		if (fdbcd.repeatcnt <> "")
+			move (verb + "[" + fdbcd.repeatcnt + "]") to verb
+			move (int fdbcd.repeatcnt * worknum) to worknum
+		endif
+		call wtverb
+		add worknum to recsize
+		if (fdbcf.access = "I")
+			add 1 to datacnt
+			move (squeeze fdbcd.data) to dataflds[datacnt]
+			move worknum to datasize[datacnt]
+		endif
+	repeat
+	clear label
+	move "listend" to verb
+	call wtverb
+	call wtblank
+	move fdbcf.file to label
+	move "list" to verb
+	call wtverb
+	clear label
+	
+	if (fdbcf.access = "I")
+		for keytot from 6 to 1 by -1
+			break if (squeeze fdbcf.keys[keytot] <> "")
+		repeat
+		for keycnt from 1 to keytot
+			clear keysize, workkey
+			if (keytot > 1)
+				move (squeeze fdbcf.file + squeeze char keycnt) to label
+				move "list" to verb
+				call wtverb
+				clear label
+			endif
+			squeeze fdbcf.keys[keycnt] to work64
+			movesize work64 to worksize
+			move 1 to worknum
+			loop while (worknum < worksize)
+				reset work64 to worknum
+				setlptr work64
+				scan "," in work64
+				if equal
+					bump work64 by -1
+					lenset work64
+					reset work64 to worknum
+				else
+					setlptr work64 to worksize
+				endif
+				move work64 to work16
+				for temp from 1 to datacnt
+					if (dataflds[temp] = work16)
+						add datasize[temp] to keysize
+						break
+					endif
+				repeat
+				if (worknum > 1)
+					move (workkey + ", ") to workkey
+				endif
+				move (workkey + squeeze (fdbcf.file + "." + work16)) to workkey
+				move (lengthptr work64 + 2) to worknum
+			repeat
+			move ("ifile keylen=" + squeeze char keysize) to verb
+			if (fdbcf.dupkeys = "Y")
+				move (verb + ", DUP") to verb
+			endif
+			if (fdbcf.compress = "N")
+				move (verb + ", fix=" + squeeze char recsize) to verb
+			else
+				move (verb + ", var=" + squeeze char recsize) to verb
+			endif
+			if (fdbcf.type = "T")
+				move (verb + ", TEXT") to verb
+			endif
+			call wtverb
+			move ("varlist " + squeeze fdbcf.name) to verb
+			if (keytot > 1)
+				move (verb + ", " + "#"" + squeeze char keycnt + "#"") to verb
+			endif
+			call wtverb
+			move ("varlist " + workkey) to verb
+			call wtverb
+			if (keytot > 1)
+				move "listend" to verb
+				call wtverb
+			endif
+		repeat
+	else
+		move "file" to verb
+		if (fdbcf.compress = "N")
+			move (verb + ", fix=" + squeeze char recsize) to verb
+		else
+			move (verb + ", var=" + squeeze char recsize) to verb
+		endif
+		if (fdbcf.type = "T")
+			move (verb + ", TEXT") to verb
+		endif
+		call wtverb
+		move ("varlist " + squeeze fdbcf.name) to verb
+		call wtverb
+	endif
+	move "listend" to verb
+	call wtverb
+gendefend
+	close wkfile
+	fastclose fdbcd
+	messageerase
+	return
+
+.
+. read next fdbcd record
+.
+readnextdata
+	if (fchar fdbcd.fptr = " ")
+		setflag over
+		setflag not eos
+		return
+	endif
+	move fdbcd.fptr to fdbcd.data
+	fastread fdbcd, fdbcd.record
+	move (filedot + fdbcd.data) to label
+	move 0 to badtype
+readnextdata1
+	if (badtype = 2)
+		error text="INVALID TYPE"
+		setflag eos
+		return
+	endif
+	if (fdbcd.type = "C       ")
+	else if (fdbcd.type = "N       ")
+	else if (fdbcd.type = "I       ")
+	else if (fdbcd.type = "F       ")
+	else if (fdbcd.type = "YN      ")
+	else if (fdbcd.type = "YYMMDD  " or fdbcd.type = "MMDDYY  ")
+	else
+		move (badtype + 1) to badtype
+		move fdbcd.type to fdbct.type
+		fastread fdbct, fdbct.record
+		if not over
+			move fdbct.atype to fdbcd.type
+			move fdbct.desc to fdbcd.desc
+			move fdbct.size to fdbcd.size
+			move fdbct.repeatcnt to fdbcd.repeatcnt
+		endif
+		goto readnextdata1
+	endif
+	setflag not over
+	setflag not eos
+	return
+
+.
+. routines to write to work file
+.
+
+wtblank
+	write wkfile, seq; " "
+	return
+
+wtdot
+	write wkfile, seq; dot
+	return
+
+wt80
+	write wkfile, seq; *ll, work80
+	return
+
+wtverb
+	write wkfile, seq; label, *ll, verb
+	return
+
+

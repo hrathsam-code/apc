@@ -1,0 +1,121 @@
+. ARSCANIT/TEXT - SCAN THE A/R KEY SEQUENTIALLY FOR TALLY
+. 
+. WRITTEN BY R BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                          41 TEELE DRIVE
+.                          CORAM, NEW YORK 11727
+.                          (516) 698-5577
+         INCLUDE   COMMON
+NAME     INIT      "ARFILE/ISAM"
+INPUT    IFILE     KEYL=5,UNCOMPRESSED        (ISAM INPUT )
+. 
+. 
+REPLY    DIM       1
+SWMR     FORM      "0"         '1'=MATCHING RECORD
+SW1P     FORM      "1"         '1'=FIRST CYCLE
+LINECT   FORM      "000"           LINE COUNTER
+PAGE     FORM      3           PAGE NUMBER
+RID01    FORM      "0"         RECORD TYPE 01
+LR       FORM      "0"         '1'=LAST RECORD PENDING
+LRTOT    FORM      5            GRAND TOTAL
+VOIDS    FORM      5
+PAIDS    FORM      5
+CRDTS    FORM      5
+ORDRTOTS FORM      8.2
+. 
+MATLTOTS FORM      8.2
+IOSW     DIM       1
+COMP     DIM       1
+. 
+. 
+         INCLUDE   CUSTMAST
+. 
+CUSTFILE IFILE     KEYL=6,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS/ISAM"
+. 
+         INCLUDE   RCVBLES
+. 
+COMPVAR  DIM       27
+. 
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+DATE8    DIM       8
+. 
+RECCNT   FORM      6
+DLOOPCNT FORM      2
+STATUS   DIM       8
++............................................................
+. MAINLINE FOLLOWS
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:02,"SCAN THE ACCOUNTS RECEIVABLE MASTER FILE":
+                       *P01:04,"AND DISPLAY THE CURRENT A/R TOTAL !"
+. 
+         GOTO      CONT1
+. 
+NOARFILE BEEP
+         DISPLAY   *P01:24,*EL,"ACCOUNTS RECEIVABLE FILE NOT ON LINE",*W2
+         GOTO       NOARFILE
+. 
+CONT1    TRAPCLR   IO
+         TRAP      NOARFILE IF IO
+         OPEN      RCVBFILE,RCVBNAME
+.
+         GOTO      GETCOMP
+. 
+NOFILE   BEEP
+         DISPLAY   *P01:12,*EL,"ACCOUNT FILE NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         GOTO      CHAINOUT
+. 
+GETCOMP  TRAPCLR   PARITY    (NOP)
+. 
+MOVLIB   MOVE      "SUPERIOR WASHER AND GASKET  " TO  COMPVAR
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    RCVBFILE;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                            INVDATE,INVTOTL,IPMNTS:
+                            IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                            ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                            IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                            IMATLS,IDOLSLFT,IPRGDTE
+         GOTO      EOJROUT  IF  OVER
+.
+         ADD       "1"  TO  RECCNT
+         ADD       "1"  TO  DLOOPCNT
+         COMPARE   "00" TO  DLOOPCNT 
+         GOTO      AROUND  IF NOT EQUAL
+         DISPLAY   *P40:23,*HON,"RECORD NUMBER ",RECCNT," SCANNED"
+*............................................................
+. CHECK THE COMPANY CODE FOR MATCH TO TERMINAL INPUT
+. BYPASS THE ZERO RECORD
+. 
+AROUND   MATCH     "00000" TO INVKEY
+         GOTO      READ    IF EQUAL
+*............................................................
+. IS THE ITEM AN  O P E N  RECEIVABLE  ?
+         CMATCH    "X",INVSTAT
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN   P A I D)
+         CMATCH    "V",INVSTAT
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN  V O I D E D)
+         CMATCH    "W",INVSTAT
+         GOTO      READ  IF  EQUAL         (ITEM HAS BEEN  WRITTEN OFF)
+.
+         CMATCH    "C"    TO INVTYPE
+         GOTO      DETCALC IF NOT EQUAL
+         MULT      "-1"   BY INVTOTL
+         MULT      "-1"   BY IDOLSLFT
+. 
+DETCALC  ADD       "1" TO LRTOT
+         ADD       IDOLSLFT TO ORDRTOTS
+*............................................................
+         GOTO      READ
+*............................................................
+. 
+.
+EOJROUT  DISPLAY   *P1:10,"A/R TOTAL IS ",ORDRTOTS
+         KEYIN     *P1:23,"PRESS ENTER WHEN READY ",REPLY
+.
+CHAINOUT CHAIN     "ARMENU1 "

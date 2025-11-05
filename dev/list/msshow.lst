@@ -1,0 +1,46 @@
+
+
+
+PAGE    1      msshow                                                                                         02-11-19 11:35:52
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP msshow -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+   15.    INCLUDE  B: common.txt
+   27.    INCLUDE  C: mspartsf.txt
+   29.    INCLUDE  D: mspurchf.txt
+   31.    INCLUDE  E: mssalesf.txt
+   58.    INCLUDE  F: apmastfd.txt
+   60.    INCLUDE  G: custmast.txt
+   71.    INCLUDE  H: callerr1.inc
+   12. H                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   73.    INCLUDE  I: callerr2.inc
+   91.    INCLUDE  J: mspartio.txt
+   93.    INCLUDE  K: mssaleio.txt
+   95.    INCLUDE  L: stdfmter.txt
+   97.    INCLUDE  M: stdparer.txt
+   99.    INCLUDE  N: stdrange.txt
+  101.    INCLUDE  O: stdioerr.txt
+  103.    INCLUDE  P: custio.txt
+  105.    INCLUDE  Q: mspoio.txt
+  155.    INCLUDE  R: msptsio.txt
+  177.                                         CMATCH    "X" TO STARTSW
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  459.                                         GOTO      EOJ  IF F5
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  603.    INCLUDE  S: apmastrd.txt
+  692.                                         GOTO      DATAIN
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\msshow.plc                                                                                                                                                                                                                                     
+      1501 LINES;      0 ERRORS;      4 WARNINGS; Start/Stop: 11:35:52 11:35:52
+  000033FC DATA;  000016AA  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

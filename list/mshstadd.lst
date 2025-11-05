@@ -1,0 +1,38 @@
+
+
+
+PAGE    1      mshstadd                                                                                       02-11-19 11:35:49
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP mshstadd -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    9.    INCLUDE  B: common.pls
+   18.    INCLUDE  C: mspartsf.txt
+   27.    INCLUDE  D: mspurchf.txt
+   29.    INCLUDE  E: mssalesf.txt
+   31.    INCLUDE  F: datetblz.txt
+   62.    INCLUDE  G: apmastfd.txt
+   64.    INCLUDE  H: custmast.txt
+   71.    INCLUDE  I: callerr1.inc
+   12. I                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   73.    INCLUDE  J: callerr2.inc
+   92.    INCLUDE  K: mspartio.txt
+   94.    INCLUDE  L: msslio2.txt
+   96.    INCLUDE  M: mspoio2.txt
+   98.    INCLUDE  N: stdioerr.txt
+  100.    INCLUDE  O: stdfmter.txt
+  102.    INCLUDE  P: stdparer.txt
+  104.    INCLUDE  Q: stdrange.txt
+  106.    INCLUDE  R: custio.txt
+  144.    INCLUDE  S: msptsio.txt
+  357.    INCLUDE  T: apmastrd.txt
+
+   Output: c:\apc\plc\mshstadd.plc                                                                                                                                                                                                                                   
+      1391 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:49 11:35:50
+  00003390 DATA;  0000140A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

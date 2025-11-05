@@ -1,0 +1,847 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    prtstmt                                                        ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    06/14/2019 at 3:07pm                                           ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   06/14/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+.
+         INCLUDE   NCOMMON.TXT
+         INCLUDE   WORKVAR.INC
+.
+         INCLUDE   ARTRN.FD
+..         INCLUDE                Stamp.FD     //HR 3/4/2005
+         INCLUDE   CMPNY.FD
+         include    CNTRY.FD
+.         INCLUDE   APCTL.FD
+         INCLUDE   CUST.FD
+         INCLUDE   ARTRM.FD
+         include                       Sequence.FD
+         INCLUDE                PrintRtn.INC
+
+
+PRTSTMNTS           PLFORM            PRTSTMTS
+.
+.
+ENV2                DIM       2
+AllCollection       COLLECTION
+.
+AddressLines        DIM               45(5)
+AddressLineCounter  form               2
+
+CURRACCT            DIM       6
+FIRSTSW             INIT      "1"
+TelephoneMask       INIT              "(999)B999-9999"
+MessageFlag         DIM               10
+MessageStamps       DIM               1(20)
+#UseStamps          DIM               10
+X                   FORM              2
+
+StampFontH    FONT                   //First Stamp Font
+StampFontH1   FONT                   //First Stamp Font
+StampFontD    FONT
+
+.
+BucketDays FORM                 3(4),("30"),("45"),("60"),("90")
+Bucket        FORM              1
+
+FirstRecord   DIM               1
+AgingDays  FORM              3
+AGINGDAYSD dim               3
+AgingAmtD     DIM               10
+AgingAmt      FORM              7.2
+AgingBucket   DIM               10(5)
+Days       FORM              10
+AgingDaysW FORM              10
+PrtTelephone  DIM               14
+PrtFax        DIM               14
+ContactName    DIM               25
+
+REPLY    DIM       1
+COMPANY  DIM       1
+IOSW     DIM       1
+STARTKEY DIM       8
+CUSTIN   DIM       6
+NUMCUST  FORM      6
+PDTOTL   FORM      6.2
+CREDTOTL FORM      6.2
+PUSHKEY  DIM       12
+AllCustFlag   FORM              1
+FromCustomer  DIM               6
+ToCustomer    DIM               6
+#FromCustomer DIM               6
+#ToCustomer   DIM               6
+PrintDetails  FORM              1
+SortedBy      FORM              1
+AtleastOne    DIM               1
+CustomerPrinted   DIM               1
+AgingTotals FORM             10.2(5)   1=Current, 2=30-59, 3=60-89, 4=90 +
+CustAging  FORM              10.2(6)          //1 = Details, 2 = Cust Totals, 3 = Report Totals Only
+.
+PrtDueDate    DIM               8
+PrtTransDate  DIM               8
+AsOfDate      DIM               8
+MessageDate   DIM               8
+MessageColumn FORM              5
+.
+OPONO    DIM      20
+OPOLN    DIM       2
+OFRGT    FORM      6.2
+SPACES   INIT      "            "
+
+END      FORM      2
+MAX      FORM      2
+
+Pict1         pict
+MessageRow    FORM              "770"
+
+LastRow       FORM              "900"
+
+HOWOLD      DIM       3
+EDITDAYS    DIM       3
+TITLOLD     DIM      35
+STATNUMB    DIM       8
+
+PTYPE    DIM       4
+WKSUB    FORM      6.2
+WKPRINT  FORM      6.2
+NETBAL   FORM      6.2
+UPFLAG   INIT      "N"
+ZEROS    INIT      "000000.00"
+CUSTCNT  FORM      "0000"
+PRINTZIP DIM       5
+.
+DISPCNTR FORM      5
+DISPCTRL FORM      1
+#RunType      FORM              1
+.
+CalcDate      DIM               8
+NumberOfDays  DIM               3
+NumberOfDaysF FORM              3
+NewCalcedDays FORM              10
+StringFPTR    FORM              3
+StringLPTR    FORM              3
+StringFPTR2   FORM              3
+StringLPTR2   FORM              3
+Y             FORM              3
+
+.=============================================================================
+                    MOVE      "0",ProgLoaded
+                    MOVE      " ",MessageFlag
+                    MOVE              "0",RunType
+StartProgram2
+         MOVE      "Customer Statements",DocumentType
+         MOVE      "SC" TO ENV2
+....HR 20190614         CREATE            Pict1=220:300:200:400,"newlogo1.jpg"
+.
+                    LISTINS           AllCollection,EFromCustomer,EToCustomer,BCustomerFrom,BCustomerTo
+
+                    CALL      OpenARTRN
+                    call               OpenSequence
+                    call               OpenCNTRY
+..                    CALL      OpenCMPNY
+                    CALL      OpenCust
+                    CALL      OpenARTRM
+...                    CALL                   OpenStamp
+
+           CLOCK             timestamp to DATE8
+           UNPACK               DATE8,CC,YY,MM,DD
+           PACKKEY              AsOfDate,MM,"/",DD,"/",YY
+
+           CALL              ConvDateToDays using DATE8,TodayDays
+.
+AGAIN
+         MOVE      "0"  TO  RESULT
+
+         IF                     (ProgLoaded = 0)           //Program NOT called as a LoadMOD
+           FORMLOAD               PRTSTMNTS
+           SETFOCUS               EFromCustomer
+           LOOP
+             WAITEVENT
+           REPEAT
+         ENDIF
+.
+StartPrint
+           CREATE            StampFontH,">Arial",Size=18,bold=1
+           CREATE            StampFontD,">Arial",Size=11,bold=1
+           CREATE            StampFontH1,">Arial",Size=14,bold=1
+
+           MOVE                 "Y",FirstPrint
+           CALL              PrintInit2
+           return               if (printInitFailed = "N" or PrintCancelFlag = 1)        //HR 2019.7.7
+
+           MOVE              "Y",FirstFlag
+           MOVE              " ",CUSTKY
+
+           IF                     (ProgLoaded = 0)           //Program NOT called as a LoadMOD
+             GETITEM           CBSortedBy,0,SortedBy
+             GETITEM           RAllCustomers,0,AllCustFlag
+
+             IF                (AllCustFlag = 0)
+               GETITEM           EFromCustomer,0,FromCustomer
+               GETITEM           EToCustomer,0,ToCustomer
+             ENDIF
+           ENDIF
+
+             IF                  (AllCustFlag = 0)
+               MOVE              FromCustomer,CustKY
+             ENDIF
+
+              IF                (SortedBy = 1)           //By Customer ID
+                CALL              RDCUST
+              ELSE
+                MOVE              "        ",CUSTKY2     //By Customer Name
+                CALL              RDCUST2
+              ENDIF
+
+...           MOVE                 Cust.TermCode,ARTRMKY
+...           CALL                 RDARTRM
+...           IF                   (ReturnFl = 1)
+             MOVE                 "2% 15 Net 30",ARTRM.Desc
+...           ENDIF
+
+           LOOP
+             IF                (SortedBy = 1)           //Customer ID
+               IF               (ReturnFL = 1 or FirstFlag = "N")
+                 CALL              KSCUST
+               ENDIF
+             ELSE
+               CALL              KSCUST2
+             ENDIF
+           UNTIL             (Returnfl = 1)
+
+             MOVE                 Cust.TermCode,ARTRMKY
+             CALL                 RDARTRM
+             IF                   (ReturnFl = 1)
+               MOVE                 "2% 15 Net 30",ARTRM.Desc
+             ENDIF
+
+
+             MOVE               "N",FirstFlag
+             BREAK              IF (AllCustFlag = 0 AND SortedBy = 1 AND Cust.CustomerID > ToCustomer)
+             CONTINUE           IF (AllCustFlag = 0 and SortedBy = 2 and Cust.CustomerID > ToCustomer)
+
+             MOVE               "N",CustomerPrinted
+             MOVE               "0",CUSTAging
+             MOVE               "Y",FirstRecord
+             MOVE               "0",CustAging
+             MOVE               "0",Page
+
+             CALL              PrintDetails
+           REPEAT
+           IF                   (FromCustomer = ToCustomer and FirstPrint = "Y")
+             beep
+           ENDIF
+
+           CALL                 PrintClose
+           GOTO                 ExitProgram
+
+RDLOOP
+PrintDetails
+          TRAPCLR   IO
+              PACK              ARTRNKY3,$ENTITY,Cust.CustomerID,"O"
+              CALL              RDARTRN3
+.
+         LOOP
+           CALL      KSARTRN3
+         UNTIL     (ReturnFL = 1 or ARTrn.CustomerID != Cust.CustomerID)
+.
+.  HR 1/8/2004   As per Allan
+.
+..FUCKUP           CONTINUE          IF (ARTrn.InvCredit = "I" and ARTrn.Balance <= 0)
+..FUCKUP           CONTINUE             if (ARTrn.InvCredit = "C")                            //HR 2/18/2009
+
+           CALL              PrintOpenByCustomer
+
+           CALL               PrintStatement IF (FirstRecord = "Y" or PrintLineCnt > 850)
+
+           MOVE      ARTrn.CustomerID,ARTrn.CustomerID
+
+PRTDTL
+           CALL      PRINTDTL
+
+           REPEAT
+
+           CALL                 PrintCustomertotals IF (FirstRecord = "N")
+           RETURN             //Process the Next Customer
+
+PRINTDTL
+              MOVE              " ",AgingBucket
+
+              CALL              CalculateAging
+
+              UNPACK            ARTrn.TransDate,CC,YY,MM,DD
+              PACKKEY           PrtDueDate FROM MM,"/",DD,"/",YY
+
+              PRTPAGE           P;*p=368:PrintLineCnt:
+                                *alignment=*left:
+                                *p=034:PrintLineCnt,PrtDueDate:
+                                *p=112:PrintLineCnt,ARTrn.Reference:
+                                *p=250:PrintLineCnt,ARTrn.CustomerPO:
+                                *alignment=*decimal:
+                                *p=492:PrintLineCnt,AgingBucket(1):
+                                *p=552:PrintLineCnt,AgingBucket(2):
+                                *p=612:PrintLineCnt,AgingBucket(3):
+                                *p=672:PrintLineCnt,AgingBucket(4):
+                                *p=732:PrintLineCnt,AgingBucket(5):
+                                *p=770:PrintLineCnt,AgingDays:
+                                *alignment=*left
+
+              ADD               SingleLine,PrintLineCnt
+              RETURN
+
+ACCTPRNT MOVE      Cust.Zip  TO  PRINTZIP
+         REPLACE   " 0"  IN  PRINTZIP
+         RETURN
+.
+;==========================================================================================================
+PrintCustomHeader
+              RETURN
+.=============================================================================
+EnableSelections
+              GETITEM           RSelectedCustomers,0,result
+              SETPROP           AllCollection,Enabled=result
+
+              IF                (result = 1)
+                SETPROP           EFromCustomer,BGCOLOR=2147483653
+                SETPROP           EToCustomer,BGCOLOR=2147483653
+              ELSE
+                SETPROP           EFromCustomer,BGCOLOR=2147483663
+                SETPROP           EToCustomer,BGCOLOR=2147483663
+              ENDIF
+              RETURN
+.=============================================================================
+ExitProgram
+                RETURN
+.=============================================================================
+ExitProgram2
+              IF                (ProgLoaded = 1)
+                RETURN
+              ELSE
+                CHAIN             FromPgm
+              ENDIF
+              STOP
+.=============================================================================
+PrintStatement
+              IF                (FirstPrint != "Y")
+                PRTPAGE           P;*F;
+              ENDIF
+
+              MOVE              "N",FirstRecord
+              ADD               "1",Page
+              squeeze           Cust.Telephone,Cust.Telephone,"("
+              squeeze           Cust.Telephone,Cust.Telephone,")"
+              squeeze           Cust.Telephone,Cust.Telephone,"-"
+
+              squeeze           Cust.Fax,Cust.Fax,"("
+              squeeze           Cust.Fax,Cust.Fax,")"
+              squeeze           Cust.Fax,Cust.Fax,"-"
+
+              COUNT             CharCount,Cust.Telephone
+              IF                (CharCount != 0)
+                EDIT              Cust.Telephone,PrtTelephone using MASK=TelephoneMask
+              ELSE
+                MOVE              "  ",PrtTelephone
+              ENDIF
+
+              count             Charcount,Cust.Fax
+              IF                (CharCount != 0)
+                EDIT              Cust.Fax,PrtFax using MASK=TelephoneMask
+              ELSE
+                MOVE            "   ",PrtFax
+              ENDIF
+.
+. Contact Name
+.
+
+              PRTPAGE           P;*Font=HeaderFont:
+                                *P=220:30,*BOLDON:
+                                *alignment=*center:
+                                *p=410:30,"APC Components Inc.":
+                                *Font=TitleHeadingFont:
+                                *P=410:58,"75 Toledo St.":
+                                *P=410:72,"P.O. Box 225":
+                                *P=410:86,"Farmingdale, New York  11735":
+                                *p=340:100,"Telephone: (631) 249-4079":
+                                *p=490:100,"Fax: (631) 249-4283":
+                                *alignment=*left:
+                                *PictRect=*Off:
+......HR FUCUP                                *Pict=540:620:300:500:Pict1:
+                                *OverlayON:
+                                *Fill=*off:
+                                *BGColor=15395562:
+                                *Fill=*On:
+                                *Rect=160:185:500:740:                         //T:B:L:R
+                                *Rect=205:225:500:600:                         //T:B:L:R
+                                *BGColor=15395562:
+                                *FILL=*Off:
+                                *Rect=185:205:500:740:                         //T:B:L:R     Change 210 --> 195
+                                *Rect=205:225:500:740:                         //New
+                                *Font=SubLineFont:
+                                *p=600:160,*Line=600:225:                      //T:B:L:R     Change 210 --> 195   205-->
+                                *p=680:160,*Line=680:205:                      //T:B:L:R     Change 210 --> 195
+                                *boldon:
+                                *P=504:208,"Terms:":
+                                *P=610:208,ARTRM.Desc:
+                                *P=504:168,"Customer Number":
+                                *P=613:168,"As Of Date":
+                                *P=697:168,"Page":
+                                *boldoff:
+                                *BGColor=15395562:
+                                *Fill=*On:
+                                *alignment=*left:
+                                *BGColor=15395562:
+                                *Rect=240:275:20:779:
+                                *FILL=*Off:
+                                *Font=SubLineFont:
+                                *p=020:LastRow,*Line=779:LastRow:               //Bottom Line
+                                *p=020:240,*Line=020:LastRow:
+...HR 2019.6.28                                *p=220:240,*Line=220:LastRow:
+...HR 2019.6.28                    *p=365:240,*Line=365:LastRow:
+                                *P=245:(LastRow - 20),*Font=DetailFont,"accounting@apccomponents.com":
+                                *p=100:240,*Line=100:LastRow:
+                                *p=245:240,*Line=245:LastRow:
+                                *p=445:240,*Line=445:LastRow:
+                                *p=505:240,*Line=505:LastRow:
+                                *p=565:240,*Line=565:LastRow:
+                                *p=625:240,*Line=625:LastRow:
+                                *p=685:240,*Line=685:LastRow:
+                                *p=745:240,*Line=745:LastRow:
+                                *p=779:240,*Line=779:LastRow:
+                                *Font=SubLineFont:
+                                *boldon:
+..HR 2019.6.28                                *p=93:260,"Purchase Order No.":
+..HR 2019.6.28                                *p=246:260,"Invoice Number":
+..HR 2019.6.28                                *p=375:260,"Invoice Date":
+                                *p=030:260,"Invoice Date":
+                                *p=140:260,"Invoice Number":
+                                *p=308:260,"Purchase Order No.":
+                                *p=460:249,"1 - 30":
+                                *p=520:249,"31 - 45":
+                                *p=580:249,"46 - 60":
+                                *p=640:249,"61 - 90":
+                                *p=695:249,"Over 90":
+                                *p=465:260,"Days":
+                                *p=525:260,"Days":
+                                *p=585:260,"Days":
+                                *p=645:260,"Days":
+                                *p=700:260,"Days":
+                                *p=748:260,"Aging":
+                                *alignment=*left:
+                                *boldoff;
+
+                    CHOP              Cust.City                 //HR 3/29/2005
+
+                    CHOP              Cust.Addr1
+                    CHOP              Cust.Addr2
+                    CHOP              Cust.Addr3
+
+                    ResetVar          AddressLines
+                    MOVE              "1",AddressLineCounter
+
+                    IF                (Cust.Addr1 != "")
+                      MOVE              Cust.Addr1,AddressLines(AddressLineCounter)
+                      ADD               "1",AddressLineCounter
+                    ENDIF
+
+                    IF                (Cust.Addr2 != "")
+                      MOVE              Cust.Addr2,AddressLines(AddressLineCounter)
+                      ADD               "1",AddressLineCounter
+                    ENDIF
+
+                    IF                (Cust.Addr3 != "")
+                      MOVE              Cust.Addr3,AddressLines(AddressLineCounter)
+                      ADD               "1",AddressLineCounter
+                    ENDIF
+
+                    PACK              AddressLines(AddressLineCounter),Cust.City,", ",Cust.St,"  ",Cust.Zip
+                    ADD               "1",AddressLineCounter
+
+                    IF                (Cust.Country != "USA" and Cust.Country != "   ")  //We're shipping to another Country
+                      MOVE              Cust.Country,CNTRYKY
+                      CALL              RDCntry
+                      IF                (ReturnFl = 1)
+                        MOVE              "         ",AddressLines(AddressLineCounter)
+                      ELSE
+                        MOVE              CNTRY.Name,AddressLines(AddressLineCounter)
+                      ENDIF
+                    ENDIF
+
+                    IF                (Cust.Contact != "")
+                      COUNT             CharCount,Cust.Contact
+                      IF                (CharCount != 0)
+                        MOVE              Cust.Contact,ContactName
+                      ELSE
+                        MOVE              "Accounts Payable",ContactName
+                      ENDIF
+                      pack             AddressLines(AddressLineCounter) from "Attn: ",ContactName
+                      ADD               "1",AddressLineCounter
+                    ENDIF
+
+
+              PRTPAGE           P;*Font=DetailFont:
+                                *P=220:138,Cust.Name:                               //HR 2019.8.16 Was 040, now 220
+                                *P=220:156,AddressLines(1):
+                                *P=220:174,AddressLines(2):
+                                *P=220:192,AddressLines(3):
+                                *P=220:210,AddressLines(4):
+                                *P=220:238,AddressLines(5):
+                                *PL:
+                                *boldon:
+.....                                *p=30:186,"Telephone : ",*boldoff,PrtTelephone:
+.....                                *boldon:
+.....                                *p=30:198,"Fax : ",*boldoff,PrtFax:
+.....                                *boldon:
+                                *boldoff
+
+              PRTPAGE           P;*P=503:188,Cust.CustomerID:
+                                *P=610:188,AsOfDate:                //600, 680
+                                *P=700:188,Page;
+
+              MOVE              "280",PrintLineCnt
+              MOVE              "N",FirstPrint
+
+
+              RETURN
+.=============================================================================
+PrintCustomertotals
+              prtpage           P;*alignment=*left:
+                                *BGColor=15395562:
+                                *Fill=*On:
+                                *Rect=950:975:50:650:
+                                *FILL=*Off:
+                                *Rect=975:1000:50:650:
+                                *Font=DetailFont;
+
+              PRTPAGE           P;*p=150:950:
+                                *Line=150:1000:
+                                *p=250:950,*Line=250:1000:
+                                *p=350:950,*Line=350:1000:
+                                *p=450:950,*Line=450:1000:
+                                *p=550:950,*Line=550:1000:
+                                *Font=HeaderFont:
+                                *BOLDON:
+                                *alignment=*center:
+                                *p=410:912,"Statement of Account":
+                                *Font=DetailFont:
+                                *alignment=*left:
+                                *boldon:
+                                *p=70:958,"1 - 30 Days":
+                                *p=166:958,"31 - 45 Days":
+                                *p=266:958,"46 - 60 Days":
+                                *p=366:958,"61 - 90 Days":
+                                *p=462:958,"Over 90 Days":
+                                *p=567:958,"Total Due":
+                                *boldoff:
+                                *alignment=*decimal:
+                                *p=130:978,CustAging(1):
+                                *p=230:978,CustAging(2):
+                                *p=330:978,CustAging(3):
+                                *p=430:978,CustAging(4):
+                                *p=530:978,CustAging(5):
+                                *p=630:978,CustAging(6):
+                                *alignment=*left
+.              PERFORM           MessageFlag of PrintMessage
+              CALL              PrintMessage
+              RETURN
+.=============================================================================
+CalculateAging
+           MOVE              "0",AgingAmt
+           unpack            ARTrn.TransDate,CC,YY,MM,DD
+           PACK              DATE8,CC,YY,MM,DD
+           CALL              ConvDateToDays using DATE8,Days
+
+           SUBTRACT          Days,TodayDays,AgingDaysW
+
+           IF                (AgingDaysW <= BucketDays(1))
+             MOVE              ARTrn.Balance,AgingBucket(1)
+             MOVE              "1",Bucket
+           ENDIF
+
+           IF                (AgingDaysW >= (BucketDays(1) + 1) and AgingDaysW <= BucketDays(2))
+             MOVE              ARTrn.Balance,AgingBucket(2)
+             MOVE              "2",Bucket
+           ENDIF
+
+           IF                (AgingDaysW >= (BucketDays(2) + 1) and AgingDaysW <= BucketDays(3))
+             MOVE              ARTrn.Balance,AgingBucket(3)
+             MOVE              "3",Bucket
+           ENDIF
+
+           IF                (AgingDaysW >= (BucketDays(3) + 1) and AgingDaysW <= BucketDays(4))
+             MOVE              ARTrn.Balance,AgingBucket(4)
+             MOVE              "4",Bucket
+           ENDIF
+
+           IF                (AgingDaysW > BucketDays(4))
+             MOVE              ARTrn.Balance,AgingBucket(5)
+             MOVE              "5",Bucket
+           ENDIF
+
+           IF                (AgingDaysW < 0)
+             MOVE              "0",AgingDays
+           ELSE
+             MOVE              AgingDaysW,AgingDays
+           ENDIF
+           ADD                  ARTrn.Balance,CustAging(Bucket)
+           ADD                  ARTrn.Balance,CustAging(6)
+           RETURN
+.=============================================================================
+PrintMessage
+              return
+
+.             CLEAR             MessageStamps
+.             MOVE              "555",MessageColumn
+.             UNPACK            MessageFlag into MessageStamps
+.             FOR                X FROM "1" TO "20" USING "1"
+.               BREAK             IF ( MessageStamps(X) = "" )
+
+.               MOVE              MessageStamps(X),StampKY
+.               call              RDStamp
+.               CONTINUE          IF (ReturnFL = 1)
+
+.               CALL            PrintMessageNew
+.               SUBTRACT        "275",MessageColumn
+.             REPEAT
+.             RETURN
+;=============================================================================
+PrintMessageNew
+              return
+.             CALL              PrintMessageNotice
+
+.             CREATE            StampFontD,">Arial",Size=StampREC.FontSize,bold=1
+
+.             CALL              CheckForDate
+
+.             PRTPAGE           P;*p=MessageColumn:800:
+.                               *alignment=*left:
+.                                *Font=StampFontD:
+.                                *p=MessageColumn:(MessageRow),StampREC.Text(1):
+.                                *p=MessageColumn:(MessageRow + StampREC.FontSize + 5),StampREC.Text(2):
+.                                *p=MessageColumn:(MessageRow + 2 * (StampREC.FontSize + 5)),StampREC.Text(3):
+.                                *p=MessageColumn:(MessageRow + 3 * (StampREC.FontSize + 5)),StampREC.Text(4):
+.                                *p=MessageColumn:(MessageRow + 4 * (StampREC.FontSize + 5)),StampREC.Text(5):
+.                                *P=MessageColumn:(MessageRow + 5 * (StampREC.FontSize + 5)),StampREC.Text(6):
+.                                *P=MessageColumn:(MessageRow + 6 * (StampREC.FontSize + 5)),StampREC.Text(7):
+.                                *P=MessageColumn:(MessageRow + 7 * (StampREC.FontSize + 5)),StampREC.Text(8):
+.                                *P=MessageColumn:(MessageRow + 8 * (StampREC.FontSize + 5)),StampREC.Text(9):
+..HR 8.4.2015                                *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+
+
+.rintMessage1
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+.                               *alignment=*left:
+.                               *Font=StampFontD:
+.                               *p=MessageColumn:770,"Your account is Past Due":
+.                               *p=MessageColumn:782,"and well beyond the terms":
+.                               *p=MessageColumn:794,"granted to you. No shipments":
+.                               *p=MessageColumn:806,"will be made until all Invoices":
+.                               *p=MessageColumn:818,"over 46 days are satisfied. ":
+.                               *P=MessageColumn:830,"Please call Accounts Receivable":
+.                               *p=MessageColumn:842,"if you have any questions":
+.                               *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *alignment=*left
+.             RETURN
+
+.rintMessage2
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+.                               *alignment=*left:
+.                               *Font=StampFontD:
+.                               *p=MessageColumn:770,"Your account is PAST DUE.":
+.                               *p=MessageColumn:782,"To avoid being put on credit hold,":
+.                               *p=MessageColumn:794,"all invoices over 46 days must be":
+.                               *p=MessageColumn:806,"satisfied.":
+.                               *p=MessageColumn:818,"Thank You.":
+.                               *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+.rintMessage3
+.             CALL              PrintMessageNotice
+.             CLOCK             TimeStamp,Date10
+.             unpack            Date10,YYYY,MM,DD
+.             PACKKEY           MessageDate FROM MM,"/",DD,"/",YYYY
+.             PRTPAGE           P;*p=MessageColumn:800:
+.                               *Font=StampFontD:
+.                               *alignment=*left:
+.                               *BoldOn:
+.                               *p=MessageColumn:770,"Your account has been Past Due":
+.                               *p=MessageColumn:782,"and we have been unable to":
+.                               *p=MessageColumn:794,"collect or contact you. If payment":
+.                               *p=MessageColumn:806,"is not received for Invoices over":
+.                               *p=MessageColumn:818,"46 days by ",MessageDate,", your":
+.                               *P=MessageColumn:830,"account will be put out for":
+.                               *P=MessageColumn:842,"collection":
+.                               *FGColor=*Black:
+.                               *BoldOff:
+.                               *Font=SubLineFont:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+.rintMessage4
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+.                               *alignment=*left:
+.                               *Font=StampFontD:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *BoldOn:
+.                               *p=MessageColumn:770,"ATTENTION - HOLD NOTICE":
+.                               *p=MessageColumn:782,"Your account is past due and":
+.                               *p=MessageColumn:794,"product is ready for shipment.":
+.                               *p=MessageColumn:806,"No orders will be shipped until":
+.                               *p=MessageColumn:818,"all Invoices over 46 days are":
+.                               *p=MessageColumn:830,"satisfied":
+.                               *P=MessageColumn:854,"Accounts Receivable":
+.                               *FGColor=*Black:
+.                               *BoldOff:
+.                               *Font=SubLineFont:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+.rintMessage5
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *Font=StampFontD:
+.                               *alignment=*left:
+.                               *BoldOn:
+.                               *p=MessageColumn:770," DEAR CUSTOMER,":
+.                               *BoldOff:
+.                               *p=MessageColumn:782,"Your account has been consistently":
+.                               *p=MessageColumn:794,"well beyond the terms granted to you.":
+.                               *p=MessageColumn:806,"If this matter is not cleared up ":
+.                               *p=MessageColumn:818,"immediately, we will have no choice":
+.                               *p=MessageColumn:830,"but to change your terms to C.O.D.":
+.                               *BoldOn:
+.                               *P=MessageColumn:842,"Accounts Receivable":
+.                               *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *BoldOff:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+.rintMessage6
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *alignment=*left:
+.                               *Font=StampFontH1:
+.                               *BoldOn:
+.                               *p=MessageColumn:770,"YOU ARE NOW A ":
+.                               *p=MessageColumn:805,"C.O.D. ACCOUNT":
+.                               *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *BoldOff:
+.                               *alignment=*left
+.             RETURN
+.=============================================================================
+.rintMessage7
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *alignment=*left:
+.                               *Font=StampFontD:
+.                               *BoldOn:
+.                               *p=MessageColumn:770,"Discount is not allowed.":
+.                               *p=MessageColumn:782,"Please submit on next":
+.                               *p=MessageColumn:794,"payment.":
+.                               *p=MessageColumn:818,"Thank You,":
+.                               *P=MessageColumn:842,"Accounts Receivable":
+.                               *BoldOff:
+.                               *Font=SubLineFont:
+.                               *FGColor=*Black:
+.                               *alignment=*left
+.             RETURN
+
+.=============================================================================
+.rintMessage8
+.             CALL              PrintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *alignment=*left:
+.                               *Font=StampFontH1:
+.                               *BoldOn:
+.                               *p=MessageColumn:770,"YOUR ACCOUNT  ":
+.                               *p=MessageColumn:805,"IS OUT FOR    ":
+.                                        *p=MessageColumn:840,"COLLECTION !  ":
+.                               *FGColor=*Black:
+.                               *Font=SubLineFont:
+.                               *BoldOff:
+.                               *alignment=*left
+.             RETURN
+
+
+.=============================================================================
+.rintMessageNotice
+.             PRTPAGE           P;*p=MessageColumn:800:
+..HR 8.4.2015 As per Luann/Steven to save money on printing copy                                *FGCOLOR=*Red:
+.                               *alignment=*left:
+.                               *Font=StampFontH:
+.                               *BoldOn:
+.                               *p=MessageColumn:740,"  NOTICE!!":
+.                               *BoldOff:
+.                               *Font=SubLineFont:
+.                               *FGColor=*Black:
+.                               *alignment=*left
+.             RETURN
+;=============================================================================
+StartProgram  ROUTINE           #FromCustomer,#ToCustomer,#RunType,#UseStamps
+              MOVE              "1",ProgLoaded
+.              MOVE              "1",MessageFlag
+              MOVE              "1",SortedBy
+              MOVE              "0",AllCustFlag
+              MOVE              "0",FaxJobNumber
+              MOVE              #RunType,RunType
+              MOVE              #UseStamps,MessageFlag
+              MOVE              #FromCustomer,FromCustomer
+              MOVE              #ToCustomer,ToCustomer
+              CALL              StartProgram2
+              RETURN
+;=============================================================================
+CheckForDate
+.             FOR                Y FROM "1" TO "9" USING "1"
+.               SCAN              "[DATE+",StampREC.Text(Y)
+.               IF                EQUAL                             //We found a valid Date String!!!
+.                 MOVEFPTR          StampREC.Text(Y),StringFPTR
+.                 BUMP              StampREC.Text(Y),6
+.                 PARSE             StampREC.Text(Y),NumberOfDays,"09"
+.                 MOVE              NumberOfDays,NumberOfDaysF
+.                 ADD               NumberOfDaysF,TodayDays,NewCalcedDays
+.                 CALL              ConvDaysToDate using NewCalcedDays,DATE8
+.                 UNPACK            DATE8,CC,YY,MM,DD
+.                 PACKKEY           CalcDate FROM MM,Slash,DD,Slash,YY
+
+.                 BUMP              StampREC.Text(Y),1
+.                 MOVEFPTR          StampREC.Text(Y),StringLPTR
+
+.                 SUBTRACT          StringFPTR,StringLPTR
+.                 RESET             StampREC.Text(Y)
+.                 SCAN              "[DATE+",StampREC.Text(Y)
+.                 SPLICE            CalcDate,StampREC.Text(Y),StringLPTR
+.                 RESET             StampREC.Text(Y)
+.               ENDIF
+.             REPEAT
+.             RETURN

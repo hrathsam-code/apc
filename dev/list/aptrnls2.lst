@@ -1,0 +1,39 @@
+
+
+
+PAGE    1      aptrnls2                                                                                       02-11-19 11:35:36
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP aptrnls2 -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    3.    INCLUDE  A: common.pls
+    4.    INCLUDE  B: apmastfd.pls
+    5.    INCLUDE  C: aptranfd.pls
+   51.    INCLUDE  D: apcalndr.txt
+   54.    INCLUDE  E: splopnfd.txt
+   14. E                              DBOX     DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   61.    INCLUDE  F: splopnpr.txt
+   78.    INCLUDE  G: apmasthr.pls
+   91.    INCLUDE  H: apmastks.pls
+  101.    INCLUDE  I: apmastup.pls
+  122.    INCLUDE  J: aptranrd.pls
+  131.    INCLUDE  K: aptranks.pls
+  146.    INCLUDE  L: apmastrd.pls
+  161.    INCLUDE  M: apmastrd.pls
+  178.    INCLUDE  N: apmastup.pls
+  241.    INCLUDE  O: apdates.pls
+  245.    INCLUDE  P: apmastrd.pls
+  262.    INCLUDE  Q: apmasthr.pls
+  268.    INCLUDE  R: apmasthu.pls
+  277.    INCLUDE  S: getdate.pls
+  278.    INCLUDE  T: apmastvk.pls
+  279.    INCLUDE  U: aptranbk.pls
+
+   Output: c:\apc\plc\aptrnls2.plc                                                                                                                                                                                                                                   
+       724 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:36 11:35:36
+  000021B0 DATA;  000009A4  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,22 @@
+         TRAPCLR   IO
+         TRAP      NOTIME IF IO
+         OPEN      TIMEFILE,TIMENAME
+         READ      TIMEFILE,REC0;STARTIME,ENDTIME,EOJDATE
+         CLOCK     TIME TO ENDTIME
+         WRITE     TIMEFILE,REC0;STARTIME,ENDTIME,EOJDATE
+. 
+         PRINT     *F,*25,"S U P E R  END-OF-DAY PROCEDURE FOR ",EOJDATE:
+                   " BEGAN AT ",STARTIME," AND ENDED AT ",ENDTIME
+         PRINT     *F
+         DISPLAY   *ES,*P01:06,*HON,"S U P E R  END OF DAY PROCEDURE IS ":
+                       "COMPLETE !":
+                   *P1:8,"IT STARTED AT ",STARTIME," AND ENDED AT ",ENDTIME:
+                   *P1:12,"YOU MAY SHUT DOWN THE COMPUTER NOW":
+                   *P1:14,"TAP   E N T E R  KEY WHEN READY "
+         KEYIN     *P40:14,REPLY
+. 
+         CHAIN     "APPMENU1"
+. 
+NOTIME   BEEP
+         DISPLAY   *P1:24,*EL,*HON,"TIME FILE UNAVAILABLE! ",*W2
+         GOTO      NOTIME

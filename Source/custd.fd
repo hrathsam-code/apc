@@ -1,0 +1,89 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CustD.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    04-19-2019 At 16:00                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00104   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CustDVAR
+$CustDVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+CustD                            RECORD
+Entity                           Dim                8                   1 - 8        //1 - 8
+CustomerID                       Dim                10                  9 - 18       //9 - 14
+LastPayDt                        Dim                8                  19 - 26       //15- 22        //Last Payment Date
+LastPayAmt                       Form               7.2                27 - 36       //23 - 32       //Last Payment Amount
+LastCheck                        Dim                10                 37 - 46       //33 - 42       //Last Check Number
+LastInvoiceDt                    Dim                8                  47 - 54       //43 - 50
+LastInvoiceAmt                   Form               7.2                55 - 64       //51 - 60
+LastInvoice                      Dim                10                 65 - 74       //61 - 70
+Balance                          Form               10.2               75 - 87       //71 - 83
+GallonsYTD                       Form               8.4                88 - 100      //4
+ProductSalesYTD                  Form               8.2               101 - 111      //2
+OtherSalesYTD                    Form               8.2               112 - 122      //2
+NotFullGallons                   Form               6.2               123 - 131      //2
+GallonsPerDay                    Form               4.4               132 - 140      //4
+WorkingKFactor                   Form               4.2               141 - 147      //2
+PreviousKFactor                  Form               4.2               148 - 154      //2
+                                 RECORDEND
+;
+;======================================================================================;
+TempCustD                           record          like   CustD                           
+OrigCustD                           record          like   CustD                           
+SaveCustD                           record          like   CustD                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+CustDTXTNM                          INIT         "CustDFL"
+CustDISI1NM                         INIT               "CustDFL.ISI"
+CustDI1DEF                           init            "-n,z,y,1-8,9-18"
+.
+. By Entity, CustomerID
+. 1-8, 9-18
+.
+CustDKY                          DIM                18
+;=============================================================================;
+;
+CustDFLST                         FILELIST
+CustDFL                             IFILE              name="CustDFL.ISI",FIX=360,NODUP,NOPATH
+                                    FILELISTEND
+ 
+CustDFileSize       CONST      "360"
+ 
+CustDProg           INIT       "CustD Program"
+CustDDesc           INIT       "CustD Maintenance"
+CustDTITLE          INIT       "CustD Record"
+CustDHelp           INIT       "CustD.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CustDVARIO
+            INCLUDE CustD.IO 
+          %ENDIF          //End of IO Include File

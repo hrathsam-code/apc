@@ -1,0 +1,104 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    VHST.FD                                                        ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/09/2005 AT 10:47PM                                          ;
+;                                                                             ;
+;  PURPOSE:    Vendor History records                                         ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   06/09/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+.
+           %IFNDEF   $VHSTVAR
+$VHSTVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+VendorHistory RECORD
+Entity        DIM               8          1 - 8
+Vendor        DIM               6          9 - 14
+Year          DIM               4         19 - 22
+PurchAmt      FORM              10.2(13)  23 - 191      //1-12 (Jan-Dec), 13=YTD
+PaidAmt       FORM              10.2(13) 192 - 360      //1-12 (Jan-Dec), 13=YTD
+PurchTotal    FORM              4(13)    361 - 412      //1-12 (Jan-Dec), 13=YTD
+PaidTotal     FORM              4(13)    413 - 464      //1-12 (Jan-Dec), 13=YTD
+DiscAmt       FORM              10.2(13) 465 - 633      //1-12 (Jan-Dec), 13=YTD
+LastPayDt     DIM               8        634 - 641      //Last Payment Date
+LastPayAmt    FORM              7.2      642 - 651      //Last Payment Amount
+LastCheck     DIM               10       652 - 661      //Last Check Number
+LastInvoice   DIM               20                      //Last Invoice Number
+LastInvDate   DIM               8                       //Last Invoice Date
+              RECORDEND
+.
+. File Keys and File Labels
+. -------------------------
+.
+VHSTK1SIZE CONST            "22"                      (Length of the Key variable)
+.
+. By Entity, By Vendor, By Year
+.
+VHSTI1DEF  INIT             "1-22"                    (Index definitions for Key 1)
+.
+VHSTFSIZE  CONST            "700"                     (Length of each Record)
+
+VHSTKY    DIM               VHSTK1SIZE                (The Actual 'Key' variable)
+
+VHSTPROG  INIT              "Vendor History"
+VHSTTITLE INIT              "Vendor History Record"   (Description used later for headers, etc)
+VHSTHELP  INIT              "VHST.HLP"                (Name of the Help file for later purposes)
+
+VHSTTXTNM  INIT             "$APDATA\","VHSTFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+VHSTISI1NM INIT             "$APDATA\","VHSTFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+VHSTFLST  FILELIST
+           %IFDEF            VHSTKY
+VHSTFL    IFILE             Name=VHSTISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY2
+VHSTFL2   IFILE             Name=VHSTISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY3
+VHSTFL3   IFILE             Name=VHSTISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY4
+VHSTFL4   IFILE             Name=VHSTISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY5
+VHSTFL5   IFILE             Name=VHSTISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY6
+VHSTFL6   IFILE             Name=VHSTISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY7
+VHSTFL7   IFILE             Name=VHSTISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY8
+VHSTFL8   IFILE             Name=VHSTISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            VHSTKY9
+VHSTFL9   IFILE             Name=VHSTISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $VHSTIO
+           INCLUDE           VHST.IO
+         %ENDIF
+#end

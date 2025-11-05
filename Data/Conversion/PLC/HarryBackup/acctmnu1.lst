@@ -1,0 +1,88 @@
+
+
+
+PAGE    1      ACCTMNU1.PLS IDE                                                                               03-22-04 19:42:04
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "ACCTMNU1.PLS","F:\PLC\ACCTMNU1.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    5.    INCLUDE  A: f:\source\mscbrag.txt
+    7.    INCLUDE  B: common.txt
+
+   Output: f:\plc\acctmnu1.plc                                                                                                                                                                                                                                       
+       171 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 19:42:03 19:42:04
+  00000E30 DATA;  000000FC  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      ACCTMNU1.PLS IDE                                                                               03-22-04 19:42:04
+                                         
+
+"ACCTDAUD                                  D      91.  *
+"ACCTDEIS                                  D      86.  *
+"ACCTPTIS                                  D      96.  *
+"ACCTSLCT                                  D     105.  *
+"ACCTSNAM                                  D      99.  *
+"ACCTSTAT                                  D     114.  *
+"ANSWER                                    D     126.  *
+"CHAIN CUSTINDX.CHN                        D     111.  *
+"LABELPT                                   D     102.  *
+"LABLSTAT                                  D     108.  *
+1                                          F      59.  *
+10                                         F      56.  *
+11                                         F      61.  *
+ACCTDAUD                                   X      91.  *    69.  
+ACCTDEIS                                   X      86.  *    68.  
+ACCTNUMB                                   D      14. B*
+ACCTPTIS                                   X      96.  *    70.  
+ACCTSLCT                                   X     105.  *    76.  
+ACCTSNAM                                   X      99.  *    71.  
+APPCODE                                    D      31. B*
+APPMENU1                                   X     126.  *    57.      77.  
+APPSECUR                                   F      32. B*
+BADCHAIN                                   X      82.  *    66.  
+CUSTINDX                                   X     111.  *    74.  
+CUSTSTAT                                   X     114.  *    75.  
+DATE6                                      D      10. B*
+ENVS                                       D      11. B*
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*
+GETINDEX                                   X      53.  *    60.      62.      78.      87.      92.      97.     100.  
+                                                     *   103.     106.     109.     115.     122.     127.  
+INDEX                                      F       9.  *    54.      56.      59.      61.      68.  
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LABEL                                      X     102.  *    72.  
+LABLSTAT                                   X     108.  *    73.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+ROLLNAME                                   D      13.  *
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+START                                      X      24.  *   112.  
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+
+
+
+PAGE    3      ACCTMNU1.PLS IDE                                                                               03-22-04 19:42:04
+                                         
+
+TIME                                       D      11.  *    67.  
+TODAY                                      D       8. B*    28.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+YOUCANT                                    X     118.  *
+

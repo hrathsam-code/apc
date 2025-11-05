@@ -1,0 +1,16 @@
+
+
+
+PAGE    1      corpctls                                                                                       02-11-19 11:56:55
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP corpctls 
+
+    3.    INCLUDE  A: mscbrag.txt
+   10.    INCLUDE  B: common.txt
+
+   Output: c:\apc\plc\corpctls.plc                                                                                                                                                                                                                                   
+       122 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:56:55 11:56:55
+  00000CA8 DATA;  00000096  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,64 @@
+*................................................................
+. LOGDATA - UPDATE THE SYSTEM LOG FILE -- INCLUSION FILE #1
+.
+. THIS FILE CONTAINS THE DATA AREA DEFINITION STATEMENTS THAT ARE
+. REQUIRED BY THE LOG FILE I/O ROUTINES
+.
+* RESTRICTIONS:  -- THIS FILE MAY BE INCLUDED IN A PROGRAM ONLY
+.                   ONCE
+.                -- THIS FILE MUST BE INCLUDED WITHIN THE
+.                   STATEMENTS USED TO DEFINE THE USER'S DATA
+.                   AREA
+*................................................................
+. A LOG ENTRY HAS THE FOLLOWING FORMAT:
+. POSITIONS   USED FOR:
+.   1- 7      RESERVED
+.   8- 9      NUMBER OF THE PORT WRITING THE LOG ENTRY
+.  10-11      RESERVED
+*  12-21      THE LOG ENTRY'S TYPE:
+.                  LOG-ON ....... USER SIGN ON
+.                  LOG-OFF ...... USER SIGN OFF
+.                  BAD ID ....... INVALID ATTEMPT TO SIGN ON
+.                  ERROR ........ DATASHARE ERROR
+.                  PROGRAM ...... SUCCESSFUL CHAIN TO A PROGRAM
+.                  NO PROGRAM ... UNSUCCESSFUL CHAIN TO A PROGRAM
+.                  ROLLOUT ...... SUCCESSFUL ROLLOUT
+.                  ROLL RET ..... ROLLOUT RETURN
+.                  NO ROLLOUT ... UNSUCCESSFUL ROLLOUT
+.                  ...
+*  22-23      RESERVED
+.  24-31      DATE OF LOG ENTRY
+.  32-33      RESERVED
+.  34-41      TIME OF LOG ENTRY
+.  42-43      RESERVED
+.  44-64      OTHER INFORMATION:
+.                  LOG-ON ....... USER'S NAME
+.                  BAD ID ....... INVALID NUMBER ENTERED
+.                  ERROR ........ ERROR MESSAGE
+.                  PROGRAM ...... NAME OF PROGRAM
+.                  NO PROGRAM ... NAME OF PROGRAM
+.                  ...
+*................................................................
+. THE FOLLOWING VARIABLES MUST BE SET TO THEIR APPROPRIATE VALUES
+. BEFORE WRITING A LOG ENTRY
+.
+LOGFILE  FILE                          SYSTEM LOG FILE
+LOGTYPE  DIM       10                  TYPE OF LOG TO BE WRITTEN
+LOGINFO  DIM       20                  OTHER INFORMATION
+*................................................................
+. THE FOLLOWING VARIABLES MUST BE DEFINED ELSEWHERE AND BE SET TO
+. THEIR APPROPRIATE VALUES BEFORE WRITING A LOG ENTRY
+.
+.PORTN    FORM      2                   PORT NUMBER
+.TODAY    INIT      "mm/dd/yy"          month/day/year
+.TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+*................................................................
+. SINCE THE SYSTEM LOG FILE IS COMMON TO ALL PORTS, THE FOLLOWING
+. VARIABLES ARE NEEDED TO HANDLE THE COMMON FILE CONSIDERATIONS
+.
+LOGRN    FORM      3                   RECORD NUMBER OF LOG ENTRY
+ZERO     FORM      "000"                 RECORD NUMBER AT RECORD 0
+ONE      FORM      "001"
+ASTERFLD DIM       1
+..
+.

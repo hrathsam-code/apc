@@ -1,0 +1,10 @@
+LIBRARY   plbwex32
+
+
+CODE      PRELOAD MOVEABLE DISCARDABLE
+DATA      PRELOAD SINGLE
+
+EXPORTS
+    extcall    @2
+
+    

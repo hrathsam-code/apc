@@ -1,0 +1,137 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CONTACT.FD                                                     ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    11/28/2003 AT 11:39PM                                          ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   11/28/2003   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+              %IFNDEF   $ContactVAR
+$ContactVAR   EQUATE            1
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+ContactREC    RECORD
+ID            DIM               15                  1 - 15
+Type          DIM               1                  16 - 16
+ContactID     FORM              6                  17 - 22
+Cont_ID       DIM               4                  23 - 26
+Nickname      DIM               30                 27 - 56
+Salutation    DIM               5                  57 - 61
+L_Name        DIM               25                 62 - 86
+F_Name        DIM               20                 87 - 106
+M_Name        DIM               1                 107 - 107
+Addr1         DIM               30                108 - 137
+Addr2         DIM               30                138 - 167
+Addr3         DIM               30                168 - 197
+City          DIM               30                198 - 227
+St            DIM               2                 228 - 229
+Zip           DIM               10                230 - 239
+CountFiller   DIM               2                 240 - 241
+Use_Phone     FORM              1                 242 - 242
+Use_Addr      FORM              1                 243 - 243
+Filler1       DIM               10                244 - 253
+Filler2       DIM               7                 254 - 260
+Country       DIM               3                 261 - 263
+Extension     DIM               7                 264 - 270
+Memo          DIM               50                271 - 320
+Email         DIM               50                321 - 370
+Title         DIM               40                371 - 410
+Birthday      DIM               8                 411 - 418
+BlankFill     DIM               7                 419 - 425
+Default       FORM              1                 426 - 426
+Rec_Added     DIM               8                 427 - 434
+Rec_Change    DIM               8                 435 - 442
+Rec_User      DIM               10                443 - 452
+              RECORDEND
+.
+. File Keys and File Labels
+. -------------------------
+.
+ContactK1SIZE CONST            "22"                                   (Length of the Key variable)
+ContactK2SIZE CONST            "52"                                   (Length of the Key variable 2)
+ContactK3SIZE CONST            "6"                                    (Length of the Key variable 2)
+ContactK4SIZE CONST            "22"                                   (Length of the Key variable)
+.
+. By Entity, Seq Major, Seq Minor
+.
+ContactI1DEF  INIT             "-N,U,16-16,1-15,17-22"                     (Index definitions for Key 1)
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+ContactI2DEF  INIT             "-N,U,62-86,87-106,17-22"                   (Index definitions for Key 2)
+
+ContactI3DEF  INIT             "-17-22"                                (Index definitions for Key 2)
+.
+ContactI4DEF  INIT             "-1-22"                                 (Index definitions for Key 1)
+.
+ContactFileSize    CONST            "452"                                  (Length of each Record)
+
+ContactKY    DIM               ContactK1SIZE                          (The Actual 'Key' variable)
+ContactKY2   DIM               ContactK2SIZE                          (The Actual 'Key' variable)
+ContactKY3   DIM               ContactK3SIZE                          (The Actual 'Key' variable)
+ContactKY4   DIM               ContactK4SIZE                          (The Actual 'Key' variable)
+
+ContactPROG  INIT              "Contact Maintenance"
+ContactTITLE INIT              "Contact Record"                       (Description used later for headers, etc)
+ContactHELP  INIT              "Contact.HLP"                          (Name of the Help file for later purposes)
+
+ContactTXTNM  INIT             "Contacts.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+ContactISI1NM INIT             "Contacts.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+ContactISI2NM INIT             "Contacts2.ISI"               .Actual ISI Filename
+ContactISI3NM INIT             "Contacts3.ISI"               .Actual ISI Filename
+ContactISI4NM INIT             "Contacts4.ISI"               .Actual ISI Filename
+
+ContactFLST  FILELIST
+           %IFDEF            ContactKY
+ContactFL    IFILE             Name=ContactISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY2
+ContactFL2   IFILE             Name=ContactISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY3
+ContactFL3   IFILE             Name=ContactISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY4
+ContactFL4   IFILE             Name=ContactISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY5
+ContactFL5   IFILE             Name=ContactISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY6
+ContactFL6   IFILE             Name=ContactISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY7
+ContactFL7   IFILE             Name=ContactISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY8
+ContactFL8   IFILE             Name=ContactISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ContactKY9
+ContactFL9   IFILE             Name=ContactISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+              GOTO              #End
+         %IFNDEF           $ContactIO
+           INCLUDE           Contact.IO
+         %ENDIF
+#End
+

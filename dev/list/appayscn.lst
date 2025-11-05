@@ -1,0 +1,33 @@
+
+
+
+PAGE    1      appayscn                                                                                       02-11-19 11:35:32
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP appayscn -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    2.    INCLUDE  A: mscbrag.txt
+    6.    INCLUDE  B: common.pls
+    8.    INCLUDE  C: appaidfd.pls
+   10.    INCLUDE  D: apmastfd.pls
+   31.    INCLUDE  E: apcalndr.pls
+   33.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   37.    INCLUDE  G: callerr2.inc
+  107.    INCLUDE  H: apmastrd.pls
+  109.    INCLUDE  I: apmastks.pls
+  118.    INCLUDE  J: appaidrd.pls
+  129.    INCLUDE  K: apmastrd.pls
+  148.    INCLUDE  L: apmastks.pls
+  160.    INCLUDE  M: appaidrd.pls
+  168.    INCLUDE  N: appaidks.pls
+  276.    INCLUDE  O: apdates.pls
+
+   Output: c:\apc\plc\appayscn.plc                                                                                                                                                                                                                                   
+       602 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:32 11:35:32
+  00001B64 DATA;  000005FE  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

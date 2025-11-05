@@ -1,0 +1,16 @@
+.............................................................
+.           STDFMTER ROUTINE   3/15/80 R. BACHARACH         .
+.              STANDARD FORMAT ERROR ROUTINE                .
+.                                                           .
+. THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+. TO FACILITATE STANDARD FORMAT ERROR DETECTION/NOTIF       .
+.............................................................
+. 
+STDFMTER BEEP
+         FILEPI    0
+         DISPLAY   *ES,*P01:10,"FORMAT ERROR ON ",IOTYPE," OF ",IOERFILE:
+                       *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+         BEEP
+         GOTO      STDFMTER
+. 
+. 

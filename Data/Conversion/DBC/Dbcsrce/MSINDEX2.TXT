@@ -1,0 +1,19 @@
+//.................................................................
+//. MSINDEXS/TXT - MODULE INDEXS ALL INVENTORY HISTORY FILES      .
+//.................................................................
+//.
+//. INDEX THE MSPARTFL/TXT FILE ON POSITIONS 2-21 (KEYLENGTH = 20)
+//.
+INDEX MSPARTFL/TXT:D5,,,:D3;2-21
+//.
+//. INDEX THE MSSALES/TXT FILE ON POSITIONS 1-29 (KEYLENGTH = 29)
+//.
+INDEX MSSALES/TXT:D6,,,:D3;1-29
+//.
+//. INDEX THE MSPURCHS/TXT FILE ON POSITIONS 1-29 (KEYLENGTH = 29)
+//.
+INDEX MSPURCHS/TXT:D7,,,:D3;1-29
+//.
+//. NOW INDEX ALL DATA ENTRY FILES FOR FOUR TERMINALS AS FOLLOWS:
+//.
+//.

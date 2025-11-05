@@ -1,0 +1,48 @@
+         INCLUDE   COMMON
+. 
+         INCLUDE   APCALNDR
+. 
+         INCLUDE   APTRANFD
+. 
+REPLY    DIM       1
+. 
+START    DISPLAY   *ES,*P10:01,*HON,"TEST THE DATE CALCULATION ROUTINE"
+. 
+SETCURR  MOVE      TODAY  TO  TMON
+         RESET     TODAY  TO  4
+         MOVE      TODAY  TO  TDAY
+         RESET     TODAY  TO  7
+         MOVE      TODAY  TO  TYEAR
+. 
+. SET CURRENT DATE
+. 
+         CALL      CALCDATE
+. 
+         MOVE      TESTDATE  TO  CURRDATE
+         DISPLAY   *P01:04,*HON,"CURRENT DATE IS ",TMON,"/",TDAY,"/",TYEAR:
+                   ", CALC'D DAYS = ",CURRDATE
+. 
+KEYTEST  MOVE      "0" TO TMON
+         MOVE      "0" TO TDAY
+         MOVE      "0" TO TYEAR
+         DISPLAY   *P01:05,*EF
+. 
+KEYDATE  KEYIN     *P01:06,"ENTER TEST DATE DESIRED ",*DE,TMON,"/",*DE:
+                   TDAY,"/",*DE,TYEAR
+. 
+         CALL      CALCDATE
+         DISPLAY   *P41:06,*HON,TESTDATE
+         MOVE      "0" TO WORKFLD
+         MOVE      CURRDATE  TO  WORKFLD
+         SUB       TESTDATE FROM WORKFLD
+         DISPLAY   *P01:08,*HON,"DAYS ELAPSED = ",*P41:08,*HON,WORKFLD
+. 
+MORE     KEYIN     *P01:12,*HON,"MORE TESTS ? (Y/N) ",REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      KEYTEST IF EQUAL
+. 
+         SHUTDOWN  "FREE"
+. 
+. 
+         INCLUDE   APDATES
+. 

@@ -1,0 +1,20 @@
+
+ pcDATAcheck - 3.11  (c) Copyright 1987-92  ProCon Systems   Site License: 1132 
+Command Was : PCDATACK  F:\CPQLAST\WOCHECKS.TXN,LOG.LOG -N38
+
+  Input  File    : F:\CPQLAST\WOCHECKS.TXN                           
+  Output File    : LOG.LOG                                           
+
+     Record #   Starting at    O/H/D  Char  Reason for Selection
+             1            1                 Record Length         40 Not Equal to         38
+
+  Record Count   :         57                  File Contains No TABs/NULs
+  Min Rec Length :         38                  Total File Size :         2,283
+  Max Rec Length :         40                  Valid EOF at    :         2,282
+
+  Extra CR     :            Others<ASCII :           
+  Extra LF     :           
+  Form Feed    :            DEL          :            Tot Non-ASCII:           
+  Backspace    :            Others>ASCII :            # Rec. Sel.  :          1
+
+

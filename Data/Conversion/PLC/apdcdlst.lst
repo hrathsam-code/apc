@@ -1,0 +1,99 @@
+
+
+
+PAGE    1      APDCDLST.PLS IDE                                                                               03-22-04 14:49:48
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APDCDLST.PLS","F:\PLC\APDCDLST.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    3.    INCLUDE  A: mscbrag.txt
+    4.    INCLUDE  B: common.pls
+   31.    INCLUDE  C: callerr1.inc
+   35.    INCLUDE  D: callerr2.inc
+
+   Output: f:\plc\apdcdlst.plc                                                                                                                                                                                                                                       
+       183 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:49:48 14:49:48
+  00000F28 DATA;  00000140  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APDCDLST.PLS IDE                                                                               03-22-04 14:49:49
+                                         
+
+"                                          D      30. D*
+"000000                                    D      48.  *    56.  
+"A/P DISTRIBUTION FILE LIST                D      33.  *
+"APDISTFL.ISI                              D      42.  *
+4                                          F      74.  *
+55                                         F      63.  *
+ACCTNUMB                                   D      14. B*
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+D                                          O 5    12. C*    13. D    16. D    31. D
+DATE6                                      D      10. B*
+DCODE                                      D       7.  *    51.      56.      60.  
+DCSL                                       F      10.  *    51.  
+DDATA                                      D      13. C*    13. D
+DESC                                       D       8.  *    51.      60.  
+DSAL                                       F       9.  *    51.      60.  
+DSTDIV                                     D      15.  *    52.  
+DUMMY                                      D      29.  *    49.  
+ENVS                                       D      11. B*
+EOJ                                        X      78.  *    54.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FIRSTIME                                   D      17. B*
+FLG                                        D      21.  *
+FROMPGM                                    D      16. B*    28. D    80.  
+HEADER                                     X      68.  *    43.      64.  
+INCODE                                     D      22.  *
+INDXIT                                     X      26. D*    22. D
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LINES                                      F      25.  *    62.      63.      74.  
+MAINLINE                                   X      30. D*    22. D
+MASTER                                     i       6.  *    42.      49.      51.      78.  
+MTDC                                       F      12.  *    51.  
+MTDS                                       F      11.  *    51.  
+NAMT1                                      D      17.  *
+NAMT2                                      D      18.  *
+NAMT3                                      D      19.  *
+NDESC                                      D      16.  *
+NITM2                                      D      20.  *
+NULL                                       X      24. D*    22. D
+PAGES                                      F      24.  *    68.      70.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+RDKEY                                      D      28.  *    48.      49.  
+READFILE                                   X      51.  *    46.      57.      66.  
+REPLY                                      D      23.  *    30. D
+RESULT                                     F      11. C*    16. D    22. D
+S$CMDLIN                                   D       0.  *
+
+
+
+PAGE    3      APDCDLST.PLS IDE                                                                               03-22-04 14:49:49
+                                         
+
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+SEQ                                        F      26.  *
+TESTIT                                     X      22. D*    16. D
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TITLTEXT                                   D       9. C*    33.      15. D
+TODAY                                      D       8. B*    40.      70.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+YTDC                                       F      14.  *    51.  
+YTDS                                       F      13.  *    51.  
+

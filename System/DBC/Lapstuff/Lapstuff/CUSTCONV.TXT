@@ -1,0 +1,67 @@
+.CUSTCONV - CONVERTS THE CUSTOMER FILE BY INCREASING THE
+.           CUSTKEY TO 6 VICE 4 CHARACTERS AND BYPASSES
+.           ANY DUPLICATE DATA KEYED
+.
+         INCLUDE   COMMON
+.
+         INCLUDE   CUSTMAST
+.
+SAVECUST DIM       6
+BIGKEY   DIM       6
+COUNT    FORM      5
+OCOUNT   FORM      5
+SEQ      FORM      "-1"
+REPLY    DIM       1
+DUMMY    DIM       127
+FIRSTSW  INIT      "1"
+.
+INFILE   FILE
+OUTFILE  FILE      UNCOMPRESSED
+.
+         OPEN      INFILE,"ACCOUNTS/SORT:9832"
+         PREPARE   OUTFILE,"ACCOUNTS/NEW:W"
+.
+READIT   TRAPCLR   IO
+         TRAPCLR   FORMAT
+.
+         TRAP      BADREAD IF IO
+         TRAP      BADREAD IF FORMAT
+.
+         INCLUDE   CUSTREAD
+.
+         GOTO      EOJ IF OVER
+.
+         ADD       "1" TO COUNT
+.        DISPLAY   *P40:23,"COUNT=",COUNT," CUSTOMER=",CUSTKEY
+.
+         CMATCH    "1",FIRSTSW
+         GOTO      AROUND  IF EQUAL
+         MOVE      CUSTKEY TO SAVECUST
+         MOVE      " "     TO FIRSTSW
+.
+AROUND   MATCH     CUSTKEY TO SAVECUST
+         GOTO      READIT  IF EQUAL
+.
+         MATCH     "10670A" TO CUSTKEY
+         GOTO      READIT  IF EQUAL
+.
+         MOVE      CUSTKEY  TO BIGKEY
+.
+         INCLUDE   CUSTWRIT
+.
+         DISPLAY   *P1:24,BIGKEY
+         MOVE      CUSTKEY TO SAVECUST
+.
+         ADD       "1" TO OCOUNT
+         GOTO      READIT
+.
+BADREAD  DISPLAY   *P40:20,"BAD READ ON CUSTOMER ",CUSTKEY,*W2:
+                   *P40:20,*EL
+         GOTO      READIT
+.
+EOJ      WEOF      OUTFILE,SEQ
+         CLOSE     OUTFILE
+         CLOSE     INFILE
+         DISPLAY   *P01:10,*HON,"RECORDS IN = ",COUNT," .. RECORDS OUT = ":
+                   OCOUNT,*HOFF
+         KEYIN     REPLY

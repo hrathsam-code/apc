@@ -1,0 +1,22 @@
+
+
+
+PAGE    1      smmastud                                                                                       02-11-19 11:36:04
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP smmastud -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    6.    INCLUDE  A: ncommon.txt
+  102.                                DA       DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+  114.                                SAVEBOX  DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+
+   Output: c:\apc\plc\smmastud.plc                                                                                                                                                                                                                                   
+       668 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:36:04 11:36:04
+  0000229C DATA;  00000C0E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

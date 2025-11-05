@@ -1,0 +1,67 @@
+%PDF-1.4
+%ÄÅÇ
+3 0 obj
+ << /Type /Font
+    /Subtype /Type1
+    /Name /F1
+    /BaseFont /Courier
+ >>
+endobj
+
+4 0 obj
+  <</Length 0 >>
+stream
+endstream
+endobj
+
+5 0 obj
+ << /Type /Page
+    /Parent 2 0 R
+    /MediaBox [ 0 0 612.000 792.000]
+    /Contents 4 0 R
+    /Resources << /Font <<  /F1 3 0 R >>
+               >>
+ >>
+endobj
+
+2 0 obj
+ << /Type /Pages
+    /Kids [ 5 0 R
+ ]
+    /Count 1 >>
+endobj
+
+6 0 obj
+ <<
+    /CreationDate (D:20190709173013)
+    /ModDate (D:20190709173013)
+    /Author (Harold)
+    /Title  (0000001.pdf)
+    /Creator (9.9   PLBWIN   18)
+    /Producer (9.9   PLBWIN   18)
+ >>
+endobj
+
+1 0 obj
+ << /Type /Catalog
+    /Pages 2 0 R >>
+endobj
+
+xref
+0 7
+0000000000 65535 f
+0000000649 00000 n
+0000000354 00000 n
+0000000017 00000 n
+0000000118 00000 n
+0000000174 00000 n
+0000000431 00000 n
+
+trailer
+ << /Size 7
+    /Root 1 0 R
+    /Info 6 0 R
+ >>
+startxref
+709
+%%EOF

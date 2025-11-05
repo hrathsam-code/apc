@@ -1,0 +1,48 @@
+.........................................................
+.   CUSTOMER MASTER FILE I/O ROUTINES                   .
+.........................................................
+. 
+OPENCUST TRAPCLR   IO
+         TRAP      NOCUSTO IF IO
+         OPEN      CUSTFILE,CSTNAME
+         MOVE      "H"    TO IOSW
+         RETURN
+. 
+NOCUSTO  BEEP
+         DISPLAY   *ES,*P01:12,"CUSTOMER FILE NOT ON-LINE - ABORTING"
+         STOP
+. 
+. 
+GETCUST  TRAPCLR   IO
+         TRAP      NOCUSTO  IF  IO
+. 
+         READ      CUSTFILE,CUSTKEY;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                                    CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED:
+                                                              CUSTCATG:
+                                    LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+                                    COMMCODE:
+                                    CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+                                    PDOVR90,MTDCASH,MTDCRED
+. 
+         GOTO      NOCUSTFD IF OVER
+         MOVE      "H"  TO  IOSW
+         RETURN
+. 
+...........                                   CUSTADR2:
+NOCUSTFD MOVE      "M"  TO  IOSW
+         RETURN
+. 
+PUTCUST  TRAPCLR   IO
+         TRAP      NOCUSTFD IF  IO
+         UPDATE    CUSTFILE;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                            CUSTCITY,CUSTSTAT,CUSTZIP,CUSTCRED,CUSTCATG:
+                            LSTSALDT,LSTPAYDT,LSTSALPR,LSTPAYPR:
+                            COMMCODE:
+                            CURNTDUE,PD01TO30,PD31TO60,PD61TO90:
+                            PDOVR90,MTDCASH,MTDCRED
+         MOVE      "H"  TO  IOSW
+         RETURN
+. 
+...........                           CUSTADR2:
+.  END OF CUSTOMER MASTER FILE I/O ROUTINES
+. ..........................................

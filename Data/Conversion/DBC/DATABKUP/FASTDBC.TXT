@@ -1,0 +1,201 @@
+.
+. fastdbc
+. user verb prototypes
+.
+black	define "#"0#""
+blue	define "#"1#""
+green	define "#"2#""
+cyan	define "#"3#""
+red	define "#"4#""
+magenta	define "#"5#""
+yellow	define "#"6#""
+white	define "#"7#""
+.
+colorfore.title	num	green
+colorback.title	num	black
+colorfore.menu	num	white
+colorback.menu	num	blue
+colorfore.sel	num	black
+colorback.sel	num	white
+colorfore.box	num	white
+colorback.box	num	magenta
+colorfore.error	num	white
+colorback.error	num	red
+colorfore.scrn	num	white
+colorback.scrn	num	black
+.
+fastdbc.syscode	gchar 2
+mnt.recflag	gint 1
+mnt.newflag	gint 1
+mnt.chgflag	gint 1
+mnt.msgflag	gint 1
+
+TITLE	verb	LEFT=cnvarlit, CENTER=cnvarlit, RIGHT=cnvarlit
+
+MENU	verb	HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit:
+			TITLE=cvarlit, ITEM=cvarlit, PROGRAM=cvarlit, ROUTINE=label:
+			TERMINATE=label:
+			F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12:
+			CTLA, CTLB, CTLC, CTLD, CTLE, CTLF, CTLG, CTLH, CTLI:
+			CTLJ, CTLK, CTLL, CTLM, CTLN, CTLO, CTLP, CTLQ, CTLR:
+			CTLS, CTLT, CTLU, CTLV, CTLW, CTLX, CTLY, CTLZ
+
+ACTIONBAR verb ENTRY=cvarlit, ITEM=cvarlit, ROUTINE=label:
+		DESELECT=nvar, CHECKMARK=nvar, ENTRYLIST=list, ITEMLIST=list:
+		KEYLIST=list, ABORT=cvarlit:label:
+		F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12:
+		CTLA, CTLB, CTLC, CTLD, CTLE, CTLF, CTLG, CTLH, CTLI:
+		CTLJ, CTLK, CTLL, CTLM, CTLN, CTLO, CTLP, CTLQ, CTLR:
+		CTLS, CTLT, CTLU, CTLV, CTLW, CTLX, CTLY, CTLZ
+
+ACTION	verb =cvarlit
+
+ACTIONSTORE verb ROUTINE=label:nvarlit
+
+ACTIONPUTQ verb #cvarlit
+
+ACTIONNOINTR verb ROUTINE=label
+
+ACTIONINTRCLR verb
+
+MAINT	verb RECORD=list, TABLE=list: 
+			FILEITEM=cvarlit, LOOKUPITEM=cvarlit, MODIFYITEM=cvarlit:
+			OPTIONSITEM=cvarlit, ROUTINE=label:
+			F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12:
+			CTLA, CTLB, CTLC, CTLD, CTLE, CTLF, CTLG, CTLH, CTLI:
+			CTLJ, CTLK, CTLL, CTLM, CTLN, CTLO, CTLP, CTLQ, CTLR:
+			CTLS, CTLT, CTLU, CTLV, CTLW, CTLX, CTLY, CTLZ:
+			AUTOSAVE, MAKEVIEW:
+			NOSAVE, NOEXIT, NOFIND, NONEXT, NOBACK, NOADD, NOCHANGE:
+			NODELETE:
+			FINDKEY=label:
+			BEGIN=label:
+			END=label:
+			SAVE=label:
+			EXIT=label:
+			FIND=label:
+			NEXT=label:
+			BACK=label:
+			ADD=label:
+			ADDEND=label:
+			CHANGE=label:
+			DELETE=label:
+			GET=label:
+			PUT=label:
+			VIEW=label
+
+MAINTFLGSAVE verb
+MAINTFLGREST verb
+
+SCREEN verb DISPLAY=label, ERASE=label, H=nvarlit, V=nvarlit, HA=nvarlit:
+		VA=nvarlit, TEXT=cvarlit, FIELD=cnvarlit, DATA=var:
+		REPEATFIELD=array:nvarlit, MMDDYY, MMDDYYYY, YYMMDD:
+		YYYYMMDD, YN, UC, DE, JR, ZF, FIELDEXIT=label, NOCHANGE:
+		FIELDINIT=cnvarlit, VIEWFIELD=cnvar, VIEWDESC=cnvarlit:
+		VIEWH=nvarlit, VIEWHA=nvarlit, VIEWWIDTH=nvarlit:
+		VIEWDEFAULTHA=nvarlit
+
+SCREENERASE verb
+SCREENKEYIN verb =nvar
+SCREENDISPLAY verb
+
+DIALOG	verb	HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit:
+			TEXT=cvarlit, FIELD=var:
+			H=nvarlit, V=nvarlit:
+			REQUIRED, YESNO
+
+ERROR	verb	HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit:
+			TEXT=cvarlit:
+			H=nvarlit, V=nvarlit
+MESSAGE	verb	HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit:
+			TEXT=cvarlit:
+			H=nvarlit, V=nvarlit
+
+MESSAGEERASE	verb
+
+LISTBOX	verb HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit:
+			TITLE=cvarlit, ARRAY=list, COUNT=nvarlit, RESULT=nvar
+
+REPORT	verb RECORD=list, TABLE=list:
+			PAGEWIDTH=nvarlit, PAGELENGTH=nvarlit:
+			TOPMARGIN=nvarlit, BOTTOMMARGIN=nvarlit, LEFTMARGIN=nvarlit:
+			RIGHTMARGIN=nvarlit:
+			TITLE=cvarlit, LTITLE=cvarlit, RTITLE=cvarlit:
+			NODATE, NOPAGE, DISPLAY:
+			BEGIN=label, END=label, BEFOREREPORT=label, AFTERREPORT=label:
+			BEFOREPAGE=label, AFTERPAGE=label:
+			DEFAULTHA=nvarlit, H=nvarlit, HA=nvarlit:
+			COL=varlit, COLWIDTH=nvarlit, DESC=cvarlit:
+			BEFOREGET=label, BEFORELINE=label, AFTERLINE=label:
+			BEFOREGROUP=label, AFTERGROUP=label, GROUPTOTAL:
+			GRANDTOTAL
+
+REPORTLINE	verb #cnvarlit
+
+FASTOPEN	verb #list
+FASTCREATE	verb #list
+FASTREAD	verb #list, #list
+FASTREADPART	verb #list, #list
+FASTREADSEQ	verb #list, #list
+FASTREADWITHKEY	verb #list, #list, #cvarlit
+FASTWRITE	verb #list, #list
+FASTUPDATE	verb #list, #list
+FASTUPDATEALL	verb #list, #list
+FASTREADNEXT	verb #list, #list
+FASTREADNEXTPART	verb #list
+FASTREADBACK	verb #list, #list
+FASTREADBACKPART	verb #list
+FASTCLOSE	verb #list
+FASTDELETE	verb #list
+FASTGETKEY	verb #cvar
+FASTBUILDKEY	verb #list, #list
+
+		#ifndef noextdef1
+TITLE		external
+MENU		external
+ERROR		external
+MESSAGE		external
+MESSAGEERASE	external
+LISTBOX		external
+FASTOPEN	external
+FASTCREATE	external
+FASTREAD	external
+FASTREADPART	external
+FASTREADSEQ	external
+FASTREADWITHKEY	external
+FASTWRITE	external
+FASTUPDATE	external
+FASTUPDATEALL	external
+FASTREADNEXT	external
+FASTREADNEXTPART	external
+FASTREADBACK	external
+FASTREADBACKPART	external
+FASTCLOSE	external
+FASTDELETE	external
+FASTGETKEY	external
+FASTBUILDKEY	external
+		#endif
+		#ifndef noextdef2
+MAINT		external
+MAINTFLGSAVE	external
+MAINTFLGREST	external
+SCREEN		external
+SCREENERASE	external
+SCREENKEYIN	external
+SCREENDISPLAY	external
+DIALOG		external
+maintrewrite	external
+		#endif
+		#ifndef noextdef3
+REPORT		external
+REPORTLINE	external
+		#endif
+		#ifndef noextdef4
+ACTIONBAR	external
+ACTION		external
+ACTIONSTORE	external
+ACTIONPUTQ	external
+ACTIONNOINTR	external
+ACTIONINTRCLR	external
+		#endif
+

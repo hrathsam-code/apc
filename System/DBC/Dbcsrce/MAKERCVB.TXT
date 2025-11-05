@@ -1,0 +1,167 @@
+. 
+. CREATE RECEIVABLES FILE - MODULE NAME = MAKERCVB/TXT
+. 
+. WRITTEN 9/20/81 BY  R. BACHARACH
+.                     MICRO SYSTEMS CONSULTANTS
+.                     41 TEELE DRIVE
+.                     CORAM, NEW YORK 11727
+.                     (516) 698-5577
+. 
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   RCVBLES
+. 
+ROLCMD   INIT      "CHAIN ARPROC;PDAY=XXXXXX"
+SPACE6   INIT      "      "
+RECCNT   FORM      "0000"
+SEQ      FORM      "-1"
+SHAZBAT  DIM       1
+INVCHDR  IFILE
+RCVBLES  FILE
+INVCS    INIT      "INVCHDRS/ISI:PURCHASE"
+RCVBLE   INIT      "ARXXXXXX/TXT:ACCOUNTS"
+IDATE6   DIM       6
+REPLY    DIM       1
+. 
+. EXECUTABLE CODE
+. 
+         DISPLAY   *ES,*P01:04,"CREATE ",TODAY," RECEIVABLES FILE"
+         TRAP      NOINVCS  IF  IO
+         OPEN      INVCHDR,INVCS
+. 
+. 
+. SET SIX CHARACTER DATE
+. 
+         MOVE      TODAY   TO  IDATE6
+         RESET     TODAY   TO  4
+         RESET     IDATE6  TO  2
+         APPEND    TODAY   TO  IDATE6
+         RESET     TODAY   TO  7
+         RESET     IDATE6  TO  4
+         APPEND    TODAY   TO  IDATE6
+         RESET     IDATE6  TO  6
+         LENSET    IDATE6
+         RESET     IDATE6  TO  1
+         REP       " 0"    IN  IDATE6
+         RESET     ROLCMD  TO  18
+         APPEND    IDATE6  TO  ROLCMD
+. 
+         RESET     ROLCMD  TO  24
+         LENSET    ROLCMD
+         RESET     ROLCMD  TO  1
+. 
+         RESET     RCVBLE  TO  2
+         APPEND    IDATE6  TO  RCVBLE
+         RESET     RCVBLE  TO  21
+         LENSET    RCVBLE
+         RESET     RCVBLE  TO  1
+. 
+         TRAPCLR   IO
+         TRAP      PREPPY IF  IO
+         OPEN      RCVBLES,RCVBLE
+. 
+EXTENDLP READ      RCVBLES,SEQ;SHAZBAT
+         GOTO      PROCESS  IF  OVER
+         GOTO      EXTENDLP
+. 
+PREPPY   DISPLAY   *P01:06,"FILE NAME IS ",RCVBLE
+         PREPARE   RCVBLES,RCVBLE
+. 
+. INITIALIZE ALL FIELDS
+. 
+PROCESS  MOVE      "0"    TO   IPMNTS
+         MOVE      "0"    TO   IAMTPD1
+         MOVE      "0"    TO   IAMTPD2
+         MOVE      "0"    TO   IAMTPD3
+         MOVE      "0"    TO   IAMTPD4
+         MOVE      "0"    TO   IAMTPD5
+         MOVE      SPACE6 TO   ICHK1
+         MOVE      SPACE6 TO   ICHK2
+         MOVE      SPACE6 TO   ICHK3
+         MOVE      SPACE6 TO   ICHK4
+         MOVE      SPACE6 TO   ICHK5
+         MOVE      SPACE6 TO   IDTPD1
+         MOVE      SPACE6 TO   IDTPD2
+         MOVE      SPACE6 TO   IDTPD3
+         MOVE      SPACE6 TO   IDTPD4
+         MOVE      SPACE6 TO   IDTPD5
+. 
+RDLOOP   TRAPCLR   IO
+         TRAP      BADREAD  IF IO
+         READKS    INVCHDR;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                         INVDATE,INVTOTL
+         GOTO      EOJ   IF  OVER
+         ADD       "1"   TO  RECCNT
+...      COMPARE   "1"   TO  RECCNT
+...      GOTO      RDLOOP    IF  EQUAL    (BYPASS DUMMY RECORD)
+. 
+         COMPARE   "0",INVTOTL
+         GOTO      RDLOOP  IF  EQUAL
+. 
+         COMPARE   "9",SECURITY
+         GOTO      SENDOPEN  IF  EQUAL
+. 
+         CMATCH    "P"   TO  INVSTAT
+         GOTO      RDLOOP    IF  NOT  EQUAL  (BYPASS INVOICES NOT PRINTED)
+. 
+. WRITE A NEW RECEIVABLES RECORD
+. 
+SENDOPEN MOVE      INVTOTL  TO  IDOLSLFT
+         TRAPCLR   IO
+         TRAP      BADWRT   IF  IO
+WRITIT   MOVE      "O"  TO  INVSTAT
+         WRITE     RCVBLES,SEQ;*-,INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                                  INVDATE,INVTOTL,IPMNTS:
+                                  IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                                  ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                                  IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                                  IDOLSLFT
+. 
+. NOW DELETE THE INVOICE HEADER
+. 
+         TRAPCLR   IO
+         TRAP      BADDELT  IF  IO
+         DELETE    INVCHDR,INVKEY
+         GOTO      RDLOOP
+. 
+NOINVCS  BEEP
+         DISPLAY   *P01:06,"INVOICE HEADER FILE NOT ON-LINE":
+                           "JOB ABORTING!",*W2
+         GOTO      NOINVCS
+. 
+BADREAD  BEEP
+         DISPLAY   *P01:06,"BAD READ ON INVOICE HEADER FILE",*W2:
+                   *P01:06,*EL
+         GOTO      RDLOOP
+. 
+BADDELT  BEEP
+         DISPLAY   *P01:06,"UNABLE TO DELETE THE INVOICE HEADER!",*W2
+         GOTO      BADDELT
+. 
+BADWRT   BEEP
+         DISPLAY   *P01:06,"BAD WRITE TO ",RCVBLE,*W2:
+                   *P01:06,*EL
+. 
+. ALLOW BAD WRITE TO FALL THRU TO WEOF ROUTINE - Hopefully !
+. 
+EOJ      WEOF      RCVBLES,SEQ
+         CLOSE     RCVBLES
+         CLOSE     INVCHDR    (NECESSARY TO PLACATE THE DOS)
+         BEEP
+         DISPLAY   *P01:06,"RECEIVABLES FILE FOR ",TODAY," CREATED":
+                   *P01:08,"ROLLING OUT FOR FILE REORGANIZATION":
+                           " - DO  N O T  DISTURB!"
+         ROLLOUT   ROLCMD
+. 
+. 
+. ADD CODE HERE TO CHAIN TO NEXT STEP IN END-OF-DAY ROUTINE!
+. 
+         BEEP
+         DISPLAY   *ES,*P01:12,"E N D - O F - D A Y   PROCEDURE IS ":
+                               "NOW   C O M P L E T E !":
+                       *P01:16,"YOU MAY NOW TAKE YOUR DISK BACKUPS":
+                               ", THEN SHUT DOWN THE COMPUTER!",*W5
+         BEEP
+         KEYIN     *P01:20,"TAP ENTER TO TERMINATE THIS PROGRAM! ",REPLY
+         CHAIN     "LIBMENU1"

@@ -1,0 +1,49 @@
+............................................................
+.  MAKEBTCH/TEXT  - CREATE A/R CASH BATCHES FOR PROCESSING .
+............................................................
+.
+.NOTE THAT THE CASH BATCH PROCESSING SYSTEM ACCESSES  THE
+.     ZERO "000000" BATCH RECORD, INTERROGATING THE BACCT1
+.     FIELD FOR THE LAST BATCH NUMBER USED, SO THAT IT MAY
+.     BE INCREMENTED BY ONE FOR THE CREATION OF A NEW BATCH
+.
+.     ALSO NOTE THAT THE BATCH KEY (6 DIGITS) CONSISTS OF
+.     A FOUR-DIGIT BATCH NUMBER AND A 2 DIGIT SUFFIX,
+.     BEGINNING WITH "00", TO ALLOW FOR CHECK BATCHES WHICH
+.     EXCEED 20 CHECKS.    THE THEORETICAL LIMIT IS A CASH
+.     BATCH CONSISTING OF 2000 CHECKS, THAT IS RECORDS
+.     00 THRU 99, WITH 20 CHECKS EACH..
+.
+.
+.
+         INCLUDE   COMMON
+.
+         INCLUDE   BATCHFD
+. 
+IOSW     DIM       1
+BTYPE    DIM       1
+REPLY    DIM       1
+.
+START    DISPLAY   *P1:1,*EF,*P20:1,*HON,"POST NEW A/R CASH BATCHES":
+                   *HOFF
+.
+         CALL      BTCHOPN
+         CMATCH    "H",IOSW
+         GOTO      PROCESS IF EQUAL
+         BEEP
+         DISPLAY   *P1:4,*EF,*HON,"UNABLE TO ACCESS A/R CASH BATCH FILE!":
+                   "  JOB ABORTED! ",*HOFF,*W4
+.
+         CHAIN     "ARMENU1"
+.
+PROCESS  KEYIN     *P1:22,*EF,"(N)ew batch, (C)urrent batch ":
+                   " or (E)nd processing? ",BTYPE
+         CMATCH    "N",BTYPE
+         GOTO      NEWBTCH IF EQUAL
+         CMATCH    "C",BTYPE
+         GOTO      OLDBTCH IF EQUAL
+         CMATCH    "E",BTYPE
+         GOTO      EOJ IF EQUAL
+         BEEP
+         GOTO      PROCESS
+.

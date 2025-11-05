@@ -1,0 +1,29 @@
+. 
+.....................................................................
+. MONTH TABLE - FIELD LENGTH IS 9 CHARACTERS   (VOLUME=COMPILER
+. 
+JAN      INIT      "JANUARY  "
+FEB      INIT      "FEBRUARY "
+MAR      INIT      "MARCH    "
+APR      INIT      "APRIL    "
+MAY      INIT      "MAY      "
+JUN      INIT      "JUNE     "
+JUL      INIT      "JULY     "
+AUG      INIT      "AUGUST   "
+SEP      INIT      "SEPTEMBER"
+OCT      INIT      "OCTOBER  "
+NOV      INIT      "NOVEMBER "
+DEC      INIT      "DECEMBER "
+. 
+MONINDX  FORM      "00"
+. 
+MONTHDSP DIM       9
+. 
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+. 
+DATESIX  DIM       6
+. 
+. END OF MONTH TABLE INCLUDE
+................................................................

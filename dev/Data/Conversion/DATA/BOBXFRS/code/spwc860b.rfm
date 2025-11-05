@@ -1,0 +1,1157 @@
+Patch SPWC860B contains the following changes:
+ 
+Date:  03-11-2002
+ 
+Subject:  Patch	RELEASE	8.6B Runtime Files
+ 
+    Included you will find the patch release of:
+ 
+	 PLBSERVE	 8.6B  11 Mar 2002     8.6.0120
+	 PLBCLIENT	 8.6B  11 Mar 2002     8.6.0120
+	 PLBWIN		 8.6B  11 Mar 2002     8.6.0120
+	 PLBDSIGN	 8.6B  11 Mar 2002     8.6.0120
+	 SUNFYSYS.DLL	 8.6B  11 Mar 2002     8.6.0120
+	 PLBCMP		 8.6B  11 Mar 2002
+	 PLB386		 8.6B  11 Mar 2002
+	 PLBEQU.INC	 8.6B  11 Mar 2002
+	 PLBMETH.INC	 8.6B  11 Mar 2002
+
+*==============================================================================
+Notes for WARNINGS:
+ 
+	 - The 8.6B release of PLBWIN.EXE requires the 8.6B SUNFHSYS.DLL to
+	   execute.  If an older version of SUNFHSYS.DLL is used, then an OS
+	   error occurs as follows:
+ 
+		'The PLBWIN.EXE file is linked to missing export
+		 SUNFHSYS.DLL:FhPrepIEx'
+
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+	 - When	using the Automation Server, the 'mvNNNN' option should
+	   be included in the Prog.Run command line to change the
+	   virtual allocation for the server thread being executed.
+ 
+*==============================================================================
+These files have been changed as follows:
+ 
+PLBSERVE - Ported to execute on	UNIX platforms.
+ 
+	 - Improved performance by about 4 times for all messages dealing with
+	   methods.  This directly impacts TREEVIEW and LISTVIEW so that by
+	   making no changes to your PLC code these objects work much faster.
+ 
+	 - New methods provided for the LISTVIEW object greatly improve
+	   performance.  This performance increase is quite noticable with
+	   PLBSERVE.  See InsertItemEx and SortColumn below.
+ 
+	 - The 'PLBSERVE.INI' supports multiple	section	headers	to 
+	   control program execution by	PLBCLIENTs that	execute	using
+	   normal Windows and CE Windows devices.
+ 
+	   The PLBSERVE	server task has	an INI file named 'PLBSERVE.INI'
+	   where keywords can be specified.  Normal runtime keyword
+	   definitions can be declared in this INI file	like other
+	   runtimes.  The normal keywords of PLB_TERM, PLB_SYSTEM, and
+	   PLB_PATH should be specified	in the PLBSERVE	ini like other
+*CE SPEC*  Sunbelt runtimes.  To allow simultaneous support for	normal
+	   Windows and CE Windows PLBCLIENTs, the 'PLBSERVE.INI' can
+	   have	specialized sections named to support CE and non-CE
+	   clients.  The 'PLBSERVE.INI'	sections can be	named as follows:
+ 
+	      [environment]  - This section contains the basic startup
+			       keywords	required to specify the	TCP/IP
+			       communication parameters	to access the
+			       PL/B program server.  This section also
+			       includes	the required runtime keywords
+			       required	(PLB_TERM, PLB_PATH, etc) to
+			       execute a program for a normal Windows
+			       PLBCLIENT.
+ 
+*CE SPEC*     [env_wincepk]  - This section contains specific keywords
+			       required	(PLB_TERM, PLB_PATH, etc) to
+			       execute a program for a Windows CE Pocket
+			       PC PLBCLIENT executable.	 This allows
+			       a user to setup specialized programs,
+			       screen definition files,	and pathing
+			       to support Windows CE PL/B applications.
+			       Also, notice that this section DOES NOT
+			       include the TCP/IP communications keywords.
+			       In addition to normal runtime program 
+			       supported keywords, the following PLBSERVE
+			       keywords	can be included	in this	section:
+ 
+				  PLBCS_CHECKTIME
+				  PLBCS_WINHIDE
+				  PLBCS_MSGBUFFSIZE
+				  PLBCS_LOGNAME
+				  PLBCS_MAXPROGMEM
+ 
+	 - Modified EVENTCHECK to not reset the	event check timer when
+	   an event is processed and dispatched.  This change allows
+	   multiple EVENTCHECK operations to be	more responsive	toward
+	   processing and dispatching multiple events from the client
+	   work	station.
+ 
+	 - Corrected a problem where the second	character for the 'mv' command
+	   line option that was received from the PLBCLIENT was being treated
+	   as case sensitive.  If a user command line from the PLBCLIENT
+	   contained an uppercase form of the 'MV' option, then	the option was
+	   being ignored.
+ 
+	 - Modified to have the	log file records terminated with an 
+	   end of record compatible with the OS	executing PLBSERVE.  This
+	   means that a	PLBSERVE executed on a Windows system will have
+	   an EOR sequence of CR/LF while a PLBSERVE executed on a Unix
+	   platform will have an EOR sequence of LF.
+ 
+	 - Corrected a problem where an	EVENTCHECK operation was 
+	   sometimes not checking the client for events.  This could
+	   happen when more than 256 instructions were executed	before
+	   the EVENTCHECK.  Also, this could happen if a PAUSE statement
+	   preceded the	EVENTCHECK.
+ 
+PLBCLIENT- Modified to translate and support forward byte order	messages
+	   as generated	by PLBSERVE implemented	for some UNIX platforms.
+ 
+PLBWIN	 - Modified all	runtimes to support a new UET/INI keyword named
+PLB386	   'PLB_NOPATH={ON | OFF}'.  If	this keyword is	not specified,
+UNIX	   then	the default action is the same as being	set to 'OFF'.
+	   When	this keyword is	set to the 'ON'	state, then the	runtime
+	   processing for a PREP of an AFILE or	IFILE variable will 
+	   NOT STORE any pathing information into an ISI or AAM	that
+	   is newly created.  This has the same	affect as specifying the
+	   'NOPATH' option on the AFILE/IFILE file variable declarations.
+	   When	this keyword is	set to the 'OFF' state or not specified,
+	   then	a PREP operation may store pathing information into the
+	   ISI/AAM file	header.
+ 
+	 - Modified all	runtimes so that a PREP	of an IFILE will 
+	   generate a command line that	is placed into the ISI header
+	   when	a Key Specification is given.  If a Key	Specification
+	   is not given, then a	command	line is	not generated.
+ 
+	 - Corrected a problem where the second	character for 'm' options
+	   was being treated as	case sensitive.	 This would the	'm'
+	   options to be ignored if specified in an uppercase form.
+ 
+	 - Corrected a problem in the language SORT statement that might
+	   cause a GPF error when a single character key was used.
+ 
+PLBWIN	 - Modified the	TREEVIEW object	to support new Methods and
+	   properties as follows:
+	   
+	   TREEVIEW New	Properties:
+	   
+	   CHECKBOX={dnumnvar}		 (See PLBEQU.INC)
+	   
+	     When this property	is set to $ON, it enables check	boxes for 
+	     items in a	TREEVIEW object. The object creates and	sets a state 
+	     image list	with two images. State image 1 is the unchecked	box, 
+	     and state image 2 is the checked box. Setting the state image to 
+	     zero removes the check box	altogether. The	GetItemCheck, and 
+	     SetItemCheck methods can be used when this	property is set.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. The CHECKBOX property	can only be used for CREATE and	GETPROP
+		  for a	TREEVIEW object.
+ 
+	   FULLROW={dnumnvar}		 (See PLBEQU.INC)
+	   
+	     When this property	is set to $ON, it enables full-row selection 
+	     in	a TREEVIEW object. 
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This option cannot be	used if	the TREELNSTYLE	is not set to 
+		  $NOLINES.
+	     
+	   HOTTRACK={dnumnvar}		 (See PLBEQU.INC)
+	   
+	     When this property	is set to $ON, it enables hot-track selection 
+	     in	a TREEVIEW object. Hot-track selection will cause the text of 
+	     any item that may be selected to be underlined
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.71 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+		
+	   TREEVIEW New	Methods:
+	   
+		.--------------------
+		. GetItemCheck Method
+		.
+		
+		The GetItemCheck method	returns	checked	
+		state for a specified item in a	TREEVIEW object.
+		TREEVIEW object.
+		
+		[label]	[object].GetItemCheck	[GIVING	{return}]:
+						USING [*Index=]{index}
+ 
+		Where:
+ 
+		     label   is	an optional Program Execution Label.
+ 
+		     object  is	a required TREEVIEW object to be accessed.
+ 
+		     return  is	an optional Numeric Variable 
+			     that returns the item check state.
+ 
+		     index   is	a required decimal number or 
+			     Numeric Variable that specifies 
+			     the item accessed.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the 
+		     item within the object to access.
+		  2. Upon completion, {return} will contain the	one 
+		     if	the item is checked else zero.
+		  3. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  4. If	{return} is too	small to contain value,	the 
+		     OVER Condition Flag is set	(TRUE).
+		  5. The EOS Condition Flag is always cleared (FALSE).
+		  6. The CHECKBOX property must	be set to $ON for 
+		     the TREEVIEW object.
+ 
+		.--------------------
+		. SetItemCheck Method
+		.
+ 
+		The SetItemCheck method	sets a checkmark 
+		beside an item within a	TREEVIEW object.
+		TREEVIEW object.
+ 
+		The method uses	the following format:
+ 
+		[label]	{object}.SetItemCheck	[GIVING	{return}]:
+						USING [*Index=]{index}:
+						[*Value=]{image}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required TREEVIEW that is modified.
+ 
+		return	is an optional Numeric Variable	that indicates 
+			the success or failure of the method.
+ 
+		index	is a required decimal number or	Numeric	Variable
+			that specifies the item	to modify.
+ 
+		value	is a required decimal number or	Numeric	Variable
+			that specifies one to set the checkmark	and 
+			zero to	clear the checkmark.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		1. {index} is a	zero based number indicating the item
+		   within the object to	modify.
+		2. {value} is either one or zero to set	or clear the
+		   checkmark.
+		3. The OVER and	EOS Condition Flags are	always cleared
+		   (FALSE).
+		4. The CHECKBOX	property must be set to	$ON for	the 
+		   TREEVIEW object.
+ 
+		.======================
+		. SubItemHitTest Method
+		.
+		
+		The SubItemHitTest method returns the item and subitem
+		number,	in a TREEVIEW object, for a given point	the screen.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SubItemHitText	[GIVING	{return}]
+						USING [*Horz=]{horz}:
+						[*Vert=]{vert}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required TREEVIEW object to be accessed.
+ 
+		return	is an optional Numeric Variable	that returns 
+			the item/subitem number.
+ 
+		horz	is a required decimal number or	Numeric	
+			Variable that specifies	the horizontal position
+			to test.
+ 
+		vert	is a required decimal number or	Numeric	
+			Variable that specifies	the vertical position
+			to test.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		1. Upon	completion, {return} will contain the item 
+		   hit or 0 for	none.
+		2. If the value	returned is zero, the ZERO (or EQUAL) 
+		   Condition Flag is set (TRUE).
+		3. The OVER and	EOS Condition Flags are	always cleared
+		   (FALSE).
+ 
+	 - Modified the	LISTVIEW object	to support new Methods and
+	   properties as follows:
+	   
+	   LISTVIEW New	Properties:
+	   
+	   ACTIVATE=dnumnvar		   (See	PLBEQU.INC)
+ 
+	     When this property	is set to $ONECLICK, the LISTVIEW object
+	     sends an $ITEMACTIVATE event when the user	clicks an item.	This
+	     property also enables hot tracking	in the LISTVIEW	object.	
+	     Hot tracking means	that when the cursor moves over	an item,
+	     it	is highlighted but not selected.
+ 
+	     When this property	is set to $TWOCLICK, the first click
+	     over an unselected	item in	the LISTVIEW object selects the	item
+	     and a second click	over the selected item sends a 
+	     $ITEMACTIVATE event.  Every click over a selected item sends
+	     a $ITEMACTIVATE event.  This property also	enables	hot
+	     tracking in the LISTVIEW object.  Hot tracking means that
+	     when the cursor moves over	an item, it is highlighted but
+	     not selected.
+	     
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This property	will only affect the operation of the
+		  LISTVIEW object when the VIEWSTYLE property is set to	
+		  $VIEWREPORT style.
+ 
+ 
+	   CHECKBOX=dnumnvar		   (See	PLBEQU.INC)
+	   
+	     When this property	is set to $ON, it enables check	boxes for
+	     items in a	LISTVIEW object. The object creates and	sets a state
+	     image list	with two images. State image 1 is the unchecked	box,
+	     and state image 2 is the checked box. Setting the state image to
+	     zero removes the check box	altogether. The	GetItemCheck,
+	     SetItemCheck, and FindItemCheck methods can be used when this 
+	     property is set.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This property	will only affect the operation of the
+		  LISTVIEW object when the VIEWSTYLE property is set to	
+		    $VIEWREPORT	style.
+ 
+ 
+	   GRIDLINE=dnumnvar		   (See	PLBEQU.INC)
+ 
+	     When this property	is set to $ON, then gridlines are displayed
+	     around items and subitems.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This property	will only affect the operation of the
+		  LISTVIEW object when the VIEWSTYLE property is set to
+		  $VIEWREPORT style.
+ 
+ 
+	   HOTTRACK=dnumnvar		   (See	PLBEQU.INC)
+ 
+	     When this property	is set to $ON, it causes those hot items 
+	     that may be activated to be displayed with	underlined text.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.71 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This requires	that the ACTIVATE property be set to 
+		  $ONECLICK or $TWO CLICK.
+		  or $TWOCLICK.
+ 
+	       3. This property	will only affect the operation of the
+		  LISTVIEW object when the VIEWSTYLE property is set to	
+		  $VIEWREPORT style.
+ 
+ 
+	   HOVERSEL=dnumnvar		   (See	PLBEQU.INC)
+ 
+	     When this property	is set to $ON, it enables hot-track selection
+	     in	a LISTVIEW object. Hot track selection means that an item is
+	     automatically selected when the cursor remains over the item
+	     for a certain period of time.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This property	will only affect the operation of the 
+		  object when the VIEWSTYLE property is	set to 
+		  $VIEWREPORT style.
+ 
+ 
+	   HOVERTIME=dnumnvar		   (See	PLBEQU.INC)
+ 
+	     This property sets the time for automatic hot-track selection
+	     (See the HOVERSEL property).  The time value is in milliseconds.
+	     A value of 0 indicates the default time is used.
+ 
+	     Note:
+ 
+	       1. This property	will not take affect unless a Microsoft	file
+		  version of 4.70 or later of 'comctl32.dll' is	installed on
+		  a given workstation.
+ 
+	       2. This property	will only affect the operation of the 
+		  LISTVIEW object when the VIEWSTYLE property is set to	
+		  $VIEWREPORT style.
+ 
+ 
+	   LISTVIEW New	Methods:
+ 
+		.------------------
+		. SortColumn Method
+ 
+		The SortColumn method sorts one	to four	columns	of 
+		a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SortColumn	[GIVING	{return}]:
+						USING [*Column=]{col}:
+						[*Type=]{type}[:
+						[*Mask=]{mask}][:
+						[*Column1=]{col1}][:
+						[*Type1=]{type1}][:
+						[*Mask1=]{mask1}][:
+						[*Column2=]{col2}][:
+						[*Type2=]{type2}][:
+						[*Mask2=]{mask2}][:
+						[*Column3=]{col3}][:
+						[*Type3=]{type3}][:
+						[*Mask3=]{mask3}]
+ 
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW into which an item is 
+			inserted.
+ 
+		return	is an optional Numeric Variable	that returns 
+			0 for success.
+ 
+		col	is a required decimal number or	Numeric	Variable 
+			that specifies the column to be	sorted.
+ 
+		type	is a required decimal number or	Numeric	Variable 
+			that specifies the type	of sort.
+ 
+		mask	is an optional Character String	Variable or literal
+			that specifies date of time mask.
+ 
+		col1-3	is a optional decimal number or	Numeric	Variable
+			that specifies the column to be	sorted.
+ 
+		type1-3	is a optional decimal number or	Numeric	Variable
+			that specifies the type	of sort.
+ 
+		mask1-3	is an optional Character String	Variable or literal
+			that specifies a date of time mask.
+ 
+		Note the following:
+ 
+		  1. A type value must be one of:
+		 
+			1 - Alpha Ascending
+			2 - Alpha Descending
+			3 - Numeric Ascending
+			4 - Numeric Descending
+			5 - Date Ascending
+			6 - Date Descending
+			7 - Time Ascending
+			8 - Time Descending
+			9 - Timestamp Ascending
+			10 - Timestamp Descending
+ 
+		  2. A date mask value looks for dd for	day, mm	for month,
+		     yy	or yyyy	for year.  The default mask is:	mm-dd-yy
+ 
+		  3. A time mask value looks for hh for	hour, mm for minute,
+		     ss	for seconds, and xx for	100th of a second. 
+		     The default mask is: hh:mm:ss.xx
+ 
+		  4. A timestamp mask value looks for DD for day, 
+		     MM	for month, YY or YYYY for year,	hh for hour,
+		     mm	for minute, ss for seconds, and	xx for 100th of
+		     a second.	The default mask is: YYYYMMDDhhmmssxx
+ 
+		.--------------------
+		. InsertItemEx Method
+		.
+ 
+		The InsertItemEx method	inserts	a new item into	
+		a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.InsertItemEx	[GIVING	{return}]:
+						USING [*Text=]{text}[:
+						[*Index=]{index}][:
+						[*Image=]{image}][:
+						[*Param=]{param}][:
+						[*State=]{state}][:
+						[*Statemask=]{statemask}][:
+						[*SubItem1=]{stext}][:
+						[*SubItem2=]{stext}][:
+						[*SubItem3=]{stext}][:
+						[*SubItem4=]{stext}][:
+						[*SubItem5=]{stext}][:
+						[*SubItem6=]{stext}][:
+						[*SubItem7=]{stext}][:
+						[*SubItem8=]{stext}][:
+						[*SubItem9=]{stext}][:
+						[*SubItem10=]{stext}]]
+ 
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW into which an item is inserted.
+ 
+		return	is an optional Numeric Variable	that returns 
+			the new	item's index.
+ 
+		text	is a required Character	String Variable	or literal
+			that specifies the label associated with the new item.
+ 
+		index	is an optional Numeric Variable	that specifies 
+			the new	item's index.
+ 
+		image	is an optional Numeric Variable	that specifies
+			an IMAGELIST object index to associate with 
+			the item.
+ 
+		param	is an optional decimal number or Numeric Variable
+			that specifies a user defined value.
+ 
+		state	is an optional decimal number or Numeric Variable
+			that specifies initial item state as described below.
+ 
+		statemask	is an optional decimal number or Numeric 
+				Variable that specifies	the valid state
+				values as described below.
+ 
+		stext	is an optional Character String	Variable or literal
+			that specifies the test	associated with	a subitem 
+			in the new item.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. The optional {state} value	determines the 
+		     item's initial state as follows:
+ 
+		     Value   Constant		 Initially the item ...
+		     0x01    LVIS_FOCUSED	 has the focus and is 
+						 surrounded by a standard
+						 focus rectangle.  Although
+						 more than one item may	be
+						 selected, only	one item can
+						 have the focus.
+		      0x02    LVIS_SELECTED	 is selected.  The 
+						 appearance of a selected
+						 item depends on whether 
+						 it has	the focus and the
+						 system	colors used to 
+						 indicate selection.
+		       0x04    LVIS_CUT		 is marked.
+		       0x08    LVIS_DROPHILITED	 is highlighted	as a
+						 drag-and-drop target.
+ 
+		  2. The optional {statemask} is a value from the table
+		     above which indicates the valid initial state values.
+ 
+		  3. Upon completion, {return} will contain the	new item
+		     number or zero if the method fails.
+ 
+		  4. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+ 
+		  5. If	{return} is too	small to contain the new item number,
+		     the OVER Condition	Flag is	set (TRUE).
+ 
+		  6. The EOS Condition Flag is always cleared (FALSE).
+ 
+		.--------------------
+		. GetItemCheck Method
+		.
+		The GetItemCheck method	returns	checked	state for 
+		a specified item in a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.GetItemCheck	[GIVING	{return}]:
+						USING [*Index=]{index}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+		 
+		object	is a required LISTVIEW object to be accessed.
+ 
+		return	is an optional Numeric Variable	that returns
+			the item check state.
+ 
+		index	is a required decimal number or	Numeric	Variable 
+			that specifies the item	accessed.
+		
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the item
+		     within the	object to access.
+		  2. Upon completion, {return} will contain the	one if the
+		     item is checked else zero.
+		  3. If	the value returned is zero, the	ZERO (or EQUAL)	
+		     Condition Flag is set (TRUE).
+		  4. If	{return} is too	small to contain value,	the OVER 
+		     Condition Flag is set (TRUE).
+		  5. The EOS Condition Flag is always cleared (FALSE).
+		  6. The CHECKBOX property must	be set to $ON for the 
+		     LISTVIEW object.
+ 
+ 
+		.--------------------
+		. SetItemCheck Method
+		.
+ 
+		The SetItemCheck method	sets a checkmark beside	an 
+		item within a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SetItemCheck	[GIVING	{return}]:
+						USING [*Index=]{index}:
+						[*Value=]{image}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW that is modified.
+ 
+		return	is an optional Numeric Variable	that indicates
+			the success or failure of the method.
+ 
+		index	is a required decimal number or	Numeric	Variable that
+			specifies the item to modify.
+ 
+		value	is a required decimal number or	Numeric	Variable 
+			that specifies one to set the checkmark	and zero to 
+			clear the checkmark.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the 
+		     item within the object to modify.
+		  2. {value} is	either one or zero to set or clear 
+		     the checkmark.
+		  3. The OVER and EOS Condition	Flags are always 
+		     cleared (FALSE).
+		  4. The CHECKBOX property must	be set to $ON for 
+		     the LISTVIEW object.
+ 
+ 
+		.---------------------
+		. FindItemCheck	Method
+		.
+		The SetItemCheck method	sets a checkmark beside	an 
+		item within a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.FindItemCheck	[GIVING	{return}]:
+						USING [[*Start=]{start}]
+ 
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW that is modified.
+ 
+		return	is an optional Numeric Variable	that indicates
+			the index of the next item with	a checkmark.
+ 
+		start	is an optional decimal number or Numeric
+			Variable that specifies	the item to start 
+			checking at.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {start} is	a zero based number indicating the item	to
+		     start the search with.
+		     The default is zero.
+		  2. If	no item	is found, {result} will	be 0xFFFFFFFF
+		  3. The OVER and EOS Condition	Flags are always 
+		     cleared (FALSE).
+		  4. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+ 
+		.-------------------------
+		. SetImageListState Method
+		.
+		 
+		The SetImageListState method associates	an IMAGELIST
+		object with the	state icons of a LISTVIEW.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SetImageListState [GIVING {return}]:
+					     USING [*ImageList=]{imagelist}
+		Where:
+ 
+		label	   is an optional Program Execution Label.
+ 
+		object	   is a	required LISTVIEW that is modified.
+ 
+		return	   is an optional Numeric Variable that	indicates
+			   the success or failure of the method.
+ 
+		imagelist  is a	required IMAGELIST that	contains 
+			   the images or bitmaps.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. Any icons or bitmaps displayed in the {object} will be
+		     obtained from {imagelist}.
+		  2. {imagelist} must been previously created.
+		  3. The images	will be	associated with	the object's 
+		     state icons.
+		  4. Upon completion, {return} will contain the	status of
+		     the modification as follows.
+		     $TRUE and $FALSE are defined in PLBEQU.INC.
+ 
+			  Value	  Constant	  The association ...
+			  0	  $FALSE  failed.
+			  1	  $TRUE	  was successful.
+		  5. If	the value returned is zero, the	ZERO (or EQUAL)	
+		     Condition Flag is set (TRUE).
+		  6. The OVER and EOS Condition	Flags are always 
+		     cleared (FALSE).
+ 
+		.----------------------
+		. InsertColumnEx Method
+ 
+		The InsertColumnEx method inserts a new	column into
+		a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.InsertColumnEx	[GIVING	{return}]:
+						USING [*Text=]{text}:
+						[*Width=]{width}:
+						[*Index=]{index}[:
+						[*Format=]{format}][:
+						[*Image=]{image}][:
+						[*Order=]{order}]
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW into which a column
+			is inserted.
+ 
+		return	is an optional Numeric Variable	that returns
+			the new	column number.
+ 
+		text	is a required Character	String Variable	or literal
+			that specifies the label for the new column.
+ 
+		width	is a required decimal number or	Numeric	Variable
+			that specifies the width of the	new column.
+ 
+		index	is a required decimal number or	Numeric	Variable
+			that specifies the index of the	subitem	for 
+			the new	column.
+ 
+		format	is an optional decimal number or Numeric Variable 
+			that specifies the label justification and column
+			options	as described below.
+ 
+		image	is an optional decimal number or Numeric Variable
+			that specifies the small image displayed in the	
+			column header.
+		 
+		order	is an optional decimal number or Numeric Variable 
+			that specifies the order the column is placed in.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. Columns must be inserted before any sub-items are added.
+  
+		  2. The optional {format} value is a constant as defined
+		     in	PLBMETH.INC or a numeric variable indicating one 
+		     of	the following label justifications:
+ 
+			  Value	  Constant	  The column is	...
+			  0x00	  LVCFMT_LEFT	  left justified. (default)
+			  0x01	  LVCFMT_RIGHT	  right	justified.
+			  0x02	  LVCMFT_CENTER	  centered.
+ 
+			  0x0800  LVCFMT_IMAGE		 column	has an image
+			  0x1000  LVCFMT_BITMAP_ON_RIGHT image should be
+							 displayed on the
+							 right
+   
+		  3. Upon completion, {return} will contain the	new column
+		     number or -1 if the method	fails.
+		  4. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  5. If	{return} is too	small to contain result	of the method,
+		     the OVER Condition	Flag is	set (TRUE).
+		  6. The EOS Condition Flag is always cleared (FALSE).
+		  7. Integer values for	the following can integer values
+		     can be found in the PLBMETH.INC include.
+ 
+			 LVCFMT_LEFT		 Integer 4,"0x0000"
+			 LVCFMT_RIGHT		 Integer 4,"0x0001"
+			 LVCFMT_CENTER		 Integer 4,"0x0002"
+ 
+			 LVCFMT_IMAGE		 Integer 4,"0x0800"
+			 LVCFMT_BITMAP_ON_RIGHT	 Integer 4,"0x1000"
+			 LVCFMT_COL_HAS_IMAGES	 Integer 4,"0x8000"
+ 
+		.----------------------
+		. SetColumnImage Method
+		.
+ 
+		The SetColumnImage method set the small	icon image to
+		display	for a column within a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SetColumnImage	[GIVING	{return}]:
+						USING [*Index=]{index}:
+						[*Image=]{image}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW that is modified.
+ 
+		return	is an optional Numeric Variable	that indicates 
+			the success or failure of the method.
+ 
+		index	is a required decimal number or	Numeric	Variable
+			that specifies the column to modify.
+ 
+		image	is a required decimal number or	Numeric	Variable 
+			that specifies new image index.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the column
+		     within the	object to modify.
+		  2. {image} is	a zero based number indicating the new image 
+		     index within the object's small imagelist.
+		  3. Upon completion, {return} will contain the	status of 
+		     the modification as follows.  $TRUE and $FALSE are
+		     defined in	PLBEQU.INC.
+ 
+			  Value	  Constant	  The modification ...
+			  0	  $FALSE  failed.
+			  1	  $TRUE	  was successful.
+		 
+		     If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+ 
+		    4. The OVER	and EOS	Condition Flags	are always 
+		       cleared (FALSE).
+ 
+		.----------------------
+		. SetColumnOrder Method
+		.
+ 
+		The SetColumnOrder method sets order for a column within a
+		LISTVIEW object.  The method uses the following	format:
+ 
+		[label]	{object}.SetColumnOrder	[GIVING	{return}]:
+						USING [*Index=]{index}:
+						[*Order=]{order}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW that is modified.
+ 
+		return	is an optional Numeric Variable	that indicates 
+			the success or failure of the method.
+ 
+		index	is a required decimal number or	Numeric	Variable
+			that specifies the column to modify.
+ 
+		order	is a required decimal number or	Numeric	Variable 
+			that specifies the new column order.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the column
+		     within the	object to modify.
+		  2. {order} is	a zero based number indicating the order the
+		     column should be placed within the	object's columns.
+		  3. Upon completion, {return} will contain the	status of
+		     the modification as follows.  $TRUE and $FALSE are
+		     defined in	PLBEQU.INC.
+ 
+			  Value	  Constant	  The modification ...
+			  0	  $FALSE  failed.
+			  1	  $TRUE	  was successful.
+ 
+		     If	the value returned is zero, the	ZERO (or EQUAL)	
+		     Condition Flag is set (TRUE).
+ 
+		  4. The OVER and EOS Condition	Flags are always cleared
+		     (FALSE).
+ 
+		.----------------------
+		. SubItemHitTest Method
+		.
+		The SubItemHitTest method returns the item and subitem 
+		number,	in a LISTVIEW object, given a point on the screen.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.SubItemHitTest	[GIVING	{return}]:
+						USING [*Horz=]{horz}:
+						[*Vert=]{vert}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW object to be accessed.
+ 
+		return	is an optional Numeric Variable	that returns the 
+			item/subitem number.
+ 
+		horz	is a required decimal number or	Numeric	Variable that
+			specifies the horizontal position to test.
+ 
+		vert	is a required decimal number or	Numeric	Variable that
+			specifies the vertical position	to test.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. Upon completion, {return} will contain -1 on a failure.
+		  2. On	success	{return} is the	item number * 100 + the	
+		     subitem number.
+		  3. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  4. The OVER and EOS Condition	Flags are always cleared
+		     (FALSE).
+ 
+		.-------------------
+		. GetItemRect Method
+		.
+		The GetItemRect	method returns the bounding rectangle for a
+		specified item in a LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.GetItemRect	[GIVING	{return}]:
+						USING [*Index=]{index}:
+						[*Subitem=]{subitem}
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW object to be accessed.
+ 
+		return	is an optional Character String	Variable that returns
+			the item's rectangle.
+ 
+		index	is a required decimal number or	Numeric	Variable that
+			specifies the item accessed.
+ 
+		subitem	is a required decimal number or	Numeric	Variable that
+			specifies the sub-item number.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. {index} is	a zero based number indicating the item
+		     within the	object to access.
+		  2. {sub-item}	specifies that the rectangle is	to come	from
+		     a child item (column) of {index}.
+		  3. Upon completion, {return} will contain the	specified
+		     item's bounding rectangle as:
+			
+			ttttbbbbllllrrrr - where t - top
+						 b - bottom
+						 l - left 
+						 r - right
+			
+		  4. If	{return} is too	small to contain the text string, the
+		     EOS Condition Flag	is set (TRUE).
+		  5. The OVER and ZERO Condition Flags are always cleared
+		     (FALSE).
+ 
+		.-----------------------
+		. EnableScrollBar Method
+		.
+		The EnableScrollBar method enables or disables the 
+		scrollbars in a	LISTVIEW object.
+		
+		The method uses	the following format:
+ 
+		[label]	{object}.EnableScrollBar [GIVING {return}]:
+						 USING [*Enable=]{enable}
+ 
+		Where:
+ 
+		label	is an optional Program Execution Label.
+ 
+		object	is a required LISTVIEW object to be accessed.
+ 
+		return	is an optional Numeric Variable	that gets the 
+			return value.
+ 
+		enable	is a required decimal number or	Numeric	Variable
+			that specifies 0 to disable or 1 to enable the 
+			scrollbars.
+ 
+		Flags Affected:	EOS, OVER, ZERO
+ 
+		Note the following:
+ 
+		  1. If	the value returned is zero, the	ZERO (or EQUAL)
+		     Condition Flag is set (TRUE).
+		  2. The OVER and EOS Condition	Flags are always 
+		     cleared (FALSE).
+ 
+ 
+	 - A new event named ItemActivate has been added for the
+	   LISTVIEW object.
+ 
+	   ItemActivate	Event
+ 
+	       $ITEMACTIVATE	 EQU	25
+ 
+	       The ItemActivate	event occurs when the mouse button 
+	       is pressed and released over an item in a LISTVIEW 
+	       object.
+ 
+	       Note the	following:
+ 
+	       1. The ItemActivate event is referenced using an	event value
+		  of twenty-five (25).
+		  The equated label in PLBEQU.INC for this event 
+		  is $ITEMACTIVATE.
+	       2. This event depends on	the setting of the ACTIVATE
+		  property.
+	       3. The Event Result value is the	item 
+		  number * 100 + the subitem number.
+	       4. The Event Modifier contains a	value from the 
+		  following table:
+ 
+		      Value   Key Pressed
+			1	ALT
+			2	CTRL
+			4	SHIFTS
+			
+	 - Corrected a problem where the second	character for the 'mv' command
+	   line option was being treated as case sensitive.  If this option was
+	   specified in an uppercase form, then the option was being ignored.
+ 
+	 - Corrected a problem for the 'ErrorText' property of the
+	   'Plbwin.Program' and	'Plbwin.ProgramNE' program objects for the
+	   Automation Server.  The problem was that the 'ErrorText' property
+	   was returning a single blank character when NO error data existed.
+	   A NULL string should be returned in this case.
+
+	 - Corrected a problem where SETMODE *F10 did not work.
+
+	 - Corrected a problem where static objects would disappear when a
+	   lower z-order tabcontrol was activated.
+
+	 - Corrected a problem where a GETITEM for an EDITTEXT object that
+	   contained highlighted text could cause a GPF error.
+
+	 - Corrected a problem where a DISPLAY *W would	not work after a TRAP
+	   occurred.
+
+PLBCMP	 - The compiler	has been modified for every PL/B language statement
+	   that generates a list of variable addresses to properly generate
+	   object code when using the syntax form of
+	   'Record(INDEX).MemberArray'.
+
+	   The compiler	has been modified to properly generate object code
+	   when	using the generic array	variable syntax	format
+	   'Record(INDEX).ArrayRef'.  This change affects any PL/B
+	   language statements that can	generate a list	of variables.
+
+	 - Corrected a problem where an unexplained duplicate label
+	   error could occur if	more than 100 variably indexed array
+	   references for a FORM array used multiple calculations to
+	   determine the index.
+
+PLBDSIGN - Added support for OEM international character sets for 
+	   the designer	processing.
+
+	 - Corrected a problem where a GPF error could occur while
+	   trying to perform a search operation.
+
+	 - Corrected a problem where a	scrolling action would occur
+	   when	a user clicked in a code window	after a	successful 
+	   search operation.
+
+SUNFHSYS.DLL- Modified the Isam	PREP to	generate an information
+	      command line that	is inserted into the ISI header.
+	      This can allow SUNIDXNT and SUNINDEX utilities to
+	      use the '-i' and '-r' options for	an ISI that has
+	      been PREPed by a PL/B program.

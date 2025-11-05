@@ -1,0 +1,957 @@
+Date:  03-20-2003
+ 
+Patch RELEASE 8.7A Runtime Files
+ 
+*==============================================================================
+Notes for some NEW Items:
+ 
+         - Added new SPLITTER object.
+ 
+         - Added new PANEL object.
+ 
+         - Added new DOCK property.
+ 
+         - Added new DOCKPADB, DOCKPADL, DOCKPADR, and DOCKPADT properties.
+ 
+         - Added new MINEXTRA and MINSIZE properties.
+ 
+*==============================================================================
+Notes for WARNINGS:
+ 
+         - The 8.7A PLBWIN and SUNFHSYS versions can not be used with any
+           prior released versions.  A U40 error will occur if the 8.7A
+           Sunfhsys.dll version is used with an older release that
+           causes a conflict.  If the 8.7A PLBWIN is used with an older
+           version of Sunfhsys.dll, then the following Windows OS error 
+           will occur:
+ 
+            "Plbwin.exe - Entry Point Not Found!
+             The procedure entry point FhSetPlbCurDir could not be 
+             located in the dynamic link library Sunfhsys.dll."
+ 
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+         - For the PICT object note item number 4, the LZW and Packbits
+           compression methods should be identified as separate methods.
+ 
+         - Please remove the 'PLBWIN_MAXPROGVMEM' keyword from the PL/B
+           reference manual.  This keyword was removed in release 8.6A and
+           replaced with command line '-mv' option.
+ 
+*==============================================================================
+    The following files have been changed as follows:
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Modified the Application Server to allow print spooling to occur
+           at the system where the server is being executed.  By default
+           PRINT and SPLOPEN print operations are executed at the client
+           workstation.  A new keyword named 'PLBCS_APSPOOL={0|1|2}' has
+           been added to change the default operations of the PLBSERVE server
+           for printing.  In addition, a new keyword named '*APSPOOL={0|1|2}'
+           has been added for GETMODE/SETMODE statements to allow a program
+           to control the default operations of the PLBSERVE server for
+           printing.  The following table shows the expected print spooling
+           operations with and without the new keywords.
+ 
+           Note:
+                1. With this change the '!' character can be included as
+                   the first character of a spool name.  For PLBSERVE
+                   runtimes the '!' character always indicates that the
+                   spooled file/device exists at the client workstation
+                   and the '!' character is not part of the filename.
+                   For PLBWIN/PLB runtimes a leading '!' character in the
+                   file name is ignored and it is not part of the file name.
+ 
+           Without New Keywords (Default actions)
+ 
+               PRINT     - Default printing is performed at the client.
+               SPLOPEN   - All spooling operations occur at the client.
+ 
+           With 'PLBCS_APSPOOL=0' or 'SETMODE *APSPOOL=0'
+ 
+               PRINT     - Default printing is performed at the client.
+               SPLOPEN   - All spooling operations occur at the client.
+ 
+           With 'PLBCS_APSPOOL=1' or 'SETMODE *APSPOOL=1'
+ 
+               PRINT     - Default printing is performed at the client
+                           when the printer device is set to be 'LPT(1-4):'
+                           in the screen definition file. If the screen
+                           definition file is changed to specify some
+                           other file name for a print device, then printing
+                           output is stored into the file at the server.
+ 
+               SPLOPEN   - All spooling operations for files occur at the
+                           server except if the file named is 'LPT(1-4):'.
+                           If a name 'LPT(1-4):' is specified, then the
+                           print spooling operation is performed at the
+                           client workstation.
+ 
+           With 'PLBCS_APSPOOL=2' or 'SETMODE *APSPOOL=2'
+ 
+               PRINT     - Default printing is performed at the server.
+               SPLOPEN   - All spooling operations occur at the server.
+ 
+         - Added a new keyword named 'PLBCS_LOGMAX=nnnnn' for the application
+           server INI file.  The 'nnnnn' value for this keyword specifies
+           a maximum number of records that can be added to the log file.  If
+           this keyword is not specified or the 'nnnnn' value is set to
+           zero, then an unlimited number of records will be written to the
+           log file.  However, if the 'nnnnn' value is set to a non-zero
+           value, then the value specifies the maximum number of records
+           that will be written to the log file.  When the maximum record
+           count is exceeded, then records are over written after the
+           header at the beginning of the log file in a circular manner.
+ 
+         - The format of the Application Server has been changed as follows:
+ 
+             1. Each record has a fixed length of 79 characters.  Log
+                records longer than 79 characters will wrap to the next
+                log record.  Records larger than 158 characters are truncated.
+ 
+             2. Each record has a field format as follows:
+ 
+                  YYYY-MM-DD HH:MM:SS NNNN L DATA
+ 
+                  Where:
+ 
+                        YYYY-MM-DD - Current date
+                        HH:MM:SS   - Current time
+                        NNNN       - Admin slot identification
+                        L          - Application Server log level value
+                        DATA       - Log data
+ 
+         - The Windows Application Server has been modified to detect a
+           program IP (Instruction Pointer) value of zero to prevent a GPF
+           from occurring.  When an IP value of zero is detected, the
+           program thread being executed will attempt to recover a
+           valid IP value before continuing.  If a valid IP value is not
+           available, then the program thread is terminated immediately.
+           Information about an IP fault is logged into the Application
+           Server log file.  If the program is terminated, then a program
+           image file is created with a name as 'CodePtr_NNNN.IMG'.  The
+           NNNN string identifies the thread id that had the fault.
+ 
+         - Modified the PLBSERVE server runtime to prevent the program
+           from terminating at the 256 instruction check event point when
+           the PLBCLIENT has prematurely terminated.  This change means
+           that a program will only terminate after a PLBCLIENT process
+           has prematurely terminated when the PLBSERVE executes a PL/B
+           statement that requires access to the client workstation.  This
+           change is implemented as per user's request that the server
+           program should be able to continue processing file updates after
+           the PLBCLIENT workstation connection has terminated.  It is the
+           user's responsibility to insure that a program does not have
+           any endless loops in a program that prevents access to a
+           PLBCLIENT workstation.
+ 
+         - Corrected a problem where a GPF could occur when multiple PL/B
+           debug sessions were performing TP actions at the same time.
+ 
+         - Corrected a problem where the OBJECTID property for a CHECKGRP
+           and RADIOGRP object was not being set by a CREATE statement.
+           Performing EVENTINFO or GETPROP operations to retrieve the
+           OBJECTID was returning a zero value.
+ 
+         - Corrected a GPF problem that could occur when a FORMLOAD
+           operation was performed for a PLFORM depending on how the 
+           Windows OS allocated memory buffers.  This problem was most
+           likely to occur when the PLFORM included TOOLBAR or STATUSBAR
+           objects.
+ 
+-------------------------------------------------------------------------------
+PLBCLIENT- Added new keyword named 'PLBCS_CMDLN={prog}' that can be placed
+PLBCLICON  into the 'PLBCLIENT.INI'.  This keyword can be specified to
+           give the default command line to be executed by PLBCLIENT.EXE
+           when no command line parameters are given.
+ 
+         - Corrected a problem where the client module could get a GPF error
+           when a '.BMP' image could not be found when executing an
+           AddBmpMasked method for an IMAGELIST object.
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - A new keyword named 'PLB_CURDIR={path}' has been added for the
+PLBWIN     Windows version of the runtimes.  Also, a new keyword
+           named '*PLBCURDIR={svar}' has been added for the GETMODE/SETMODE
+           statements.  The runtime '-z{path}' runtime option also can
+           be used.  The need for he PLB_CURDIR directory is to address
+           a Windows OS multiple thread issue where a change to the
+           current working directory affects all of the threads.  This
+           problem can occur for the Application Server or the Automation
+           Server when a PL/B application requires unique working directories
+           for all threads.
+ 
+           Any time that the PL/B current directory is set, then the
+           runtime will perform the following actions when executing a
+           program:
+ 
+              1. The PL/B current directory is used as the default directory
+                 for all OPEN or PREP operations when a path is not
+                 specified in the file name.
+ 
+              2. The PL/B current directory is used as the default directory
+                 when an BATCH/EXECUTE/ROLLOUT instruction is executed.
+ 
+              3. When the PL/B current directory is used/specified, the
+                 PATH CHANGE instruction will only change the PL/B
+                 current directory.  If the PL/B current directory is
+                 NOT used/specified when the PATH CHANGE is executed,
+                 then only the OS working directory is set.
+ 
+              4. When the PL/B current directory is used/specified, the
+                 PATH CURRENT instruction will return the PL/B current
+                 directory buffer string.  If the PL/B current directory
+                 buffer is not used/specified, then the PATH CURRENT
+                 returns the current OS working directory.
+ 
+              5. When the PL/B current directory is used/specified, the
+                 PATH CREATE instruction will use the PL/B current directory
+                 when the user specified string does not specify a 
+                 pathed name.
+ 
+              6. When the PL/B current directory is used/specified, the
+                 PATH DELETE instruction will use the PL/B current directory
+                 when the user specified string does not specify a
+                 pathed name.
+ 
+         - Corrected a problem where data could be displayed on the wrong
+           line after a SCRNRESTORE or STATERESTORE operation.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Corrected a problem where function key flags were being cleared
+PLBSERVE   when executing under the PLBDBUG debugger and a 'STOP IF FKEY'
+PLB:UNIX   statement was executed where a CHAIN is not performed.
+ 
+         - Corrected a problem where a CHAIN statement was not clearing
+           a FKEY (function key flag).
+ 
+         - Corrected a problem where an indeterminate/unknown program error
+           would occur if the S$RETVAL value was greater than 255 when
+           a program performed a SHUTDOWN.
+ 
+         - Corrected an I80 error that could occur while executing a
+           REPOSIT instruction.  The following code would cause the
+           problem with a file size of 256 bytes.  This error actually
+           can occur when the true file size is less than a position
+           value used for the first REPOSIT file position.
+ 
+                  $0      INTEGER   0
+                  $1135h  INTEGER   4,"0x1135"
+                  FILE    FILE
+                  .
+                          OPEN      FILE....
+                  .
+                          REPOSIT   FILE,$1135h
+                          REPOSIT   FILE,$0
+                          REPOSIT   FILE,$1135h    ;I80 error occurs!
+ 
+         - Corrected a problem where an invalid generic string property
+           for a Gui object was being reported as an O105 error in a
+           GETPROP operation.  This error has been changed to be an O123
+           error.
+ 
+         - Corrected a problem where a F04 error would occur when a program
+           was compiled using the 'zc=3' compiler option and a CALL USING
+           list operand was a whole reference array and the ROUTINE list
+           operand was an array of pointers.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified the BATCH, EXECUTE, ROLLOUT, and SHUTDOWN statements to
+           automatically attempt to use the current COMSPEC keyword command
+           after a user specified command line fails to execute.  The format
+           of the second execution attempt in this case would be as follows:
+ 
+              EXECUTE  "User Command"  ;If execution fails, then automatic
+                                       ;retry as '%COMSPEC% /c User Command'
+ 
+         - SPLITTER Object (NEW)
+ 
+           A new GUI object named SPLITTER has been added for Windows
+           runtimes.  The SPLITTER object enables the user, at runtime, to
+           resize an object that is docked to the edge of the SPLITTER
+           object.  When the user passes the mouse pointer over the SPLITTER
+           object, the cursor changes to indicate that the object can be
+           resized.  The SPLITTER object enables the user to resize the
+           docked object that has the same docking type and is immediately
+           before it in z-order.  To enable the user to resize a docked
+           object, dock the object you want the user to be able to
+           resize, and then dock a SPLITTER to the same value.  When the
+           mouse pointer is over a SPLITTER object and the mouse pointer
+           is set to the resize indicator, then a user can click and hold
+           the left mouse button.  This causes the splitter bar to be
+           activated where it can be moved to a new desired location.
+ 
+           Properties
+ 
+               BDRSTYLE
+               BGCOLOR
+               DOCK
+               ENABLED
+               HEIGHT
+               LEFT
+               MINEXTRA
+               MINSIZE
+               OBJECTID
+               TOOLTIP
+               TOP
+               VISIBLE
+               WIDTH
+               ZORDER
+ 
+           Events
+ 
+               MOVE
+ 
+         - PANEL Object (NEW)
+ 
+           A new GUI object named PANEL has been added for Windows runtimes.
+           The PANEL object is an object that can contain other objects,
+           just as a WINDOW contains other objects.  When an object is
+           created in a PANEL object, it belongs to that PANEL object and
+           will be enabled, disabled, hidden, made visible, or destroyed
+           when one of these actions take place on the PANEL object.
+ 
+           Properties
+ 
+               ANCHOR
+               AUTOSCROLL
+               BDRSTYLE
+               BGCOLOR
+               DOCK
+               DOCKPADL
+               DOCKPADT
+               DOCKPADR
+               DOCKPADB
+               ENABLED
+               HEIGHT
+               LEFT
+               MINSCROLLH
+               MINSCROLLV
+               OBJECTID
+               SCROLLBAR
+               TOOLTIP
+               TOP
+               VISIBLE
+               WIDTH
+               WINOFFSETH
+               WINOFFSETV
+               ZORDER
+ 
+           Events
+ 
+               MOUSEDOWN
+               MOUSEUP
+               MOUSEMOVE
+               PAINT
+               RESIZE
+ 
+         - ANCHOR Property (NEW)
+ 
+           Format:
+                  ANCHOR=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 This property allows an object to be anchored to one
+                 or more edges of its parent object.  The parent object
+                 can be either a Window or Panel object. Anchoring an object
+                 to its parent ensures that the anchored edges remain in
+                 the same position relative to the edges of the parent
+                 container when it is resized.  By default objects are
+                 anchored to the top/left.  The possible anchor values
+                 are as follows:
+ 
+                   $ANCHORBL       - Bottom, Left
+                   $ANCHORBLR      - Bottom, Left/Right
+                   $ANCHORBR       - Bottom, Right
+                   $ANCHORTBL      - Top/Bottom, Left
+                   $ANCHORTBLR     - Top/Bottom, Left/Right
+                   $ANCHORTBR      - Top/Bottom, Right
+                   $ANCHORTL       - Top, Left
+                   $ANCHORTLR      - Top, Left/Right
+                   $ANCHORTR       - Top, Right
+ 
+           Objects Supported:
+ 
+                 BUTTON
+                 CHECKBOX
+                 CHECKGRP
+                 COMBOBOX
+                 CONTAINER
+                 CONTROL
+                 DATALIST
+                 EDITTEXT
+                 GROUPBOX
+                 HSCROLLBAR
+                 ICON
+                 LISTVIEW
+                 MREGION
+                 MOVIE
+                 PANEL
+                 PICT
+                 PROGRESS
+                 RADIOGRP
+                 RADIO
+                 SHAPE
+                 SLIDER
+                 STATTEXT
+                 STATUSBAR
+                 TABCONTROL
+                 TOOLBAR
+                 TREEVIEW
+                 VSCROLLBAR
+ 
+           dnumnvar values:
+ 
+                 $NONE           EQU     0
+                 $ANCHORBL       EQU     1
+                 $ANCHORBLR      EQU     2
+                 $ANCHORBR       EQU     3
+                 $ANCHORTBL      EQU     4
+                 $ANCHORTBLR     EQU     5
+                 $ANCHORTBR      EQU     6
+                 $ANCHORTL       EQU     7
+                 $ANCHORTLR      EQU     8
+                 $ANCHORTR       EQU     9
+ 
+         - The DOCK property has been modified to support a $DOCKFULL mode.
+           In addition, the DOCK property has been added to more objects.
+ 
+             $DOCKFULL - The object takes up the rest of the docking space.
+ 
+           Objects Supported:
+ 
+                 BUTTON
+                 CHECKBOX
+                 COMBOBOX
+                 CONTROL
+                 DATALIST
+                 EDITTEXT
+                 HSCROLLBAR
+                 LISTVIEW
+                 PANEL
+                 RADIO
+                 SLIDER
+                 SPLITTER
+                 STATUSBAR
+                 TABCONTROL
+                 TOOLBAR
+                 TREEVIEW
+                 VSCROLLBAR
+ 
+           dnumnvar values:
+ 
+                 $DOCKBOTTOM     EQU     1     ;Same as $WINDOCKBOTTOM
+                 $DOCKLEFT       EQU     2     ;Same as $WINDOCKLEFT
+                 $DOCKNONE       EQU     3     ;Same as $WINDOCKNONE
+                 $DOCKRIGHT      EQU     4     ;Same as $WINDOCKRIGHT
+                 $DOCKTOP        EQU     5     ;Same as $WINDOCKFULL
+                 $DOCKFULL       EQU     6     ;New
+ 
+                 $WINDOCKBOTTOM  EQU     1
+                 $WINDOCKLEFT    EQU     2
+                 $WINDOCKNONE    EQU     3
+                 $WINDOCKRIGHT   EQU     4
+                 $WINDOCKTOP     EQU     5
+ 
+         - DOCKPADB Property (NEW)
+ 
+           Format:
+                  DOCKPADB=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The DOCKPADB property identifies the padding between
+                 the bottom of a window and the first docked object.
+ 
+           Objects Supported:
+ 
+                 PANEL
+                 WINDOW
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - DOCKPADL Property (NEW)
+ 
+           Format:
+                  DOCKPADL=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The DOCKPADL property identifies the padding between
+                 the left side of a window and the first docked object.
+ 
+           Objects Supported:
+ 
+                 PANEL
+                 WINDOW
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - DOCKPADR Property (NEW)
+ 
+           Format:
+                  DOCKPADR=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The DOCKPADR property identifies the padding between
+                 the right side of a window and the first docked object.
+ 
+           Objects Supported:
+ 
+                 PANEL
+                 WINDOW
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - DOCKPADT Property (NEW)
+ 
+           Format:
+                  DOCKPADT=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The DOCKPADT property identifies the padding between
+                 the top of a window and the first docked object.
+ 
+           Objects Supported:
+ 
+                 PANEL
+                 WINDOW
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - MINEXTRA Property (NEW)
+ 
+           Format:
+                  MINEXTRA=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The MINEXTRA property specifies the minimum distance that
+                 must remain between the SPLITTER object and the edge of the
+                 opposite side of the closest object docked to the opposite
+                 side.
+ 
+           Objects Supported:
+ 
+                 SPLITTER
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - MINSIZE Property (NEW)
+ 
+           Format:
+                  MINSIZE=dnumnvar
+ 
+           Statements Supported:
+ 
+            CREATE  SETPROP  GETPROP
+ 
+           Description:
+ 
+                 The MINSIZE property specifies the minimum distance that
+                 must remain between the SPLITTER object and the edge of the
+                 object that the SPLITTER object is docked to.
+ 
+           Objects Supported:
+ 
+                 SPLITTER
+ 
+           dnumnvar values:
+ 
+                 The <dnumnvar> value is a pixel value.
+ 
+         - Added the AUTOREDRAW property for the TREEVIEW object.
+ 
+         - Modified the SortColumn method for a LISTVIEW object to preserve
+           the checkbox states when the CHECKBOX property is set true.
+ 
+         - Modified the LISTVIEW to update the colors for a line item when
+           the text in a subitem was modified.
+ 
+         - It was reported that a program executed on a Windows 98/NT system
+           would go into an infinite loop when color control columns were
+           added.  This problem could not be reproduced on several Windows
+           98 systems available to the Sunbelt staff.  However, in response
+           to the reported issue the LISTVIEW object logic was modified to
+           try and eliminate any possible cases of infinite loops when
+           processing color control columns.
+ 
+         - Corrected a PostScript printer color printing problem for
+           advanced printing.  The problem occurred because the data
+           returned from the PostScript printer driver was causing the
+           runtime to identify the printer as a non-colored printer.
+ 
+         - Corrected a problem where the BDRSTYLE property was not being
+           processed in a CREATE statement for a TOOLBAR.
+ 
+         - Corrected a F05 error that would occur when a CALL using operand
+           was a GUI MAINWINDOW object and the ROUTINE operand was a GUI
+           WINDOW object pointer.
+ 
+         - Corrected a F05 error that would occur when a CALL using operand
+           was a GUI object (any type) and the ROUTINE operand was a VAR
+           typeless variable.
+ 
+         - Corrected a problem where the 8.7 PLBWIN runtime could not be
+           loaded and executed on a Windows 95 system that did not provide
+           the "Windows Socket 2" support.  The 8.7A PLBWIN runtime has 
+           been modified to detect when "Windows Socket 2" support is not
+           available and then load the runtime without ADMIN services.  The
+           ADMIN services are used to monitor Automation Server threads.
+ 
+           One of the Sunbelt users has reported that there is a Microsoft
+           upgrade file named 'WS2SETUP.EXE' that upgrades a Windows 95
+           system to provide the "Windows Socket 2" capability.  This
+           could allow a Windows 95 system to be upgraded so that
+           the 8.7 PLBWIN runtime will load and provide full ADMIN services
+           needed to support Automation Server.
+ 
+         - Corrected a problem where a WINDOW object was being created with
+           a larger size than expected when a CAPTION property was set off.
+ 
+-------------------------------------------------------------------------------
+PLB:UNIX - Modified the GETFILE NAMETYPE keyword to return a value of
+            3 when a UNIX runtime is being used.
+ 
+-------------------------------------------------------------------------------
+PLBCMP   - Modified the compiler to give a syntax error when a generic
+           property string format is used in a CREATE/GETPROP/SETPROP
+           statement for any GUI objects except for AUTOMATION, CONTAINER,
+           CONTROL, and VARIANT. This helps prevent situations where a
+           generic property syntax problem could only be detected when
+           the program was executed.                       
+ 
+           Example:
+                      SETPROP    BUTTON,*ENABLED=0   ;Gives compiler error!
+ 
+                      SETPROP    BUTTON,ENABLED=0    ;Valid syntax format!
+ 
+         - Modified the nested INCLUDE levels supported from 4 to 8 levels.
+ 
+         - Modified the CREATE statement syntax to accept a PANEL object
+           as the parent object.  This syntax change applies to all objects
+           that can be created with a parent window.
+ 
+           Format:
+                  [label] CREATE [{window}|{panel};]{object}....
+ 
+         - Added support for new SPLITTER object.
+ 
+         - Added support for new PANEL object.
+ 
+         - Added support for new DOCK property.
+ 
+         - Added support for new DOCKPADB, DOCKPADL, DOCKPADR, and 
+           DOCKPADT properties.
+ 
+         - Added support for new MINEXTRA and MINSIZE properties.
+ 
+         - Corrected a problem where the compiler was prematurely
+           terminating with an I10 error when a user was using the
+           'PLB_OPENABS=ON' keyword.
+ 
+         - Corrected a DIM array syntax error that would occur when using
+           the 'zc#3' option.  The following statement was causing
+           an erroneous compilation error when using this option.
+ 
+                 Label  DIM  1(2):
+                              ("a"):
+                              ("b")
+ 
+         - Corrected a problem where an underscore character ('_') was
+           causing a compilation error when it existed in a MACRO
+           opcode name.
+ 
+         - Corrected a F02 compiler error that would prematurely terminate
+           the compiler.  This could occur when an invalid variable was
+           encountered when a LIST definition was active.
+ 
+-------------------------------------------------------------------------------
+PLBDSIGN - Added a new Tool\Options checkbox 'Save File in Ansi'. When
+           this option is unchecked, then PLF form program code is translated
+           from ANSI to OEM data before it is written into the PLF form. If
+           this option is checked, then PLF form program code is NOT 
+           translated and ANSI international data characters are written
+           into the PLF form.
+ 
+         - Corrected a problem where the &OBJNAME macro was not expanded
+           properly into an object name.  This was causing a compilation
+           error to occur because an object name was truncated.
+ 
+         - Corrected a problem where the current working directory for 
+           the designer was being changed when a form resource was added
+           to a PLF form.
+ 
+         - Corrected a problem where a WINDOW object was being created with
+           a larger size than expected when a CAPTION property was set off.
+ 
+-------------------------------------------------------------------------------
+UTILITY  - Corrected a problem where the 8.7 SUNAAMDX.EXE utility did not
+           execute properly when redirected key input was used as follows:
+ 
+               sunaamdx file.txt,,l20;: <keys.txt
+ 
+-------------------------------------------------------------------------------
+PLBWSEC  - Corrected a problem where the security DLL was not recognizing
+           multiple load instances of PLBWIN.  This could cause erroneous
+           U21 Subcode 2 errors to occur.  The user can use the '-v'
+           option for the runtime and verify that the PLBWSEC.DLL date is
+           '87A 03/20/2003' to identify a corrected version.
+ 
+-------------------------------------------------------------------------------
+SUNFHSYS - Modified spool printing functions to support spooled output
+           at the Application Server system as per the PLBCS_APSPOOL
+           keyword setting.
+ 
+         - Corrected a problem where a REPOSIT could cause an I80 error.
+ 
+-------------------------------------------------------------------------------
+ADMIN    - Modified the server logging support to format server log messages
+           as fixed length records.  This change is used to support new
+           ADMGETINFO data types.  The following admin server data types
+           have been added for the ADMGETINFO statement:
+ 
+           $ADMITEMSRVLOGCUR specifies that the current log record number
+                             for the server log file is to be returned.
+                             The record number returned is a one-based value.
+ 
+                             $ADMITEMSRVLOGCUR      EQU   110
+ 
+           $ADMITEMSRVLOGMAX specifies that the maximum allowed record count
+                             value is to be returned.  If the returned value
+                             is zero, then an unlimited number of records
+                             are being logged.  The server FM_LOGMAX or
+                             PLBCS_LOGMAX keywords controls this value.
+ 
+                             $ADMITEMSRVLOGMAX      EQU   111
+ 
+           $ADMITEMSRVLOGSTART specifies the starting record number of the
+                               user data records in the log file.  The
+                               value is one based and identifies the first
+                               user data record after the server header
+                               information records.
+ 
+                             $ADMITEMSRVLOGSTART    EQU   112
+ 
+           $ADMITEMSRVLOGRECS specifies that log file records are to be
+                              returned.  The <mask> parameter, in this
+                              case, identifies a starting record number and
+                              a record count to be retrieved.  The <mask>
+                              string in this case is specified as follows:
+ 
+                              nnnn,mmmm
+ 
+                              Where:
+                                    nnnn - identifies the starting record.
+ 
+                                    mmmm - identifies the number of records
+                                           to retrieve.
+ 
+                              Note:
+                                   1. Log records are packed into the result
+                                      operand as data groups separated by
+                                      a ';' character that represents an EOR;
+ 
+                             $ADMITEMSRVLOGRECS     EQU   113
+ 
+         - The ADMSETINFO statement has been modified to support a new
+           <action> named $ADMLOG.  The <action> value for the $ADMLOG
+           is a value of 4.  The $ADMLOG action will cause the <value>
+           string to be placed into the server's log file.  This action
+           command can be used to store application log records directly 
+           into the log file of a server.
+ 
+                             $ADMLOG   EQU   4
+ 
+         - Corrected a problem where an ADMGETINFO statement that retrieved
+           more than 1024 bytes could cause indeterminate operations.  This
+           included the possibility of hanging a server application.
+ 
+-------------------------------------------------------------------------------
+SUNIDE   - Fixed a bug where compiler -E= option wasn't picking up the leading
+           dot "." on the extension.
+
+	 - Fixed a bug where if a user defined extension was specified,
+	   filenames were built without the extension delimiter.
+
+	 - Added option to not show the IDE logo.
+
+	 - Fixed a bug where you could get multiple editor property windows.
+
+	 - Fixed a bug where new dependencies were not being processed.
+
+	 - Fixed a bug where an external editor would launch after stripping
+	   the path from a file name.  This could  cause the external editor
+	   to not find the file.
+
+	 - Fixed a problem where we were not looking for equated labels in INI
+	   compiler options.
+
+	 - Fixed a bug in Save Project As where a corrupt project file could be
+	   saved.
+
+	 - Added option to delete the make file when the IDE is finished with
+	   it.
+
+	 - Fixed a bug where some items on the project menu could be enabled
+	   with no project file open.
+
+	 - Added option to refresh dependencies to the TreeView right click and
+	   on the project menu.
+
+	 - Corrected a problem where if an error occurs while defining a new
+	   project, the new project dialog would close so a user would have to
+	   start over.
+
+	 - All IDE working scratch file names are now generated to be unique
+	   based on a time stamp.
+
+	 - The IDE now checks the version of the editor loadmod and gives a
+	   warning if a version other than expected is found.
+
+	 - Added override for PLB_SKIPFOCUS keyword because the IDE needs this
+	   events to restore state when re-activating. This is to try to
+	   address the issue where after the compiler executes, the window with
+	   focus may be indeterminate and tabs could be arbitrarily be added to
+	   a source.
+
+	 - Fixed a bug where if a source file was specified on the command
+	   line, the file could get truncated.
+
+	 - Fixed a problem where the working directory may not be properly
+	   stripped from a file name during makefile generation.
+
+	 - Modified the IDE to use splitters and panels and removed docking
+	   code and nearly 200 lines of child window updating code.
+
+	 - Fixed a bug where indeterminate results could occur if a nested
+	   include was the updated file that caused a compile.
+
+	 - Fixed a bug where an include could be mistaken for program's main
+	   source after a compile.
+
+	 - Added path squashing so the file name should always be visible on
+	   the status dialog during project opens and compiles
+
+	 - Made the Browse Labels tab sort the labels case insensitive
+
+	 - Fixed save all to detect if a save is canceled or fails.
+
+	 - Fixed build operation so if a save canceled or the editor fails to
+	   save at least one file, the build aborts.
+
+	 - Fixed a bug in the line parser where a comment after the second
+	   parameter in an IFEQ/XIF was being treated as part of the label to
+	   compare which would result in a bogus false if.  This resulted in
+	   some conditional includes not being picked up by the IDE.
+
+	 - Fixed a bug in the line parser that would pick up a variable called
+	   "INC" as an include directive when it is the first variable after a
+	   line continuation.
+
+	 - Added logic to clear events when an MDIChild window gets focus to
+	   try to prevent bogus tabs from getting entered into the editor.
+
+	 - The dependency resolver was optimized to eliminate code and run
+	   faster.  It also eliminates an infinite loop problem where a program
+	   could be copied to a project file several times.
+
+	 - Fixed a bug in printing where data would run off the end of the page
+	   (approximately 1" worth) to the right and bottom of the printable
+	   area.
+
+	 - The editor now saves and restores user defined hot keys for the
+	   editor.
+
+	 - The editor now saves and restores keyboard macros.
+
+	 - Corrected bad config file detection to prevent loading a corrupt
+	   config file.
+
+	 - Modified the print dialog to try to reliably retrieve a list of
+	   printers and addressed an issue where the ide may not be able to get
+	   a list of printers using the GETINFO PRINTERS.  If no printer is
+	   selected, the user is presented with a windows printer selection
+	   dialog.
+
+	 - Fixed a problem where the TABS to spaces property in the editor was
+	   not working.
+
+	 - Modified the open and save file logic to honor the PLB_OEM keyword.
+
+-------------------------------------------------------------------------------
+WATCH    - Rewrote the data acquisition logic for improved performance.
+
+	 - Eliminated work files used during data acquisition.
+
+	 - Shortened descriptive fields in the treeview.
+
+	 - Moved client properties to a new dialog available with a right-click
+	   action.
+
+	 - Anchored screen items to allow resizing of the main form.
+
+	 - Added the ability to define aliases for IP addresses.
+
+	 - Divided index and data file names into separate columns.
+
+	 - Added an informational message window.
+
+	 - Added the ability to abort tasks (hard terminate).
+
+	 - Added client logging control.
+	 
+	 - Added right click on Tree View for expand or collapse below and
+	   expand or collapse all.
+
+-------------------------------------------------------------------------------
+SUNSCAN  - Added ROUTINE entry point so it can be used as LOADMOD.
+
+	 - Corrected problem where if last line did not have an EOR, then the
+	   prior line would not display properly.
+
+	 - Corrected problem where file position was reported for end of record
+	   instead of beginning of record.
+
+	 - Increased file position variables from 9 to 10 digits.
+
+	 - Corrected bug where function keys F1-F9 did not work if file was
+	   currently positioned at End of File.

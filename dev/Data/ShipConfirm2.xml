@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<AccessRequest xml:lang="en-US">
+  <AccessLicenseNumber>1D6901A8E67FA1D5</AccessLicenseNumber>
+  <UserId>HarryStar56</UserId>
+  <Password>Taylor1156!</Password>
+</AccessRequest>
+
+
+<?xml version="1.0"?>
+<ShipmentConfirmRequest xml:lang="en-US">
+  <Request>
+    <TransactionReference>
+      <CustomerContext>Customer Comment</CustomerContext>
+      <XpciVersion/>
+    </TransactionReference>
+    <RequestAction>ShipConfirm</RequestAction>
+    <RequestOption>validate</RequestOption>
+  </Request>
+  <LabelSpecification>
+    <LabelPrintMethod>
+      <Code>GIF</Code>
+      <Description>gif file</Description>
+    </LabelPrintMethod>
+    <HTTPUserAgent>Mozilla/4.5</HTTPUserAgent>
+    <LabelImageFormat>
+      <Code>GIF</Code>
+      <Description>gif</Description>
+    </LabelImageFormat>
+  </LabelSpecification>
+  <Shipment>
+   <RateInformation>
+      <NegotiatedRatesIndicator/>
+    </RateInformation>
+	<Description/>
+    <Shipper>
+      <Name>Shipper Name</Name>
+      <PhoneNumber>1234567890</PhoneNumber>
+      <ShipperNumber>156620</ShipperNumber>
+	  <TaxIdentificationNumber>1234567877</TaxIdentificationNumber>
+      <Address>
+    	<AddressLine1>75 TOLEDO ST</AddressLine1>
+    	<City>FARMINGDALE</City>
+    	<StateProvinceCode>NY</StateProvinceCode>
+    	<PostalCode>11735</PostalCode>
+    	<PostcodeExtendedLow></PostcodeExtendedLow>
+    	<CountryCode>US</CountryCode>
+     </Address>
+    </Shipper>
+	<ShipTo>
+     <CompanyName>Ship To Company Name</CompanyName>
+      <AttentionName>Eileen Schieferstein</AttentionName>
+      <PhoneNumber>6312494079</PhoneNumber>
+      <Address>
+        <AddressLine1>2357 MELVIN PLACE</AddressLine1>
+        <City>SEAFORD</City>
+        <StateProvinceCode>NY</StateProvinceCode>
+        <PostalCode>11783</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipTo>
+    <ShipFrom>
+      <CompanyName>Ship From XYZ Company Name</CompanyName>
+      <AttentionName>Ship From Attn Name</AttentionName>
+      <PhoneNumber>1234567890</PhoneNumber>
+	  <TaxIdentificationNumber>1234567877</TaxIdentificationNumber>
+      <Address>
+        <AddressLine1>51 HAMLET RD</AddressLine1>
+        <City>LEVITTOWN</City>
+    	<StateProvinceCode>NY</StateProvinceCode>
+    	<PostalCode>11756</PostalCode>
+    	<CountryCode>US</CountryCode>
+      </Address>
+    </ShipFrom>
+     <PaymentInformation>
+      <Prepaid>
+        <BillShipper>
+          <AccountNumber>156620</AccountNumber>
+        </BillShipper>
+      </Prepaid>
+    </PaymentInformation>
+    <Service>
+      <Code>02</Code>
+      <Description>2nd Day Air</Description>
+    </Service>
+    <Package>
+      <PackagingType>
+        <Code>02</Code>
+        <Description>Customer Supplied</Description>
+      </PackagingType>
+      <Description>Package Description</Description>
+	  <ReferenceNumber>
+	  	<Code>00</Code>
+		<Value>Package</Value>
+	  </ReferenceNumber>
+      <PackageWeight>
+        <UnitOfMeasurement/>
+        <Weight>60.0</Weight>
+      </PackageWeight>
+      <LargePackageIndicator/>
+      <AdditionalHandling>0</AdditionalHandling>
+    </Package>
+  </Shipment>
+</ShipmentConfirmRequest>

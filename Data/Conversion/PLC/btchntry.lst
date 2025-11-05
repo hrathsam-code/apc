@@ -1,0 +1,365 @@
+
+
+
+PAGE    1      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "BTCHNTRY.PLS","F:\PLC\BTCHNTRY.PLC",,c:\docume~1\lauraa~1\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    4.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.pls
+    9.    INCLUDE  C: batchfd.txt
+   11.    INCLUDE  D: f:\source.cnv\custmast.txt
+  165.    INCLUDE  E: batchio.txt
+  166.    INCLUDE  F: f:\source.cnv\stdioerr.txt
+  167.    INCLUDE  G: f:\source.cnv\stdparer.txt
+  168.    INCLUDE  H: f:\source.cnv\stdfmter.txt
+  169.    INCLUDE  I: f:\source.cnv\stdrange.txt
+  170.    INCLUDE  J: f:\source.cnv\custio.txt
+  435.    INCLUDE  K: modcheck.txt
+
+   Output: f:\plc\btchntry.plc                                                                                                                                                                                                                                       
+       994 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:35:25 14:35:25
+  000029D0 DATA;  00000C9C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+"                                          D     128.  *
+"                                          D     453.  *   143.     156.     233.     244.     303.     343.     354.  
+                                                     *   367.     377.     387.      13. K
+" 0                                        D     101.  *   102.     103.     200.  
+"00000                                     D      81.  *
+"B                                         D     279.  *
+"BATCHFL                                   D      21. E*    49. E    75. E   102. E   128. E
+"CASHLDGR                                  D      67.  *    73.     300.     329.  
+"CLOSE                                     D     127. E*
+"H                                         D       9. E*    41. E    68. E    94. E   123. E   132. E     8. J    28. J
+                                                     *    43. J
+"M                                         D       7. E*    23. E    51. E    77. E   104. E   129. E    32. J
+"READ                                      D      22. E*
+"READKS                                    D     103. E*
+"UPDATE                                    D      76. E*
+"WRITE                                     D      50. E*
+0                                          F     140.  *   208.     334.     335.     444.     452.     457.  
+1                                          F     173.  *   180.  
+13                                         F     176.  *
+18                                         F     363.  *
+19                                         F     413.  *
+21                                         F     265.  *   447.  
+3                                          F     215.  *   223.     406.     424.     458.  
+31                                         F     182.  *
+ACCTARG                                    D      21. C*   137. E   152. E   253.     429.      23. K   453.  
+ACCTIN                                     D      24.  *   228.     233.     237.     253.     429.       5. K     6. K
+                                                     *    23. K
+ACCTNUMB                                   D      14. B*
+ADDMOR                                     X     405.  *   390.  
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+ASKMOR                                     X     367.  *   268.     375.  
+ASKMR                                      X     317.  *   310.     403.  
+BACCT1                                     D      22. C*    31. E    59. E    85. E   112. E   137. E   152. E
+BACCT10                                    D      31. C*    32. E    60. E    86. E   113. E   139. E   154. E
+BACCT11                                    D      32. C*    32. E    60. E    86. E   113. E   140. E   155. E
+BACCT12                                    D      33. C*    32. E    60. E    86. E   113. E   140. E   155. E
+BACCT13                                    D      34. C*    33. E    61. E    87. E   114. E   140. E   155. E
+BACCT14                                    D      35. C*    33. E    61. E    87. E   114. E   140. E   155. E
+BACCT15                                    D      36. C*    33. E    61. E    87. E   114. E   140. E   155. E
+BACCT16                                    D      37. C*    33. E    61. E    87. E   114. E   141. E   156. E
+BACCT17                                    D      38. C*    33. E    61. E    87. E   114. E   141. E   156. E
+BACCT18                                    D      39. C*    33. E    61. E    87. E   114. E   141. E   156. E
+BACCT19                                    D      40. C*    34. E    62. E    88. E   115. E   141. E   156. E
+BACCT2                                     D      23. C*    31. E    59. E    85. E   112. E   138. E   153. E
+BACCT20                                    D      41. C*    34. E    62. E    88. E   115. E   141. E   156. E
+BACCT3                                     D      24. C*    31. E    59. E    85. E   112. E   138. E   153. E
+BACCT4                                     D      25. C*    31. E    59. E    85. E   112. E   138. E   153. E
+BACCT5                                     D      26. C*    31. E    59. E    85. E   112. E   138. E   153. E
+BACCT6                                     D      27. C*    31. E    59. E    85. E   112. E   139. E   154. E
+BACCT7                                     D      28. C*    32. E    60. E    86. E   113. E   139. E   154. E
+BACCT8                                     D      29. C*    32. E    60. E    86. E   113. E   139. E   154. E
+BACCT9                                     D      30. C*    32. E    60. E    86. E   113. E   139. E   154. E
+
+
+
+PAGE    3      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+BADBATCH                                   X     341.  *   275.     350.  
+BADINSRT                                   X     312.  *   306.     315.  
+BATCH5                                     D     130. C*
+BATCHFL                                    i       5. C*    85.     114.       8. E    29. E    57. E    83. E   110. E
+BATCHKEY                                   D       8. C*    85.     114.      29. E    57. E    83. E   110. E   280.  
+BATCHNM                                    D       6. C*     8. E
+BATCHTOT                                   F      18. C*    53.      85.      89.      91.     114.     126.     127.  
+                                                     *   138.      29. E    57. E    83. E   110. E   274.     334.     336.  
+                                                     *   352.     353.  
+BCAMT1                                     F      85. C*    35. E    63. E    89. E   116. E   143. E   158. E
+BCAMT10                                    F      94. C*    36. E    64. E    90. E   117. E   145. E   160. E
+BCAMT11                                    F      95. C*    36. E    64. E    90. E   117. E   146. E   161. E
+BCAMT12                                    F      96. C*    36. E    64. E    90. E   117. E   146. E   161. E
+BCAMT13                                    F      97. C*    36. E    64. E    90. E   117. E   146. E   161. E
+BCAMT14                                    F      98. C*    37. E    65. E    91. E   118. E   146. E   161. E
+BCAMT15                                    F      99. C*    37. E    65. E    91. E   118. E   146. E   161. E
+BCAMT16                                    F     100. C*    37. E    65. E    91. E   118. E   147. E   162. E
+BCAMT17                                    F     101. C*    37. E    65. E    91. E   118. E   147. E   162. E
+BCAMT18                                    F     102. C*    37. E    65. E    91. E   118. E   147. E   162. E
+BCAMT19                                    F     103. C*    37. E    65. E    91. E   118. E   147. E   162. E
+BCAMT2                                     F      86. C*    35. E    63. E    89. E   116. E   144. E   159. E
+BCAMT20                                    F     104. C*    38. E    66. E    92. E   119. E   147. E   162. E
+BCAMT3                                     F      87. C*    35. E    63. E    89. E   116. E   144. E   159. E
+BCAMT4                                     F      88. C*    35. E    63. E    89. E   116. E   144. E   159. E
+BCAMT5                                     F      89. C*    35. E    63. E    89. E   116. E   144. E   159. E
+BCAMT6                                     F      90. C*    35. E    63. E    89. E   116. E   145. E   160. E
+BCAMT7                                     F      91. C*    35. E    63. E    89. E   116. E   145. E   160. E
+BCAMT8                                     F      92. C*    36. E    64. E    90. E   117. E   145. E   160. E
+BCAMT9                                     F      93. C*    36. E    64. E    90. E   117. E   145. E   160. E
+BCHECKS                                    F      17. C*    85.     114.      29. E    57. E    83. E   110. E   284.  
+BCHKNO1                                    D      43. C*
+BCHKNO11                                   D      52. C*
+BCHKNO12                                   D      53. C*
+BCHKNO13                                   D      54. C*
+BCHKNO14                                   D      55. C*
+BCHKNO15                                   D      56. C*
+BCHKNO16                                   D      57. C*
+BCHKNO17                                   D      58. C*
+BCHKNO18                                   D      59. C*
+BCHKNO19                                   D      60. C*
+BCHKNO2                                    D      44. C*
+BCHKNO20                                   D      61. C*
+BCHKNO3                                    D      45. C*
+BCHKNO4                                    D      46. C*
+BCHKNO5                                    D      47. C*
+BCHKNO6                                    D      48. C*
+BCHKNO7                                    D      49. C*
+BCHKNO8                                    D      50. C*
+BCHKNO9                                    D      51. C*
+BCSTAT1                                    D     106. C*
+BCSTAT10                                   D     115. C*
+BCSTAT11                                   D     116. C*
+BCSTAT12                                   D     117. C*
+
+
+
+PAGE    4      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+BCSTAT13                                   D     118. C*
+BCSTAT14                                   D     119. C*
+BCSTAT15                                   D     120. C*
+BCSTAT16                                   D     121. C*
+BCSTAT17                                   D     122. C*
+BCSTAT18                                   D     123. C*
+BCSTAT19                                   D     124. C*
+BCSTAT2                                    D     107. C*
+BCSTAT20                                   D     125. C*
+BCSTAT3                                    D     108. C*
+BCSTAT4                                    D     109. C*
+BCSTAT5                                    D     110. C*
+BCSTAT6                                    D     111. C*
+BCSTAT7                                    D     112. C*
+BCSTAT8                                    D     113. C*
+BCSTAT9                                    D     114. C*
+BDD                                        D      43.  *
+BDTPD1                                     D      63. C*
+BDTPD10                                    D      72. C*
+BDTPD11                                    D      73. C*
+BDTPD12                                    D      74. C*
+BDTPD13                                    D      75. C*
+BDTPD14                                    D      76. C*
+BDTPD15                                    D      77. C*
+BDTPD16                                    D      78. C*
+BDTPD17                                    D      79. C*
+BDTPD18                                    D      80. C*
+BDTPD19                                    D      81. C*
+BDTPD2                                     D      64. C*
+BDTPD20                                    D      82. C*
+BDTPD3                                     D      65. C*
+BDTPD4                                     D      66. C*
+BDTPD5                                     D      67. C*
+BDTPD6                                     D      68. C*
+BDTPD7                                     D      69. C*
+BDTPD8                                     D      70. C*
+BDTPD9                                     D      71. C*
+BEEPIT                                     X     191.  *   174.     177.     181.     183.  
+BEEPLINE                                   X     438.  *   414.     420.  
+BMM                                        D      42.  *
+BSTATUS                                    D      16. C*    85.     114.      29. E    57. E    83. E   110. E   279.  
+BTCHBYDT                                   i      10. C*    78.     308.  
+BTCHCLOS                                   X     126. E*
+BTCHDATE                                   D      19. C*    85.     105.     106.     107.     108.     109.     111.  
+                                                     *   114.     142.      30. E    58. E    84. E   111. E   195.     196.  
+                                                     *   197.     198.     199.     200.     287.  
+BTCHDTKY                                   D      13. C*   286.     287.     288.     290.     308.  
+BTCHINDX                                   F     133. C*   137. E   143. E   152. E   158. E   255.     426.      25. K
+                                                     *   444.     446.     447.     457.  
+BTCHOPEN                                   X       5. E*    75.  
+BTCHRDKS                                   X      98. E*
+BTCHRDKY                                   D     129. C*    81.      85.     116.     120.      29. E    57. E   280.  
+                                                     *   288.  
+
+
+
+PAGE    5      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+BTCHREAD                                   X      17. E*
+BTCHRTRN                                   X      43. E*    40. E   121. E
+BTCHUPDT                                   X      71. E*
+BTCHWRIT                                   X      45. E*   292.  
+BTDTNAME                                   D      11. C*    78.  
+BTOTOK                                     X     129.  *
+BYY                                        D      44.  *
+CAMTIN                                     F      27.  *   241.     243.     254.     261.     430.      10. K    12. K
+                                                     *    24. K    29. K
+CANCELIT                                   X     395.  *   392.  
+CHECKAMT                                   F      84. C*   143. E   158. E   254.     430.     431.      24. K   452.  
+CHKCNT                                     F      29.  *   140.     363.  
+CHKSUM                                     F      20.  *    55.     208.     209.     261.     262.     274.     335.  
+                                                     *   336.     431.     433.      29. K    30. K
+CLEARCHK                                   X     140.  *   193.  
+CLR1                                       X     446.  *   455.  
+CLRBATCH                                   X     443.  *   124.     332.     401.  
+CLREXIT                                    X     457.  *   448.  
+COL                                        F      19.  *
+COMMCODE                                   D      26. D*    23. J    40. J
+CSTNAME                                    D      14.  *     7. J
+CURNTDUE                                   F      31. D*    24. J    41. J
+CURRCHK                                    F     134. C*
+CUSTADDR                                   D      11. D*    19. J    37. J
+CUSTADR2                                   D      12. D*
+CUSTCATG                                   D      17. D*    21. J    38. J
+CUSTCITY                                   D      13. D*    20. J    38. J
+CUSTCRED                                   F      16. D*    20. J    38. J
+CUSTFILE                                   i      13.  *     7. J    19. J    37. J
+CUSTKEY                                    D       8. D*    19. J    37. J   237.     243.       6. K    12. K
+CUSTNAME                                   D      10. D*    19. J    37. J   239.       8. K
+CUSTSTAT                                   D      14. D*    20. J    38. J
+CUSTSTTS                                   D       9. D*    19. J    37. J
+CUSTZIP                                    F      15. D*    20. J    38. J
+DATE6                                      D      10. B*
+DATE8                                      D      22.  *   136.  
+DD                                         D      33.  *   153.     155.     179.     198.     201.  
+DDX                                        D      39.  *    96.     102.     108.  
+DROW                                       F      18.  *   221.     223.     224.     226.     255.     257.     263.  
+                                                     *   423.      25. K    31. K
+ENTERDT                                    X     152.  *   148.     161.     163.  
+ENVS                                       D      11. B*
+EOJ                                        X     274.  *   229.     266.     357.     373.     410.      33. K
+EOJ2                                       X     328.  *   323.  
+ERASLINE                                   X     270.  *   234.     249.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+ERRTYPE                                    D      28.  *
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*
+GETBATCH                                   X      81.  *   338.  
+
+
+
+PAGE    6      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+GETBDATE                                   X     136.  *   131.     150.  
+GETCHKS                                    X     211.  *
+GETCUST                                    X      16. J*   238.       7. K
+GETOUT                                     X      67.  *    61.  
+GTNWTOT                                    X     352.  *   346.     359.     361.  
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*    21. E    49. E    75. E   102. E   128. E    10. F    11. G
+                                                     *    11. H    11. I
+IOSW                                       D      23.  *     7. E     9. E    23. E    41. E    51. E    68. E    77. E
+                                                     *    94. E   104. E   123. E   129. E   132. E     8. J    28. J    32. J
+                                                     *    43. J   294.  
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*    22. E    50. E    76. E   103. E   127. E    10. F    11. G
+                                                     *    11. H    11. I
+KEYCHKS                                    X     217.  *   272.     371.     407.  
+KEYLINE                                    D      25.  *   409.     412.     422.     423.  
+LASTBTCH                                   D     131. C*
+LASTLINE                                   F      36.  *   257.     284.     405.  
+LASTROW                                    F      30.  *   224.     416.     458.  
+LINENO                                     F      26.  *   412.     413.     416.     426.  
+LOADBTCH                                   X     152. E*   427.  
+LSTPAYDT                                   D      22. D*    22. J    39. J
+LSTPAYPR                                   F      24. D*    22. J    39. J
+LSTSALDT                                   D      21. D*    22. J    39. J
+LSTSALPR                                   F      23. D*    22. J    39. J
+MM                                         D      32.  *   153.     155.     172.     197.     201.  
+MMX                                        D      38.  *    94.     101.     107.  
+MODDTLS                                    X     409.  *   381.     441.  
+MODENTER                                   X     237.  *
+MODIFY                                     X       5. K*    19. K
+MODSOKAY                                   X      12. K*    21. K
+MORAGN                                     X     387.  *   383.  
+MORDTLS                                    X     363.  *
+MOREBTCH                                   X     303.  *   295.     326.  
+MTDCASH                                    F      39. D*    25. J    42. J
+MTDCRED                                    F      40. D*    25. J    42. J
+NEWBATCH                                   F      21.  *    89.      90.      91.     116.  
+NEXTBTCH                                   X     331.  *   320.  
+NOBATCH                                    X      12. E*     6. E
+NOCUSTFD                                   X      32. J*    27. J    36. J
+NOCUSTO                                    X      11. J*     6. J    17. J
+NOZERO                                     X      70.  *    84.      87.  
+NXT1                                       X     205.  *   146.  
+NXT2                                       X     172.  *   159.  
+NXT2A                                      X     195.  *   189.  
+OKAYMOD                                    X     422.  *   417.     418.  
+OPENCUST                                   X       5. J*    63.  
+PD01TO30                                   F      32. D*    24. J    41. J
+PD31TO60                                   F      33. D*    24. J    41. J
+PD61TO90                                   F      34. D*    24. J    41. J
+PDOVR90                                    F      35. D*    25. J    42. J
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+
+
+
+PAGE    7      BTCHNTRY.PLS IDE                                                                               03-27-04 14:35:25
+                                         
+
+PUTCUST                                    X      35. J*
+REPLY                                      D      16.  *    59.     128.     129.     130.     132.     143.     144.  
+                                                     *   145.     147.     156.     157.     158.     160.     244.     245.  
+                                                     *   246.     248.     303.     317.     319.     322.     343.     344.  
+                                                     *   345.     347.     354.     355.     356.     358.     367.     369.  
+                                                     *   370.     372.     377.     379.     380.     382.     387.     388.  
+                                                     *   389.     391.      13. K    14. K    15. K    18. K
+RITEACCT                                   X     243.  *   251.  
+ROW                                        F      17.  *   215.     220.     221.     226.     228.     239.     241.  
+                                                     *   243.     263.     265.     270.     271.     405.     406.     422.  
+                                                     *   424.       5. K     8. K    10. K    12. K    31. K
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+SHOWBTCH                                   X     120.  *   133.     134.  
+START                                      X      75.  *    65.  
+STDFMTER                                   X       9. H*    27. E    55. E    81. E   108. E    14. H
+STDIOERR                                   X       8. F*    24. E    52. E    78. E   105. E   130. E    13. F
+STDPARER                                   X       9. G*    26. E    54. E    80. E   107. E    14. G
+STDRANGE                                   X       9. I*    25. E    53. E    79. E   106. E    14. I
+STORBTCH                                   X     137. E*   259.      27. K   454.  
+STORIT                                     X     253.  *   247.  
+STORMOD                                    X      23. K*    16. K
+TEST2                                      F      35.  *   172.     173.     176.     179.     180.     182.  
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+THISBTCH                                   D     132. C*
+TODAY                                      D       8. B*    50.      94.      95.      96.      97.      98.      99.  
+                                                     *   136.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+WHATTHEN                                   X     377.  *   348.     364.     385.  
+YY                                         D      34.  *   153.     155.     196.     201.  
+YYX                                        D      40.  *    98.     103.     106.  
+ZEROS                                      X     208.  *   202.  
+

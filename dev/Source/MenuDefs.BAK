@@ -1,0 +1,167 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    MENUDEFS.INC                                                   ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/05/2004 AT 4:43PM                                           ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   07/05/2004   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+.             1 - Print
+.             2 - Print Preview
+.            99 - Exit
+.             3 - Undo
+.             4 - Cut
+.             5 - Copy
+.             6 - Paste
+.             7 - Delete
+.             8 - Select All
+.            20 - Reset Record
+.            21 - New Record
+.            22 - Delete Record
+.            23 - Modify Record
+.            24 - Save Record
+.            25 - Cancel/Reject Record
+.            40 - Program Help
+.            41 - Contents
+.            42 - Search for Help On...
+.            44 - About Chiron Software
+.            50 - First Record
+.            51 - Previous Record
+.            52 - Search Records
+.            53 - Next Record
+.            54 - Last Record
+.            71 - Comments
+GetMenuName
+           SELECT            USING MenuTag
+         %IF PDECLARED(MainPrint) == 4
+           WHEN              "1"
+             CALL              MainPrint
+             RETURN
+         %endif
+
+         %IF PDECLARED(RePrintInvoices) == 4
+           WHEN              "81"
+             CALL              RePrintInvoices
+             RETURN
+         %endif
+
+         %IF PDECLARED(PrintStatement) == 4
+           WHEN              "82"
+             CALL              PrintStatement
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainPrintPreview) == 4
+           WHEN              "2"
+             CALL              MainPrintPreview
+             RETURN
+         %EndIF
+
+           WHEN              "99"
+             CALL              MainClose
+             RETURN
+           WHEN              "20"
+             CALL              MainUndo
+             RETURN
+         %IF PDECLARED(MainNew) == 4
+           WHEN              "21"
+             CALL              MainNew
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainDelete) == 4
+           WHEN              "22"
+             CALL              MainDelete
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainChange) == 4
+           WHEN              "23"
+             CALL              MainChange
+             RETURN
+         %endif
+
+           WHEN              "24"
+             CALL              SaveMode
+             RETURN
+           WHEN              "25"
+             CALL              MainCancel
+             RETURN
+           WHEN              "40"
+             CALL              MainHelp
+             RETURN
+
+         %IF PDECLARED(MainHelpContents) == 4
+           WHEN              "41"
+             CALL              MainHelpContents
+             RETURN
+         %EndIF
+
+         %IF PDECLARED(MainHelpSearch) == 4
+           WHEN              "42"
+             CALL              MainHelpSearch
+             RETURN
+         %EndIF
+
+         %IF PDECLARED(MainAboutChiron) == 4
+            WHEN              "44"
+             CALL              MainAboutChiron
+             RETURN
+         %EndIF
+
+            WHEN              "45"
+             CALL              MainAbout
+             RETURN
+
+         %IF PDECLARED(MainFirst) == 4
+           WHEN              "50"
+             CALL              MainFirst
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainPrevious) == 4
+           WHEN              "51"
+             CALL              MainPrevious
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainFind) == 4
+           WHEN              "52"
+             CALL              MainFind
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainNext) == 4
+           WHEN              "53"
+             CALL              MainNext
+             RETURN
+         %endif
+
+         %IF PDECLARED(MainLast) == 4
+           WHEN              "54"
+             CALL              MainLast
+             RETURN
+         %endif
+
+         %IF PDECLARED(ViewComments) == 4
+           WHEN              "71"
+             CALL              ViewComments
+             RETURN
+         %EndIF
+
+           DEFAULT
+           ENDSELECT
+           return

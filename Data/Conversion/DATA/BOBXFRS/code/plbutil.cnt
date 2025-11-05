@@ -1,0 +1,36 @@
+:Base PLBUTIL.HLP
+:Title PL/B Utilities User's Guide
+1 Utilities
+2 Distribution=distribution
+2 BLOKEDIT=blokedit
+2 BUILD=build
+2 CHAIN=chain
+2 GETKEY=getkey
+2 HEXDUMP=hexdump
+2 MAKEDEF=makedef
+2 MAKEMFD=makemfd
+2 OBJMATCH=objmatch
+2 REFORMAT=reformat
+2 SETDRIVE=setdrive
+2 SETUPPER=setupper
+2 SORTSEQ=sortseq
+2 SUNAAMDX=sunaamdx
+2 SUNADMIN=sunadmin
+2 SUNADXNT=sunaamdx
+2 SUNDBUG=sundbug
+2 SUNDUMP=sundump
+2 SUNEDIT=sunedit
+2 SUNFM=sunfm
+2 SUNIDXNT=sunindex
+2 SUNINDEX=sunindex
+2 SUNLIST=sunlist
+2 SUNSCAN=sunscan
+2 SUNSORT=sunsort
+2 SUNSRTNT=sunsort
+2 TESTCRT=testcrt
+2 TXTMATCH=txtmatch
+1 Other PL/B References
+2 PL/B Language=contents_plb@plb.hlp
+2 PL/B Runtime and Errors=contents_plbrun@plbrun.hlp
+2 PL/B Designer=contents_plbdsign@plbdsign.hlp
+2 PL/B Utilities=contents_plbutil@plbutil.hlp

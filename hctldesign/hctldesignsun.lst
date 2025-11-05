@@ -1,0 +1,235 @@
+
+
+
+PAGE    1      HCTLDESIGNSUN.PLS IDE                                                                          02-21-18 16:15:46
+                                         
+
+PL/B COMPILER   Version 10.0Ac  16 Feb 2018 
+COMMAND LINE WAS: PLBCMP "HCTLDESIGNSUN.PLS",".\HCTLDESIGNSUN.PLC",,c:\sunbelt\plbwin~1.100\code\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+PLBCMP_OPT=-ZG
+
+    4.    INCLUDE  A: c:\sunbelt\plbwin.100a\code\plbequ.inc
+    5.    INCLUDE  B: c:\sunbelt\plbwin.100a\code\plbmeth.inc
+    9.    INCLUDE  C: hctldesignsun1.pwf
+   70. C                                      RETURN 
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+   10.    INCLUDE  D: hctldesignsun2.pwf
+
+   Output: .\hctldesignsun.plc                                                                                                                                                                                                                                       
+     12258 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 16:15:46 16:15:46
+  00033B6C DATA;  000007B0  CODE;   SYMBOL TABLE USAGE:  UDA:   3% EXE:   0%
+
+
+
+PAGE    2      HCTLDESIGNSUN.PLS IDE                                                                          02-21-18 16:15:46
+                                         
+
+ C#Designer_Load                           X       25. C*
+ C#EventChar                               D       17. C*
+ C#EventMod                                F       18. C*
+ C#EventObjId                              F       16. C*
+ C#EventResult                             F       15. C*
+ C#EventType                               F       14. C*
+#S                                         X       75. C*    20. C
+ D#Designer_Load                           X       18. D*
+ D#EventChar                               D       10. D*
+ D#EventMod                                F       11. D*
+ D#EventObjId                              F        9. D*
+ D#EventResult                             F        8. D*
+ D#EventType                               F        7. D*
+#S                                         X       45. D*    13. D
+"                                          D       30. D*   152.     153.     244.     259.     270.     275.     280.  
+                                                        *   285.     290.     295.     300.     305.  
+" 10                                       D       62.  *
+"'                                         D      195.  *   329.     344.  
+".                                         D      107.  *
+".snip                                     D      102.  *
+".snip8                                    D      172.  *
+"/                                         D       64.  *
+";   id:                                   D      278.  *
+";   metaKey:                              D      293.  *
+";   pageX:                                D      283.  *
+";   pageY:                                D      288.  *
+";   target:                               D      303.  *
+";   which:                                D      298.  *
+"= '                                       D      344.  *
+"@pdf:                                     D      259.  *
+"AddString                                 D      148.  *
+"Column0                                   D       28. C*
+"DeleteAllContents                         D       72.  *
+"DeleteAllItems                            D      135.  *   161.  
+"Error Find Node:                          D      349.  *
+"Error Move Node:                          D      346.  *
+"FILTER                                    D      331.  *
+"FindNode                                  D      330.  *
+"GetInfo                                   D       83.  *
+"GetText                                   D      164.  *   343.  
+"GetUnicode                                D      120.  *   220.  
+"HtmlControl Template '                    D      195.  *
+"HtmlControl Test                          D      151.  *
+"InsertColumn                              D       75.  *    76.      77.      78.      79.  
+"InsertColumnEX                            D       74.  *
+"InsertColumnEx                            D       28. C*    73.  
+"InsertItemEx                              D      272.  *
+"LoadJson                                  D      268.  *
+"MakePict                                  D      253.  *
+"MoveToNode                                D      337.  *
+"POSITION                                  D      332.  *   337.  
+"ResetContent                              D      139.  *
+"SetItemText                               D      277.  *   282.     287.     292.     297.     302.  
+
+
+
+PAGE    3      HCTLDESIGNSUN.PLS IDE                                                                          02-21-18 16:15:46
+                                         
+
+"SetUTF8Convert                            D      116.  *   118.     185.     187.     216.     218.  
+"SetUnicode                                D      190.  *
+"Snippet uses 'data-plbevent'!             D      235.  *
+"data-plbevent=                            D      232.  *
+"htmlsnippets                              D      165.  *
+"htmlsnippets\*.snip*                      D      138.  *
+"id                                        D       74.  *   276.  
+"label='                                   D      329.  *
+"metaKey                                   D       77.  *   291.  
+"pageX                                     D       75.  *   281.  
+"pageY                                     D       76.  *   286.  
+"snip                                      D      112.  *
+"snip8                                     D      114.  *
+"target                                    D      301.  *
+"targetId                                  D       79.  *
+"type                                      D       73.  *   271.  
+"type:                                     D      273.  *
+"which                                     D       78.  *   296.  
+"|                                         D      143.  *
+"|F                                        D      141.  *
+$LOENGLISH                                 E    *********   254.  
+$PIXELS                                    E    *********   258.  
+0                                          F    *********   176.  
+00!FetchJsonStringValue                    X      314.  *    FUNCTION
+00%dReturn                                 D^     317.  *   354.  
+00%nvar                                    F      323.  *   330.     333.     337.     339.     349.  
+00%pXData                                  O^3B   315.  *   330.     337.     343.  
+00%x200                                    D      321.  *
+00%xError                                  D      322.  *
+00%xLabel                                  D      316.  *   329.     344.  
+00%xString                                 D      320.  *   343.     344.     352.     354.  
+1                                          F    *********    88.     174.  
+10                                         F      257.  *
+30                                         F      256.  *
+6                                          F    *********   189.  
+8                                          F    *********   121.     221.  
+Bottom                                     F       37.  *   255.     256.     261.  
+Button1                                    O 01     2. C*
+Button2                                    O 01     3. C*
+Button3                                    O 01     8. C*    87.  
+Button4                                    O 01     9. C*
+Button5                                    O 01    11. C*
+Button6                                    O 01    12. C*
+ButtonFocus                                O 01     3. D*
+Change_ComboBox1                           X       44. C*
+Change_ListView1                           X       72. C*
+CheckBox1                                  O 02    13. C*   109.     179.     209.  
+Click_Button1                              X       36. C*
+Click_Button2                              X       40. C*
+Click_Button3                              X       48. C*
+Click_Button4                              X       52. C*
+Click_Button5                              X       60. C*
+Click_Button6                              X       64. C*
+
+
+
+PAGE    4      HCTLDESIGNSUN.PLS IDE                                                                          02-21-18 16:15:46
+                                         
+
+Click_ButtonFocus                          X       34. D*
+Click_ComboBox1                            X       56. C*
+Click_HideWin                              X       42. D*
+Click_PrtBtn                               X       38. D*
+Client                                     O 39    12.  *    83.     116.     118.     185.     187.     216.     218.  
+CliInfo                                    D       13.  *    83.      84.  
+Close_Form1                                X       68. C*
+Close_Form2                                X       29. D*
+ComboBox1                                  O 1F     5. C*    93.     139.     148.     155.     156.     164.  
+CurIndex                                   F       21.  *   272.     277.     282.     287.     292.     297.     302.  
+D1                                         D       33.  *   145.  
+DataUni                                    D       16.  *   120.     121.     189.     190.     220.     221.  
+DisableIt                                  X      204.  *    61. C
+DX                                         D      265.  *   273.     278.     283.     288.     293.     298.     303.  
+                                                        *   306.  
+EditForm                                   O 24     9.  *    71.  
+EditText1                                  O 06     4. C*   111.     117.     120.     134.     140.     182.     186.  
+                                                        *   190.     212.     217.     220.  
+EditText2                                  O 06    10. C*   101.     126.     153.     167.     252.  
+EnableIt                                   X      200.  *    65. C
+FetchJsonStringValue                       X      314.  *   271.     276.     281.     286.     291.     296.     301.  
+FileName                                   D       32.  *   143.     145.     164.     165.  
+FocusTesting                               X      247.  *    35. D
+Form1                                      O 1E     1. C*
+Form2                                      O 1E     1. D*    90.     151.     196.     227.     243.     254.     258.  
+FullHtml                                   D       15.  *   212.     217.     221.     226.     232.     234.  
+HideTestWin                                X      242.  *    31. D    43. D
+HideWin                                    O 01     5. D*
+HtmlCtl                                    O 3C     7.  *    30. D    68.      69.     152.     201.     205.     211.  
+                                                        *   214.     226.     253.     255.  
+HtmlEvCtl                                  X      267.  *    69.  
+HtmlForm                                   O 24    10.  *    67.  
+HtmlPageBlank                              D       46.  *   134.     140.  
+Info                                       D       22.  *   270.     271.     272.     273.     275.     276.     277.  
+                                                        *   278.     280.     281.     282.     283.     285.     286.  
+                                                        *   287.     288.     290.     291.     292.     293.     295.  
+                                                        *   296.     297.     298.     300.     301.     302.     303.  
+                                                        *   305.  
+IsUtf8                                     F       39.  *   109.     110.     174.     176.     179.     181.     209.  
+                                                        *   210.  
+IsWin                                      F       38.  *    88.     115.     184.     215.  
+JsonData                                   D       17.  *    69.     268.  
+JsonEvent                                  O 3B    18.  *   268.     271.     276.     281.     286.     291.     296.  
+                                                        *   301.  
+LabelText1                                 O 32     6. C*
+ListView1                                  O 17     7. C*    28. C    72.      73.      74.      75.      76.      77.  
+                                                        *    78.      79.     135.     161.     272.     277.     282.  
+                                                        *   287.     292.     297.     302.  
+LoadTemplate                               X      160.  *    45. C    57. C
+MinusOne                                   F       27.  *   155.  
+MOVE_FIRST_CHILD                           E    *********   337.  
+NULL                                       D       42.  *   155.  
+Panel1                                     O 2F     2. D*    68.  
+
+
+
+PAGE    5      HCTLDESIGNSUN.PLS IDE                                                                          02-21-18 16:15:46
+                                         
+
+PathChar                                   D       40.  *    64.     165.  
+PrintIt                                    X      251.  *    39. D
+PrtBtn                                     O 01     4. D*    86.  
+PrtFile                                    p       35.  *   259.     260.     262.  
+PrtPict                                    O 0B    34.  *   253.     261.  
+Rep7F                                      D       30.  *
+ResetIt                                    X      133.  *    53. C
+Result                                     F       20.  *   162.     163.     164.  
+Right                                      F       36.  *   255.     257.     261.  
+S$CMDLIN                                   D%       0.  *    61.      62.     195.     196.     329.     331.     344.  
+                                                        *   346.     349.  
+S$CMPVER$                                  E        0.  *
+S$ERROR$                                   D%       0.  *
+S$RETVAL                                   F%       0.  *
+SaveIt                                     X       99.  *    49. C
+Seq                                        F       28.  *   129.     169.  
+SnipData                                   D       24.  *   100.     111.     117.     121.     129.     169.     182.  
+                                                        *   186.     189.  
+SnipFile                                   f       26.  *   127.     128.     129.     130.     168.     169.     170.  
+SnipFileName                               D       25.  *   101.     102.     104.     106.     107.     112.     114.  
+                                                        *   125.     126.     127.     145.     146.     148.     165.  
+                                                        *   166.     167.     168.     172.     195.     252.     260.  
+snipNames                                  D       53.  *   138.     141.     143.  
+START_DOCUMENT_NODE                        E    *********   332.  
+StatText1                                  O 10     6. D*   235.     237.     244.     306.  
+TemplateReset                              X      137.  *    81.  
+Test                                       X      208.  *    41. C
+Zero                                       F       29.  *   128.  
+0                                          I       68.  *    68.      90.     110.     115.     162.     181.     184.  
+                                                        *   205.     210.     214.     215.     243.     333.     339.  
+

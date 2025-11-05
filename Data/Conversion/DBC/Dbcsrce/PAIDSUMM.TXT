@@ -1,0 +1,59 @@
+.  PAIDSUMM - PRINT A REPORT SHOWING TOTAL PAYMENTS BY MONTH AND TOTALS
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   APPAIDFD
+. 
+APPAIDFL IFILE
+PAIDNAME INIT      "PAIDBYDT/ISI"
+. 
+TESTMON  DIM       2
+. 
+FIRSTMON DIM       2
+. 
+MONTHTOT FORM      9.2
+. 
+RPTTOTS  FORM      9.2
+. 
+. 
+         DISPLAY   *ES,*P01:01,*HON,"PRINT A/P PAYMENT HISTORY TOTALS"
+. 
+         OPEN      APPAIDFL,PAIDNAME
+         MOVE      "1" TO FIRSTIME
+. 
+         PRINT     *F,*35,"AMERICAN PRECISION COMPONENTS - A/P PAYMENTS ":
+                   "SUMMARY REPORT ",*100,"AS OF ",TODAY
+. 
+         PRINT     *C,*L,*L
+. 
+READLOOP INCLUDE   APPAIDKS
+. 
+         GOTO      EOJ  IF  OVER
+. 
+         CMATCH    "1" TO FIRSTIME
+         GOTO      BYPASS IF NOT EQUAL
+. 
+         MOVE      TPAIDDT TO FIRSTMON
+         MOVE      TPAIDDT TO TESTMON
+         MOVE      " "     TO FIRSTIME
+. 
+BYPASS   MATCH     TESTMON TO TPAIDDT
+         CALL      MONTHBRK IF NOT EQUAL
+. 
+         ADD       TAMT TO MONTHTOT
+         ADD       TAMT TO RPTTOTS
+         GOTO      READLOOP
+. 
+MONTHBRK PRINT     " "
+         PRINT     *1,"MONTH  ",TESTMON,"  TOTAL  ",*40,MONTHTOT
+         MOVE      TAMT    TO MONTHTOT
+         ADD       TAMT    TO RPTTOTS
+         MOVE      TPAIDDT TO TESTMON
+         GOTO      READLOOP
+. 
+EOJ      PRINT     " "
+         PRINT     "------------------------------------------------------"
+         PRINT     " "
+         PRINT     "REPORT TOTAL   ",*40,RPTTOTS
+. 
+         CHAIN     "APMENU1"

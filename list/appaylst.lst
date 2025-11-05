@@ -1,0 +1,33 @@
+
+
+
+PAGE    1      appaylst                                                                                       02-11-19 11:35:32
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP appaylst -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    2.    INCLUDE  A: mscbrag.txt
+    6.    INCLUDE  B: common.pls
+    8.    INCLUDE  C: appaidfd.pls
+   10.    INCLUDE  D: apmastfd.pls
+   31.    INCLUDE  E: apcalndr.pls
+   33.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   37.    INCLUDE  G: callerr2.inc
+  126.    INCLUDE  H: apmastrd.pls
+  128.    INCLUDE  I: apmastks.pls
+  137.    INCLUDE  J: appaidrd.pls
+  148.    INCLUDE  K: apmastrd.pls
+  163.    INCLUDE  L: apmastks.pls
+  175.    INCLUDE  M: appaidrd.pls
+  181.    INCLUDE  N: appaidks.pls
+  290.    INCLUDE  O: apdates.pls
+
+   Output: c:\apc\plc\appaylst.plc                                                                                                                                                                                                                                   
+       621 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:32 11:35:32
+  00001CCC DATA;  0000063A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

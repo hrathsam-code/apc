@@ -1,0 +1,34 @@
+
+
+
+PAGE    1      aplovr20                                                                                       02-11-19 11:35:28
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP aplovr20 -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.pls
+    6.    INCLUDE  C: apmastfd.pls
+    7.    INCLUDE  D: aptranfd.pls
+   50.    INCLUDE  E: apcalndr.pls
+   63.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   67.    INCLUDE  G: callerr2.inc
+  108.    INCLUDE  H: apmasthr.pls
+  125.    INCLUDE  I: apmasthr.pls
+  145.    INCLUDE  J: aptranrd.pls
+  156.    INCLUDE  K: aptranks.pls
+  169.    INCLUDE  L: apmastrd.pls
+  180.    INCLUDE  M: apmastrd.pls
+  232.    INCLUDE  N: apdates.pls
+  294.    INCLUDE  O: apmastvk.pls
+  312.    INCLUDE  P: getdate.pls
+
+   Output: c:\apc\plc\aplovr20.plc                                                                                                                                                                                                                                   
+       709 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:28 11:35:28
+  00001EAC DATA;  00000878  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

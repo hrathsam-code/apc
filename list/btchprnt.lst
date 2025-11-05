@@ -1,0 +1,38 @@
+
+
+
+PAGE    1      btchprnt                                                                                       02-11-19 11:35:42
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP btchprnt -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    5.    INCLUDE  A: mscbrag.txt
+    8.    INCLUDE  B: common.txt
+   10.    INCLUDE  C: batchfd2.txt
+   12.    INCLUDE  D: custmast.txt
+   83.    INCLUDE  E: dateschk.txt
+  204.    INCLUDE  F: batchio.txt
+  205.    INCLUDE  G: stdioerr.txt
+  206.    INCLUDE  H: stdparer.txt
+  207.    INCLUDE  I: stdfmter.txt
+  208.    INCLUDE  J: stdrange.txt
+  209.    INCLUDE  K: custio.txt
+  230.                                BTCHBRK  PRINT     *1," ",*FLUSH 
+                                                                      *WARNING*
+Warning: I/O control not implemented.
+  273.                                         PRINT     " ",*FLUSH   (THIS FLUSHES OUT THE FULL 3 COLUMN LINE)
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  287.                                         PRINT     *1,CUSTNAME,*32,CHECKAMT,*FLUSH;
+                                                                                        *WARNING*
+Warning: I/O control not implemented.
+  296.                                         PRINT     *45,CUSTNAME,*77,CHECKAMT,*FLUSH;
+                                                                                         *WARNING*
+Warning: I/O control not implemented.
+
+   Output: c:\apc\plc\btchprnt.plc                                                                                                                                                                                                                                   
+       949 LINES;      0 ERRORS;      4 WARNINGS; Start/Stop: 11:35:42 11:35:42
+  00002CF8 DATA;  00000B30  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

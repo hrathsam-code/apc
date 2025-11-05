@@ -1,0 +1,38 @@
+
+
+
+PAGE    1      apmanchk                                                                                       02-11-19 11:35:29
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apmanchk -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    3.    INCLUDE  B: common.pls
+    5.    INCLUDE  C: apmastfd.pls
+    7.    INCLUDE  D: aptranfd.pls
+   65.    INCLUDE  E: callerr1.inc
+   12. E                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   69.    INCLUDE  F: callerr2.inc
+  108.    INCLUDE  G: apmasthr.pls
+  121.    INCLUDE  H: apmasthu.pls
+  144.    INCLUDE  I: apmastrd.pls
+  212.    INCLUDE  J: aptranrd.pls
+  237.    INCLUDE  K: appaidwt.pls
+  242.    INCLUDE  L: aptranup.pls
+  286.    INCLUDE  M: apmastup.pls
+  313.    INCLUDE  N: apmasthr.pls
+  318.    INCLUDE  O: apmasthu.pls
+  348.    INCLUDE  P: aptranks.pls
+  356.    INCLUDE  Q: aptranup.pls
+  389.    INCLUDE  R: apmastvk.pls
+  390.    INCLUDE  S: aptranbk.pls
+  391.    INCLUDE  T: getdate.pls
+
+   Output: c:\apc\plc\apmanchk.plc                                                                                                                                                                                                                                   
+       734 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:29 11:35:29
+  00002620 DATA;  00000BDC  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,285 @@
+Patch SPWC860A contains the following changes:
+ 
+Date:  02-05-2002
+ 
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+         - Make a note for a CLOCK INI operation to identify that when
+           this PL/B instruction is executed using PLBSERVE, then the
+           operation will search for a keyword in the PLBCLIENT.INI file
+           before looking in the PLBSERVE.INI file.  This operation
+           allows a PL/B program to retrieve INI keywords from a client
+           workstation.
+ 
+         - When using WINAPI in a PLBCLIENT/PLBSERVE application, the
+           'pDIM' parameter type should be used in the PROFILE when 
+           remote data is to be retrieved from the client workstation
+           into a function parameter.
+ 
+         - In release 8.6, the DATALIST object was changed to allow 
+           multiple datalist records to be loaded in a single operation.
+           An embedded 0x7F character in data being loaded into a datalist
+           is identified as a logical record terminator.  The detection
+           of the 0x7F is a default action by the runtimes for the 
+           INSERTITEM, SETITEM, AddString method, and InsertString method.  
+           These operations for loading data into a DATALIST oject can be
+           used to provide improved loading times when using
+           PLBCLIENT/PLBSERVE.  If an application does not want the 0x7F
+           to be used as a logical record terminator, then the SETMODE
+           *USE7F keyword can be used to enable and disable this capability.
+ 
+         - In release 8.6, the COMBOBOX object was changed to allow
+           multiple data items to be loaded in a single operation.
+           An embedded 0x7F character in data being loaded into a combobox
+           is identified as a logical item record terminator.  The detection
+           of the 0x7F is a default action by the runtimes for the
+           INSERTITEM and SETITEM statements.  The operation of these
+           statements for loading data into a COMBOBOX oject can be used
+           to provide improved loading times when using PLBCLIENT/PLBSERVE. 
+           If an application does not want the 0x7F to be used as a 
+           logical item delimitor, then the SETMODE *USE7F keyword can be
+           used to enable and disable this capability.
+ 
+*==============================================================================
+These files have been changed as follows:
+ 
+PLBWIN   - Corrected a problem when using record locking with LOCKAUTO
+PLB386     and SINGLE modes. This problem is that a READ operation
+UNIX       was able to access a record that was locked by another task
+           for a given sequence of operations as follows:
+ 
+               Program1     Program2      Result      Comment
+ 
+           1.  READ FIRST                 Successful
+           2.               READ SECOND   Successful
+           3.               READ FIRST    Locked      Clears SECOND lock
+           4.  READ SECOND                Successful
+           5.               READ SECOND   ????        Should give Locked
+ 
+           The correction for this problem is that the Step (5.)
+           'READ SECOND' operation should fail with a Locked state.
+ 
+         - Modified expression handling to support compiler changes 
+           required for a unindexed array reference of a member that
+           was referenced as a variably index RECORD array reference
+           in a CALL USING list. The correction for this problem requires
+           both a runtime and compiler modification.  Please see PLBCMP
+           for details.
+         
+         - Corrected a problem where an APPEND statement was setting the EOS
+           flag when the source operand was NULL.
+ 
+PLBWIN   - Modified PLBWIN runtime to allow a new command line option as
+           '-mvNNNN'.  The value NNNN specifies a byte value to be allocated
+           as the maximum virtual memory for a PL/B program.  If this option
+           is not specified, then the maximum default virtual memory
+           allocated for a PL/B program will be 20MB for a normal PLBWIN
+           program task and 4MB for an Automation server thread task.
+ 
+           Example: (10MB Virtural program space)
+ 
+                   plbwin -mv10240000 program     
+ 
+         - Added a new program control to the GETMODE and SETMODE 
+           statements.  The new control is named '*USE7F={dnum|nvar|ivar}'.
+           This keyword can be used to enable or disable the data
+           detection and use of a 0x7F character while loading a 
+           DATALIST or COMBOBOX object.  The default runtime actions
+           are to use the 0x7F character as a record/item delimitor while
+           loading data via INSERTITEM, SETITEM, and supported object
+           methods (AddString/InsertString).  If the *USE7F value is
+           set to zero using the SETMODE, then the 0x7F character is
+           not used as a delimitor for any of these operations.
+ 
+         - Corrected a GPF error that would occur when the following 
+           instruction sequence was executed.
+ 
+                   X    COLLECTION
+                        SETPROP    X,VISIBLE=1
+ 
+         - Corrected problem where a wrong printer font could be
+           used when printing from a PRINT PREVIEW window and a
+           print dialog was used after the PRINT button was clicked.
+ 
+         - Modified to correct a problem where the number of copies
+           specified in a print dialog was not being used when
+           performing a PRINT PREVIEW.  Also, these changes cause
+           the number of copies for the printed output to be
+           determined by the program *COPIES setting times the
+           printer dialog number of copies selection.
+ 
+         - Corrected a problem where invalid print positioning would
+           occur when a PRTOPEN was specified to cause both direct
+           printing and the creation of a spool file to be performed
+           at the same time.  It is not possible to perform these
+           operations simultaneously.  Therefore, the runtime correction 
+           is to cause the direct printing to be delayed until the PRTCLOSE
+           operation.  At that point, the newly created spool file is
+           used to perform the direct printing.
+ 
+         - Corrected a problem where the PRINT PREVIEW ZOOM-IN action 
+           did not work as expected.  This problem could occur when 
+           the display monitor resolution was set high ( 1024x768 or higher )
+           and a printed page was viewed in landscape mode.
+ 
+         - Corrected a problem where a DISABLEITEM statement did not
+           work properly when processing a COLLECTION object that 
+           included another nested COLLECTION object.  This problem 
+           could affect any PL/B statement that processed a COLLECTION
+           of this form.
+ 
+         - Corrected a problem where a PL/B program could cause a GPF
+           error after it was CHAINed 'to' and the program that was CHAINed
+           'from' contained VARIANT objects that were created.
+ 
+         - Corrected a problem where a 'GETINFO EXCEPTION' instruction
+           would not return all of the exception data to the user program.
+ 
+         - Corrected a problem where the PLBWIN Automation Server could
+           cause a VB CLient program to give an 'Invalid memory access
+           error!'.
+ 
+         - Corrected a problem where the CAUSEVALID property did not work
+           for an ActiveX CONTROL object or CONTAINER object.
+           
+         - Corrected a problem where the inclusion of '&&' in a string
+           for a STATTEXT object was being displayed as two characters.
+           This correction now caused the '&&' to be displayed as a 
+           single character.
+ 
+         - Corrected a problem where a SETPROP of a TOOLTIP property to 
+           a NULL string was not removing the tooltip.  A tooltip is now
+           removed in this case.
+ 
+PLBWIN   - Corrected a problem where a SHUTDOWN instruction did not
+PLBCON     execute a specified command.
+ 
+PLBCMP   - Modified GETMODE/SETMODE statements to support a new keyword
+           named '*USE7F={dnum|nvar|ivar}'.  See description above for
+           more details.
+ 
+         - Corrected problem where a RECORD member reference used
+           in a CALC statement could give an error if the member
+           name was the same in the main members and also a
+           nested RECORD.
+ 
+         - Corrected problem where invalid pcode was generated for
+           a CALLS when the calling DIM variable was a pointer.  Execution
+           of a program using this syntax form would cause a GPF error.
+ 
+         - Corrected a problem for a RECORD ARRAY member reference that
+           was an array which was used in a CALL USING list.  This
+           problem was causing a program GPF error to occur.  The
+           program syntax to cause this problem is described as follows:
+ 
+           Example:
+ 
+                   crash   record  (5)
+                   numbers         integer 4(5)
+                           recordend
+                   index   integer         4
+ 
+                           set  index
+                           move "42" to crash(index).numbers(1)
+                   .
+                   . GPF occurred on the following CALL operation
+                   .
+                           call crashme using crash(index).numbers
+ 
+                           loop
+                             waitevent
+                           repeat
+ 
+                   #array  integer         ^(5)
+                   crashme lroutine #array
+                           display #array(1)
+                           return
+ 
+         - Corrected a problem where the compiler was not allowing the
+           CAUSEVALID property to be specified for a CONTROL object.
+ 
+PLBDSIGN - The 'Start TABID Renumbering' has been enhanced where a dialog
+           is now opened that lists the object names in the tab id order.
+           A user can modify the values and closing the dialog will stop
+           the tab id renumbering tool.
+ 
+         - Corrected a problem for the 8.6 release where the designer
+           did not load the properties associated with a CONTROL
+           object in a PLF form.
+ 
+         - Corrected a problem when a form was loaded where invalid code
+           was generated for an event even if the form already had code.
+ 
+         - Corrected a problem where the code window status bar was
+           not properly resizing when the code window size changed.
+ 
+         - Corrected a problem where the full edit command 'Goto Line'
+           did not work if the resulting line was an event divider.
+ 
+         - Corrected a problem for full edit mode as follows.  If
+           several characters were selected and a user started typing,
+           the normal behavior should delete the selected text before
+           a new character is inserted.  The problem in the 8.6 designer
+           is that if there is an empty event above the selected text,
+           when the user hits a character, the cursor jumps and the
+           text is unselected before the new character is inserted.
+           The character is located to an indeterminate location in the
+           code.  This erratic behavior has been fixed.
+ 
+         - Corrected a problem in non-full edit mode where it was not
+           possible to delete all of the code for an event.
+ 
+         - Corrected a problem that would cause a GPF error for the
+           following sequence of operations:
+ 
+                a. Click New Form
+                b. Double click on button
+                c. Selecting the first byte in full code edit window
+                   caused a GPF.
+ 
+         - Corrected a full code edit status bar problem for the
+           'COL:' value where the column counter did not always give
+           valid values.
+ 
+         - Corrected a full code edit problem where indeterminate
+           actions would occur if the object name was prefixed by
+           the same characters as the form name.  Example as follows:
+ 
+               FORM NAME  :  form001
+               OBJECT NAME:  form001edittext001
+ 
+         - Corrected a problem for non-full edit mode where a GPF
+           would occur if code was added for a newly created object.
+           This problem occurred because an event was not set initially.
+ 
+         - Corrected a GPF error that result when the Tools 'Start
+           TABID Renumbering' menu item was selected with no form
+           currently loaded.
+ 
+         - Corrected a problem where the 'Start TABID Renumbering'
+           operation would hang if a form had no objects.
+
+         - Corrected a CTRL-V (^V) paste problem for the Over stike mode.
+           The problem is that the ^V operation caused data at the
+           cursor position to be overwritten with the pasted text
+           even when nothing was highlighted.  Nothing should be
+           overwritten unless highlighted text exists at the cursor
+           position.
+ 
+         - Correct various other CTRL-V (^V) pasting problems.
+ 
+UTILITY  - Corrected a problem in the SUNAAMDX/SUNADXNT utilities where 
+           a GPF error would occur if a path was specified that contained
+           more than 30 characters.
+
+chain    - Corrected a problem caused in 8.6 where sometimes it was not
+suned      to open a file that had more than 5 characters in the name.
+sunlist
+sunplbws
+ 
+SUNFHSYS - Modified the ERASE and RENAME statement processing to
+           support the PLB_OPENUSEIP keyword to force redirected
+           operations to a specified file manager.
+ 
+         - Modified to correct a record locking problem.

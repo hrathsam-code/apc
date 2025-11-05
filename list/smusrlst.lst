@@ -1,0 +1,24 @@
+
+
+
+PAGE    1      smusrlst                                                                                       02-11-19 11:36:06
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP smusrlst -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    6.    INCLUDE  A: ncommon.txt
+   61.    INCLUDE  B: splopnfd.txt
+   14. B                              DBOX     DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   74.                                DA       DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+  133.    INCLUDE  C: splopnpr.txt
+
+   Output: c:\apc\plc\smusrlst.plc                                                                                                                                                                                                                                   
+       380 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:36:06 11:36:06
+  000018B8 DATA;  00000558  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

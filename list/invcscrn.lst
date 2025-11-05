@@ -1,0 +1,24 @@
+
+
+
+PAGE    1      invcscrn                                                                                       02-11-19 11:35:46
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP invcscrn -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   12.    INCLUDE  A: common.txt
+   49.    INCLUDE  B: rcvbles.txt
+   57.    INCLUDE  C: custmast.txt
+   74.    INCLUDE  D: invctabl.txt
+  299.    INCLUDE  E: custio.txt
+  301.    INCLUDE  F: rcvblsio.txt
+  308.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\invcscrn.plc                                                                                                                                                                                                                                   
+       632 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:46 11:35:46
+  00002080 DATA;  0000063A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

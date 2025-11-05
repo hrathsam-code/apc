@@ -1,0 +1,262 @@
+         INC       COMMON
+         INC       APMASTFD
+         INC       APTRANFD
+APTRANFL IFILE     KEYL=19,UNCOMPRESSED
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+DESC     DIM       20
+AMT      FORM      6.2
+LDDAY    DIM       8
+LINES    FORM      "55"
+PAGE     FORM      3
+MON      DIM       2
+DAY      DIM       2
+YEAR     DIM       2
+T90      FORM      7.2
+T60      FORM      7.2
+T30      FORM      7.2
+TCURR    FORM      7.2
+CMON     FORM      3
+TMON2    FORM      3
+TOT      FORM      7.2
+SVACC    DIM       6
+OPTION   FORM      1
+FTFLG    INIT      " "
+OVFLG    INIT      " "
+REPLY    DIM       1
+DATEDESC DIM       15
+DATERROR DIM       1
+MM DIM 2
+DD DIM 2
+YY DIM 2
+FM FORM 2
+FD FORM 2
+FY FORM 2
+BKUPFLG  DIM       1
+DATFLG   DIM       1
+REPTTOTS FORM      8.2
+CNAME    DIM       25
+. 
+. NEW FILELE  3/19/83
+. 
+APADJUST FILE
+ADJUST   FORM      5.2
+REC0     FORM      "00"
+. 
+         INCLUDE   APCALNDR
+. 
++ 
+. 
+         DISPLAY   *ES,*P01:01,*HON,"PRINT A/P SYSTEM TRANSACTION LISTING"
+         OPEN      APMASTER,"APMASTER"
+         OPEN      APTRANFL,"APTRANFL"
+A0       DISPLAY   *P1:3,*HON,"OPTIONS ARE        1) LIST (NO AGING)":
+                   *P1:4,"                   2) LIST AND AGE":
+                   *P1:8,"IF YOU HAVE JUST POSTED VENDOR INVOICES":
+                   *P1:9,"THIS PROGRAM  W I L L  LIST AND AGE"
+. 
+         CMATCH    "2" TO TESTONE
+         GOTO      KEYHOW IF NOT EQUAL
+         MOVE      TESTONE   TO  OPTION
+         GOTO      A0ABRCH
+. 
+KEYHOW   KEYIN     *P1:20,*HON,"ENTER SELECTION = ",OPTION
+. 
+A0ABRCH  BRANCH    OPTION OF A0A,A0A
+         GOTO      A0
+A0A      MOVE      "000000",ACCKEY
+         INC       APMASTHR
+         GOTO      A0A1 IF NOT OVER
+         BEEP
+         DISPLAY   *P1:23,*EF,"NO A/P MASTER FILE HEADER RECORD ON FILE":
+                   *W,*W,*W,*W,*W
+         RELEASE
+         CHAIN     "APMENU1"
+A0A1     CALL      APMASTVK
+         MOVE      NAME TO CNAME
+         COMPARE   "1",OPTION
+         GOTO      A0C IF EQUAL
+A0B      TRAPCLR   PARITY
+         INC       APMASTKS
+         GOTO      A0C IF OVER
+         MOVE      "0",TOTDUE
+         MOVE      "0",OVR90
+         MOVE      "0",OVR60
+         MOVE      "0",OVR30
+         MOVE      "0",CURR
+         MOVE      "0",MTDD
+         MOVE      "0",MTDC
+         MOVE      " ",ACCST
+         INC       APMASTUP
+         GOTO      A0B
+A0C      MOVE      "X",BKUPFLG
+. 
+         MOVE      TODAY TO MM
+         RESET     TODAY TO 4
+         MOVE      TODAY TO DD
+         RESET     TODAY TO 7
+         MOVE      TODAY TO YY
+         RESET     TODAY TO 1
+. 
+         MOVE      MM TO MON
+         MOVE      DD TO DAY
+         MOVE      YY TO YEAR
+. 
+         MOVE      MON TO TMON
+         MOVE      DAY TO TDAY
+         MOVE      YEAR TO TYEAR
+         CALL      CALCDATE
+         MOVE      TESTDATE TO CURRDATE
+         MOVE      "0000000000000000000",TRNKEY
+         INC       APTRANRD
+         GOTO      A0D IF NOT OVER
+         BEEP
+         DISPLAY   *P1:23,*EF,"NO HEADER ON TRANSACTION FILE",*W,*W,*W
+         RELEASE
+         CHAIN     "APMENU1"
+A0D      MATCH     TRNKEY TO TRNKEY2 
+         GOTO      APTRANBK IF NOT EQUAL
+A1       TRAPCLR   PARITY
+         INC       APTRANKS
+         GOTO      A1A IF NOT OVER
+         MOVE      "X",OVFLG
+         COMPARE   "2",OPTION
+         GOTO      A1B IF EQUAL
+         GOTO      EOJ
+. 
+. 
+A1A      MATCH     " ",FTFLG
+         GOTO      A2 IF EQUAL
+         MATCH     TACCN,SVACC
+         GOTO      A2 IF EQUAL
+         PRINT     *78,"----------"
+.....    PRINT     *78,TOT
+         MOVE      SVACC TO ACCKEY
+         INCLUDE   APMASTRD
+         PRINT     *7,NAME,*78,TOT
+         PRINT     " "
+         ADD       "3" TO LINES
+. 
+         ADD       TOT TO REPTTOTS
+         MOVE      "0",TOT
+         COMPARE   "2",OPTION
+         GOTO      A2 IF NOT EQUAL
+A1B      MATCH     "X",OVFLG
+         GOTO      A1B1 IF NOT EQUAL
+         MATCH     " ",FTFLG
+         GOTO      A1B1 IF NOT EQUAL
+         STOP
+A1B1     MOVE      SVACC TO ACCKEY
+         INC       APMASTRD
+         GOTO      A1B1A IF NOT OVER
+         BEEP
+         DISPLAY   *P1:23,*EF,"SECOND READ FOR ACCOUNT ##",ACCKEY," FAILED":
+                   *W,*W,*W,*W,*W
+         GOTO      A1B1              (MODIFIED FROM "STOP" ON 3/13/83)
+A1B1A    CALL      APMASTVK
+         MOVE      "0",TOTDUE
+         ADD       T90,TOTDUE
+         ADD       T60,TOTDUE
+         ADD       T30,TOTDUE
+         ADD       TCURR,TOTDUE
+         MOVE      T90,OVR90
+         MOVE      T60,OVR60
+         MOVE      T30,OVR30
+         MOVE      TCURR,CURR
+         MOVE      "1",ACCST
+         INC       APMASTUP
+         MATCH     "X",OVFLG
+         GOTO      EOJ IF EQUAL
+         MOVE      "0",T90
+         MOVE      "0",T60
+         MOVE      "0",T30
+         MOVE      "0",TCURR
+A2       COMPARE   "55",LINES
+         GOTO      A3 IF LESS
+         MOVE      "X",FTFLG
+         ADD       "1",PAGE
+.....        PRINT     *F,*48,CNAME
+.        9/30/89<REPLACE ABOVE 
+         PRINT     *F,*40,"AMERICAN PRECISION COMPONENTS"
+         PRINT     *46,"TRANSACTION LIST"
+         PRINT     *47,"FOR: ",MON,"/",DAY,"/",YEAR,*96,"PAGE: ",PAGE
+         PRINT     " "
+         PRINT     *7,"VENDOR",*23,"DATE",*38,"INVOICE",*56,"DESCRIPTION":
+                   *82,"AMOUNT"
+         PRINT     " "
+         MOVE      "9",LINES
+A3       PRINT     *7,TACCN,*21,TMON,"/",TDAY,"/",TYEAR,*37,TINVNO," ",TCNT:
+                   *52,TDESC,*79,TAMT
+         MOVE      TACCN,SVACC
+         ADD       "1",LINES
+         ADD       TAMT,TOT
+         COMPARE   "2",OPTION
+         GOTO      A1 IF NOT EQUAL
+. 
+. ......................................................
+. 4/11/83 ADD NEW LOGIC FOR AGEING ROUTINE - 
+. 
+. USE THE APDATES ROUTINE AND CALCULATE THE NUMBER OF DAYS BETWEEN
+. THE TRANSACTION DATE AND THE CURRENT DATE
+. 
+         CALL      CALCDATE
+         MOVE      CURRDATE  TO  WORKFLD
+         SUBTRACT  TESTDATE  FROM  WORKFLD
+. 
+. TEST IF OVER 90 DAYS OLD
+. 
+         COMPARE   "90" TO WORKFLD
+         GOTO      TEST60  IF  LESS
+. 
+         ADD       TAMT TO T90
+         GOTO      A1
+. 
+TEST60   COMPARE   "60" TO WORKFLD
+         GOTO      TEST30  IF  LESS
+. 
+         ADD       TAMT TO T60
+         GOTO      A1
+. 
+TEST30   COMPARE   "30" TO WORKFLD
+         GOTO      UPCURR  IF LESS
+. 
+         ADD       TAMT TO T30
+         GOTO      A1
+. 
+UPCURR   ADD       TAMT,TCURR
+         GOTO      A1
+. 
+         INCLUDE   APDATES
+. 
+EOJ      PRINT     *78,"----------"
+         MOVE      SVACC TO ACCKEY
+         INCLUDE   APMASTRD
+         PRINT     *7,NAME,*78,TOT
+         PRINT     " "
+...      OPEN      APADJUST,"APADJUST"
+...      READ      APADJUST,REC0;ADJUST
+...      ADD       ADJUST TO REPTTOTS
+         ADD       TOT    TO REPTTOTS
+. 
+         PRINT     *77,"------------"
+         PRINT     *1,"** REPORT TOTALS **",*77,REPTTOTS
+         PRINT     *F
+         CLOSE     APTRANFL
+. 
+. NOW UPDATE THE APCONTRLS FIGURE ON THE APMASTER HEADER RECORD!
+. 
+         MOVE      "000000" TO ACCKEY
+. 
+         INCLUDE   APMASTHR
+. 
+...      SUBTRACT  ADJUST   FROM REPTTOTS
+         MOVE      REPTTOTS TO   APCONTRL
+         MOVE      REPTTOTS TO   TOTDUE
+. 
+         INCLUDE   APMASTHU
+. 
+         CLOSE     APMASTER
+         RELEASE
+         CHAIN     "APMENU1"
+         INC       GETDATE
+         INC       APMASTVK
+         INC       APTRANBK

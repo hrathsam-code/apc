@@ -1,0 +1,138 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    OrderDetails.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    03-12-2019 At 12:22                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00186   05-11-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $OrderDetailsVAR
+$OrderDetailsVAR                 EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+OrderDetails                     RECORD
+CustomerID                       Like             Cust.CustomerID    //1 -   6                                 
+OrderNumber                      Form               10                 11 - 20       //7 -  16    Sales Order Number
+SeqMajor                         Form               7                  21 - 27       //17 -  23    Sequence Number of the Order
+SeqNo                            Form               7                  28 - 34       //24 -  30    Sequence Number of the Order
+Line                             Form               3                  35 - 37       //31 -  33    Detail Line Number
+Completed                        Form               1                  38 - 38       //34 -  34    //Completed 0 = No, 1 = Comp
+Status                           Form               1                  39 - 39       //35 -  35
+PartNumber                       Like             Parts.PartNumber    //36 -  55    Part Number (May Be Redefine
+EnteredBy                        Form               1                  56 - 56       //60 -  60    Recorded by (P)art (1) or (S
+QtyOrdered                       Form               9.4                57 - 70       //76 -  84    Quantity Ordered
+QtyAllocated                     Form               9.4                71 - 84       //85 -  93
+QtyShipped                       Form               9.4                85 - 98       //94 - 102    Quantity Shipped (Cumulative
+OrderedFrom                      Dim                2                  99 - 100      //103 - 104
+UnitPrice                        Form               5.4               101 - 110      //105 - 114    Unit Price
+UOM                              Like             Parts.UOM    //115 - 116    Unit of Sale               
+DatePosted                       Dim                8                 115 - 122      //378 - 385    Date Posted to file MMDDYYY
+ExtraCharges                     Form               5.2               123 - 130      //453 - 460    Extra Charges
+CancelFlag                       Form               1                 131 - 131      //488 - 488    Cancel Flag. 1 = Cancelled
+OrderType                        Form               1                 132 - 132      //579 - 579
+Comments                         Dim                100               133 - 232      //583 - 682
+TaxableAmt                       Form               9.2               233 - 244
+NonTaxableAmt                    Form               9.2               245 - 256
+ExtendedAmt                      Form               7.2               257 - 266
+Description1                     Like             Parts.Description1    //                                        
+Description2                     Like             Parts.Description2    //                                        
+TaxCode                          Like             Parts.TaxCode    //                                        
+ReplacementPartNumber            Like             Parts.PartNumber    //                                        
+ReplacementPart                  Form               1                 361 - 361
+AllowFractional                  Form               1                 362 - 362
+SerialNumbered                   Form               1                 363 - 363
+WarrantyIncluded                 Form               1                 364 - 364
+WarrantyTime                     Form               4                 365 - 368
+ServiceLife                      Form               4                 369 - 372
+Cost                             Form               7.2               373 - 382
+DiscountAmt                      Form               7.2               383 - 392
+KitItem                          Form               1                 393 - 393
+Size                             Like             Parts.Size    //                                        
+LotNumber                        Like             Parts.LotNumber    //                                        
+ItemType                         Like             Parts.ItemType    //                                        
+ItemOrderType                    Dim                1                 430 - 430      //Used to determine if the item is a kit/C
+Entity                           Dim                8                 431 - 438
+                                 RECORDEND
+;
+;======================================================================================;
+TempOrderDetails                    record          like   OrderDetails                    
+OrigOrderDetails                    record          like   OrderDetails                    
+SaveOrderDetails                    record          like   OrderDetails                    
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+OrderDetailsTXTNM                          INIT         "OrderDetails"
+OrderDetailsISI1NM                         INIT               "OrderDetails.ISI"
+OrderDetailsISI2NM                         INIT               "OrderDetails2.ISI"
+OrderDetailsISI3NM                         INIT               "OrderDetails3.ISI"
+OrderDetailsISI4NM                         INIT               "OrderDetails4.ISI"
+OrderDetailsI1DEF                           init            "-n,z,y,431-438,11-20,35-37"
+OrderDetailsI2DEF                           init            "-n,z,y,431-438,11-20,40-55,21-27"
+OrderDetailsI3DEF                           init            "-n,w,z,y,431-438,1-10,11-20,40-55,21-27"
+OrderDetailsI4DEF                           init            "-n,w,z,y,431-438,40-55,11-20,21-27"
+.
+. By Entity, OrderNumber, Line
+. 431-438, 11-20, 35-37
+.
+OrderDetailsKY                   DIM                21
+.
+. By Entity, OrderNumber, PartNumber, SeqMajor
+. 431-438, 11-20, 40-55, 21-27
+.
+OrderDetailsKY2                  DIM                41
+.
+. By Entity, CustomerID, OrderNumber, PartNumber, SeqMajor
+. 431-438, 1-10, 11-20, 40-55, 21-27
+.
+OrderDetailsKY3                  DIM                51
+.
+. By Entity, PartNumber, OrderNumber, SeqMajor
+. 431-438, 40-55, 11-20, 21-27
+.
+OrderDetailsKY4                  DIM                41
+;=============================================================================;
+;
+OrderDetailsFLST                         FILELIST
+OrderDetailsFL                      IFILE              name="OrderDetails.ISI",FIX=600,NODUP,NOPATH
+OrderDetailsFL2                     IFILE              name="OrderDetails2.ISI",FIX=600,NODUP,NOPATH
+OrderDetailsFL3                     IFILE              name="OrderDetails3.ISI",FIX=600,NODUP,WEOF,NOPATH
+OrderDetailsFL4                     IFILE              name="OrderDetails4.ISI",FIX=600,NODUP,WEOF,NOPATH
+                                    FILELISTEND
+ 
+OrderDetailsFileSize       CONST      "600"
+ 
+OrderDetailsProg           INIT       "OrderDetails Program"
+OrderDetailsDesc           INIT       "OrderDetails Maintenance"
+OrderDetailsTITLE          INIT       "OrderDetails Record"
+OrderDetailsHelp           INIT       "OrderDetails.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $OrderDetailsVARIO
+            INCLUDE OrderDetails.IO 
+          %ENDIF          //End of IO Include File

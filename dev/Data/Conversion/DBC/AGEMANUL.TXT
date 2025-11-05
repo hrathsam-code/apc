@@ -1,0 +1,359 @@
+.......................................................................
+. AGED RECEIVABLES REPORT PROGRAM:   MODULE NAME   "AGEMANUL/TXT"
+. 
+. ALLOWS ENTRY OF SPECIFIC INVOICES AND DATES FOR PURPOSES OF
+. "SPECIAL ACCOUNTS RECEIVABLE AGEING REPORT"
+. 
+.                 MAJOR  IS  ACCOUNT  (INVCUST)  POSITIONS 9 - 12
+.                 MINOR  IS  INVC NO. (INVKEY)   POSITIONS 1 - 5
+. 
+.......................................................................
+. 
+. WRITTEN  11/15/83 BY  R. BACHARACH
+.                     MICRO SYSTEMS CONSULTANTS
+.                     41 TEELE DRIVE
+.                     CORAM, NEW YORK 11727
+.                     (516) 698-5577
+.......................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   RCVBLES
+. 
+ARFILEXX INIT      "ARFILEXX/ISI"
+. 
+         INCLUDE   DATETBLZ
+. 
+CUSTFILE IFILE
+CSTNAME  INIT      "ACCOUNTS/ISI"
+. 
+. 
+         INCLUDE   CUSTMAST
+. 
+CURRACCT DIM       4
+FIRSTSW  INIT      "1"
+PAGEZ    FORM      3
+LINEZ    FORM      2
+RECCNT   FORM      "00"
+RLIMIT   FORM      "71"
+SHORTRUN DIM       1
+REPLY    DIM       1
+COMPANY  DIM       1
+IOSW     DIM       1
+STARTKEY DIM       8
+NUMCUST  FORM      4
+PDTOTL   FORM      6.2
+CREDTOTL FORM      6.2
+. 
+ASTER45  INIT      "*********************************************"
+. 
+PTYPE    DIM       7
+WKSUB    FORM      6.2
+WKPRINT  FORM      6.2
+NETBAL   FORM      6.2
+UPFLAG   INIT      "N"
+ZEROS    INIT      "000000.00"
+TOTCURNT FORM      "0000000.00"
+TOT130   FORM      "0000000.00"
+TOT3160  FORM      "0000000.00"
+TOT6190  FORM      "0000000.00"
+TOTOV90  FORM      "0000000.00"
+TOTNET   FORM      "00000000.00"
+. 
+COMPDISP INIT      "AMERICAN PRECISION COMPONENTS"
+. 
+INPDATE  DIM       6
+INPUTLNS FORM      2
+INPRDATE DIM       8
+DSPNAME  DIM       20
+PRTNAME  DIM       30
+. 
+INITIATE MOVE      "0",PAGEZ
+         MOVE      "0",LINEZ
+         MOVE      " ",REPLY
+         MOVE      "?"  TO  COLUMNSW  (SET THE DATE CORRECTOR)
+. 
+         CALL      OPENCUST
+. 
+         DISPLAY   *ES,*HON,*P01:04,"AGED RECEIVABLES ENTRY/PRINT PROGRAM":
+                   *P1:06,"WHEN ENTERING DOLLAR AMOUNTS JUST TAP THE ENTER":
+                          " KEY IF AMOUNT IS ZERO!":
+                   *W2
+         MOVE      " ",REPLY
+         KEYIN     *P1:10,"TAP ENTER WHEN READY TO START",REPLY
+         MOVE      "A",COMPANY                                                
+. 
+. FIRST CALCULATE THE AGEING DATE RANGES!
+.
+ASKDATE  DISPLAY   *P1:3,*EF
+         KEYIN     *P1:3,"ENTER DESIRED REPORT DATE (MM/DD/YY) ",INPRDATE
+         DISPLAY   *P1:4,"DATE IS ",INPRDATE
+         MOVE      " " TO REPLY
+         KEYIN     *P20:4,"OK? (Y/N) ", REPLY
+         CMATCH    "Y",REPLY
+         GOTO      ASKDATE IF NOT EQUAL
+.
+. 
+OKAY     KEYIN     *P01:10,"PLEASE MOUNT STANDARD STOCK PAPER":
+                   *P01:11,"....AND PRESS ENTER WHEN YOU ARE READY",REPLY
+. 
+. SET START KEY IF REQUIRED FOR REPUBLIC !
+. 
+.....    CALL      CALCCRNT
+. 
+         MOVE      " ",REPLY
+         MOVE      "N",UPFLAG
+. 
+BEGIN    DISPLAY   *ES,*P01:01,*HON,"ENTER INVOICES MANUALLY AND PRINT ":
+                   "A/R AGEING LIST "
+. 
+         DISPLAY   *P1:2,*HON,"ACCT #     NAME":
+                   *P31:2,"CURRENT",*P41:2,"P/D 31-60",*P51:2,"P/D 61-90":
+                   *P61:2,"P/D 91-120",*P72:2,"P/D 120+"
+. 
+         MOVE      "2" TO INPUTLNS
+. 
+GETDATA  TRAPCLR   PARITY
+CUSTLOOP ADD       "1" TO INPUTLNS
+         COMPARE   "22" TO INPUTLNS
+         CALL      RECYCLE IF NOT LESS
+         RESET     CUSTKEY TO 1
+. 
+. 
+         DISPLAY   *P1:24,*EL,*HON,"PRESS F5 IF FINISHED!"
+         KEYIN     *P1:INPUTLNS,CUSTKEY
+         GOTO      EOJ IF F5
+         RESET     CUSTKEY TO 4
+         GOTO      SAMELINE IF EOS
+         RESET     CUSTKEY TO 1
+         CALL      GETCUST
+         CMATCH    "H",IOSW
+         GOTO      CUSTDISP IF EQUAL
+         BEEP
+         DISPLAY   *P1:24,*HON,"INVALID ACCT##",*W,*P1:24,*EL
+         GOTO      CUSTLOOP
+. 
+SAMELINE SUBTRACT  "1" FROM INPUTLNS
+         GOTO      CUSTLOOP
+. 
+. 
+CUSTDISP MOVE      CUSTNAME TO DSPNAME
+         MOVE      CUSTNAME TO PRTNAME
+         DISPLAY   *P9:INPUTLNS,DSPNAME
+         MOVE      " " TO REPLY
+.....     KEYIN     *P40:2,"CORRECT ACCT## ? (Y/N) ",REPLY
+.....     CMATCH    "Y",REPLY
+.....     GOTO      CUSTLOOP IF NOT EQUAL
+. 
+.....     MOVE      "4" TO INPUTLNS
+. 
+....     ADD       "1" TO INPUTLNS
+....     COMPARE   "23" TO INPUTLNS
+....     CALL      RECYCLE IF NOT LESS
+. 
+...      KEYIN     *P1:INPUTLNS,*DE,INVKEY,*P12:INPUTLNS,INVDATE:
+...                *P24:INPUTLNS,IDOLSLFT
+. 
+. 
+         KEYIN     *P31:INPUTLNS,*RV,AMTCURNT:
+                   *P41:INPUTLNS,*RV,AMT130P:
+                   *P51:INPUTLNS,*RV,AMT3160P:
+                   *P61:INPUTLNS,*RV,AMT6190P:
+                   *P71:INPUTLNS,*RV,AMTOV90P
+. 
+. 
+RDLP1    CMATCH    "1",FIRSTSW
+         CALL      FIRSTONE IF EQUAL
+. 
+         MOVE      INVDATE  TO  WKDATE6       (SET UP TO AGE THE ITEM)
+         CALL      AGETOTS
+.....    CALL      CALCTOTL    (DETERMINE AMOUNT OUTSTANDING AND ITEM TYPE)
+. 
+......C2       CALL      AGEIT      (AGEING BUCKETS ARE INCREMENTED HR)
+. 
+         CALL      PRINTDTL    
+         MOVE      "0.00" TO AMTCURNT
+         MOVE      "0.00" TO AMT130P
+         MOVE      "0.00" TO AMT3160P
+         MOVE      "0.00" TO AMT6190P
+         MOVE      "0.00" TO AMTOV90P
+         MOVE      "0.00" TO WKAMT
+. 
+         GOTO      GETDATA
+. 
+MOREDTLS MOVE      " " TO REPLY
+         KEYIN     *P1:24,*EL,*HON,"MORE INVOICES THIS ACCOUNT ? (Y/N) ":
+                   REPLY
+         CMATCH    "Y",REPLY
+         GOTO      GETDATA IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      ASKMORE IF EQUAL
+         BEEP
+         GOTO      MOREDTLS
+. 
+RECYCLE  DISPLAY   *P1:3,*EF
+         MOVE      "3" TO INPUTLNS
+         RETURN
+. 
+ASKMORE  CALL      ACCTBRK
+         MOVE      " " TO REPLY
+         KEYIN     *P1:24,*EL,*HON,"MORE ACCOUNTS ? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      CUSTLOOP IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      EOJ IF EQUAL
+. 
+         BEEP
+         GOTO      ASKMORE
+. 
+. 
+. 
+CALCTOTL MOVE      IDOLSLFT  TO  WKPRINT
+         MOVE      "INVOICE"  TO  PTYPE
+. 
+         MOVE      "0"      TO  WKSUB
+         CMATCH    "C",INVTYPE             (IS IT A CREDIT ?)
+         GOTO      CALCB1   IF  NOT  EQUAL
+         MOVE      "CREDIT "    TO   PTYPE
+         MULT      "-1"  BY  WKPRINT         (YES...REVERSE THE AMOUNT)
+         ADD       WKPRINT  TO  CREDTOTL
+. 
+CALCB1   MOVE      WKPRINT  TO  WKAMT
+CB1RTRN  RETURN
+. 
+. 
+. 
+AGETOTS  ADD       AMTCURNT   TO  TOTCURNT
+         ADD       AMT130P    TO  TOT130
+         ADD       AMT3160P   TO  TOT3160
+         ADD       AMT6190P   TO  TOT6190
+         ADD       AMTOV90P   TO  TOTOV90
+. 
+         ADD       AMTCURNT   TO  WKAMT
+         ADD       AMT130P    TO  WKAMT
+         ADD       AMT3160P   TO  WKAMT
+         ADD       AMT6190P   TO  WKAMT
+         ADD       AMTOV90P   TO  WKAMT
+         RETURN
+. 
+PRINTDTL PRINT     *2,CUSTKEY,*9,PRTNAME;
+         PRINT     *44,AMTCURNT;
+         PRINT     *58,AMT130P;
+         PRINT     *72,AMT3160P;
+         PRINT     *86,AMT6190P;
+COL5     PRINT     *100,AMTOV90P;
+. 
+PRNTRTRN PRINT     *114,WKAMT
+         PRINT     " "
+         ADD       "2",LINEZ
+         COMPARE   "57",LINEZ
+         CALL      HDR  IF  NOT  LESS   
+         RETURN
+. 
+FIRSTONE MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+         MOVE      INVCUST  TO  CURRACCT
+         CALL      HDR
+         MOVE      " ",FIRSTSW
+         RETURN
+. 
+HDR      ADD       "1"  TO  PAGEZ
+         PRINT     *F:
+                   "** SUMMARY **":
+                   *51,"AGED ACCOUNTS RECEIVABLE REPORT":
+                   *111,"AS OF ",INPRDATE,"  **"
+. 
+LIBHEAD  PRINT     *52,"AMERICAN PRECISION COMPONENTS",*111,"PAGE ",PAGEZ
+         GOTO      TITPRNT
+. 
+REPHEAD  PRINT     *55,"XXXXXXXX XXXXXXXXX INC.",*111,"PAGE ",PAGEZ
+. 
+TITPRNT  PRINT     " "
+         PRINT     *2,"ACCOUNT   NAME",*30,"DATE",*47,"CURRENT":
+                   *60,"PAST DUE":
+                   *74,"PAST DUE",*88,"PAST DUE",*102,"PAST DUE":
+                   *117,"ACCOUNT"
+         PRINT     *2,"NUMBER",*48,"1-30",*62,"31-60",*76,"61-90":
+                   *89,"91-120",*102,"OVER 120",*118,"TOTAL"                  
+         PRINT     " "
+         MOVE      "6"  TO  LINEZ
+         RETURN
+. 
+ACCTBRK  CALL      AGETOTS
+         ADD       "1"       TO  RECCNT
+         MOVE      AMT130P   TO  PDTOTL
+         ADD       AMT3160P  TO  PDTOTL
+         ADD       AMT6190P  TO  PDTOTL
+         ADD       AMTOV90P  TO  PDTOTL
+         MOVE      AMTCURNT  TO  NETBAL
+         ADD       PDTOTL    TO  NETBAL
+         ADD       NETBAL    TO  TOTNET
+. 
+. ...................................................................
+. NOTE THAT CREDTOTL IS ALREADY NEGATIVE...HENCE ADD VICE SUBTRACT
+. ...................................................................
+....     ADD       CREDTOTL  TO  NETBAL
+. ...................................................................
+         PRINT     *C,*L,ASTER45,ASTER45,ASTER45
+         PRINT     *3,CUSTKEY,*10,CUSTNAME:
+                   *44,AMTCURNT,*58,AMT130P,*72,AMT3160P,*86,AMT6190P:
+                   *100,AMTOV90P,*115,NETBAL                                  
+         PRINT     *C,*L,*L
+         MOVE      "0"  TO  PDTOTL
+         MOVE      "0"  TO  NETBAL
+         MOVE      "0"  TO  AMTCURNT
+         MOVE      "0"  TO  AMT130P
+         MOVE      "0"  TO  AMT3160P
+         MOVE      "0"  TO  AMT6190P
+         MOVE      "0"  TO  AMTOV90P
+         MOVE      "0"  TO  CREDTOTL
+         MOVE      "0"  TO  WKSUB
+         MOVE      "0"  TO  WKAMT
+         ADD       "4"  TO  LINEZ
+         COMPARE   "54" TO  LINEZ
+         CALL      HDR  IF  NOT  LESS
+         MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+         MOVE      CUSTKEY  TO  CURRACCT
+         RETURN
+. 
+. NOTE.....MODIFY THIS IF YOU WANT TO PRINT DETAILS AND GET A
+.          FINAL ACCOUNT TOTAL LINE !
+. 
+         INCLUDE   CUSTIO
+. 
+         INCLUDE   RCVBLSIO
+. 
+         INCLUDE   DATEMNUL
+. 
+EOJ      CALL      REPTOTS
+         BEEP
+         DISPLAY   *ES,*P01:04,"END OF AGED RECEIVABLES PRINT",*W5
+         BEEP
+         CHAIN     "ARMENU1 "
+. 
+INVCRTRN RETURN
+. 
+REPTOTS  COMPARE   "50",LINEZ
+         CALL      HDR IF LESS
+. 
+         MOVE      "0.00" TO TOTNET
+         ADD       TOTCURNT TO TOTNET
+         ADD       TOT130   TO TOTNET
+         ADD       TOT3160  TO TOTNET
+         ADD       TOT6190  TO TOTNET
+         ADD       TOTOV90  TO TOTNET
+. 
+         PRINT     *L,*L
+         PRINT     *1,ASTER45,ASTER45,ASTER45
+         PRINT     " "
+         PRINT     *10,"COMPANY TOTALS:"
+         CMATCH    "R",COMPANY
+         GOTO      RPT1 IF NOT EQUAL
+. 
+RPT1     PRINT     *10,COMPDISP,*44,TOTCURNT,*58,TOT130,*72,TOT3160:
+                   *86,TOT6190,*100,TOTOV90,*113,TOTNET
+         PRINT     " "
+         PRINT     *1,ASTER45,ASTER45,ASTER45
+         RETURN
+. 

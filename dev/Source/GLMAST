@@ -1,0 +1,38 @@
+           INCLUDE           WORKVAR.INC
+#RESULT    FORM              1
+LABEL1     DIM               130
+.
+           goto              #exit
+           INCLUDE           GLMST.FD
+GLMST      PLFORM            GLMST.PLF
+GLMSTCOLL  COLLECTION
+GLMSTEDT   COLLECTION
+
+#exit
+STARTPGM   ROUTINE
+           INCLUDE           SECURITY.INC
+           TRAP              NOFILE NORESET IF IO
+OPENFILES
+           CALL              OPENGLMST
+           TRAPCLR           IO
+.
+           LISTINS           GLMSTCOLL,EGLMstAccount,EGLMstDesc,EGLMstFSDesc,EGLMstType:
+                                     EGLMstGLCategory,EGLMstFSCategory,CBGLMstIndicator
+           LISTINS           GLMSTEDT,EGLMstAccount,EGLMstDesc,EGLMstFSDesc,EGLMstType:
+                                      EGLMstGLCategory,EGLMstFSCategory
+
+.
+           FORMLOAD          GLMST
+           STOP
+
+           INCLUDE           GLMST1.INC
+
+NOFILE
+           NORETURN
+           BEEP
+           ALERT             PLAIN,"G/L Account Master file does not exist. Do you wish to create it?",#RESULT
+           IF                (#RESULT = 1)
+             CALL              PREPGLMST
+             GOTO              OPENFILES
+           ENDIF
+           STOP

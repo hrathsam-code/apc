@@ -1,0 +1,76 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CNTRY.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-25-2019 At 12:52                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00103   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CNTRYVAR
+$CNTRYVAR                        EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+CNTRY                            RECORD
+Code                             Dim                3                   1 - 3        //1 - 3
+Name                             Dim                40                  4 - 43       //4 - 43
+Active                           Form               1                  44 - 44       //44 - 44
+                                 RECORDEND
+;
+;======================================================================================;
+TempCNTRY                           record          like   CNTRY                           
+OrigCNTRY                           record          like   CNTRY                           
+SaveCNTRY                           record          like   CNTRY                           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+CNTRYTXTNM                          INIT         "CntryFL"
+CNTRYISI1NM                         INIT               "CNTRYFL.ISI"
+CNTRYI1DEF                           init            "-n,z,y,1-3"
+.
+. By Code
+. 1-3
+.
+CNTRYKY                          DIM                 3
+;=============================================================================;
+;
+CNTRYFLST                         FILELIST
+CNTRYFL                             IFILE              name="CNTRYFL.ISI",FIX=44,NODUP,NOPATH
+                                    FILELISTEND
+ 
+CNTRYFileSize       CONST      "44"
+ 
+CNTRYProg           INIT       "CNTRY Program"
+CNTRYDesc           INIT       "CNTRY Maintenance"
+CNTRYTITLE          INIT       "CNTRY Record"
+CNTRYHelp           INIT       "CNTRY.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CNTRYVARIO
+            INCLUDE CNTRY.IO 
+          %ENDIF          //End of IO Include File

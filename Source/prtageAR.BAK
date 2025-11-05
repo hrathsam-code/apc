@@ -1,0 +1,662 @@
+.Hi Dave.  You might think that it's impossible to have the computer actually talk to you about your inventory, your parts or anything else on the system.  The truth is, that I can pretty much do anything that this genius developer wants to implement
+.onto your system.  Just some food for thought of course.  Oh, and I'm not a Siri or an Alexa.  I'm unique in my own persona
+
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    PRTAGEAR.PLS                                                   ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/01/2005 AT 1:28PM                                           ;
+;                                                                             ;
+;  PURPOSE:    Print .CustomerIDs Payable Aging Report                            ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   07/01/2005   HOR     INITIAL VERSION                     ;
+;              1.4   04/05/2006   HOR     Modified Aging Dates in PLF         ;
+;              1.4   04/06/2006   HOR     Re-Modified Aging Dates in PLF      ;
+;                                                                             ;
+;=============================================================================;
+.
+              INCLUDE           NCOMMON.TXT
+              INCLUDE           WORKVAR.INC
+
+..HR 2017.4.24 PLBWebServer  EQUATE            1
+ItemCount  FORM              6
+TransDate  DIM               8
+DueDate    DIM               8
+DiscDate   DIM               8
+HoldFlag   DIM               8       //HR 3/24/2008  Was 1
+AgingDays  FORM              3
+AGINGDAYSD dim               3
+CityState  DIM               42
+Days       FORM              10
+....  TodayDays  FORM              10
+AgingDaysW FORM              10
+Bucket     FORM              1
+BucketDays FORM                 3(7)
+BucketDaysD DIM                 3
+AgingAmt   FORM              7.2(7)            //Buckets 1 - 4, 5 = Totals for Customers
+MinBalanceD   DIM               10
+MinBalance    FORM              7.2
+SortedBy      FORM              1
+AtleastOne    DIM               1
+CustomerPrinted   DIM               1
+ASTER45  INIT      "*********************************************"
+
+AutoPayFlag         dim                3
+Heading       DIM               12(7)
+StartingDays  FORM              2
+EndingDays    FORM              2
+
+AllCustFlag   FORM              1
+FromCustomer  DIM               4
+ToCustomer    DIM               4
+PrintDetails  FORM              1
+
+AgingTotals FORM             10.2(7)   1=Current, 2=30-59, 3=60-89, 4=90 +
+CustAging  FORM              10.2(7)          //1 = Details, 2 = Cust Totals, 3 = Report Totals Only
+TempFile   IFILE
+Aging
+AllCollection COLLECTION
+CustomerCount       form               6
+CustExcludeKY       dim                4
+CustomerID          dim                4
+X                   form               6
+IgnoreCustomers     form               1
+
+CustExcludeFile     ifile
+.
+                    GOTO              #S
+                    INCLUDE           CMPNY.FD
+                    INCLUDE           Cust.FD
+                    include           Sequence.FD
+..                    include           ARFile.FD
+                    include            ARTRN.FD
+                    INCLUDE           PrintRtn.INC
+
+PRTAGEAR            PLFORM            PRTAGEAR
+FSelectCustomers    plform             PrtAgeAR2.PLF
+#S
+STARTPGM            routine
+                    winhide
+                    LISTINS           AllCollection,EFromCustomer,EToCustomer,BCustomerFrom,BCustomerTo
+                    MOVE              "Y",PrintGuiMode
+
+                    OPEN              CustFLST,READ
+                    open                     CustExcludeFile,"CustExclude"
+
+                    FORMLOAD          PRTAGEAR
+                    formload                 FSelectCustomers
+
+                    read               CustExcludeFile,CustExcludeKY;;
+                    loop
+                      readks             CustExcludeFile;CustomerID
+                    until (over)
+                      move              CustomerID,CustKY
+                      call              RDCust
+                      pack              DataLine from Cust.CustomerID,";",Cust.Name
+                      LVCustList.SetItemTextAll using *Index=0,*Text=DataLine,*Delimiter=";"
+                    repeat
+
+                    SETITEM           CBPrintOptions,0,1
+
+                    LOOP
+                      WAITEVENT
+                    REPEAT
+                    STOP
+.
+. We never get to this point above
+.......................................
+
+StartPrint
+              SETMODE           *MCURSOR=*Wait
+
+           MOVE              "Y",FirstFlag
+           MOVE              "Accounts4 Receivable Aging Report",ReportTitle
+
+           CLOCK             timestamp to DATE8
+           CALL              ConvDateToDays using DATE8,TodayDays
+
+Harry1
+
+             getprop                   CXSelectCustomers,value=IgnoreCustomers
+              open              ARTRNFLST,READ
+           CALL              OPENCMPNY
+
+           CALL               PrintPreviewInit
+
+           RETURN             IF (printInitFailed = "N")
+           CALL               PrintLandScapeMode
+
+           GETITEM              EBucket1,0,BucketDaysD
+           MOVE                 BucketDaysD,BucketDays(1)
+
+           GETITEM              EBucket2,0,BucketDaysD
+           MOVE                 BucketDaysD,BucketDays(2)
+
+           GETITEM              EBucket3,0,BucketDaysD
+           MOVE                 BucketDaysD,BucketDays(3)
+
+          GETITEM              EBucket4,0,BucketDaysD
+          MOVE                 BucketDaysD,BucketDays(4)
+
+.          GETITEM              EBucket5,0,BucketDaysD
+.          MOVE                 BucketDaysD,BucketDays(5)
+
+           GETITEM              EMinimumBalance,0,MinBalanceD
+           MOVE                 MinBalanceD,MinBalance
+
+              GETITEM           CBSortedBy,0,SortedBy
+              GETITEM           CBPrintOptions,0,PrintDetails
+
+              MOVE              BucketDays(1),EndingDays
+
+              PACKKEY           Heading(1),"1"," - ",EndingDays," Days"
+
+              MOVE              BucketDays(1),StartingDays
+              ADD               "1",StartingDays
+              MOVE              BucketDays(2),EndingDays
+
+              PACKKEY           Heading(2),StartingDays," - ",EndingDays," Days"
+
+              MOVE              BucketDays(2),StartingDays
+              ADD               "1",StartingDays
+              MOVE              BucketDays(3),EndingDays
+
+              PACKKEY           Heading(3),StartingDays," - ",EndingDays," Days"
+
+              MOVE              BucketDays(3),StartingDays
+              ADD               "1",StartingDays
+              MOVE              BucketDays(4),EndingDays
+
+              PACKKEY           Heading(4),StartingDays," - ",EndingDays," Days"
+
+.             MOVE              BucketDays(4),StartingDays
+.             ADD               "1",StartingDays
+.             MOVE              BucketDays(5),EndingDays
+
+.             PACKKEY           Heading(5),StartingDays," - ",EndingDays," Days"
+
+.             MOVE              BucketDays(5),EndingDays
+              SUBTRACT          "1",EndingDays
+
+              PACKKEY           Heading(5),"Over",BucketDays(4)," Days"
+
+              MOVE              "Totals",Heading(6)
+
+           GETITEM           RAllCustomers,0,AllCustFlag
+           IF                (AllCustFlag = 0)
+             GETITEM           EFromCustomer,0,FromCustomer
+             GETITEM           EToCustomer,0,ToCustomer
+
+           ENDIF
+           MOVE              " ",CustKY
+
+           IF                  (AllCustFlag = 0)
+             MOVE                 FromCustomer,CustKY
+           ENDIF
+
+              IF                (SortedBy = 2)           //By Customer ID
+                CALL              RDCust
+              ELSE
+                MOVE              "        ",CustKY2     //By Customer Name
+                CALL              RDCust2
+              ENDIF
+
+             CALL              PrintHeader
+
+
+           LOOP
+             IF                (SortedBy = 2)           //Customer ID
+               IF               (ReturnFL = 1 or FirstFlag = "N")
+                 CALL              KSCust
+               ENDIF
+             ELSE
+               CALL              KSCust2
+             ENDIF
+           UNTIL             (Returnfl = 1)
+
+             BREAK              IF (AllCustFlag = 0 AND SortedBy = 2 AND Cust.CustomerID > ToCustomer)
+             CONTINUE           IF (AllCustFlag = 0 and SortedBy = 1 and Cust.CustomerID > ToCustomer)
+
+             move               Cust.CustomerID,CustKY
+             read               CustExcludeFile,CustKY;;
+             continue           if (not over AND IgnoreCustomers = 1)         //W've found a Customer Number, ignore it as per David????
+
+             MOVE               "N",CustomerPrinted
+             MOVE               "N",FirstFlag
+             MOVE              "0",CUSTAging
+.             PACKKEY           VHSTKY,$Entity,Cust..CustomerIDNumber
+.CALL              RDVHST
+
+             CALL              PrintDetails
+           REPEAT
+
+           CALL              PrintTotals
+           SETMODE           *MCURSOR=*Wait
+
+           IF                (PrintGuiMode = "Y")
+             CALL              PrintClose
+           ENDIF
+
+
+
+           GOTO                 ExitProgram
+;==========================================================================================================
+SelectCustomers
+                    setfocus           ECustCode
+                    setprop            WCustList,visible=1
+
+                    return
+;==========================================================================================================
+MainSaveCust
+
+                    move               " ",CustExcludeKY
+                    read               CustExcludeFile,CustExcludeKY;;
+                    loop
+                      readks             CustExcludeFile;CustomerID
+                    until (over)
+                      delete             CustExcludeFile
+                    repeat
+
+                    display            "Got here"
+                    LVCustList.GetItemCount giving CustomerCount
+                    if                 (CustomerCount > 0)
+                      for                 X from "0" to (CustomerCount - 1) using "1"
+                        LVCustList.GetItemText giving CustomeriD using *Index=X
+                        display            "CustomerID : ",CustomerID
+                        move               CustomerID,CustExcludeKY
+                        read               CustExcludeFile,CustExcludeKY;;
+                        if                 (over)
+                          write              CustExcludeFile,CustExcludeKY;CustomerID
+                        endif
+                      repeat
+                    endif
+
+                    setprop            WCustList,visible=0
+                    return
+;==========================================================================================================
+MainExit2
+                    setprop            WCustList,visible=0
+                    return
+;==========================================================================================================
+SaveCustomer
+                    getprop            ECustCode,text=CustKY
+                    return             if (CustKY = "")
+                    call               RDCust
+                    if                 (ReturnFl = 1)
+                      beep
+                      alert              stop,"Invalid Customer Number Entered",result,"ERROR: INVALID CUSTOMER"
+                    else
+                      pack               DataLine from Cust.CustomerID,";",Cust.Name
+                      LVCUstList.SetItemTextAll using *Index=9999:
+                                                      *Text=DataLine:
+                                                      *Delimiter=";"
+                    endif
+                    setprop            EcustCode,text=""
+                    setfocus           ECustCode
+                    return
+;==========================================================================================================
+OnClickSelectCustomers
+                    IfChecked          CXSelectCustomers
+                      setprop            CXSelectCustomers,value=0
+                      setprop            BSelect,visible=0
+                    else
+                      setprop            CXSelectCustomers,value=1
+                      setprop            BSelect,visible=1
+                    endif
+                    return
+;==========================================================================================================
+Change_ECustCode
+                    READAHEAD          ECustCode,Cust,CustomerID
+                    RETURN
+.===============================================================================
+KeyPress_ECustCode
+                    F2SEARCH           ECustCode,Cust
+                    IF                  (PassedVar = "Y")
+
+                    ENDIF
+                    RETURN
+
+
+
+;==========================================================================================================
+ClearCustList
+                    alert              Plain,"Are you sure you want to delete this list",result,"DELETE CUSTOMERS?"
+                    if                 (result = 1)
+                      LVCustList.DeleteAllItems
+                    endif
+                    return
+;==========================================================================================================
+PrintLine
+           IF                   (CustomerPrinted = "N")
+             CHOP              Cust.City,Cust.City
+             PACK              CityState,Cust.City,", ",Cust.St,"  ",Cust.Zip
+
+             EndOfPage
+
+             PrtPage           P;*font=DetailFont:
+                               *alignment=*left:
+                               *boldon:
+                               *p=020:PrintLineCnt,Cust.CustomerID:
+                               *p=110:PrintLineCnt,Cust.Name:
+                               *alignment=*decimal
+
+
+             ADD               SingleLine,PrintLineCnt
+
+             MOVE              "Y",CustomerPrinted
+           ENDIF
+
+           RETURN
+.=============================================================================
+. Calculate the Proper Aging Buckets
+.
+CalculateAging
+.
+           MOVE              "0",AgingAmt
+           unpack            ARTrn.TransDate,CC,YY,MM,DD
+           PACK              DATE8,"20",YY,MM,DD
+                    CALL              ConvDateToDays using DATE8,Days
+
+                    SUBTRACT          Days,TodayDays,AgingDaysW
+
+           IF                (AgingDaysW <= BucketDays(1))
+             MOVE              "1",Bucket
+           ENDIF
+
+           IF                (AgingDaysW >= (BucketDays(1) + 1) and AgingDaysW <= BucketDays(2))
+             MOVE              "2",Bucket
+           ENDIF
+
+           IF                (AgingDaysW >= (BucketDays(2) + 1) and AgingDaysW <= BucketDays(3))
+             MOVE              "3",Bucket
+           ENDIF
+
+          IF                (AgingDaysW >= (BucketDays(3) + 1) and AgingDaysW <= BucketDays(4))
+            MOVE              "4",Bucket
+          ENDIF
+
+.          IF                (AgingDaysW >= (BucketDays(4) + 1) and AgingDaysW <= BucketDays(5))
+.            MOVE              "5",Bucket
+.          ENDIF
+
+           IF                (AgingDaysW > BucketDays(4))
+             MOVE              "5",Bucket
+           ENDIF
+
+           MOVE              ARTrn.Balance,AgingAmt(Bucket)
+           ADD               ARTrn.Balance,AgingTotals(Bucket)
+           ADD               ARTrn.Balance,CUSTAging(Bucket)
+.
+           ADD               ARTrn.Balance,AgingTotals(6)
+           ADD               ARTrn.Balance,CUSTAging(6)
+
+
+           IF                (AgingDaysW < 0)
+             MOVE              "0",AgingDays
+           ELSE
+             MOVE              AgingDaysW,AgingDays
+           ENDIF
+           RETURN
+
+.=============================================================================
+PrintDetails
+           MOVE              "N",AtLeastOne
+           PACKKEY           ARTrnKY3 from $Entity,Cust.CustomerID,"O"            //Open Only!!!!!
+.
+. Read through all of the Transactions looking for 'Open' transactions
+. only.  'Open' transactions are records that don't have a Zero balance.
+.
+           CALL              RDARtrn3
+           LOOP
+             CALL              KSARtrn3
+           UNTIL             (Returnfl = 1 or ARtrn.CustomerID != Cust.CustomerID)
+.             continue          if      (ARFile.Status = "X" or ARFile.Status = "W" or ARFile.Status = "V")
+
+             IF                (ARTrn.Balance = 0)            // or APTRN.Balance < MinBalance)
+               CONTINUE
+             ENDIF
+
+           CALL              CalculateAging
+
+           unpack            ARTrn.TransDate,CC,YY,MM,DD
+           PACK              TransDate FROM MM,"/",DD,"/",YY
+
+
+           EndOfPage
+
+           move              agingdays,agingdaysD
+           if                (ARTrn.Balance = 0)
+             move               "   ",AgingDaysD
+           endif
+
+           MOVE                 "Y",AtLeastOne
+           if                   (PrintDetails = "1")
+             IF                 (AtleastOne = "Y")
+               CALL              PrintLine
+             ENDIF
+
+             PrtPage           P;*alignment=*left:
+                               *font=SubLineFont:
+                               *p=040:PrintLineCnt,ARTrn.Reference:           //12
+...                               *p=155:PrintLineCnt,APTRN.PO:                  //12
+                               *p=270:PrintLineCnt,TransDate:
+                               *alignment=*left:
+....                               *p=340:PrintLineCnt,DueDate:
+                               *alignment=*decimal:
+                               *p=455:PrintLineCnt,AgingAmt(1):
+                               *p=535:PrintLineCnt,AgingAmt(2):
+                               *p=615:PrintLineCnt,AgingAmt(3):
+                               *p=695:PrintLineCnt,AgingAmt(4):
+                               *p=775:PrintLineCnt,AgingAmt(5):
+.                               *p=855:PrintLineCnt,AgingAmt(6):
+                               *alignment=*left:
+                               *BoldOn:                               //HR 3/24/2008
+...                               *P=0985:PrintLineCnt,HoldFlag:         //HR 3/24/2008
+                               *boldoff
+             ADD               SubSingleLine,PrintLineCnt
+             endif
+
+
+           REPEAT
+
+           IF                (AtLeastOne = "Y")
+             CALL              PrintCustomerTotals
+           ENDIF
+           RETURN
+.=============================================================================
+. Print the Totals for each Customer
+.=============================================================================
+PrintCustomerTotals
+           IF                   (CustAging(1) = 0 and CustAging(2) = 0 and:
+                                 CustAging(3) = 0 and CustAging(4) = 0 and:
+                                 CustAging(5) = 0 and CustAging(6) = 0)
+              RETURN
+           ENDIF
+
+           ADD               "1",ItemCount
+
+
+           RETURN               IF (PrintDetails = 3)      //Report Grand Totals Only!!!
+
+             IF                (PrintDetails = "1")    //Print ONLY when details
+
+               PRTPAGE           P;*font=SubLineFont:
+                                 *alignment=*left:
+                                 *Pensize=1:
+                                 *p=40:(PrintLineCnt - 2):
+                                 *Line=380:(PrintLineCnt - 2):
+                                 *p=402:(PrintLineCnt - 2):
+                                 *Line=468:(PrintLineCnt - 2):
+                                 *p=482:(PrintLineCnt - 2):
+                                 *Line=548:(PrintLineCnt - 2):
+                                 *p=562:(PrintLineCnt - 2):
+                                 *Line=628:(PrintLineCnt - 2):
+                                 *p=642:(PrintLineCnt - 2):
+                                 *Line=708:(PrintLineCnt - 2):
+                                 *p=722:(PrintLineCnt - 2):
+                                 *Line=788:(PrintLineCnt - 2):
+                                 *p=802:(PrintLineCnt - 2):
+                                 *Line=868:(PrintLineCnt - 2)
+.                                 *p=882:(PrintLineCnt - 2):
+.                                 *Line=948:(PrintLineCnt - 2)
+             ENDIF
+
+             CHOP              Cust.CustomerID,Cust.CustomerID
+             if                (CustAging(7) > MinBalance)
+
+             PrtPage           P;*font=SubLineFont:
+                               *alignment=*left:
+                               *p=40:PrintLineCnt,"Totals ":
+                               *ha=10:
+                               *boldon:
+                               *LL:
+                               Cust.CustomerID:
+                               " :  ":
+                               Cust.Name:
+                               *alignment=*decimal:
+                               *boldon:
+                               *p=456:PrintLineCnt,CUSTAging(1):
+                               *p=536:PrintLineCnt,CUSTAging(2):
+                               *p=616:PrintLineCnt,CUSTAging(3):
+                               *p=696:PrintLineCnt,CUSTAging(4):
+                               *p=776:PrintLineCnt,CUSTAging(5):
+                               *p=856:PrintLineCnt,CustAging(6):
+.                              *p=936:PrintLineCnt,CustAging(7):
+                               *alignment=*left:
+                               *p=840:PrintLineCnt,AutoPayFlag:
+                               *boldoff
+                switch                 PrintDetails
+
+                case                   "1"
+                ADD               (SingleLine * 2),PrintLineCnt
+                case                   "2"
+                ADD               (SingleLine),PrintLineCnt
+                endswitch
+
+              else
+                subtract          CustAging(1),AgingTotals(1)             //Remove these from the Grand Totals
+                subtract          CustAging(2),AgingTotals(2)             //Remove these from the Grand Totals
+                subtract          CustAging(3),AgingTotals(3)             //Remove these from the Grand Totals
+                subtract          CustAging(4),AgingTotals(4)             //Remove these from the Grand Totals
+                subtract          CustAging(5),AgingTotals(5)             //Remove these from the Grand Totals
+                subtract          CustAging(6),AgingTotals(6)             //Remove these from the Grand Totals
+.               subtract          CustAging(7),AgingTotals(7)             //Remove these from the Grand Totals
+
+              endif
+.
+..             ADD               DoubleLine,PrintLineCnt
+           RETURN
+.=============================================================================
+PrintTotals
+           PRTPAGE           P;*font=SubLineFont:
+                             *alignment=*left:
+                             *Pensize=1:
+                             *p=40:(PrintLineCnt - 2):
+                             *Line=380:(PrintLineCnt - 2):
+                             *p=402:(PrintLineCnt - 2):
+                             *Line=468:(PrintLineCnt - 2):
+                             *p=482:(PrintLineCnt - 2):
+                             *Line=548:(PrintLineCnt - 2):
+                             *p=562:(PrintLineCnt - 2):
+                             *Line=628:(PrintLineCnt - 2):
+                             *p=642:(PrintLineCnt - 2):
+                             *Line=708:(PrintLineCnt - 2):
+                             *p=722:(PrintLineCnt - 2):
+                             *Line=788:(PrintLineCnt - 2):
+                             *p=802:(PrintLineCnt - 2):
+                             *Line=868:(PrintLineCnt - 2):
+                             *p=882:(PrintLineCnt - 2):
+                             *Line=948:(PrintLineCnt - 2):
+.
+                             *p=40:(PrintLineCnt - 4):
+                             *Line=380:(PrintLineCnt - 4):
+                             *p=402:(PrintLineCnt - 4):
+                             *Line=468:(PrintLineCnt - 4):
+                             *p=482:(PrintLineCnt - 4):
+                             *Line=548:(PrintLineCnt - 4):
+                             *p=562:(PrintLineCnt - 4):
+                             *Line=628:(PrintLineCnt - 4):
+                             *p=642:(PrintLineCnt - 4):
+                             *Line=708:(PrintLineCnt - 4):
+                             *p=722:(PrintLineCnt - 4):
+                             *Line=788:(PrintLineCnt - 4):
+                             *p=802:(PrintLineCnt - 4):
+                             *Line=868:(PrintLineCnt - 4):
+                             *p=882:(PrintLineCnt - 4):
+                             *Line=948:(PrintLineCnt - 4)
+
+
+           PrtPage           P;*font=SubLineFont:
+                             *alignment=*left:
+                             *boldon:
+                             *p=155:PrintLineCnt,"Total Report Aging ":
+                             ":":
+                             *alignment=*decimal:
+...                             *p=368:PrintLineCnt,VStatRec.Balance:
+                             *boldon:
+                             *p=456:PrintLineCnt,AgingTotals(1):
+                             *p=536:PrintLineCnt,AgingTotals(2):
+                             *p=616:PrintLineCnt,AgingTotals(3):
+                             *p=696:PrintLineCnt,AgingTotals(4):
+                             *p=776:PrintLineCnt,AgingTotals(5):
+                             *p=856:PrintLineCnt,AgingTotals(6)
+.                            *p=936:PrintLineCnt,AgingTotals(7)
+
+           ADD               (SingleLine),PrintLineCnt
+
+           PRTPAGE           P;*font=DetailFont,*boldon:
+                             "Total Customers printed :":
+                             *alignment=*left:
+                             ItemCount:
+                             *boldoff
+           RETURN
+.
+ExitProgram
+..FUCKUP              NORETURN
+..FUCKUP              NORETURN
+              winshow
+              chain   FromPGM
+.TESTING              CHAIN
+              STOP
+.=============================================================================
+EnableSelections
+              GETITEM           RSelectedCustomers,0,result
+              SETPROP           AllCollection,Enabled=result
+
+              IF                (result = 1)
+                SETPROP           EFromCustomer,BGCOLOR=2147483653
+                SETPROP           EToCustomer,BGCOLOR=2147483653
+              ELSE
+                SETPROP           EFromCustomer,BGCOLOR=2147483663
+                SETPROP           EToCustomer,BGCOLOR=2147483663
+              ENDIF
+              RETURN
+.=============================================================================
+PrintCustomHeader
+              PRTPAGE           P;*alignment=*left:
+                                *font=SubLineFont:
+                                *p=028:PrintLineCnt,"Code":
+                                *P=125:PrintLineCnt,"Customer Name":
+                                *p=270:PrintLineCnt,"Inv. Date":
+                                *p=416:PrintLineCnt,Heading(1):
+                                *p=496:PrintLineCnt,Heading(2):
+                                *p=576:PrintLineCnt,Heading(3):
+                                *p=656:PrintLineCnt,Heading(4):
+                                *p=736:PrintLineCnt,Heading(5):
+                                *p=816:PrintLineCnt,Heading(6)
+...                                *p=810:PrintLineCnt,"Auto Pay"
+
+.                               *p=810:PrintLineCnt,Heading(6):
+.                               *p=912:PrintLineCnt,Heading(7)
+              ADD               SingleLine,PrintLineCnt
+              RETURN
+.=============================================================================

@@ -1,0 +1,22 @@
+.
+. file definition for fast DB/C file definition file
+.
+
+fdbcf.record	list
+fdbcf.file	char 8
+fdbcf.name	char 30
+fdbcf.desc	char 40
+fdbcf.type	char 1
+fdbcf.access	char 1
+fdbcf.compress	char 1
+fdbcf.dupkeys	char 1
+fdbcf.altcode	char 8
+fdbcf.chgflag	char 1
+fdbcf.keys	char 40[6]
+		listend
+
+fdbcf		list
+		ifile fix=331, keylen=8
+		varlist fastdbc.syscode, "FASTF"
+		varlist fdbcf.file
+		listend

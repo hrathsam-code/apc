@@ -1,0 +1,109 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    convshipto                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    05/23/2019 at 2:35pm                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   05/23/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+                    include            WorkVar.INC
+                    include            Sequence.FD
+                    include            Cust.FD
+                    include            Cntry.FD
+                    include            ShipTo.FD
+
+Field1              dim                10
+Field2              dim                5
+Country             dim                40
+CountryFile         ifile
+CountryKey          dim                40
+CountryCode         dim                3
+SaveShipTo          form               4
+Cust2               record             like Cust
+CustName10          dim                10
+
+InputFile           file
+                    call               OpenCust
+                    open               CountryFile,"Cntryfl2",READ
+                    call               OpenCntry
+                    call               OpenShipTo
+                    open               InputFile,"UPS_CSV_EXPORT.CSV",READ
+
+                    loop
+                    read               InputFile,seq;*CDFON:
+                                                     Cust2.CustomerID:
+                                                     Cust2.Name:
+                                                     Field1:
+                                                     Field2:
+                                                     Cust2.Addr1:
+                                                     Cust2.Addr2:
+                                                     Cust2.Addr3:
+                                                     Cust2.City:
+                                                     Cust2.St:
+                                                     Cust2.Zip:
+                                                     Country:
+                                                     Cust2.Telephone
+
+                    until              (over)
+                      move             Country,CountryKey
+                      uppercase        CountryKey,CountryKey
+Harry1A
+                      if               (CountryKey = "UNITED STATES")
+                      move             "UNITED STATES OF AMERICA",COUNTRYKEY
+                      endif
+                      read             CountryFile,CountryKey;CountryCode,CountryKey
+                      if               (not over)
+                        move             CountryCode,Cust.Country
+                      else
+Harry1
+                      display          "Invalid Country"
+
+                      endif
+
+                    chop               Cust2.Name,Cust2.Name
+                    uppercase          Cust2.Name
+                    move               Cust2.Name,CustName10
+                    pack               CustAAMKY1 from "01L",CustName10
+                    call               RDCustA1
+                    continue           if (ReturnFl = 1)
+Harry4
+                    PACKKEY           ShipToKY from Cust.CustomerID,"9999"
+                    call                   RDShipTo
+                    call                   KPShipTo
+                    IF                (ReturnFl = 0 and ShipTo.CustomerID = Cust.CustomerID)
+                      add                  "1",ShipTo.SeqNo
+                      move                 ShipTo.SeqNo,SaveShipTo
+                      CLEAR             ShipTo
+                      MOVE              SaveShipTo,ShipTo.SeqNo
+                    ELSE
+                      CLEAR             ShipTo
+                      MOVE              "0",ShipTo.SeqNo
+                    ENDIF
+Harry2
+
+                      move               Cust2.Name,ShipTo.Name
+                      move               Cust.CustomerID,ShipTo.CustomerID
+                      move               Cust2.Addr1,ShipTo.Addr1
+                      move               Cust2.Addr2,ShipTo.Addr2
+                      move               Cust2.Addr3,ShipTo.Addr3
+                      move               Cust2.City,ShipTo.City
+                      move               Cust2.St,ShipTo.St
+                      move               Cust2.Zip,ShipTo.Zip
+                      move               CountryCode,ShipTo.Country
+                      move               Cust2.Telephone,ShipTo.Telephone
+                      call               WrtShipTo
+                    repeat

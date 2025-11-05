@@ -1,0 +1,155 @@
+                 DB/C LINKING INSTRUCTIONS
+                              
+
+************************************************************
+*                                                          *
+*                    UNIX  and XENIX                       *
+*                                                          *
+************************************************************
+To install SQL, CCALL, CVERB, native I/O,  or special
+communications routines, you will need to re-link DBC.  The
+object files needed are contained on your distribution
+media.  Copy these files into the directory in which you
+will be working.
+
+A 'makefile' has been included on the distribution.  It is
+named 'makefile.dbc'.  You may want to rename makefile.dbc
+to Makefile or makefile.  The makefile contains the linking
+commands necessary to relink DB/C.
+
+The following table shows which module name must be changed
+in the makefile in order to replace the default module with
+a custom module provided by the user.
+
+               Module           |   Default Module Name
+            ===========================================
+             Null SQL           |   sqlnull.o
+             Debugger           |   dbcdbg.o
+             Null Debugger      |   dbgnull.o
+             Communications     |   comunx.o
+             Null Communcations |   comnull.o
+             Null CVERB         |   cverb.o
+             Null CCALL         |   ccall.o
+
+
+The makefile contains two different configurations:
+     dbc & dbcsmall
+
+The user can type:
+     make dbc
+       or
+     make dbcsmall
+
+This will cause the default version of DB/C to be relinked
+WITH communications and the debugger in the first case and
+WITHOUT communications and the debugger in the second case.
+
+
+************************************************************
+*                                                          *
+*                           MS-DOS                         *
+*                                                          *
+************************************************************
+
+To install SQL, CCALL, CVERB or special communications
+routines, you will need to re-link DBC.EXE.  The object
+files needed are contained on the last disk of your
+distribution.  Copy these files into the directory in which
+you will be working.
+
+Procedure 1:  Compiling and linking a new CCALL, CVERB, COM
+     or NIO module with DB/C.
+
+     1) You must use Microsoft C version 5.1.  Be sure that
+     it is set up correctly.
+
+     2) Compile your routine using the following command
+     line:
+               CL -c -W2 -Oati -Gs -AL filename.c
+
+        where filename.c is the name of your C source
+     program.
+
+     3) The file DBCLINK specifies the object files that are
+     linked together to make the new DBC.EXE.  In this file,
+     change the name CCALL.OBJ, COM.OBJ or NIO.OBJ,
+     CVERB.OBJ to the name of the file compiled in step 2.
+
+     4) Link DBC.EXE using the following command line:
+
+              LINK /E @DBCLINK,.\DBC.EXE;
+
+Procedure 2:  Linking SQL-ORACLE routines with DB/C
+
+     1) Create an ORACLE Pro*C program.
+
+     2) Run your program through PCC.EXE as described in the
+     Pro*C User Guide to obtain a C source program using the
+     value 130 for the IRECLEN and ORECLEN command line
+     options.
+
+     3) Compile the resulting C source program using the
+     following command line:
+
+               CL -c -W2 -Oati -Gs -AL filename.c
+
+        where filename.c is the name of the C source program
+     created by PCC.
+
+     4) The file DBCLINK specifies the object files that are
+     linked together to make the new DBC.EXE.  In this file,
+     change the name SQLNULL.OBJ to the name of the file
+     compiled in step 3.
+
+     5) Link DBC.EXE using the following command line:
+
+      LINK /E /SE:512 /ST:10000
+     @DBCLINK,.\DBC.EXE,,c:\ORACLE5\PRO\SQLMSC.LIB;
+
+      If your Oracle library is not in
+     C:\ORACLE5\PRO\SQLMSC.LIB then
+      you must change the LINK command line appropriately.
+
+
+Procedure 3:  Linking a small version of DBC.EXE
+
+It is possible to make a version of DBC.EXE that requires
+     less memory at run-time.  The following procedure will
+     remove communications and/or the Source Debugger from
+     the DBC.EXE.
+
+     1) The file DBCLINK specifies the object files that are
+     linked together to make the new DBC.EXE.  In this file,
+     change the name COM.OBJ to COMNULL.OBJ and/or change
+     the name DBCDBG.OBJ to DBGNULL.OBJ.
+
+     2) Link DBC.EXE using the following command line:
+
+              LINK /E @DBCLINK,.\DBC.EXE;
+
+     3) Using the EXEMOD utility from the Microsoft C
+     package, examine the Hex field of the Minimum
+     Allocation (para) field for your DBC.EXE.  Add HEX 40
+     to this number and use EXEMOD to change the Maximum
+     Allocation (para) field to the number calculated above.
+
+
+CONTENTS OF FILE DBCLINK:
+     dbc+dbciex+dbcldr+dbcmov+dbcmth+dbcmsc+dbcdev+dbcdio+
+     dbckds+dbcprt+dbccom+dbcsys+dbcdbg+sqlnull+ccall+fio+  
+     fiomsdos+rio+xio+aio+nio+vid+com+cverb+dsrnull
+
+CONTENTS OF FILE LINKSMAL
+     dbc+dbciex+dbcldr+dbcmov+dbcmth+dbcmsc+dbcdev+dbcdio+
+     dbckds+dbcprt+comnull+dbcsys+dbgnull+sqlnull+ccall+fio+
+     fiomsdos+rio+xio+aio+nio+vid+cverb+dsrnull
+
+Notes for Novell Network Users:
+     The DBCLINK and LINKSMAL files also need to contain:
+          comaib
+          fionetwr
+
+Notes for other network users:
+     The DBCLINK and LINKSMAL files also need to contain:
+          fiopcnet
+

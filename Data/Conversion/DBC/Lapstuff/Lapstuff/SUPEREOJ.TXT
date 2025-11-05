@@ -1,0 +1,472 @@
+.  SUPEREOJ  -  ROLL DAILY TOTALS INTO MTD/YTD
+.               CREATE ACCOUNTS RECEIVABLE 
+. 
+.  WRITTEN BY   R BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                             41 TEELE DRIVE
+.                             CORAM,  NEW YORK 11727
+.                             (516) 698-5577
+. 
+.  MODIFIED 1/29/84 TO CLOCK AND RECORD THE TIMING OF THE END-OF-DAY
+. 
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   CONTFILE
+. 
+         INCLUDE   BALFWDFL
+. 
+PARTFL   IFILE
+PARTNAME INIT      "INVENTF/ISI"
+. 
+. 
+EOM      INIT      "X"
+EOD      INIT      "X"
+EOY      INIT      "X"
+REPLY    DIM       1
+ZEROS    FORM      "0000000.00"
+IOSW     DIM       1
+. 
+WTCNT    FORM      "000"
+WBALFWD  FORM      8.2
+WCREDITS FORM      7.2
+. 
+EOJTIME  DIM       9
+TIMEFILE FILE
+TIMENAME INIT      "EOJTIME/TXT:D0"
+STARTIME DIM       9
+ENDTIME  DIM       9
+EOJDATE  DIM       8
+REC0     FORM      "0000"
+SEQ      FORM      "-1"
+. 
+         INCLUDE   MONTHTAB
+. 
+. 
+START    BEEP
+. 
+         DISPLAY   *ES,*P1:02,*HON,"S U P E R   S H U T D O W N   P R O":
+                   " C E D U R E "                                            
+. 
+         CLOCK     TIME  TO  EOJTIME
+         DISPLAY   *P01:03,"END-OF-DAY BEGINNING AT ",EOJTIME
+. 
+TIMEBYP  BEEP                                                                 
+         PREPARE   TIMEFILE,TIMENAME
+         MOVE      EOJTIME  TO  STARTIME
+         MOVE      EOJTIME  TO  ENDTIME
+         MOVE      TODAY    TO  EOJDATE
+         WRITE     TIMEFILE,REC0;STARTIME,ENDTIME,EOJDATE
+         WEOF      TIMEFILE,SEQ
+         CLOSE     TIMEFILE
+         KEYIN     *P1:4,*HON,"N O T E ... YOU  M U S T   HAVE STOCK ":
+                   "PAPER IN THE PRINTER   N O W !":
+                   *P1:6,"TAP ENTER WHEN READY ",REPLY                         
+         DISPLAY   *P1:4,*EF
+. NOW SET THE PRINT MONTH INCASE IT IS A MONTH-END REPORT
+. 
+SETPT    MOVE      TODAY  TO  MM
+         REPLACE   " 0"   IN  MM
+         MOVE      MM     TO  MONINDX
+. 
+.  FIRST SET ALPHA MONTH / THEN NUMERIC INDEX
+. 
+         LOAD      MONTHDSP FROM MONINDX OF JAN,FEB,MAR,APR,MAY,JUN:
+                                            JUL,AUG,SEP,OCT,NOV,DEC
+         DISPLAY   *P35:12,MONTHDSP,*W
+. 
+         COMPARE   "1"    TO  MONINDX
+         GOTO      BADMNTH   IF  LESS
+. 
+         ADD       "1"    TO  MONINDX
+         COMPARE   "13"   TO  MONINDX
+         GOTO      ALLSET IF  NOT EQUAL
+. 
+. OKAY...SO THIS IS DECEMBER...SO LETS RESET TO JANUARY
+. 
+         MOVE      "01"   TO  MONINDX      (NOW POINTING TO JAN OF NEW YEAR)
+ALLSET   TRAPCLR   PARITY                  (NOP)
+. 
+         DISPLAY    *P01:06,"DAILY END-OF-PROCESSING PROCEDURE":
+                    *P01:08,"THIS PROCEDURE WILL ROLL DAILY TOTALS TO ":
+                               "MONTH-TO-DATE AND YEAR-TO-DATE":
+                 *P01:10,"FOR END-OF-DAY PROCESSING,   THE DAILY EDP CONTROLS":
+                           " REPORT WILL BE PRINTED":
+                    *P30:11,"    THE DAILY FIELDS WILL BE ZEROED":
+                 *P30:12,"       AND ACCOUNTS RECEIVABLE FILES CREATED":
+                    *P01:14,"FOR END-OF-MONTH PROCESSING, THE MONTH-END EDP ":
+                           "CONTROLS REPORT WILL BE PRINTED":
+                   *P30:15,"AND BOTH THE DAILY AND MONTHLY FIELDS WILL BE ":
+                           "ZEROED":
+                   *P01:20,"THE PROCEDURE WILL THEN WRITE BACKUP COPIES OF":
+                   *P01:21,"DATA FILES TO DISKETTE"
+         BEEP
+. 
+. OPEN THE CONTROLS FILE FOR UPDATE
+. 
+         CALL      OPENCTLS
+. 
+. 10/11/81 CHANGE TO ACCESS AND UPDATE THE A/R BALANCE FORWARD FILE
+. 
+         CALL      OPENBALF
+         CALL      GTBALFWD        (WE NOW HAVE THE BAL FWD FIGS)
+. 
+         PRINT     *F,*25,"END-OF-DAY PROCESSING FOR ",TODAY:
+                   " BEGINNING AT ",EOJTIME
+QUES1    KEYIN     *P01:24,*EF,"IS IT END-OF-YEAR ?  Y or N ",EOY
+         CMATCH    "Y" TO EOY
+         GOTO      SETEOY IF EQUAL
+         CMATCH    "N" TO EOY
+         GOTO      QUES2 IF EQUAL
+         BEEP
+         GOTO      QUES1
+QUES2    KEYIN     *P01:24,*EF,*P01:24,"IS IT END-OF-MONTH ?  Y or N ",EOM
+         CMATCH    "Y" TO EOM
+         GOTO      SETEOM IF EQUAL
+         CMATCH    "N" TO EOM
+         GOTO      SETDLY IF EQUAL
+         BEEP      
+         GOTO      QUES2
+SETDLY   DISPLAY   *ES,*P01:24,"ONLY END-OF-DAY PROCESSING WILL BE ":
+                               "ACCOMPLISHED"
+         MOVE      "Y"      TO  EOD
+. 
+. 
+DAILYDO  MOVE      "APP"    TO  CTLKEY
+         CALL      GETCTL
+         CMATCH    "H"      TO IOSW
+         GOTO      NXT1     IF EQUAL
+BEEPER   BEEP
+         DISPLAY   *ES,"UNABLE TO ACCESS CONTROLS FILE - ABORTING!"
+         STOP
+NXT1     TRAPCLR   PARITY
+. 
+. SET THE A/R BALANCE FORWARD WORK FIELD
+. 
+         MOVE      LBALFWD  TO  WBALFWD
+         MOVE      LBALCRED TO  WCREDITS
+. 
+         CALL      ROLLTOTS
+         CALL      PRINTLST
+. 
+. NOW OVERLAY THE A/R BALANCE FORWARD FIELD
+. 
+         MOVE      "0.00"   TO  LBALCRED     (ZERO OUT   DAILY CREDS)
+         MOVE      WBALFWD  TO  LBALFWD
+. 
+         CALL      ZERODALY        ZERO OUT THE DAILY CONTROL FIELDS
+. 
+.  SHALL I ZERO OUT THE MONTHLY FIELDS ALSO  ?
+. 
+         CMATCH    "Y"  TO  EOM
+         CALL      ZEROMON  IF  EQUAL        (YES ... DO IT)
+. 
+.  SHALL I ZERO OUT THE YEARLY FIELDS ALSO ?
+. 
+         CMATCH    "Y"  TO  EOY
+         CALL      ZEROYEAR  IF  EQUAL       (YES..WHY NOT?)
+. 
+         CALL      PUTCTL
+         GOTO      TWOBYPAS
+. 
+.  NOW DO IT FOR FOR COMPANY TWO
+. 
+         MOVE      "XXX"    TO  CTLKEY
+         CALL      GETCTL
+         CMATCH    "H"      TO  IOSW
+         GOTO      BEEPER   IF  NOT EQUAL
+. 
+. NOW SET THE A/R BALANCE FORWARD FIELD AGAIN
+. 
+         MOVE      RBALCRED TO  WCREDITS
+         MOVE      RBALFWD  TO  WBALFWD
+. 
+         CALL      ROLLTOTS
+         CALL      PRINTLST
+. 
+. NOW OVERLAY THE COMPANY TWO A/R BALANCE FORWARD FIELD
+. 
+         MOVE      "0.00"   TO  RBALCRED
+         MOVE      WBALFWD  TO  RBALFWD
+. 
+         CALL      ZERODALY        ZERO OUT THE DAILY CONTROL FIELDS
+. 
+.  SHALL I ZERO OUT COMPANY TWOS MONTHLY FIELDS ?
+. 
+         CMATCH    "Y"  TO  EOM
+         CALL      ZEROMON  IF  EQUAL    (YES DO IT)
+. 
+.  SHALL I ZERO OUT THE YEARLY FIELDS  ?
+. 
+         CMATCH    "Y"  TO  EOY
+         CALL      ZEROYEAR  IF  EQUAL   (YES DO IT)
+. 
+         CALL      PUTCTL
+. 
+.  NEW SWITCHING LOGIC IN HERE  1/6/80 RB
+. 
+. NOW UPDATE  THE  BALANCE FORWARD FILE FOR BOTH COMPANIES!.
+.
+TWOBYPAS CALL      PTBALFWD
+         CMATCH    "Y"  TO  EOD
+         GOTO      CHAINBKP IF EQUAL           (OTHERWISE ROUTINE WAS CALLED)
+. 
+         RETURN                                (GOBACK TO EOM OR EOY ROUTINES)
+. 
+BADMNTH  BEEP
+         DISPLAY   *ES,*P01:10,"YOUR SIGN-ON DATE IS N/G - I AM ABORTING!":
+                   *P01:12:
+                   "BECAUSE I CANT DETERMINE THE MONTH TO ZERO OUT!"
+         CHAIN     "ANSWER1"
+. 
+. 
+. ROUTINE FOR ROLLING TOTALS....
+. 
+ROLLTOTS TRAPCLR   PARITY     (NOP)
+         ADD       CTLRCVD  TO  CTLMRCVD
+         ADD       CTLRCVD  TO  CTLYRCVD
+         ADD       CTLSOLD  TO  CTLMSOLD
+         ADD       CTLSOLD  TO  CTLYSOLD
+         ADD       CTLCASH  TO  CTLMCASH
+         ADD       CTLCASH  TO  CTLYCASH
+         RETURN
+. 
+ZERODALY MOVE      ZEROS    TO  CTLRCVD
+         MOVE      ZEROS    TO  CTLSOLD
+         MOVE      ZEROS    TO  CTLCASH
+         DISPLAY   *P55:24,"DAILY FIELDS ZEROED OUT",*W,*W,*W,*P55:24,*EL
+         RETURN
+. 
+ZEROMON  MOVE      ZEROS    TO  CTLMRCVD
+         MOVE      ZEROS    TO  CTLMSOLD
+         MOVE      ZEROS    TO  CTLMCASH
+         DISPLAY   *P55:24,"MONTHLY FIELDS ZEROED OUT",*W,*W,*W,*P55:24,*EL
+         RETURN
+. 
+ZEROYEAR MOVE      ZEROS    TO  CTLYRCVD
+         MOVE      ZEROS    TO  CTLYSOLD
+         MOVE      ZEROS    TO  CTLYCASH
+         BEEP
+         DISPLAY   *P55:24,"YEARLY FIELDS ZEROED OUT ",*W,*W,*W,*W,*P55:24,*EL
+         BEEP
+         RETURN
+. 
+. 
+PRINTLST PRINT     *F,*C,*L
+         MATCH     "APP"  TO CTLKEY
+         GOTO      PTREP  IF NOT EQUAL
+. 
+         CMATCH    "Y"  TO  EOD
+         GOTO      DAILYLTL IF  EQUAL
+. 
+. FALLTHRU  IS  END OF MONTH/YEAR TITLE
+. 
+         PRINT     *1,"AMERICAN PRECISION PRODUCTS INC. - MONTH END REPORT ":
+                      "FOR ":
+                    MONTHDSP,"           AS OF ",TODAY
+         GOTO      PRINTSPC
+. 
+DAILYLTL PRINT     *1,"AMERICAN PRECISION PRODUCTS INC. - DAILY EDP CONTROLS":
+                      " TOTALS       AS OF ",TODAY
+PRINTSPC PRINT     " "
+         CALL      PRINTOTS
+PTRTRN   RETURN
+. 
+. 
+PTREP    CMATCH    "Y"  TO  EOD
+         GOTO      DAILYRTL  IF  EQUAL
+. 
+. FALLTHRU  IS END OF MONTH/YEAR TITLE
+. 
+         PRINT     *1,"COMPANY TWO XXXXXXXXX INC. - MONTH END REPORT FOR ":
+                   MONTHDSP,"            AS OF ",TODAY
+         GOTO      PRINTSPC
+. 
+DAILYRTL PRINT     *1,"COMPANY TWO XXXXXXXXX INC. - DAILY EDP CONTROLS TOTALS":
+                      "       AS OF ",TODAY
+         GOTO      PRINTSPC
+. 
+PRINTOTS PRINT     *1,"DAILY VALUE RECEIVED ",CTLRCVD
+         PRINT     *1,"---------------------"
+         PRINT     *1," "
+         PRINT     *1,"PRIOR A/R BALANCE   ",WBALFWD
+         PRINT     *1," "
+. 
+. NOTE THAT CTLSOLD  I N C L U D E S  CREDITS THAT HAVE BEEN ADDED
+.           WITH NEGATIVE SIGNS.....THEREFORE TO HIGHLIGHT THE DAILY
+.           CREDITS ON A SEPARATE LINE, IT IS NECESSARY TO  A D D
+.           WCREDITS TO CTLSOLD  P R I O R  TO PRINT
+. 
+         ADD        WCREDITS TO    CTLSOLD
+....................................................................
+         PRINT     *1,"DAILY VALUE SOLD     ",CTLSOLD
+         PRINT     *1,"DAILY CASH PROCESSED ",CTLCASH
+         PRINT     *1,"DAILY CREDITS ISSUED ",WCREDITS
+         PRINT     *1," "
+. 
+         SUBTRACT  CTLCASH  FROM  WBALFWD
+         SUBTRACT  WCREDITS FROM  WBALFWD
+         ADD       CTLSOLD  TO    WBALFWD
+. 
+         PRINT     *1,"---------------------"
+         PRINT     *1," "
+         PRINT     *1,"NEW A/R BALANCE IS  ",WBALFWD
+         PRINT     *1," "
+         PRINT     *1,"---------------------"
+         PRINT     *1," "
+         PRINT     *1,"M-T-D VALUE RECEIVED ",CTLMRCVD
+         PRINT     *1,"M-T-D VALUE SOLD     ",CTLMSOLD
+         PRINT     *1,"M-T-D CASH PROCESSED ",CTLMCASH
+         PRINT     *1," "
+         PRINT     *1,"Y-T-D VALUE RECEIVED ",CTLYRCVD
+         PRINT     *1,"Y-T-D VALUE SOLD     ",CTLYSOLD
+         PRINT     *1,"Y-T-D CASH PROCESSED ",CTLYCASH
+         PRINT     *C,*L,*L,*L:
+                   *1,"Note:  The M-T-D and Y-T-D Figures shown    ":
+                      "I N C L U D E     Today`s data"
+WTLOOP   ADD       "1"   TO  WTCNT
+         COMPARE   "250" TO  WTCNT
+         GOTO      WTLOOP    IF   LESS
+         MOVE      "000"     TO   WTCNT
+         RETURN
+SETEOY   BEEP
+         COMPARE   "01"  TO  MONINDX
+         GOTO      CRAP  IF  NOT  EQUAL
+         DISPLAY   *ES,*P01:01," ** END OF YEAR ** PROCESSING WILL BE ":
+                               "ACCOMPLISHED":
+                   *P01:04,"THIS INCLUDES THE FOLLOWING PROCEDURES":
+                   *P01:10,"CORPORATE CONTROL RECORDS WILL BE ZEROED OUT FOR":
+                   *P01:11,"    EACH COMPANY - INCLUDING DAY/MONTH/YEAR FIELDS"
+. 
+         MOVE      "Y"  TO  EOY
+         MOVE      "Y"  TO  EOM
+. 
+. THE ABOVE INSURES THAT WE WILL EXECUTE THE EOM AND EOY ROUTINES
+. 
+         GOTO      ENDOFMON
+. 
+CRAP     BEEP
+         DISPLAY   *ES,*P01:01,"IT CANNOT BE END-OF-YEAR !":
+                       *P01:03,"IT ISN`T DECEMBER!",*W,*W,*W,*W
+         BEEP
+         GOTO       QUES1
+. 
+. 
+SETEOM   DISPLAY   *ES,*P01:01," ** END OF MONTH ** PROCESSING WILL BE ":
+                               "ACCOMPLISHED":
+                    *P01:03,"THIS WILL ZERO OUT THE CORPORATE CONTROLS FOR":
+                    *P01:04,"     EACH COMPANY FOR DAY/MONTH FIELDS":
+                    *P01:05,"ALSO ZEROS THE USAGE FIELDS FOR NEW MONTH"
+. 
+         GOTO      ENDOFMON
+. 
+CHAINBKP BEEP
+         DISPLAY   *ES,*P01:10,"I AM NOW LEAVING   D A T A S H A R E":
+                       *P01:12,"TO EXECUTE THE REQUIRED DAILY FILE UTILITIES":
+                       *P01:14,"AND TO CREATE THE RECEIVABLES FILES"
+         BEEP
+         ROLLOUT   "CHAIN CASHPRNT"
+         TRAPCLR   PARITY      (NOP)
+         CHAIN     "SUPERCSH"
+. 
+. NOW CHAIN THE ACCTS RECEIVABLE CREATE PROGRAM
+. IF THE CLIENT IS USING THIS MODULE
+. 
+.        CHAIN     "MAKERCVB"     (NO GOOD!  SYSTEM WILL NOT 
+.                                  RETURN FROM PRINTCSH PROGRAM)
+EOJ      STOP
+. 
+. 
+         INCLUDE   CONTRLIO
+. 
+........ INCLUDE   USAGEIO
+. 
+         INCLUDE   BALFWDIO
+. 
+........ INCLUDE   PARTIO
+. 
+ENDOFMON CALL      DAILYDO      (ZERO CONTROL RECORDS FIRST)
+. 
+. MODIFIED 2/26/83 TO LOOP BACK TO CHAINBKP
+. 
+.  NOW USE CURRENT MONTH TO DETERMINE WHICH FIELD TO ZERO OUT
+.  IN INVENTORY USAGE FIELD FOR EACH USAGE RECORD
+. 
+........ CALL USAGOPEN
+. 
+........ OPEN      PARTFL,PARTNAME     (OPEN PARTFILE FOR EOY)
+. 
+........ MOVE      "0"   TO USAGCALC     (SET THE COUNTER)
+. 
+. READ THE INVENTORY USAGE FILE KEY SEQUENTIALLY AND UPDATE ACCORDINGLY
+. 
+........ MOVE      "       "  TO  USAGPART
+........ CALL      GETUSAGE                (POINT TO FIRST RECORD)
+. 
+........ BEEP
+........ DISPLAY   *ES,*P01:12,"THE INVENTORY USAGE FILE WILL BE ZEROED OUT":
+........                       " FOR NEXT MONTH`S DATA":
+........               *P01:14,"THIS PORTION OF THE JOB IS LIKELY TO RUN FOR ":
+........                       "OVER THIRTY (30) MINUTES"
+........ BEEP
+. 
+....RDUSGKS  READKS    USAGEFL;USAGPART,USNYBGOH:
+........                   NYJANR,NYFEBR,NYMARR,NYAPRR,NYMAYR,NYJUNR:
+........                   NYJULR,NYAUGR,NYSEPR,NYOCTR,NYNOVR,NYDECR:
+........                   NYJANS,NYFEBS,NYMARS,NYAPRS,NYMAYS,NYJUNS:
+........                   NYJULS,NYAUGS,NYSEPS,NYOCTS,NYNOVS,NYDECS:
+........                   USTXBGOH:
+........                   TXJANR,TXFEBR,TXMARR,TXAPRR,TXMAYR,TXJUNR:
+........                   TXJULR,TXAUGR,TXSEPR,TXOCTR,TXNOVR,TXDECR:
+........                   TXJANS,TXFEBS,TXMARS,TXAPRS,TXMAYS,TXJUNS:
+........                   TXJULS,TXAUGS,TXSEPS,TXOCTS,TXNOVS,TXDECS
+. 
+........ GOTO      ZEROEND IF OVER
+. 
+. ZERO OUT THE FIELDS NOW
+. 
+........ CMATCH    "Y"  TO  EOY
+........ GOTO      BYPASS  IF  NOT  EQUAL
+. 
+. FALLTHRU INDICATES END-OF-YEAR..........
+. 
+.      SO ACCESS THE INVENTORY MASTER FILE  (ISAM)
+.      TO GAIN THE BEGINNING ON-HAND FIGURES BY COMPANY
+.      IN ORDER TO RESET THE BEGINNING ON-HAND FOR THE USAGE FILE
+. 
+........ MOVE      USAGPART  TO  PARTNO
+........ CALL      GETPART
+........ CMATCH    "H"  TO  IOSW
+........ CALL      BEEPPART  IF  NOT  EQUAL
+. 
+.        NOW  SET  THE BEGINNING ON-HAND AS YOU HAVE SUCCESSFULLY READ!
+. 
+........ MOVE      PNYOH  TO  USNYBGOH        (SET LIBERTY)
+........ MOVE      PTXOH  TO  USTXBGOH        (SET REPUBLIC)
+. 
+.BYPASS   MOVE      "000"   TO NYRCVD
+........ MOVE      "000"   TO NYSOLD
+........ MOVE      "000"   TO TXRCVD
+........ MOVE      "000"   TO TXSOLD
+. 
+........ MOVE      MONINDX TO USAGINDX       (LOAD THE USAGE INDEX FIELD)
+. 
+........ CALL      STORNYUS
+........ CALL      STORTXUS
+........ CALL      PUTUSAGE
+........ ADD       "1"     TO USAGCALC
+........ GOTO      RDUSGKS           (GO BACK AND GET NEXT ONE)
+. 
+.BEEPPART BEEP
+........ DISPLAY   *P01:24,*EL,*P01:24,PARTNO,"  NOT ON INVENTORY FILE!":
+........                   "  SET TO 0"
+........ MOVE      "0"  TO  PNYOH
+........ MOVE      "0"  TO  PTXOH
+........ RETURN
+. 
+ZEROEND  BEEP
+........ DISPLAY   *ES,*P01:10,USAGCALC," USAGE RECORDS UPDATED":
+........               *P01:14,"YOU MAY BEGIN NEXT MONTHS PROCESSING WHEN":
+........               " TODAYS SHUTDOWN PROCEDURE IS COMPLETE",*W,*W,*W
+........ BEEP
+. 
+         GOTO      CHAINBKP

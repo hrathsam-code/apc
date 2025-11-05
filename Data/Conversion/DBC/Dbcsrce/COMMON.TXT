@@ -1,0 +1,29 @@
+*................................................................
+. COMMON - DEFINE COMMON DATA AREAS
+. 
+. NOTE:  85 BYTES WILL BE RESERVED FOR INTER PROGRAM COMMUNICATIONS
+. MODIFIED 3/15/80 FOR I/O FUNCTION TYPE LOAD FOR ERROR DETECTION
+. 
+PORTN    DIM       *30
+TODAY    DIM       *8                  DATE IN mm/dd/yy FORMAT
+SECURITY FORM      *1                  SECURITY CLEARANCE LEVEL
+DATE6    DIM       *6                  DATE IN MMDDYY WITH NO /
+PONUMBS  DIM       *4
+INVNUMB  DIM       *5                  CURRENT INVOICE NUMBER
+ACCTNUMB DIM       *4                  CURRENT ACCOUNT NUMBER
+VENDNUMB DIM       *3                  CURRENT VENDOR NUMBER
+FROMPGM  DIM       *8                  CALLING PROGRAM NAME
+FIRSTIME DIM       *1                  FIRST TIME SWITCH
+TESTONE  DIM       *1
+TESTTWO  DIM       *1
+TESTTHRE DIM       *1
+ERRORSW1 DIM       *1
+ERRORSW2 DIM       *1
+ERRORSW3 DIM       *1
+ERRORSW4 DIM       *1
+IOTEST   DIM       *1
+IOTYPE   DIM       *6                  READ/WRITE/UPDATE
+IOERFILE DIM       *19                 NAME OF FILE TRAPPED FOR ERROR MSG
+. 
+.  END OF COMMON WORK AREA FOR INTER PROGRAM COMMUNICATION
+. 

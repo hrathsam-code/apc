@@ -1,0 +1,32 @@
+
+
+
+PAGE    1      cashntry                                                                                       02-11-19 11:35:43
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP cashntry -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   11.    INCLUDE  A: common.txt
+   29.    INCLUDE  B: contfile.txt
+   50.    INCLUDE  C: rcvbcash.txt
+   60.    INCLUDE  D: custmast.txt
+   81.    INCLUDE  E: invctbl2.txt
+  192.                                         TRAP      ARFILEOP IF IO
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  939.    INCLUDE  F: custio.txt
+  940.    INCLUDE  G: contrlio.txt
+   57. G                                       RETURN 
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  941.    INCLUDE  H: rcvblsio.txt
+ 1038.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\cashntry.plc                                                                                                                                                                                                                                   
+      1436 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:43 11:35:43
+  00003874 DATA;  000012DE  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

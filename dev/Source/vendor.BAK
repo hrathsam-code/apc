@@ -1,0 +1,1418 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    Vendor.PLS                                                     ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/25/2003 AT 10:34AM                                          ;
+;                                                                             ;
+;  PURPOSE:    Venor Maintenance Program                                      ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   03/28/2005   HOR     INITIAL VERSION                     ;
+;              1.1   08.26.2014   HOR     Added ability to update SQL system  ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+           INCLUDE           NCOMMON.TXT
+           INCLUDE           WORKVAR.INC
+#RESULT    FORM              1
+#RES1      FORM              1
+#DIM1      DIM               1
+#DIM2      DIM               2
+#RES2      FORM              2
+#LEN1      FORM              3
+#MenuObj   Automation
+TestName      DIM               25
+#MenuItem  DIM               25
+ReturnColumn FORM              2
+MarkupPct     FORM              2.2
+NXTACCTN      FORM              5
+Field01       DIM               5
+.=============================================================================
+. Added to support updating of multiple Vendor information
+.
+EGLAccount    EDITTEXT          (18)
+EGLEntity     EDITTEXT          (18)
+EGLAmount     EDITNUMBER        (18)
+TestGLCode    DIM               8
+TestGLEntity  DIM               8
+EditTop       FORM              4
+EditBottom    FORM              4
+EditLeft      FORM              4
+EditRight     FORM              4
+X             FORM              3
+GLLine        FORM              3
+
+.
+DUMMY    DIM       1
+...SEQEOF   FORM      "-3"
+
+DIM1          DIM               1
+
+AccountNo     FORM              5
+AccountNoD    DIM               5
+.=============================================================================
+
+           GOTO              STARTPGM
+
+           INCLUDE           ADOMacro.INC
+
+           INCLUDE           Vendor.FD
+.CustRec2      RECORD            like CustREC
+
+           INCLUDE           GLMAST.FD
+           include           Sequence.FD
+           include           Type.FD
+           INCLUDE           CNTRY.FD
+           INCLUDE           STATE.FD
+           INCLUDE              ARTRM.FD
+           INCLUDE              APClass.FD
+           INCLUDE              APType.FD
+
+MAIN          PLFORM            Vendor.PLF
+VendorDist    PLFORM            Vendor2.PLF
+About         PLFORM            About.PLF
+DataMenu           PLFORM            DataMenu.PLF
+
+.X FileMenu    menu
+.X ChangeMenu  menu
+.X HelpMenu    menu
+
+FileMenuTxt init      "&File;":
+                      "&Print;":
+                      "-;":
+                      "E&xit"
+
+ChngMenuTxt init      "&Edit;":
+                      "&New record;":
+                      "&Change Record;":
+                      "&Delete Record;":
+                      "&Save Record"
+
+HelpMenuTxt init      "&Help;":
+                      "F1 - Help with A//P Terms;":
+                      "-;":
+                      "&About Chiron Software"
+.
+STARTPGM   ROUTINE
+           INCLUDE           SECURITY.INC
+           MOVE              "1",ProgLoaded
+.
+. If we're unable to find the Help file, then we're going to simply just not make
+. the F1 Function key available to the Users
+.
+           MOVE              "AppDir;HELPDIR",EnvData
+           CLOCK             INI,EnvData
+           IF                NOT OVER
+             PACK              EnvData,EnvData,VendorHelp
+             TRAP              NOHELP IF OBJECT
+             SETMODE           *HELPLIB=EnvData
+             SETMODE           *F1HELP=ON
+             TRAPCLR           OBJECT
+             GOTO              OPENFILES
+NOHELP
+             NORETURN
+           ENDIF
+.
+OPENFILES
+                   TRAP              NOFILE IF IO
+                   CALL              OPENVendor
+                   call                OpenSequence
+                   CALL              OpenARTRM
+                   CALL              OpenVendorGL
+                   CALL              OpenAPClass
+                   CALL              OpenAPType
+..                   ADOInit           "DRIVER={SQL Server};SERVER=10.10.10.21;User ID=harry;Password=Tim1156!;Initial Catalog=Superior_DailyExtract"
+
+                   TRAPCLR           IO
+
+                   CALL              OPENGLMAST
+                   CALL              OPENCNTRY
+.=============================================================================
+. HR 7/22/04
+.
+.         OPEN      XMTADFL,XMTADNM,SHARE        \\ CH 01/14/03
+.         OPEN      XMTCGFL,XMTCGNM,SHARE        \\ CH 01/14/03
+
+.         OPEN      ROLODEXFL
+.         OPEN      XMTCCGFL,XMTCCGNM,SHARE            //CH 01/13/03
+.         OPEN      XMTCCADFL,XMTCCADNM,SHARE            //CH 01/13/03
+
+
+..HR 4/13/2005         TRAP      NOFILE IF IO
+.=============================================================================
+
+VendorColl          COLLECTION
+VendorEdt           COLLECTION
+VendorBoxes         COLLECTION
+VendorStat          COLLECTION
+VendorNum           COLLECTION
+VendorRemitColl     collection
+
+.           LISTINS           VendorStat,STVendCountry
+
+.           LISTINS           VendorNum
+
+           listins           VendorRemitColl,ERemitName,ERemitAddress1,ERemitAddress2,ERemitAddress3:
+                                             ERemitCity,ERemitState,ERemitZip,ERemitCountry
+
+           LISTINS           VendorCOLL,EVendor,EVendName,EVendAddress1,EVendAddress2,EVendAddress3:
+                                        EVendCity,EVendSt,EVendZip,EVendCountry,EVendContact:
+                                        EVendAccountNo,EVendMemo,EVendHomePage:
+                                        EGLAccount,EGLEntity:                   //HR 7/19/2005
+                                        EVendTerm,EVendPOContact:
+                                        EVendType,EVendClass,EVendEIN:
+                                        EVendEMail,EVendPriority:
+                                        ERemitName,ERemitAddress1,ERemitAddress2,ERemitAddress3:
+                                        ERemitCity,ERemitState,ERemitZip,ERemitCountry
+.
+
+           LISTINS           VendorEDT,EVendor,EVendName,EVendAddress1,EVendAddress2,EVendAddress3:
+                                       EVendCity,EVendSt,EVendZip,EVendCountry,EVendContact:
+                                       EVendAccountNo,EVendMemo,EVendHomePage:
+                                       EGLAccount,EGLEntity:                   //HR 7/19/2005
+                                       EVendTerm,EVendPOContact:
+                                       EVendType,EVendClass,EVendEIN:
+                                       EVendEMail,EVendPriority:
+                                       ERemitName,ERemitAddress1,ERemitAddress2,ERemitAddress3:
+                                       ERemitCity,ERemitState,ERemitZip,ERemitCountry
+
+              LISTINS           VendorBoxes,CBPrintAcctNo,CBForm1099,CBAutoPay,CBVendActive,BGLCodes:
+                                            BSearchType,BSearchClass,BSearchARTerm,BSearchCountry:
+                                            BRemitCountry,EVendPOType,CBUseVendInfo
+.
+.           LISTINS           VendorBOXES,CBVendActive                      //EVendInvType
+
+           winhide                     //HR 3/2/2005
+           FORMLOAD             MAIN
+           FORMLOAD             VendorDist,WMain
+           FORMLOAD          DataMenu,WMain
+
+           CALL                 SetupGLCodes
+           setfocus             EVendor
+
+           LOOP
+             WAITEVENT
+           REPEAT
+.
+. We never get here!!   Just in case though.... :-)
+.
+           RETURN
+.           STOP
+;=============================================================================
+SetupGLCodes
+              MOVE              "24",EditTop
+              MOVE              "56",EditLeft
+              FOR               X FROM "1" TO "18" USING "1"
+                CALC              EditBottom = (EditTop + ((X-1) * 15)+ 16)
+                CALC              EditRight = EditLeft + 80
+
+                CREATE            WVendor2;EGLAccount(X)=(EditTop + ((X-1) * 15)):(EditTop + ((X-1) * 15)+ 16):EditLeft:(EditLeft + 80):
+                                  MaxChars=8,Style=2,ZORDER=1000,visible=1,Border=1,SelectAll=1,ObjectID=X
+                CREATE            WVendor2;EGLEntity(X)=(EditTop + ((X-1) * 15)):(EditTop + ((X-1) * 15)+ 16):(EditLeft + 80):((EditLeft + 80) + 80):
+                                  MaxChars=8,Style=2,ZORDER=1000,visible=1,Border=1,SelectAll=1,ObjectID=X
+
+                ACTIVATE          EGLAccount(X)
+                ACTIVATE          EGLEntity(X)
+              REPEAT
+              EVENTREG          EGLAccount,10,CheckGLAccountKeyPress,ObjectID=RowSelected
+              RETURN
+;=============================================================================
+CheckGLAccountKeyPress
+              F2SEARCH          EGLAccount(RowSelected),GLMAST
+              DISPLAY           "Object = ",RowSelected
+              RETURN
+;=============================================================================
+BROWSEFILE ROUTINE              ReturnColumn
+
+SEARCH     PLFORM            SEARCH3.PLF
+           CALL                 OpenVendor
+           FORMLOAD          SEARCH
+
+           RETURN
+
+INITSRCH
+           PACK              SearchTitle,VendorTitle," Search Window"
+           SETPROP           WSearch,Title=SearchTitle
+
+           CTADDCOL          "Account Number",75,"Vendor Name",125:
+                             "Address",75:
+                             "City",100:
+                             "State",40:
+                             "Zip",60
+
+           RETURN
+.=============================================================================
+LoadSearchWindow
+              GETITEM           ESearchName,0,VendorKY2
+
+              SETMODE           *mcursor=*wait
+
+              COUNT             result,VendorKY2
+              IF                (result = 0)
+                SETMODE           *mcursor=*Arrow
+                setprop                BSearchSearch,default=1
+                setfocus                 ESearchName
+
+                RETURN
+              ENDIF
+
+              clear             SearchCounter
+              Uppercase         VendorKY2
+              LVSearchPLB.DeleteAllItems
+              CALL              RDVendor2
+              LOOP
+                CALL              KSVendor2
+              UNTIL             (ReturnFl = 1)
+                uppercase         Vendor.Name
+                MATCH             VendorKY2,Vendor.Name
+                IF                not equal
+                  SETMODE           *mcursor=*Arrow
+                  BREAK
+                ENDIF
+                incr              SearchCounter
+                CTLoadRecord2     Vendor2,Vendor,Vendor.AccountNumber,Vendor.AccountNumber,Vendor.Name:
+                                  Vendor.Address1,Vendor.City,Vendor.State
+              REPEAT
+              SETMODE           *mcursor=*Arrow
+              if                (SearchCounter = 0)
+                beep
+                alert                    stop,"No Vendors Found that match the Search Criteria",result,"NO VENDORS FOUND"
+                ESearchName.SelectAll
+                ESearchName.Clear
+                setprop                BSearchSearch,default=1
+                setfocus                 ESearchName
+              else
+                LVSearchPLB.SetItemState using *Index=0,*State=03,*StateMask=03
+                setprop                BSearchSelect,default=1
+                setfocus               LVSearchPLB
+              endif
+              RETURN
+;==========================================================================================================
+ItemSelected
+                      LVSearchPLB.GetNextItem giving RowSelected using *Flags=02,*Start=FirstRow
+                    if                 (RowSelected != -1)
+                      LVSearchPLB.GetItemText giving $SearchKey using *Index=RowSelected,*SubItem=0
+                      MOVE               "Y",PassedVar
+                      DESTROY            WSearch
+                    endif
+
+                    RETURN
+;==========================================================================================================
+NOFILE
+           NORETURN
+           ALERT             PLAIN,"Vendor Master file does not exist. Do you wish to create it?",#RESULT
+           IF                (#RESULT = 1)
+.             CALL              PREPVendor
+             GOTO              OPENFILES
+           ENDIF
+           STOP
+
+.X READOPT    DIM               12
+.X PAGED      DIM               4
+.X NEXTLINE   INIT              127
+.X PRTFILE    PFILE
+.X PRTCOUNT   FORM              6
+.X PRTCOUNTD  FORM              6
+.X PRGTITLE   INIT              "A/P Terms MAster Listing"
+.X PAGETITLE  DIM               60
+.X DIM500     DIM               500
+.X PRTWIDTH   FORM              8
+.X PRTHEIGHT  FORM              8
+.X DIM8       DIM               8
+.X COL        FORM              3
+.X ROW        FORM              3
+.X MAXROWS    FORM              3
+.X ACCT       DIM               9
+.X TODAY8     DIM               8
+.X TIME8      DIM               8
+.X NUM1       FORM              3
+.X NUM2       FORM              3
+.X ToCode     DIM               8
+.X .
+.X PRTREPORT
+.X VendorRPT   PLFORM            VendorRPT.PLF
+.X .           WINHIDE
+.X
+.X            CLOCK             DATE,TODAY8
+.X            CLOCK             TIME,TIME8
+.X
+.X            MOVE              "60",MAXROWS
+.X            MOVE              "0",PAGE
+.X            MOVE              "90",LINE
+.X
+.X            FORMLOAD          VendorRPT
+.X            LOOP
+.X              WAITEVENT
+.X            REPEAT
+.X
+.X            RETURN
+.X
+.X .           alert             note,"how???",returnfl
+.X .           LOOP                                              .Wait...and Wait...
+.X .             WAITEVENT                                       .
+.X .           REPEAT                                            .and wait
+.X
+.X START
+.X .
+.X .
+.X . Since we're dealing with a sorted file, we're going to read it in
+.X . Sequential order vs. Key Sequential.  Also, we must make sure that
+.X . we don't read any records that we're not supposed to based on the
+.X . code that was in the other program. (AP42.DBS)
+.X .
+.X
+.X            CLOCK             DATE,TODAY8
+.X            CLOCK             TIME,TIME8
+.X
+.X            MOVE              "60",MAXROWS
+.X            MOVE              "0",PAGE
+.X            MOVE              "90",LINE
+.X            MOVE              "0",PRTCOUNT
+.X .
+.X . Process all Vendorors in Sorted Order
+.X .
+.X            MOVE              " ",VendorKY
+.X
+.X            GETITEM           RAll,0,RETURNFL
+.X            BRANCH            RETURNFL OF ALL
+.X
+.X            GETITEM           EFromRange,0,VendorKY
+.X            GETITEM           EToRange,0,ToCode
+.X
+.X            IF                (ToCode < VendorKY)
+.X            BEEP
+.X            ALERT             STOP,"From Code cannot be less than the To Code",RETURNFL,"Range Error"
+.X            SETFOCUS          ETORANGE
+.X            RETURN
+.X            ENDIF
+.X
+.X ALL
+.X            TRAP              NOPRINT IF SPOOL
+.X            PRTOPEN           PRTFILE,"@?","A/P Term Code Listing"
+.X            TRAPCLR           IO
+.X
+.X            CALL              PRTHEADER2
+.X
+.X
+.X            CALL              RDVendor
+.X            LOOP
+.X              CALL              KSVendoror
+.X            UNTIL             (RETURNFL = 1 OR Vendor.VendoromerID > ToCode)
+.X              CALL              PRTLINE
+.X            REPEAT
+.X .
+.X . Print Totals line
+.X .
+.X            IF                (LINE + 4 > MAXROWS)
+.X              CALL              PRTHEADER
+.X            ENDIF
+.X            PRTPAGE           PRTFILE;*N=3,PRTCOUNT," A/P Term Records Printed"
+.X            PRTCLOSE          PRTFILE
+.X            RETURN
+.X .
+.X . Print Each Detailed line
+.X .
+.X PRTLINE
+.X            ADD               "1",PRTCOUNT
+.X            MOVE              PRTCOUNT,PRTCOUNTD
+.X
+.X            IF                (LINE > MAXROWS)
+.X              CALL              PRTHEADER
+.X            ENDIF
+.X            CHOP              Vendor.NETDAYS,Vendor.NETDAYS
+.X            CHOP              Vendor.DISCDAYS,Vendor.DISCDAYS
+.X
+.X            MOVE              Vendor.NETDAYS,NUM1
+.X            MOVE              Vendor.DISCDAYS,NUM2
+.X
+.X            PRTPAGE           PRTFILE;*1,Vendor.VendoromerID:
+.X                                      *16,Vendor.Desc:
+.X                                      *Alignment=*Right:
+.X                                      *38,Num1:
+.X                                      *50,Num2:
+.X                                      *Alignment=*Decimal:
+.X                                      *61,Vendor.DiscPerc:
+.X                                      *Alignment=*Left
+.X
+.X            ADD       "2" TO LINE
+.X            RETURN
+.X
+.X PRTHEADER
+.X            PRTPAGE           PRTFILE;*NEWPAGE;
+.X PRTHEADER2
+.X            CALC              COL=PRTWIDTH-15
+.X            ADD               "1",PAGE
+.X            MOVE              PAGE,PAGED
+.X .           SETITEM           EPage,0,PAGED
+.X
+.X            PRTPAGE           PRTFILE;*P1:63,*LINE=85:63:
+.X                              *N:
+.X                              *40,"Page :",*alignment=*left,PAGE:
+.X                              *P1:1:
+.X                              *P1:1,"Date : ",TODAY8:
+.X                              *BOLDON:
+.X                              *H=27,"Chiron Software & Services, Inc.",*BOLDOFF:
+.X                              *72,"APTERM":
+.X                              *N:
+.X                              *H=1,"Time : ",TIME8:
+.X                              *H=29,"A/P Term Code Master Listing":
+.X                              *72,"Accounts Payable":
+.X                              *N=2:
+.X                              *ULON:
+.X                              *H=1,"Term Code",*H=16,"Description":
+.X                              *H=33,"Net Days",*H=44,"Disc. Days":
+.X                              *H=57,"Disc. %":
+.X                              *ULOFF:
+.X                              *N
+.X
+.X            MOVE              "5",LINE
+.X            RETURN
+
+EXITASK
+           ALERT             PLAIN,"Are you sure you wish to exit this report?",#RESULT
+           IF                (#RESULT=1)
+             STOP
+           ENDIF
+           RETURN
+
+NOPRINT
+           TRAPCLR           SPOOL
+           NORETURN
+           RETURN
+.=============================================================================
+.
+.=============================================================================
+.
+MaintMenuOption
+           CALL                 GetMenuName
+           return
+;==========================================================================================================
+
+
+MainValid
+           IF                (Status = 0)
+             GETCOUNT          EVendor
+             IF                (CharCount > 0)
+               GETITEM           EVendor,0,VendorKY
+.               JustifyVendor       VendorKY
+
+               CALL              RDVendor
+               IF               (RETURNFL = 1)
+                 PARAMTEXT        VendorTITLE,VendorKY,"",""
+                 ALERT            CAUTION,"^0: ^1 Not Found",#RES2,"Record does not exist"
+                 CALL             MAINRESET
+                 RETURN
+               ENDIF
+.
+. OK, we've been able to read the record and now let's show it on the screen.
+.
+               CALL              SETMAIN
+               MOVE              "3",Status                   .We've found a record
+               ENABLEITEM        BMainCHANGE
+               ENABLETOOL        ID_Change
+
+.               DISABLEITEM       BMainNEW
+.               DISABLETOOL       ID_New
+
+               ENABLEITEM        BMainDELETE
+               ENABLETOOL        ID_Delete
+
+               DISABLEITEM       EVendor
+               DISABLEITEM       Fill1
+.1               DISABLEITEM       ChangeMenu,1
+.1               ENABLEITEM        ChangeMenu,2
+.1               ENABLEITEM        ChangeMenu,3
+.1               DISABLEITEM       ChangeMenu,4
+               SETFOCUS          BMainChange
+             ENDIF
+           ENDIF
+           RETURN
+
+.=============================================================================
+. Initialize MAIN Form and setup the Menu's, Fields, Objects, Buttons, etc
+.
+MAININIT
+.           CREATE            WMAIN;HelpMenu,HelpMenuTxt
+.           CREATE            WMAIN;ChangeMenu,ChngMenuTxt
+.           CREATE            WMAIN;FileMenu,FileMenuTxt
+.
+.           ACTIVATE          HelpMenu,onClickMainWinHelpMenu,result
+.           ACTIVATE          ChangeMenu,onClickMainWinChangeMenu,result
+.           ACTIVATE          FileMenu,onClickMainWinFileMenu,result
+.
+. Set the SELECTALL property for the COLLECTION and then take care of
+. any ActiveX controls.
+.
+..HR 7/22/2005           SETPROP           VendorEDT,SELECTALL=$SelectAll
+.
+           CALL              MAINRESET
+           RETURN
+.=============================================================================
+. New Button is pressed
+.
+MAINNEW
+           IF                (Status = 2)      //Let's 'Save' this NEW Record
+             CALL              VALIDATE1     //Validate the data first
+.
+. Something's not right...Let's just return and wait until all the fields
+. have been validated
+.
+             IF                (ValidFlag = 1)
+               RETURN
+             ENDIF
+.
+. Get all of the fields from the Form into the proper RECORD
+.
+             CALL              GETMAIN
+.
+. Let's see if SOMEBODY else has entered/used this code before or let's just
+. see if this Code already exists in the system
+.
+...             GETITEM           EVendor,0,VendorKY
+
+             loop
+               GetNextSeq                Vendor
+               squeeze                   Sequence.SeqNo,VendorKY
+               CALL              TSTVendor
+
+             until                     (ReturnFl = 1)
+             repeat
+             move                      VendorKY,Vendor.AccountNumber
+             setprop                   EVendor,text=Vendor.AccountNumber
+
+               CLOCK            TimeStamp,Vendor.Rec_Added
+
+               move              "NET30",Vendor.TermCode
+               CALL              WRTVendor
+               CALL              WriteSQLVendor               //HR 8.26.2014
+.
+. Update Vendor Additions File
+.
+               pack              DataLine from "Vendor : ",Vendor.AccountNumber," has been created for ",Vendor.Name
+               alert                   note,DataLine,result,"VENDOR ADDED"
+               CALL              MAINRESET
+               RETURN
+           ELSE
+             CALL              MainReset
+             MOVE              "2",Status
+             CALL              DisableRecordButtons
+.
+. Enable all of the EditText fields and set the EditText fields
+. to Non Read-Only
+.
+. Add New Vendoromer # based upon Old system system
+.
+.             READ              NextVend,ZeroSeq;AccountNo
+.             ADD               "1" TO AccountNo
+.             WRITE             NextVend,ZeroSeq;AccountNo
+
+             MOVE               AccountNo,AccountNoD
+             SQUEEZE            AccountNoD,AccountNoD
+             SETITEM            EVendor,0,AccountNoD
+.
+             ENABLEITEM        VendorEDT
+             DISABLEITEM       Fill1
+             %IFDEF            CBVendorActive
+             ENABLEITEM        CBVendorActive
+             %ENDIF
+
+             SETPROP           VendorEDT,READONLY=0
+             SETPROP           VendorEDT,BGCOLOR=$WINDOW
+.
+. We also need to set any ActiveX controls to the same properties
+.
+              ENABLEITEM        VendorBoxes
+
+              SETPROP           EVendPhone,*Enabled=1
+              SETPROP           EVendFax,*Enabled=1
+              SETPROP           EVendPOPhone,*Enabled=1
+              SETPROP           EVendPOFax,*Enabled=1
+
+              SETPROP           EVendPhone,BGColor=$WINDOW
+              SETPROP           EVendFax,BGColor=$WINDOW
+              SETPROP           EVendPOPhone,BGColor=$WINDOW
+              SETPROP           EVendPOFax,BGColor=$WINDOW
+.
+. Disable & Enable the proper Buttons along with changing
+. the description of the Button's (i.e. Exit --> Change)
+.
+             DISABLEITEM       BMainCHANGE
+             DISABLETOOL       ID_Change
+
+             DISABLEITEM       BMainDELETE
+             DISABLETOOL       ID_Delete
+
+             SETITEM           BMainNEW,0,SaveTitle
+             ENABLETOOL        ID_Save
+
+             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+             DISABLETOOL       ID_New
+.
+. Disable the Menu Items except for the 'Save' button
+.
+.1             DISABLEITEM       ChangeMenu,1
+.1             DISABLEITEM       ChangeMenu,2
+.1             DISABLEITEM       ChangeMenu,3
+.1             ENABLEITEM        ChangeMenu,4
+.
+. Set the Focus to the first field that we're going to be Entering
+.
+...HR 3/31/2005             SETFOCUS          EVendor
+             SETPROP           EVendor,READONLY=1
+             SETPROP           EVendor,BGCOLOR=$BtnFace
+
+              ClearEvents
+             SETFOCUS           EVendName
+..HR 2/15/2005           DISABLEITEM          EVendor        //HR 7/22/2004
+           ENDIF
+           RETURN
+.=============================================================================
+. Change/Save Button has been pressed
+.
+MAINCHANGE
+.
+. I'm only getting here if the Change Button has been selected.  Soooooo....Either the
+. Change Button has been pressed, or this button now reads 'Save'.  If it reads Save,
+. the Status flag will have been set to 1 the first time that this routine has been
+. reached.
+           IF                (Status = 1)                //'Save' button has been pressed
+             CALL              VALIDATE1
+             IF                (ValidFlag = 0)           //Great..All fields ARE valid!!!
+               CALL              GETMAIN                 //Get all of the fields
+.               CLOCK             TimeStamp,Vendor.Rec_Change
+               CALL              UPDVendor                //Update the record
+               CALL              WriteSQLVendor               //HR 8.26.2014
+
+.
+. Update Vendor Changes File
+.
+               CALL              MAINRESET               //Reset the objects & fields
+             ENDIF
+             RETURN                                      //Voila...Either way, we're RETURNING
+           ENDIF
+           GETCOUNT          EVendor
+           IF                (Charcount > 0)
+             GETITEM           EVendor,0,VendorKY      //Read the Primary field ito the Key
+
+             CALL              RDVendorLK               //Lock the record so that nobody uses it
+.
+. Just for arguments sake, let's just make sure that the record hasn't been deleted
+. by another user, AND...Let's make sure that it's not being used by another user
+. as well!!
+.
+             IF                (RETURNFL = 1)          //WHAT!!! Somebody deleted this record
+               BEEP
+               ALERT             STOP,"Record deleted by another User!!",RESULT
+               CALL              MAINRESET
+               RETURN
+             ENDIF
+.
+. Record is locked...Try again later
+.
+             IF                (RETURNFL = 2)          //WHAT!!! Somebody's locked the record
+               BEEP
+               ALERT             NOTE,"Record locked by another User..."::
+                                       "Try again later",RESULT,LOCKTITLE
+               RETURN
+             ENDIF
+.
+. OK, OK...We've gotten this far...The record is now locked and we
+. can safely change the Status to "Modify"
+.
+             MOVE              "1",Status                  //We've selected the Modify/Change Button
+             CALL              DisableRecordButtons
+.
+. Not only do we have a good record, but we've been able to 'Lock' the record
+. and now we're ready to proceed
+.
+. Enable the Entire Collection of EditText fields as well as setting the
+. background colors and making them Non Read-Only
+.
+             ENABLEITEM        VendorEDT
+.             ENABLEITEM        VendorStat
+.             ENABLEITEM         EVendorInvType
+             DISABLEITEM       Fill1
+             %IFDEF            CBVendorActive
+             ENABLEITEM        CBVendorActive
+             %ENDIF
+.
+             SETPROP           VendorCOLL,READONLY=0
+             SETPROP           VendorCOLL,BGCOLOR=$WINDOW
+.             SETPROP           EVendorInvType,BGCOLOR=$WINDOW
+.
+. OK, OK...What do we do with any ActiveX components. We've got to handle
+. them as well.  Let's change these to Non Read-Only and change the
+. Background colors as well
+.
+              ENABLEITEM        VendorBoxes
+
+              SETPROP           EVendPhone,*Enabled=1
+              SETPROP           EVendFax,*Enabled=1
+              SETPROP           EVendPOPhone,*Enabled=1
+              SETPROP           EVendPOFax,*Enabled=1
+
+              SETPROP           EVendPhone,BGColor=$WINDOW
+              SETPROP           EVendFax,BGColor=$WINDOW
+              SETPROP           EVendPOPhone,BGColor=$WINDOW
+              SETPROP           EVendPOFax,BGColor=$WINDOW
+
+              if                (Vendor.UseMain = 1)
+                setprop                   VendorRemitColl,BGColor=$BtnFace,Static=1
+              else
+                setprop                   VendorRemitColl,BGColor=$Window,Static=0
+              endif
+
+.
+. Change the Cancel button button to 'Save' and the 'Exit' button to Cancel
+.
+             SETITEM           BMainCancel,0,CancelTitle
+             ENABLETOOL        ID_Cancel
+
+             SETITEM           BMainCHANGE,0,SaveTitle
+             ENABLETOOL        ID_Save
+.
+             ENABLETOOL        ID_Undo
+             DISABLETOOL       ID_Change
+.
+             DISABLETOOL       ID_New
+             DISABLEITEM       BMainNew
+.
+             SETFOCUS          EVendName               //Set the cursor to the next field
+             DISABLEITEM       EVendor               //and Disable the Primary Code
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainUndo
+. If I've click on the Undo/Reset button, I've already got the 'Key' based on
+. the fact that I'm changing a record that already exists and I loaded the
+. key the first time.  Soooooo....Simply 'Re-read' the record, Calll the
+. SetMain routine and Voila!!!!
+.
+           BEEP
+           ALERT             PLAIN,"Revert back to the 'Original' record",RESULT:
+                                   SureTitle
+           IF                (RESULT = 1)
+             CALL              RDVendorLK
+             CALL              SetMain
+           ENDIF
+           RETURN
+.=============================================================================
+MainFind
+           FindSearch        EVendor
+           IF                (PassedVar = "Y")
+.             GETITEM           EVendor,0,VendorKY
+.             MOVE              VendorKY,VendoromerIDF
+.             MOVE              VendoromerIDF,VendorKY
+
+             MOVE              $SearchKey,VendorKY
+             CALL              RDVendor
+.
+. We've got a record thanks to our Trusy Search/Browse window. Let's
+. continue now by setting up the proper Code field and calling the
+. MainValid subroutine, that will take care of it for us.
+.
+             MOVE              "0",Status
+             SETITEM           EVendor,0,Vendor.AccountNumber
+             CALL              MainValid
+           ENDIF
+           RETURN
+.=============================================================================
+. Routine to read the First record and display it
+.
+MainFirst
+           CLEAR             VendorKY
+           FILL              FirstASCII,VendorKY
+           CALL              RDVendor
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KSVendor         . Try the 'next' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      FirstTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EVendor,0,Vendor.AccountNumber
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Last record and display it
+.
+MainLast
+           CLEAR             VendorKY
+           FILL              LastASCII,VendorKY
+           CALL              RDVendor
+           IF                (RETURNFL = 1)  . We didn't find a 'Blank' record
+             CALL              KPVendor         . Try the 'Previous' record
+             IF                (RETURNFL = 1)  . There are no records in the file
+               BEEP
+               ALERT             STOP,"No records exist in the system...",RESULT:
+                                      LastTitle
+               RETURN
+             ENDIF
+           ENDIF
+.
+. We've got a record (either on the READ or the READKP.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EVendor,0,Vendor.AccountNumber
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Next record and display it
+.
+MainNext
+. We can't just do a simple READKS/READKP because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          EVendor
+           IF                (CharCount <> 0)
+             GETITEM           EVendor,0,VendorKY
+
+             CALL              RDVendor
+           ENDIF
+.
+           CALL              KSVendor         . Try the 'next' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"End of file has been reached.",RESULT:
+                                    NextTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EVendor,0,Vendor.AccountNumber
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Routine to read the Previous record and display it
+.
+MainPrevious
+. We can't just do a simple 'READKS' because of certain conditions including
+. 'Attempting' to read past the last record (Next --> EOF) and the reverse
+. condition.  Due to this fact, we need to get the current code, and THEN
+. do a READKS/READKP
+.
+           GETCOUNT          EVendor
+           IF                (CharCount <> 0)
+             GETITEM           EVendor,0,VendorKY
+             CALL              RDVendor
+           ENDIF
+.
+           CALL              KPVendor         . Try the 'Previous' record
+           IF                (RETURNFL = 1)  . There are no records in the file
+             BEEP
+             ALERT             STOP,"Beginning of file has been reached...",RESULT:
+                                    PrevTitle
+             RETURN
+           ENDIF
+.
+. We've got a record (either on the READ or the READKS.  Let's now continue
+. processing as if we just lost the Focus of the main field.  By calling the
+. MainValid subroutine, that will take care of it for us.
+           MOVE              "0",Status
+           SETITEM           EVendor,0,Vendor.AccountNumber
+           CALL              MainValid
+           RETURN
+.=============================================================================
+. Save has been selected from the MENU vs. the Button
+.
+SAVEMODE
+.
+. OK...The 'Save' has been selected from the Menu rather than from the Save Button.
+. What to do, What to do??  Is this a Save to a 'NEW' record or is it a Save to a
+. 'CHANGED' record....
+. Let's check the 'Status' flag...1 is a Change record, 2 is a New Record
+.
+           BRANCH            Status,MainChange,MainNew
+           RETURN
+.=============================================================================
+. Routine to Validate the data from the Form
+.
+VALIDATE1
+           MOVE              "0",ValidFlag
+
+.X           GETITEM           EVendor,0,TestChars
+.X           COUNT             CharCount,TestChars
+.X           IF                (CharCount = 0)
+.X             MOVE            "1",ValidFlag
+.X             BEEP
+.X             ALERT             CAUTION,"A Code must be entered into the system",RETURNFL,"Error in Field"
+.X             SETFOCUS          EVendor
+.X             RETURN
+.X           ENDIF
+
+.
+. Everything's OK...Let's just return because the ValidFlag will be set to
+. Zero from the top of this routine.
+.
+           MOVE              "0",ValidFlag
+           RETURN
+.=============================================================================
+. Routine to 'Reset' everything which includes the Button's, Objects,
+. fields, etc.
+.
+MAINRESET
+              MOVE              "0",Status     //Reset the status to Not updating
+              UNLOCK            VendorFL
+.
+. Reset the fields to 'Blank' and DISABLE all of those fields as well
+              DELETEITEM        VendorCOLL,0
+
+              DISABLEITEM       VendorBoxes
+              SETITEM           VendorBoxes,0,0
+
+              SETPROP           EVendPhone,*Text=""
+              SETPROP           EVendFax,*Text=""
+              SETPROP           EVendPOPhone,*Text=""
+              SETPROP           EVendPOFax,*Text=""
+
+              SETPROP           EVendPhone,*Enabled=0
+              SETPROP           EVendFax,*Enabled=0
+              SETPROP           EVendPOPhone,*Enabled=0
+              SETPROP           EVendPOFax,*Enabled=0
+
+              SETPROP           EVendPhone,BGColor=$BTNFACE
+              SETPROP           EVendFax,BGColor=$BTNFACE
+              SETPROP           EVendPOPhone,BGColor=$BTNFACE
+              SETPROP           EVendPOFax,BGColor=$BTNFACE
+
+              SETPROP           VendorCOLL,READONLY=1
+              SETPROP           VendorCOLL,BGCOLOR=$BTNFACE
+              ENABLEITEM        Fill1
+.
+. Reset the Buttons for the Next record
+.
+              DISABLEITEM       BMainChange
+              DISABLETOOL       ID_Change
+
+              DISABLEITEM       BMainDELETE
+              DISABLETOOL       ID_Delete
+
+              SETITEM           BMainCHANGE,0,ChangeTitle
+
+              SETITEM           BMainNEW,0,NewTitle
+              ENABLETOOL        ID_New
+
+              ENABLEITEM        BMainNEW
+              SETITEM           BMainCancel,0,ExitTitle
+
+              DISABLETOOL       ID_Save
+              DISABLETOOL       ID_Undo
+              DISABLETOOL       ID_Cancel
+
+              CALL              EnableRecordButtons
+.
+              SETPROP           EVendor,READONLY=0
+              SETPROP           EVendor,BGCOLOR=$WINDOW
+              ENABLEITEM        EVendor
+              SETFOCUS          EVendor
+              RETURN
+.=============================================================================
+. Cancel Button has been Clicked
+.
+MAINCLOSE
+.
+. Only display this message if I'm in either the Modify or New mode.  If not,
+. simply exit the program and proceed as normal
+.
+           IF                (Status <> 0)
+             BEEP
+             ALERT              PLAIN,"By Exiting the program now, your operation will be Cancelled?",RESULT:
+                                      "Are you sure?"
+             IF                 (RESULT = 1)
+               DESTROY         WMAIN      . Get rid of the Bank Window
+              winshow
+              CHAIN             FROMPGM
+             ELSE
+               RETURN                     . Contine with standard operations
+             ENDIF
+           ENDIF
+           DESTROY         WMAIN          . Get rid of the Bank Window
+              winshow
+              CHAIN             FROMPGM
+
+.=============================================================================
+. Cancel button has been pressed
+.
+MainCancel
+           IF                (Status = 0)      . They want to exit the program
+             DESTROY         WMAIN             . Get rid of the Main Window
+..FUCKUP             NORETURN
+...FUCKUP             RETURN
+              winshow
+              CHAIN             FROMPGM
+
+           ELSE
+             IF                (Status = 1 OR Status = 2)  . Change/New Mode
+               BEEP
+               ALERT              PLAIN,"Do you wish to cancel this operation?",RETURNFL:
+                                        "Are you sure?"
+               IF                 (RETURNFL = 1)
+                 CALL               MAINRESET
+                 RETURN
+               ELSE
+                 RETURN
+               ENDIF
+             ELSE
+               CALL              MAINRESET
+             ENDIF
+             RETURN
+           ENDIF
+.=============================================================================
+. Delete Button has been Pressed
+.
+MainDelete
+           PARAMTEXT        Vendor.AccountNumber,VendorTitle,"",""
+           BEEP
+           ALERT            PLAIN,"Do you wish to Delete the ^1: ^0 ?",#RES1,DelTitle
+           IF               (#RES1 = 1)
+             CALL             DELVendor
+             ALERT            NOTE,"A/P Term Code ^0 has been deleted",#RES1,DelOKTitle
+             CALL             MAINRESET
+           ENDIF
+           RETURN
+.=============================================================================
+.
+. Setup all of the fields in the Form based upon the data record
+SETMAIN
+              SETITEM           EVendor,0,Vendor.AccountNumber
+SETMAIN2
+              SETITEM           EVendName,0,Vendor.Name
+              SETITEM           EVendAddress1,0,Vendor.Address1
+              SETITEM           EVendAddress2,0,Vendor.Address2
+              SETITEM           EVendAddress3,0,Vendor.Address3
+
+              SETITEM           EVendCity,0,Vendor.City
+              SETITEM           EVendSt,0,Vendor.State
+              SETITEM           EVendZip,0,Vendor.Zip
+              SETITEM           EVendCountry,0,Vendor.Country
+
+
+              SETPROP           EVendPhone,*Text=Vendor.Telephone
+              SETPROP           EVendFax,*Text=Vendor.APFax
+              SETPROP           EVendPOPhone,*Text=Vendor.POPhone
+              SETPROP           EVendPOFax,*Text=Vendor.POFax
+
+              SETITEM           EVendContact,0,Vendor.APContact
+              SETITEM           EVendPOContact,0,Vendor.POContact
+
+              SETITEM           EVendEMail,0,Vendor.POEMail
+              SETITEM           EVendMemo,0,Vendor.Memo
+              SETITEM           EVendHomePage,0,Vendor.HomePage
+
+              SETITEM           EVendAccountNo,0,Vendor.VendorAccount
+              SETITEM           EVendTerm,0,Vendor.TermCode
+              SETITEM           CBPrintAcctNo,0,Vendor.PrintAcctNo
+              SETITEM           EVendPOType,0,Vendor.OutputMethod
+              SETITEM           EVendType,0,Vendor.Type
+              SETITEM           EVendClass,0,Vendor.Class
+              SETITEM           EVendEIN,0,Vendor.EIN_SSNo
+              SETITEM           EVendPriority,0,Vendor.Priority
+              SETITEM           CBForm1099,0,Vendor.Form1099
+              SETITEM           CBAutoPay,0,Vendor.AutoDisburse
+              SETITEM           CBVendActive,0,Vendor.Active
+              SETITEM           CBUseVendInfo,0,Vendor.UseMain
+
+              if                (Vendor.UseMain = 1)                  //Use the Main Vendor Information
+                move              Vendor.Name,Vendor.RemitName
+                move              Vendor.Address1,Vendor.RemitAddress1
+                move              Vendor.Address2,Vendor.RemitAddress2
+                move              Vendor.Address3,Vendor.RemitAddress3
+                move              Vendor.City,Vendor.RemitCity
+                move              Vendor.State,Vendor.RemitState
+                move              Vendor.Zip,Vendor.RemitZip
+                move              Vendor.Country,Vendor.RemitCountry
+                setprop                   VendorRemitColl,BGColor=$BtnFace,Static=1
+              else
+                setprop                   VendorRemitColl,BGColor=$Window,Static=0
+              endif
+
+              SETITEM           ERemitName,0,Vendor.RemitName
+              SETITEM           ERemitAddress1,0,Vendor.RemitAddress1
+              SETITEM           ERemitAddress2,0,Vendor.RemitAddress2
+              SETITEM           ERemitAddress3,0,Vendor.RemitAddress3
+
+              SETITEM           ERemitCity,0,Vendor.RemitCity
+              SETITEM           ERemitState,0,Vendor.RemitState
+              SETITEM           ERemitZip,0,Vendor.RemitZip
+              SETITEM           ERemitCountry,0,Vendor.RemitCountry
+              CALL              LoadGLDistributions
+
+              RETURN
+.=============================================================================
+. Retrieve all of the fields in the Form based upon the data record
+.
+GETMAIN
+              GETITEM           EVendor,0,Vendor.AccountNumber
+
+              GETITEM           EVendName,0,Vendor.Name
+              GETITEM           EVendAddress1,0,Vendor.Address1
+              GETITEM           EVendAddress2,0,Vendor.Address2
+              GETITEM           EVendAddress3,0,Vendor.Address3
+
+              GETITEM           EVendCity,0,Vendor.City
+              GETITEM           EVendSt,0,Vendor.State
+              GETITEM           EVendZip,0,Vendor.Zip
+              GETITEM           EVendCountry,0,Vendor.Country
+
+              GETPROP           EVendPhone,*Text=Vendor.Telephone
+              GETPROP           EVendFax,*Text=Vendor.APFax
+              GETPROP           EVendPOPhone,*Text=Vendor.POPhone
+              GETPROP           EVendPOFax,*Text=Vendor.POFax
+
+              GETITEM           EVendContact,0,Vendor.APContact
+              GETITEM           EVendPOContact,0,Vendor.POContact
+
+              GETITEM           EVendEMail,0,Vendor.POEMail
+              GETITEM           EVendMemo,0,Vendor.Memo
+              GETITEM           EVendHomePage,0,Vendor.HomePage
+
+              GETITEM           EVendAccountNo,0,Vendor.VendorAccount
+              GETITEM           EVendTerm,0,Vendor.TermCode
+              GETITEM           CBPrintAcctNo,0,Vendor.PrintAcctNo
+              GETITEM           EVendPOType,0,Vendor.OutputMethod
+              GETITEM           EVendType,0,Vendor.Type
+              GETITEM           EVendClass,0,Vendor.Class
+              GETITEM           EVendEIN,0,Vendor.EIN_SSNo
+              GETITEM           EVendPriority,0,Vendor.Priority
+              GETITEM           CBForm1099,0,Vendor.Form1099
+              GETITEM           CBAutoPay,0,Vendor.AutoDisburse
+              GETITEM           CBVendActive,0,Vendor.Active
+              GETITEM           CBUseVendInfo,0,Vendor.UseMain
+              if                (Vendor.UseMain = 1)                  //Use the Main Vendor Information
+                move              Vendor.Name,Vendor.RemitName
+                move              Vendor.Address1,Vendor.RemitAddress1
+                move              Vendor.Address2,Vendor.RemitAddress2
+                move              Vendor.Address3,Vendor.RemitAddress3
+                move              Vendor.City,Vendor.RemitCity
+                move              Vendor.State,Vendor.RemitState
+                move              Vendor.Zip,Vendor.RemitZip
+                move              Vendor.Country,Vendor.RemitCountry
+              else
+                GETITEM           ERemitName,0,Vendor.RemitName
+                GETITEM           ERemitAddress1,0,Vendor.RemitAddress1
+                GETITEM           ERemitAddress2,0,Vendor.RemitAddress2
+                GETITEM           ERemitAddress3,0,Vendor.RemitAddress3
+
+                GETITEM           ERemitCity,0,Vendor.RemitCity
+                GETITEM           ERemitState,0,Vendor.RemitState
+                GETITEM           ERemitZip,0,Vendor.RemitZip
+                GETITEM           ERemitCountry,0,Vendor.RemitCountry
+              endif
+
+
+              RETURN
+.=============================================================================
+.Help Menu selection if required
+.
+MAINHELP
+          RETURN
+
+onClickMainWinChangeMenu
+           PERFORM           RESULT OF  MAINNEW,MAINCHANGE,MainDelete,SAVEMODE
+           RETURN
+.=============================================================================.
+onClickMainWinExitButton
+.
+. check to see if this is masquerading as a CANCEL button
+.
+           CALL              MainCancel
+           RETURN
+.=============================================================================.
+onClickMainWinFileMenu
+.
+. process a click on the file menu
+.
+           PERFORM           result of MainPrint,,MAINCLOSE
+           RETURN
+.=============================================================================.
+onClickMainWinHelpMenu
+           PERFORM           result of MAINHELP,MAINHELP,MAINAbout
+           RETURN
+.=============================================================================.
+. Display the Standard "About Box"
+.
+MAINAbout
+.
+. display an alert box describing the program
+.
+                   getmode           *ProgName=ProgramName
+                   getmode           *ProgStamp=ProgramStamp
+                   getmode           *ProgVer=ProgramVer
+
+                   CALL              About using ProgramName,ProgramStamp,ProgramVer
+                   SETFOCUS          WMain
+                   RETURN
+.=============================================================================
+. Print Report option
+.
+MainPrint
+.X           CALL              PRTREPORT
+           RETURN
+MainToolBar
+           RETURN
+
+.=============================================================================
+. Disable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+DisableRecordButtons
+           DISABLETOOL       ID_First
+           DISABLETOOL       ID_Next
+           DISABLETOOL       ID_Previous
+           DISABLETOOL       ID_Last
+           DISABLETOOL       ID_Find
+           RETURN
+.=============================================================================
+. Enable the 'Record' Buttons because we're in the middle of Updating or
+. Creating a New record.
+.
+EnableRecordButtons
+           ENABLETOOL        ID_First
+           ENABLETOOL        ID_Next
+           ENABLETOOL        ID_Previous
+           ENABLETOOL        ID_Last
+           ENABLETOOL        ID_Find
+           RETURN
+;=============================================================================
+CalculateTotalDue
+              RETURN
+;=============================================================================
+OnClickGLDistribution
+.              CALL              LoadGLDistributions
+              SETFOCUS          EGLAccount(1)
+              SETPROP           WVendor2,visible=1
+              RETURN            IF (CancelFlag)
+              CALL              WriteGLDetails
+              RETURN
+;=============================================================================
+LoadGLDistributions
+              MOVE              Vendor.AccountNumber,VendorGLKY
+              CALL              RDVendorGL
+              LOOP
+                CALL              KSVendorGL
+              UNTIL             (ReturnFL = 1 or Vendor.AccountNumber != VendorGL.AccountNumber)
+                SETITEM           EGLAccount(VendorGL.Line),0,VendorGL.GLCode
+                SETITEM           EGLEntity(VendorGL.Line),0,VendorGL.SubEntity
+              REPEAT
+              RETURN
+;=============================================================================
+WriteGLDetails
+.
+. Delete the VendorGL totals first before writing out the new ones!!!
+.
+              MOVE              Vendor.AccountNumber,VendorGLKY
+              CALL              RDVendorGL
+              LOOP
+                CALL              KSVendorGL
+              UNTIL             (ReturnFL = 1 or Vendor.AccountNumber != VendorGL.AccountNumber)
+                CALL              DelVendorGL
+              REPEAT
+
+              MOVE              "0",VendorGL.Line
+              MOVE              Vendor.AccountNumber,VendorGL.AccountNumber
+
+              FOR               X FROM "1" TO "18" USING "1"
+                MOVE              "    ",TestGLCode
+                GETITEM           EGLAccount(X),0,TestGLCode
+                COUNT             result,TestGLCode
+                CONTINUE          IF (result = 0)
+
+                GETITEM           EGLAccount(X),0,VendorGL.GLCode
+                GETITEM           EGLEntity(X),0,VendorGL.SubEntity
+
+                ADD               "1",VendorGL.Line
+                CALL              WrtVendorGL
+              REPEAT
+              RETURN
+;=============================================================================
+WriteSQLVendor
+;
+; Do we have stock for these specific Customers
+;
+                   RETURN
+CommentOutForNow
+                   SQUEEZE           Vendor.AccountNumber,Vendor.AccountNumber           //HR 8.24.2014
+
+                   ADOWrite          T015_Vendor,AccountNumber=Vendor.AccountNumber:
+                                                 Name=Vendor.Name:
+                                                 Address1=Vendor.Address1:
+                                                 Address2=Vendor.Address2:
+                                                 Address3=Vendor.Address3:
+                                                 City=Vendor.City:
+                                                 State=Vendor.State:
+                                                 Zip=Vendor.Zip:
+                                                 Country=Vendor.Country:
+                                                 APPhone=Vendor.Telephone:
+                                                 APFax=Vendor.APFax:
+                                                 POPhone=Vendor.POPhone:
+                                                 POFax=Vendor.POFax:
+                                                 OutputMethod=Vendor.OutputMethod:
+                                                 Memo=Vendor.Memo:
+                                                 HomePage=Vendor.HomePage:
+                                                 TermCode=Vendor.TermCode:
+                                                 Form1099=Vendor.Form1099:
+                                                 POEMail=Vendor.POEMail:
+                                                 EIN_SSNo=Vendor.EIN_SSNo:
+                                                 Active=Vendor.Active:
+                                                 APContact=Vendor.APContact:
+                                                 POContact=Vendor.POContact:
+                                                 VendorAccount=Vendor.VendorAccount:
+                                                 PrintAcctNo=Vendor.PrintAcctNo:
+                                                 Priority=Vendor.Priority:
+                                                 Class=Vendor.Class:
+                                                 Type=Vendor.Type:
+                                                 Buyer=Vendor.Buyer:
+                                                 AutoDisburce=Vendor.Autodisburse:
+                                                 UseMain=Vendor.UseMain:
+                                                 RemitName=Vendor.RemitName:
+                                                 RemitAddress1=Vendor.RemitAddress1:
+                                                 RemitAddress2=Vendor.RemitAddress2:
+                                                 RemitAddress3=Vendor.RemitAddress3:
+                                                 RemitBlank=Vendor.RemitBlank:
+                                                 RemitCity=Vendor.RemitCity:
+                                                 RemitState=Vendor.RemitState:
+                                                 RemitZip=Vendor.RemitZip:
+                                                 RemitCountry=Vendor.RemitCountry
+                   RETURN
+;==========================================================================================================
+OnClickUseMain
+                    IfChecked                 CBUseVendInfo
+                      setprop                   CBUseVendInfo,value=0
+                      setprop                   VendorRemitColl,BGColor=$BtnFace,Static=1
+                    else
+                      setprop                   CBUseVendInfo,value=1
+                      setprop                   VendorRemitColl,BGColor=$Window,Static=0
+                    endif
+
+                    return
+;==========================================================================================================
+                    include            MenuDefs.INC
+
+
+

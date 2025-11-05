@@ -1,0 +1,215 @@
+.......................................................................
+. SPLITAR.TXT   SPLIT A/R FILE INTO OPEN AND CLOSED DATA              .
+.               SEGREGATE CLOSED DATA UP TO AND INCLUDING 6/30/2
+. 
+.......................................................................
+. 
+. WRITTEN  9/13/81 BY  R. BACHARACH
+.                     MICRO SYSTEMS CONSULTANTS
+.                     41 TEELE DRIVE
+.                     CORAM, NEW YORK 11727
+.                     (516) 698-5577
+.......................................................................
+. 
+         INCLUDE   COMMON.TXT
+. 
+         INCLUDE   RCVBLES.TXT
+. 
+ARFILES  FILE     
+ARFILE   INIT      "ARFILE.TXT"
+. 
+         INCLUDE   DATE.685
+         INCLUDE   APCALNDR.TXT
+
+AROPEN   FILE     
+AROPNM   INIT      "F:\DATA\AROPEN.TXT"
+
+ARCLOSED FILE
+ARCLNM   INIT	   "F:\DATA\ARCLOSED.TXT"
+. 
+CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS.ISI"
+. 
+. 
+         INCLUDE   CUSTMAST
+. 
+.
+CURRACCT DIM       4
+FIRSTSW  INIT      "1"
+PAGEZ    FORM      3
+LINEZ    FORM      2
+RECCNT   FORM      "00"
+RLIMIT   FORM      "71"
+SHORTRUN DIM       1
+REPLY    DIM       1
+COMPANY  DIM       1
+IOSW     DIM       1
+STARTKEY DIM       8
+NUMCUST  FORM      4
+PDTOTL   FORM      6.2
+CREDTOTL FORM      6.2
+. 
+ASTER45  INIT      "*********************************************"
+MONX     DIM       2
+DAYX     DIM       2
+YEARX    DIM       2
+.
+YRNUMB   FORM      2
+MONN     FORM      2
+SEQ	 FORM      "-1"
+. 
+PTYPE    DIM       7
+WKSUB    FORM      6.2
+WKPRINT  FORM      6.2
+NETBAL   FORM      6.2
+UPFLAG   INIT      "N"
+ZEROS    INIT      "000000.00"
+TOTCURNT FORM      "0000000.00"
+TOT130   FORM      "0000000.00"
+TOT3160  FORM      "0000000.00"
+TOT6190  FORM      "0000000.00"
+TOTOV90  FORM      "0000000.00"
+TOTNET   FORM      "00000000.00"
+
+OPENTOTL FORM      2
+CLOSTOTL FORM      2
+RECTOTL  FORM      2
+. 
+COMPDISP INIT      "APC"
+
+         INCLUDE   CALLERR1.INC
+ 
+         MOVE      "SPLIT A/R TO OPEN & CLOSED" TO TITLTEXT
+ 
+         INCLUDE   CALLERR2.INC
+
+. 
+INITIATE MOVE      "0",PAGEZ
+         MOVE      "0",LINEZ
+         MOVE      " ",REPLY
+.       
+. 
+         TRAPCLR   IO
+         TRAP      NOARFL IF IO
+         OPEN      ARFILES,ARFILE
+
+	 PREPARE   AROPEN,AROPNM
+
+	 PREPARE   ARCLOSED,ARCLNM
+
+         GOTO      CLCRNT
+. 
+NOARFL   BEEP
+         DISPLAY   *P1:24,*HON,"A/R FILE NOT AVAILABLE - ABORTING"
+         GOTO      NOARFL
+. 
+. 
+. FIRST CALCULATE THE AGEING DATE RANGES!
+. 
+CLCRNT   CLOCK     DATE  TO  TODAY
+         DISPLAY   *P1:23,*EL,"TODAY=",TODAY,*W2
+         MOVE      TODAY TO MONX
+         MOVE      MONX  TO TMON
+         RESET     TODAY TO 4
+         MOVE      TODAY TO DAYX
+         MOVE      DAYX  TO TDAY
+         RESET     TODAY TO 7
+         MOVE      TODAY TO TYEAR
+         RESET     TODAY TO 1
+
+.
+RDLOOP   TRAPCLR   IO
+         TRAP      RCVIOERR IF IO
+         READ      ARFILES,SEQ;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,IPMNTS:
+                           IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                           ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                           IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                           IDOLSLFT,IPRGDTE
+.
+         GOTO      EOJ IF OVER
+         ADD       "1" TO RECTOTL
+         DISPLAY   *P1:10,*EL,"A/R RECS READ: ",RECTOTL
+.
+. 
+         CMATCH    "X",INVSTAT
+         GOTO      CLOSDATE IF EQUAL
+         CMATCH    "W",INVSTAT
+         GOTO      CLOSDATE  IF EQUAL
+.
+. FALLTHRU MEANS THE A/R RECORD IS OPEN,  THEREFORE WRITE IT NOW
+
+WRITOPEN
+         WRITE      AROPEN,SEQ;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,IPMNTS:
+                           IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                           ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                           IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                           IDOLSLFT,IPRGDTE
+
+ 	 ADD        "1"  TO  OPENTOTL
+         DISPLAY    *P1:12,*EL,"OPEN A/R RECORDS WRITTEN:  ",OPENTOTL
+ 
+         GOTO       RDLOOP
+
+CLOSDATE 
+.
+.    NOW DETERMINE IF THE CLOSED RECORD IS 6/30/2004 OR PRIOR
+.
+      
+         RESET   INVDATE  TO  5
+         MOVE    INVDATE  TO  YEARX
+	 MOVE    YEARX    TO  YRNUMB
+         RESET   INVDATE 
+ 
+         IF   (YRNUMB = "05")
+            GOTO WRITOPEN
+         ENDIF
+.
+
+         IF   (YRNUMB = "98" | "99")
+            GOTO   WRITCLSD
+         ENDIF
+
+         IF   (YRNUMB = "04")
+            GOTO   CHKMONTH
+         ENDIF
+
+.  FALLTHRU MEANS RECORD IS CLOSED AND NOT "04" OR "05" SO WRITE IT CLOSED NOW
+
+WRITCLSD
+
+         WRITE      ARCLOSED,SEQ;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,IPMNTS:
+                           IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                           ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                           IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                           IDOLSLFT,IPRGDTE
+
+         ADD        "1"  TO CLOSTOTL
+         DISPLAY    *P1:14,*EL,"CLOSED A/R RECS WRITTEN:  ",CLOSTOTL
+         GOTO       RDLOOP
+
+CHKMONTH
+         MOVE       INVDATE  TO  MONX
+	 MOVE	    MONX     TO  MONN
+         COMPARE    "7" TO MONN
+         GOTO       WRITCLSD IF  LESS   (IT IS CLOSED, "04" AND EARLIER THAN JULY)
+
+         GOTO       WRITOPEN       (REC IS CLOSED, BUT IS "04" AFTER JUNE 30)
+
+. 
+
+. 
+         INCLUDE   RCVBLSIO.TXT
+. 
+
+......         INCLUDE   APDATES.TXT
+. 
+EOJ      CLOSE     AROPEN
+         CLOSE     ARCLOSED
+
+         DISPLAY   *ES,*P01:04,"END OF A/R PURGE PROGRAMT",*W5
+       
+         CHAIN     "ARMENU1"
+. 

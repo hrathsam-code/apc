@@ -1,0 +1,1840 @@
+Date:  07-28-2003
+ 
+Subject:  Patch RELEASE 8.7C Runtime Files
+ 
+    Included you will find the patch release of:
+ 
+         PLBSERVE        8.7C  28 Jul 2003     8.7.0130
+         PLBCLIENT       8.7C  28 Jul 2003     8.7.0130
+         PLBCLICON       8.7C  28 Jul 2003     8.7.0130
+         PLBWIN          8.7C  28 Jul 2003     8.7.0130
+         PLBDSIGN        8.7C  28 Jul 2003     8.7.0130
+         SUNFYSYS.DLL    8.7C  28 Jul 2003     8.7.0130
+         SUNFHDLL.DLL    8.7C  28 Jul 2003     8.7.0130
+         SUNFHDLL.LIB    8.7C  28 Jul 2003
+         PLBCMP          8.7C  28 Jul 2003
+         PLBDBUG         8.7C  28 Jul 2003
+         ADMEQU.INC      8.7C  28 Jul 2003
+         PLBEQU.INC      8.7C  28 Jul 2003
+         PLBMETH.INC     8.7C  28 Jul 2003
+         SUNIDE.PLC      8.7C  28 Jul 2003
+         WATCH.PLC       8.7C  28 Jul 2003
+
+*==============================================================================
+Notes for some NEW Items:
+ 
+         - Added MOVE of VARLIST to VARLIST.
+ 
+         - Added {dnum} operand support for SWITCH, CASE, SELECT, WHEN,
+           and FOR statements.
+        
+         - The EDITTEXT object has been modified to support the following
+           new Properties and Methods.
+ 
+           Properties (NEW)
+ 
+               AUTOENTER
+               LEFTMARGIN
+               MODIFYFLAG
+               PASSWORDCHAR
+               RIGHTMARGIN
+               SELTEXT
+               TEXTOUTCONV
+ 
+           Methods (NEW)
+ 
+               CanUndo               Clear
+               ClearUndo             Copy
+               Cut                   GetCharIndexFromPos
+               GetFirstVisibleLine   GetLine
+               GetLineCount          GetPosFromCharIndex
+               GetTextLength         LineFromChar
+               LineIndex             LineLength
+               LineScroll            Paste
+               Scroll                ScrollToCaret
+               Select                SelectAll
+               Undo
+ 
+         - Added new GUI object named EDITNUMBER.
+ 
+         - Added scrollbar support for COMBOBOX and DATALIST objects.
+ 
+         - Added new properties and methods for a COMBOBOX object.
+ 
+         - Added new properties for a DATALIST object.
+ 
+*==============================================================================
+Notes for DOCUMENTATION:
+ 
+         - Please change the {type} field description in the Compiler
+           Cross Reference to include a 'nn' type id for an Object variable.
+           The Object now has a type field named 'Onn' where the 'nn'
+           value is the same as identified for the subtype equates found
+           in the PLBEQU.INC include file.
+ 
+*==============================================================================
+The following files have been changed as follows:
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Modified the socket error information stored in a server log
+           file to include a client User name and Computer name.
+ 
+         - Modified the PLBSERVE runtime to use the PLBCS_LOCALIP address
+           setting in place of the PLBCS_HOSTNAME address setting when
+           the PLBCS_HOSTNAME address setting is all zeros and one of the
+           command options -f, -r, or -t is being used.
+ 
+         - Modified CLOCK VERSION to append the PLBCLIENT version in
+           the output DIM variable in byte positions 27 to 31.
+ 
+         - Modified GETMODE *GUI to report a value of 0 to indicate
+           no GUI support when a PLBCLIUNX client is being used.
+ 
+         - Modified the PLBSERVE log file output to report the Admin
+           Slot Identification as a decimal number.  This eliminates
+           confusion comparing data reported by the ADMGETINFO statement
+           to the data found in the server log file.
+ 
+         - Corrected a problem where a SETPROP of VISIBLE=0 for a COLLECTION
+           that contained a MODAL dialog WINDOW object did not execute
+           properly.  This could cause the program instruction pointer to
+           be invalid after the SETPROP VISIBLE=0 operation.
+ 
+-------------------------------------------------------------------------------
+PLBCLIENT- Corrected a problem that would cause a forward byte order
+           server child process to give a SEGV error when a DESTROY of a 
+           WINDOW object was executed and other objects were implicitly
+           destroyed.
+ 
+-------------------------------------------------------------------------------
+PLBSERVE - Corrected a problem where a DEACTIVATE of a Modal WINDOW object
+PLBCLIENT  was not properly restoring the user program stack.  This was
+           causing the program instruction pointer to be invalid resulting
+           in indeterminate program execution.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Added support for a MOVE {varlist} to {varlist1} operation.
+PLBSERVE   See PLBCMP section for details.
+PLB (UNIX)
+ 
+         - Corrected a problem with the REPLACE statement caused in release
+           8.7B where a replace of the same character did not set the
+           ZERO flag.
+ 
+         - Corrected a problem where the following instructions could give
+           erroneous results when executed using the PLB debugger single
+           step operations.
+ 
+              CHARSAVE, CHARRESTORE
+              SCRNSAVE, SCRNRESTORE, SCRNSIZE
+              WINSAVE,  WINRESTORE,  WINSIZE
+ 
+         - Corrected a problem where *JL control in a KEYIN instruction was
+           affecting all of the following variables in the KEYIN.  The
+           *JL should only affect the next variable in the KEYIN.
+ 
+         - Corrected a problem where a LOADADR operation did not work
+           properly when the destination variable was a VAR type and the
+           variable list was a VARLIST.  The problem in this case was that 
+           the address of the VARLIST was being placed into the VAR variable
+           pointer.  The correction is that the address of the members of
+           VARLIST is now stored into the VAR variable pointer.
+ 
+-------------------------------------------------------------------------------
+PLBWIN   - Modified PRTPLAY to open a spool file in a READ ONLY mode.
+           This can allow spool files to be processed directly off of
+           a CD-ROM.
+ 
+         - Modified the FORMLOAD instruction to allow a PANEL object to
+           be specified for the optional {window} parent object.  This
+           can be used to specify a PANEL object as the parent window for
+           an Objects Only PLF form.  If a PANEL object is specified for
+           a PLF form that is not an Objects Only form, then an O119 error
+           with a subcode of 46 occurs.
+ 
+         - Modified the TABCONTROL object to support the DOCK property.
+ 
+         - Modified the BTRIEVE instruction to set an open state flag
+           in a BFILE variable when an open function is executed 
+           successfully.  When an 8.7C PLBDBUG debugger is used, this
+           change allows a DV BFILE command to indicate an open state 
+           for a BFILE.  Please note that a BFILE does not contain any
+           information about any handles or file names specified for
+           BTRIEVE function.
+ 
+         - Modified the runtime to prevent an EVENTWAIT statement from
+           continuing execution at the next PLB statement when a
+           30-second keep alive check was performed.  This keep alive
+           check behavior started occurring with the 8.7B patch release.
+ 
+         - The EDITTEXT object has been modified to support the following
+           new Properties and Methods.
+ 
+           Properties (NEW)
+ 
+               AUTOENTER     CREATE  SETPROP  GETPROP
+               TEXT                  SETPROP  GETPROP
+               LEFTMARGIN    CREATE  SETPROP  GETPROP
+               MODIFYFLAG            SETPROP  GETPROP
+               PASSWORDCHAR  CREATE  SETPROP  GETPROP
+               RIGHTMARGIN   CREATE  SETPROP  GETPROP
+               SELTEXT               SETPROP  GETPROP
+               TEXTOUTCONV   CREATE  SETPROP  GETPROP
+ 
+           Methods (NEW)
+ 
+               CanUndo
+               Clear
+               ClearUndo
+               Copy
+               Cut
+               GetCharIndexFromPos
+               GetFirstVisibleLine
+               GetLine
+               GetLineCount
+               GetPosFromCharIndex
+               GetTextLength
+               LineFromChar
+               LineIndex
+               LineLength
+               LineScroll
+               Paste
+               Scroll
+               ScrollToCaret
+               Select
+               SelectAll
+               Undo
+ 
+         - The new property AUTOENTER is implemented for an EDITTEXT
+           object as follows:
+ 
+           Format:
+                 AUTOENTER=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the automatic entry
+                 state. If the state is ON, the object automatically
+                 tabs to the next object in the tab sequence when the
+                 the following conditions occur:
+ 
+                 1. The EDITTEXT object is a single line edit object.
+                 2. The EDITTEXT MAXCHARS property is set to a non-zero value.
+                 3. The user keys the last character in the edit field as
+                    determined from the MAXCHARS property.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+           Note:
+                1. The autoenter action does not occur if data is keyed
+                   at a caret position other than the last position
+                   of the edit field as determined by the MAXCHARS
+                   property value.
+ 
+                2. The autoenter action does not occur if the user sets
+                   the caret to a full edit field, as determined by the
+                   MAXCHARS property, and re-enters data in an OVERTYPE
+                   mode.
+ 
+         - The TEXT property has been implemented for the EDITTEXT
+           object as follows:
+ 
+           Format:
+                 TEXT=svarslit
+ 
+           Statements Supported:
+ 
+                 SETPROP  GETPROP
+ 
+           Description:
+ 
+                 This property specifies the text to display in the object. If
+                 the object is an EDITTEXT, the property works in conjunction
+                 with the TEXTOUTCONV property.
+ 
+           Objects Supported:
+ 
+                 EDITTEXT
+                 STATUSPANEL
+                 TOOLBUTTON
+ 
+           svarslit value:
+ 
+                 String of data.
+ 
+ 
+         - The new property named LEFTMARGIN has been added for the EDITTEXT
+           object as follows:
+ 
+           Format:
+                 LEFTMARGIN=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used in set or get the left margin
+                 of an edit object.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+                 EDITTEXT
+ 
+         - The new property named MODIFYFLAG has been added for the EDITTEXT
+           object as follows:
+ 
+           Format:
+                 MODIFYFLAG=dnumnvar
+ 
+           Statements Supported:
+ 
+                 SETPROP  GETPROP
+ 
+           Description:
+                 This property sets or retrieves the state of an edit
+                 object's modification flag. The flag indicates whether
+                 the contents of the edit object have been modified. The
+                 system automatically clears the modification flag to zero
+                 when the object is created.  If the user changes the
+                 object's text, the system sets the flag to $ON.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+                 EDITTEXT
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+         - The new property named PASSWORDCHAR has been added for the
+           EDITTEXT object as follows:
+ 
+           Format:
+                 PASSWORDCHAR=svarslit
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property sets or gets the password character
+                 for an EDITTEXT object. When a password character is set,
+                 that character is displayed in place of the characters
+                 typed by the user. This property is used in conjunction
+                 with the PASSWORD property.
+ 
+           Objects Supported:
+ 
+                 EDITTEXT
+ 
+           svarslit value:
+ 
+                 String of data. Only the first character is used or set.
+ 
+ 
+         - The new property named RIGHTMARGIN has been added for the
+           EDITTEXT object as follows:
+ 
+           Format:
+                 RIGHTMARGIN=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used in set or get the right margin
+                 of an edit object.
+  
+           Objects Supported:
+ 
+                 EDITNUMBER
+                 EDITTEXT
+ 
+         - The new property named SELTEXT has been added for the EDITTEXT
+           object as follows:
+ 
+           Format:
+                 SELTEXT=svarslit 
+ 
+           Statements Supported:
+ 
+                 SETPROP  GETPROP
+ 
+            Description:
+ 
+                  This property gets or replaced the selected text. It
+                  works in conjunction with the TEXTOUTCONV property.
+ 
+            Objects Supported:
+ 
+                  EDITTEXT
+ 
+            svarslit value:
+ 
+                  String of data.
+ 
+         - The new property named TEXTOUTCONV has been added for the
+           EDITTEXT object as follows:
+ 
+           Format:
+                 TEXTOUTCONV=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to control the conversion of text from
+                 an EDITTEXT object, when text is obtain by a GETPROP or
+                 GETITEM statement. It must be one of:
+ 
+                   $CONVDEFAULT    - The conversion default to the global
+                                     runtime conversion. The default runtime
+                                     conversion is $CONVEOL.
+                   $CONVEOL        - The CR/LF combinations are replaced
+                                     with the 0x7F characters.
+                   $CONVEXPAND     - The CR/LF combinations are replaced
+                                     with the 0x7F characters.  Tab
+                                     characters are expanded into spaces.
+                   $CONVRAW        - No conversion is done.
+                   $CONVSPACES     - The CR/LF combinations are replaced
+                                     with 0x7F characters.  All characters
+                                     below a space in value are turned
+                                     into a single space character.
+ 
+           Objects Supported:
+ 
+                   EDITTEXT
+ 
+           dnumnvar values:
+ 
+                   $CONVDEFAULT    EQU     1
+                   $CONVEOL        EQU     2
+                   $CONVEXPAND     EQU     3
+                   $CONVRAW        EQU     4
+                   $CONVSPACES     EQU     5
+ 
+ 
+         - The EDITTEXT object has been modified to support the following
+           methods.
+ 
+              EDITTEXT Methods
+ 
+                .--------------------
+                . Clear Method
+                .
+                The Clear method is used to delete (clear) the current
+                selection for the EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Clear  [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+                  3. This operation can be reversed by the Undo method.
+ 
+                .--------------------
+                . ClearUndo Method
+                .
+                The ClearUndo method resets the UNDO flag of an EDITTEXT
+                object.  The UNDO flag is set whenever an operation within
+                the EDITTEXT object can be undone.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.ClearUndo      [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+ 
+                .--------------------
+                . Copy Method
+                .
+                The Copy method copies the current selection to the
+                clipboard in text format.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Copy   [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+ 
+                .--------------------
+                . Cut Method
+                .
+                The Cut method is used to delete (cut) the current selection,
+                if any, in the EDITTEXT object and place the deleted text
+                to the clipboard in text format.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Cut    [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+                  3. This operation can be reversed by the Undo method.
+ 
+                .--------------------
+                . Paste Method
+                .
+                The Paste method is used to copy the current content of
+                the clipboard to the EDITTEXT object at the current caret
+                position. Data is inserted only if the clipboard contains
+                data in text format.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Paste  [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+ 
+                .--------------------
+                . Undo Method
+                .
+                The Undo method is used to undo the last EDITTEXT object
+                operation in the object's undo queue.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Undo   [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. For a single-line EDITTEXT object, the return value
+                     is always 1.
+                  4. For a multiline EDITTEXT object, the return value
+                     is 1 if the undo operation is successful, or 0 if
+                     the undo operation fails.
+                  5. An undo operation can also be undone.
+ 
+                .--------------------
+                . ScrollToCaret Method
+                .
+                The ScrollToCaret method is used to scroll the caret
+                into view.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.ScrollToCaret  [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A return value is always set to be 1 for success.
+ 
+                .--------------------
+                . Select Method
+                .
+                The Select method is used to select a range of characters. 
+                Also, this method can be used to set the current caret
+                position.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Select [GIVING {return}]:
+                                           USING [*Start=]{start},[*End=]{end}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that gets the
+                             return value.
+ 
+                     start   is a required decimal number or Numeric Variable
+                             that specifies a caret/selection point before
+                             the starting character position.
+ 
+                     end     is a required decimal number or Numeric Variable
+                             that specifies the ending selection point before
+                             the ending character position.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+                  3. The first character position is at 1.
+                  4. If an end position of 0 is given, then the selection goes
+                     from the {start} position and selects all of the
+                     remaining data.  The caret position is left after the
+                     {end} position.
+                  5. If the {start} and {end} positions are the same, then
+                     the caret position is set before the {start} position and
+                     no data is highlighted as a selection.  If the {start}
+                     position has a value larger than the number of characters
+                     in the edit object, then the caret is after the last
+                     character in the object.
+                  6. If the {start} value is set to 1 and the {end} value
+                     is set to 5, then the first 4 characters are highlighted
+                     as a selection.  The caret is set before the 5th
+                     character and the 5th character is not selected.
+ 
+                .--------------------
+                . SelectAll Method
+                .
+                The SelectAll method is used to selects all of the characters
+                in an EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.SelectAll      [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  2. A return value is always set to be 1 for success.
+ 
+                .--------------------
+                . GetLineCount Method
+                .
+                The GetLineCount method is used to retrieve the number of
+                lines in a multiline EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetLineCount   [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the total number of text lines.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+ 
+                .--------------------
+                . GetLine Method
+                .
+                The GetLine method is used to copy a line of text from a
+                multiline EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetLine [GIVING {return}]:
+                                            USING [*Line=]{line}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Character String Variable that
+                             gets the line text.
+ 
+                     line    is a required decimal number or Numeric
+                             Variable that specifies the line number to get.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If {return} is too small to contain value, the OVER
+                     Condition Flag is set (TRUE).
+                  2. The ZERO and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. Line numbers are one-based, a value of one specifies
+                     the topmost line.
+ 
+                .--------------------
+                . GetFirstVisibleLine Method
+                .
+                The GetFirstVisibleLine method is used to retrieve the
+                one-based index of the uppermost visible line in a multiline
+                EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetFirstVisibleLine    [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the first visible line.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+ 
+                .--------------------
+                . LineIndex  Method
+                .
+                The LineIndex method is used to retrieve the character
+                index of the first character of a specified line in a
+                multiline EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.LineIndex  [GIVING {return}]:
+                                               USING [*Line=]{line}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the character index.
+ 
+                     line    is a required decimal number or Numeric Variable
+                             that specifies the one-based line number. A
+                             value of 0 specifies the current line number
+                             (the line that contains the caret).
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A character index is the one-based index of the character
+                     from the beginning of the EDITTEXT object.
+                  4. The result is 0 if the specified line number is greater
+                     than the number of lines in the EDITTEXT object.
+ 
+                .--------------------
+                . LineFromChar  Method
+                .
+                The LineFromChar method is used to retrieve the line number
+                that contains the specified character index in a multiline
+                EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.LineFromChar  [GIVING {return}]:
+                                                  USING [*CharIndex=]{charndx}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the one-based line number.
+ 
+                     charndx is a required decimal number or Numeric Variable
+                             that specifies the one-based character index.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A character index is the one-based index of the
+                     character from the beginning of the EDITTEXT object.
+                  4. A character index of 0 specifies  that either the
+                     line number of the current line (the line containing
+                     the caret) or, if there is a selection, the line
+                     number of the line containing the beginning of the
+                     selection, should be returned.
+ 
+                .--------------------
+                . LineLength  Method
+                .
+                The LineLength method is used to retrieve the length, in
+                characters, of a line in an EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.LineLength  [GIVING {return}]:
+                                                USING [*CharIndex=]{charndx}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the line length.
+ 
+                     charndx is a required decimal number or Numeric Variable
+                             that specifies the one-based character index.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A character index is the one-based index of the
+                     character from the beginning of the EDITTEXT object.
+                  4. A character index of 0 returns the number of unselected
+                     characters on lines containing selected characters.
+ 
+                .--------------------
+                . LineScroll Method
+                .
+                The LineScroll method is used to scroll the text in a
+                multiline EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.LineScroll [GIVING {return}]:
+                                                USING [*Chars=]{chars}:
+                                                      [*Lines=]{lines}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+ 
+                     chars   is a required decimal number or Numeric Variable
+                             that specifies the number of characters to
+                             scroll horizontally.
+ 
+                     lines   is a required decimal number or Numeric Variable
+                             that specifies the number of lines to scroll
+                             vertically.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A return value of 0 indicates a single-line EDITTEXT
+                     object.
+                  4. A return value of 1 indicates a multiline EDITTEXT object
+ 
+                .--------------------
+                . GetCharIndexFromPos Method
+                .
+                The GetCharIndexFromPos method is used to retrieve
+                information about the character closest to a specified
+                point in the client area of n EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetCharIndexFromPos [GIVING {return}]:
+                                                  USING [*Vert=]{vert}:
+                                                        [*Horz=]{horz}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that gets the
+                             character index.
+ 
+                     vert    is a required decimal number or Numeric Variable
+                             that specifies the vertical number of pixels from
+                             the EDITTEXT object's upper-left corner.
+ 
+                     horz    is a required decimal number or Numeric Variable
+                             that specifies the horizontal number of pixels
+                             from the EDITTEXT object's upper-let corner.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A character index returned is the one-based index of
+                     the character from the beginning of the EDITTEXT object.
+ 
+                .--------------------
+                . GetPosFromCharIndex Method
+                .
+                The GetPosFromCharIndex method is used to retrieve the
+                client area coordinates of a specified character in an
+                EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetPosFromCharIndex  [GIVING {return}]:
+                                                  USING [*CharIndex=]{charndx}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the position.
+ 
+                     charndx is a required decimal number or Numeric Variable
+                             that specifies the one-based character index.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A character index is the one-based index of the
+                     character from the beginning of the EDITTEXT object.
+                  4. The positioned is returned as vertical
+                     position * 10000 + horizontal position.
+ 
+                .--------------------
+                . CanUndo Method
+                .
+                The CanUndo method is used to determine whether
+                there are any actions in an EDITTEXT object's undo queue.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.CanUndo        [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that indicates
+                             the success or failure of the method.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  3. A return value of 0 indicates no undo actions.
+                  4. A return value of non-zero indicates undo actions.
+ 
+ 
+                .--------------------
+                . GetTextLength Method
+                .
+                The GetTextLength method is used to get the raw character
+                count.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.GetTextLength  [GIVING {return}]
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required EDITTEXT object to be accessed.
+ 
+                     return  is an optional Numeric Variable that obtains
+                             the raw character count.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+ 
+                .--------------------
+                . Scroll Method
+                .
+                The Scroll method is used to scroll the text vertically
+                in a multiline EDITTEXT object.
+ 
+                The method uses the following format:
+ 
+                   [label] {object}.Scroll [GIVING {return}]:
+                                            USING [*Action=]{action}
+ 
+                Where:
+ 
+                     label   is an optional Program Execution Label.
+ 
+                     object  is a required WINDOW object to be accessed.
+ 
+                     return  is an optional Numeric Variable that gets the
+                             return value.
+ 
+                     action  is a required decimal number or Numeric Variable
+                             that specifies the action to perform.
+ 
+                Flags Affected: EOS, OVER, ZERO
+ 
+                Note the following:
+ 
+                  1. The {action} parameter can be one of:
+ 
+                     $LineDown       Scrolls down one line.
+                     $LineUp         Scrolls up one line.
+                     $PageDown       Scrolls down one page.
+                     $PageUp         Scrolls up one page.
+ 
+                     $LineUp         EQU     0
+                     $LineDown       EQU     1
+                     $PageUp         EQU     2
+                     $PageDown       EQU     3
+ 
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+                  4. The result is zero if the scroll fails.
+ 
+         - A new object named EDITNUMBER has been added to the PL/B
+           set of GUI objects.  This new object is like an EDITTEXT except
+           it only allows numeric data where the number of whole digits and
+           decimal digits are specified when the object is created. This
+           object only accepts valid numeric data in the same format as
+           is allowed for a PL/B FORM variable.  The EDITNUMBER object
+           has been implemented to support the following Properties, Methods,
+           and Events.
+ 
+           Properties (Support added for EDITNUMBER object)
+ 
+               ALIGNMENT
+               ANCHOR
+               BDRCOLOR
+               BGCOLOR
+               BORDER
+               CAUSEVALID
+               CLIPSIB
+               DOCK
+               DROPID
+               ENABLED
+               EDITHIDESEL
+               EVENTFILTER
+               FGCOLOR
+               FONT
+               HEIGHT
+               HELPID
+               HWND
+               LEFT
+               LEFTMARGIN
+               OBJECTID
+               OVERTYPE
+               READONLY
+               RIGHTMARGIN
+               SELECTALL
+               STYLE
+               TABID
+               TEXT
+               TOOLTIP
+               TOOLTIPHWND
+               TOP
+               VISIBLE
+               WIDTH
+               ZORDER
+ 
+           Properties (New EDITNUMBER Properties)
+ 
+               ALLOWMINUS    CREATE  SETPROP  GETPROP
+               AUTOENTER     CREATE  SETPROP  GETPROP
+               DECIMALDIGITS CREATE  SETPROP  GETPROP
+               INTEGERDIGITS CREATE  SETPROP  GETPROP
+               LEFTMARGIN    CREATE  SETPROP  GETPROP See EDITTEXT description
+               MODIFYFLAG            SETPROP  GETPROP See EDITTEXT description
+               UPDOWNALIGN   CREATE  SETPROP  GETPROP
+               RIGHTMARGIN   CREATE  SETPROP  GETPROP See EDITTEXT description
+               UPDOWNCHANGE  CREATE  SETPROP  GETPROP
+               UPDOWNMAX     CREATE  SETPROP  GETPROP
+               UPDOWNMIN     CREATE  SETPROP  GETPROP
+ 
+           Methods (Same description as for EDITTEXT methods with same name)
+ 
+               CanUndo
+               Clear
+               ClearUndo
+               Copy
+               Cut
+               GetTextLength
+               Paste
+               ScrollToCaret
+               Select
+               SelectAll
+               Undo
+ 
+           Events (Same description as for an EDITTEXT)
+ 
+               Change
+               DragDrop
+               DragOver
+               GotFocus
+               KeyPress
+               LostFocus
+               Move
+               MouseDown
+               MouseUp
+               MouseMove
+               Validate
+ 
+         - The new property ALLOWMINUS is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 ALLOWMINUS=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to prevent or allow negative numbers.
+                 If the property is set to $OFF, a leading minus sign
+                 is not allowed.  If it is set to $ON, a leading minus
+                 sign is allowed.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+         - The new property AUTOENTER is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 AUTOENTER=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the automatic entry
+                 state. If the state is ON, the object automatically
+                 tabs to the next object in the tab sequence when the number
+                 is completed using the keyboard.  If a number has decimal
+                 digits, it is considered complete when all of the decimal
+                 digits have been entered.  If the value has no decimal
+                 digits, then all of the integer digits must be entered.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+         - The new property DECIMALDIGITS is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 DECIMALDIGITS=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get number of decimal
+                 digits allowed.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+         - The new property INTEGERDIGITS is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 INTEGERDIGITS=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get number of integer
+                 digits allowed.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+         - The new property UPDOWNALIGN is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 UPDOWNALIGN=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the alignment value
+                 of an UpDown control component of an EDITNUMER object. If
+                 the default or $UPDOWNALIGNNONE value is used, no UpDown
+                 control is created. If $UPDOWNALIGNLEFT, or $UPDOWNALIGNRIGHT
+                 is used, an UpDown control is created inside the EDITNUMBER
+                 object by reducing the object's width.
+ 
+                 An UpDown control only affects the integer portion of a
+                 EDITNUMBER object.  The UPDOWNCHANGE, UPDOWNMAX, and
+                 UPDOWNMIN properties must also be set.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+           dnumnvar values:
+ 
+                 $DEFAULT           EQU 0 - Use Default ($UPDOWNALIGNNONE).
+                 $UPDOWNALIGNLEFT   EQU 1 - UpDown control should be on the
+                                            left.
+                 $UPDOWNALIGNNONE   EQU 2 - No UpDown control is to be used.
+                 $UPDOWNALIGNRIGHT  EQU 3 - UpDown control should be on the
+                                            right.
+ 
+         - The new property UPDOWNCHANGE is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                UPDOWNCHANGE=dnumnvar
+ 
+           Statements Supported:
+ 
+                CREATE  SETPROP  GETPROP
+ 
+           Description:
+                This property is used to set or get the change value of the
+                UpDown control. The change value is used to modify the
+                current value of the EDITNUMBER object, when the UpDown
+                control is used.  If no value is specified on a create, then
+                a value of 1 is used.
+ 
+           Objects Supported:
+ 
+                EDITNUMBER
+ 
+         - The new property UPDOWNMAX is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 UPDOWNMAX=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the maximum value of
+                 the UpDown control. If the maximum value is exceeded
+                 while using the control, the value wraps to the minimum
+                 value. If no value is specified on a create, then a value
+                 of 100 is used.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+         - The new property UPDOWNMIN is implemented for an EDITNUMBER
+           object as follows:
+ 
+           Format:
+                 UPDOWNMIN=dnumnvar
+ 
+           Statements Support:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the minimum value of
+                 the UpDown control. If the value drops below the minimum
+                 value while using the control, the value wraps to
+                 the maximum value. If no value is specified on a create,
+                 then a value of 0 is used.
+ 
+           Objects Supported:
+ 
+                 EDITNUMBER
+ 
+         - The DATALIST object has been modified to support the following
+           Properties.
+ 
+           Properties
+ 
+               SCROLLBAR     CREATE  SETPROP  GETPROP
+               SCROLLHIDE    CREATE           GETPROP   (NEW)
+               MULTICOLUMN   CREATE           GETPROP   (NEW)
+               COLUMNWIDTH   CREATE  SETPROP  GETPROP   (NEW)
+               HORZEXTENT    CREATE  SETPROP  GETPROP   (NEW)
+ 
+         - The COMBOBOX object has been modified to support the following
+           Properties and Methods.   Note, that the description of the
+           COMBOBOX methods are the same as for the DATALIST.
+ 
+           Properties
+ 
+               SCROLLBAR     CREATE  SETPROP  GETPROP
+               SCROLLHIDE    CREATE           GETPROP   (NEW)
+               HORZEXTENT    CREATE  SETPROP  GETPROP   (NEW)
+ 
+           Methods (NEW)  - Same description as for a DATALIST
+ 
+               AddString
+               DeleteString
+               Dir
+               FindString
+               FindStringExact
+               GetCount
+               GetCurSel
+               GetItemData
+               GetText
+               GetTopIndex
+               InsertString
+               ResetContent
+               SelectString
+               SetCurSel
+               SetItemData
+               SetTopIndex
+ 
+         - The SCROLLBAR property has been added to both the DATALIST and
+           COMBOBOX objects.
+ 
+         - The SCROLLHIDE property is a new property and has been added
+           to the COMBOBOX and DATALIST objects as follows:
+ 
+           Format:
+                 SCROLLHIDE=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  GETPROP
+ 
+           Description:
+                 This property is used to indicate if scrollbars should be
+                 hidden or disabled if not required. If the value is $OFF,
+                 scrollbars are disabled.  A value of $ON causes the
+                 scrollbars to be hidden.
+ 
+           Objects Supported:
+ 
+                 COMBOBOX
+                 DATALIST
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+         - The MULTICOLUMN property is a new property that has been added
+           to the DATALIST object as follows:
+ 
+           Format:
+                 MULTICOLUMN=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  GETPROP
+ 
+           Description:
+                 This property is used to indicate if the DATALIST object
+                 should contain multiple columns. The size of the columns
+                 is set using the COLUMNWIDTH property.
+ 
+           Objects Supported:
+ 
+                 DATALIST
+ 
+           dnumnvar values:
+ 
+                 $OFF         EQU       0       // Default
+                 $ON          EQU       1
+ 
+         - The COLUMNWIDTH property is a new property that has been added
+           to the DATALIST object as follows:
+ 
+           Format:
+                 COLUMNWIDTH=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get column width of
+                 a multicolumn DATALIST object.
+ 
+           Objects Supported:
+ 
+                 DATALIST
+ 
+         - The HORZEXTENT property is a new property that has been added
+           to the COMBOBOX and DATALIST objects as follows:
+ 
+           Format:
+                 HORZEXTENT=dnumnvar
+ 
+           Statements Supported:
+ 
+                 CREATE  SETPROP  GETPROP
+ 
+           Description:
+                 This property is used to set or get the width, in pixels,
+                 by which a list box can be scrolled horizontally
+                 (the scrollable width). If the width of the list box
+                 is smaller than this value, the horizontal scroll bar
+                 horizontally scrolls items in the list box.  If the width
+                 of the list box is equal to or greater than this value,
+                 the horizontal scroll bar is hidden or, if the object
+                 has the ScrollHide property set $OFF, disabled.
+ 
+           Objects Supported:
+ 
+                 COMBOBOX
+                 DATALIST
+ 
+         - Corrected a problem where the position/size of objects that
+           used the ANCHOR property and was placed over a PANEL object
+           could be changed by a FORMLOAD operation.
+ 
+         - Corrected a problem where a GROUPBOX over a PANEL object did
+           not appear after a FORMLOAD operation.
+ 
+         - Corrected a problem where SETITEM for a TIMER object did not
+           reset the timer.  This problem was caused by 8.7B changes.
+ 
+         - Corrected a problem where a DESTROY of a MODAL form after
+           a SETPROP VISIBLE=1 for a PLF form COLLECTION that included
+           the MODAL form could cause a GPF error.
+ 
+         - Corrected a problem where the border of a GROUPBOX with a
+           transparent background was being drawn on top of a STATTEXT
+           object that was created over the border of the GROUPBOX with
+           the STATTEXT object having a higher ZORDER than the GROUPBOX.
+           This problem was created in release 8.6E.
+ 
+         - Corrected a problem where a STATTEXT object created on a PANEL
+           was not being updated when a SETITEM operation was performed.
+ 
+         - Corrected a problem where anchored objects did not properly
+           redraw when the parent object was changed resulting in a
+           negative height or width for the anchored object.
+ 
+         - Corrected ANCHOR drawing problems when the AUTOSCROLL property
+           was being used for the parent window of an anchored object.
+ 
+         - Corrected a problem where the EDITHIDESEL property did not
+           work when used in a CREATE for an EDITTEXT object.
+ 
+         - Corrected a problem where the date reported for internal
+           diagnostic/debug log data could have an invalid month value.
+ 
+         - Corrected a problem where a DATALIST was not being resized
+           properly when the ANCHOR and INTEGRAL properties were used
+           and the parent window size was changed.
+ 
+-------------------------------------------------------------------------------
+PLBCMP   - Modified the compiler Cross Reference output to include a type
+           ID for the Object variable types.  The Object variable types
+           are the same as defined for the Object subtype equated values
+           found in the PLBEQU.INC include file as '$ST_object'.
+ 
+           Example:
+                    $ST_BUTTON     EQU  0x01
+                    $ST_VARIANT    EQU  0x29
+ 
+         - Modified the compiler to give a compilation error when a GOTO
+           references an EXTERNAL label.  This corrects a problem where
+           invalid pcode was being generated that result in a GPF error.
+ 
+         - Modified the SWITCH, CASE, SELECT, WHEN, and FOR statements to
+           allow a decimal number (dnum} to be used.
+ 
+           Examples:
+                      SWITCH   2
+                       CASE    NUMVAR
+                         .....
+                      ENDSWITCH
+ 
+                      SWITCH   NUMVAR
+                       CASE    2
+                        .....
+                      ENDSWITCH
+ 
+                      SELECT   2
+                       WHEN    NUMVAR
+                        .....
+                      ENDSELECT
+ 
+                      FOR NDX 1 TO 5
+                       .....
+                      REPEAT
+ 
+         - Added support for a MOVE VARLIST to VARLIST operation.
+ 
+           This MOVE instruction transfers the contents of each variable
+           in the source VARLIST into the corresponding variable in the
+           destination VARLIST.
+ 
+           Format:   [label] MOVE    {source}{sep}{dest}
+ 
+           Where:
+ 
+                 [label]  is an optional Program Execution label.
+ 
+                 {source} is a VARLIST Variable.
+ 
+                 {sep}    is a comma or one of the following prepositions:
+                          BY, TO, OF, FROM, USING, WITH, IN, or INTO.
+ 
+                 (dest}   is a VARLIST Variable.
+ 
+           Flags Affected: EOS, LESS, OVER, ZERO
+ 
+           Note the following:
+ 
+           1. Each VARLIST variable in the {source} is move to the
+              corresponding VARIABLE in the {dest} according to the rules
+              normal MOVE operation for variable types DIM, FORM, and
+              INTEGER.
+ 
+         - Modified the compiler to support the new Properties for the 
+           EDITTEXT object. (See PLBWIN section for descriptions)
+ 
+         - Modified the compiler to support new Properties for a COMBOBOX
+           object. (See PLBWIN section for descriptions)
+ 
+         - Modified the compiler to support new Properties for a DATALIST
+           object. (See PLBWIN section for descriptions)
+ 
+         - Modified the compiler to support a new GUI object named
+           EDITNUMBER and its associated properties. (See PLBWIN section
+           for descriptions)
+ 
+         - Changed to allow the TEXT property for a EDITTEXT and STATTEXT
+           object when using a GETPROP or SETPROP instruction.
+ 
+         - Modified the TABCONTROL object to support the DOCK property.
+ 
+         - Corrected a problem where the reference addresses for Global
+           Array elements were invalid when the 'zc#3' compiler option
+           was used.
+ 
+         - Corrected a problem where a compilation error was occurring
+           without cause for the following statement syntax when the
+           'zc#3' option was used.
+ 
+           Example:
+                    VARPT   VAR   @
+                    F2      FORM  2
+                    .
+                            TYPE  VARPT TO F2
+ 
+         - Corrected a problem where an invalid compilation error was
+           occurring for an ARRAY initialization when a comment existed
+           beyond the last element and the 'zc#3' option was used.
+ 
+         - Corrected a problem where the *ZF control did not work with
+           an *DVEDIT or *DVRV control in a KEYIN.  This problem was
+           created in release 8.7B.
+ 
+-------------------------------------------------------------------------------
+PLBDBUG  - Modified the DV BFILE command to detect an open state flag
+           so that an open state can be reported.  Please, note that there
+           is no file name or handle information that can be reported for
+           a BFILE variable.  The open state flag only indicates that
+           an open function has been completed successfully by a BTRIEVE
+           operation.  A close function clears the open state flag in 
+           the BFILE variable.
+ 
+         - Added EDITNUMBER to the GUI object table.
+ 
+         - Corrected a problem where the debugger would hang indefinitely
+           if a single step ( 'T' or F8 ) command was executed and the
+           expression was true.
+ 
+                'STOP IF ( S$CMDLIN = "*" )'
+ 
+-------------------------------------------------------------------------------
+PLBDSIGN - Modified the TABCONTROL object to support the DOCK property.
+ 
+         - Modified to support new EDITNUMBER object.
+ 
+         - Modified for new properties for COMBOBOX object.
+ 
+         - Modified for new properties for DATALIST object.
+ 
+         - Data entry via the properties editing window can now allow up to
+           a 1000 characters.  The limit prior to this change was 100 
+           characters.
+ 
+         - Corrected a problem where the position/size of objects that
+           used the ANCHOR property and was placed over a PANEL object
+           could be changed by a FORMLOAD operation.
+ 
+         - Corrected a problem where anchored objects did not properly
+           redraw when the parent object was changed resulting in a
+           negative height or width for the anchored object.
+ 
+-------------------------------------------------------------------------------
+ADMEQU.INC - Added $ADMCMDLOGMSGLEVEL0, $ADMCMDLOGMSGLEVEL1, and
+             $ADMCMDLOGMSGLEVEL2 command equates for the ADMCOMMAND
+             statement.
+ 
+-------------------------------------------------------------------------------
+PLBEQU.INC - Updated the subtype equates to include new object types.
+ 
+           - Added new property descriptions for COMBOBOX, DATALIST,
+             EDITNUMBER, and EDITTEXT.
+ 
+-------------------------------------------------------------------------------
+PLBMETH.INC- Added new object methods for COMBOBOX, EDITNUMBER, & EDITTEXT.
+ 
+-------------------------------------------------------------------------------
+SUNFHSYS.DLL- Corrected a problem where a record in a TXT data file
+              could be changed unexpectedly when the following instruction
+              sequence was executed:
+ 
+               1. A sequential READ of an AFILE/IFILE that gives an OVER
+                  flag because the end of file was encountered.
+ 
+               2. The OVER flag is ignored.
+ 
+               3. An UPDATE of the AFILE/IFILE would execute and change
+                  a record in the data file unexpectedly.
+ 
+              With this correction implemented, then this same sequence of
+              instructions cause an I40 error on the UPDATE instruction.
+ 
+-------------------------------------------------------------------------------
+ADMIN    - Modified the ADMCOMMAND statement to accept 3 new {command} values
+           to allow information to be logged into the server log file.
+           These commands can be used to store data into the PLBSERVE or
+           the SUNFM server log files.
+ 
+           The new {command} values are as follows:
+ 
+           $ADMCMDLOGMSGLEVEL0 is a command that causes the {value} data
+                               to be stored into the server log file with
+                               a logging level 0 used.
+ 
+                               $ADMCMDLOGMSGLEVEL0  EQU  8
+ 
+           $ADMCMDLOGMSGLEVEL1 is a command that causes the {value} data
+                               to be stored into the server log file with
+                               a logging level 1 used.
+ 
+                               $ADMCMDLOGMSGLEVEL1  EQU  9
+ 
+           $ADMCMDLOGMSGLEVEL2 is a command that causes the {value} data
+                               to be stored into the server log file with
+                               a logging level 2 used.
+ 
+                               $ADMCMDLOGMSGLEVEL2  EQU  10
+ 
+-------------------------------------------------------------------------------
+SUNIDE   - Fixed a problem when saving the editor settings where incorrect font
+	   information may be saved.
+
+	 - Fixed a bug that was introduced in 8.7B where the IDE would get
+	   stuck in an infinite loop adding bogus sources to the project. (the
+	   "OO" bug)
+
+	 - Added module name detection to correct a problem interfacing the
+	   editor when the PLB_FNC keyword was defined as mixed.
+
+	 - Corrected a problem where errors that may be reported at the end of
+	   the compile may not be detected.
+
+	 - Fixed a bug were labels were not being processed properly while
+	   processing the source list file.
+
+	 - Fixed a problem were a project could be added to the recent projects
+	   list multiple times if the path was mixed case.
+
+	 - Modified configuration file location to be user specific. The IDE
+	   now uses the Windows Application Data folder for them.
+
+	 - Various list file processing optimizations.
+
+	 - Modified the load errors and browse info to support "XE" (errors
+	   only/cross reference) list file as well as full source lists.
+	   Because a cross reference loads faster, it is now the project
+	   settings default compiler option for new projects.
+
+	 - Corrected a bug where if the IDE configured runtime/compiler did not
+	   contain an EXE extension, the project specified ini file could be
+	   spliced into the middle of the command line.
+ 
+-------------------------------------------------------------------------------
+WATCH    - Corrected computation of client and server version numbers for
+	   display.
+
+	 - Added Trap Object logic to handle communication failures gracefully.
+
+	 - Modified the message window to move the focus as messages are added.
+

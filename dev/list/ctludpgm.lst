@@ -1,0 +1,16 @@
+
+
+
+PAGE    1      ctludpgm                                                                                       02-11-19 11:35:45
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP ctludpgm -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    7.    INCLUDE  A: common.pls
+
+   Output: c:\apc\plc\ctludpgm.plc                                                                                                                                                                                                                                   
+       468 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:45 11:35:45
+  00001A80 DATA;  00000780  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

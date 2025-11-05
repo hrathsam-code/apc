@@ -1,0 +1,1271 @@
+                            RELEASE NOTES
+                          DB/C Release 7.0
+                            May 28, 1991
+                                  
+                                  
+*****************************************************************
+                   CORRECTIONS TO DB/C 7.0 MANUALS
+*****************************************************************
+
+1.   The "nioprep" function was incorrectly included on page 71 of
+     the DB/C Programmer's Guide.  This function is not implemented
+     under DB/C release 7.0.
+
+2.   The DRAW LINEWIDTH parameter (page 177 of DB/C Language
+     Reference) does nothing.  All lines are drawn with a width of 1.
+
+3.   When creating a dialog box with the OS/2 dialog box editor, if
+     the Visible Bit is set in the Edit Styles menu, then OPEN will
+     display the dialog (without need for SHOW).  If the bit is off,
+     OPEN will not display the dialog box - SHOW is used to display
+     it.
+
+4.   The DRAW verb syntax is incorrect on page 178 of DB/C Language
+     Reference.  The correct syntax is:
+     
+     label    DRAW      image; list
+     
+     The semi-colon is missing from the documentation.
+
+5.   The GETCOLOR verb syntax is incorrect on page 179 of the DB/C
+     Language Reference.  The correct syntax is:
+     
+     label    GETCOLOR  image prep number; list
+     
+     and the example should be:
+     
+     IMAGE    IMAGE     H=640, V=480, COLORBITS=4
+     NUM1     INT       5
+              DRAW      IMAGE; COLOR=*RED, ERASE
+              GETCOLOR  IMAGE INTO NUM1
+
+6.   The GETPOSITION verb syntax is incorrect on page 180 of the DB/C
+     Language Reference.  The correct syntax is:
+     
+     label    GETPOSITION image prep numvar prep numvar
+     
+     and the example should be:
+     
+     IMAGE    IMAGE     H=640, V=480, COLORBITS=4
+     NUM1     INT       5
+     NUM2     INT       5
+              DRAW      IMAGE; P=50:100
+              GETPOSITION IMAGE INTO NUM1, NUM2
+
+7.   The qhandle variable used in the Writing Device Support Routines
+     (pages 81-82 of the DB/C Programmer's Guide) has been changed
+     from type 'int' to type 'unsigned long int'.  This change
+     affects the following functions:
+     
+     dsrlink, dsrunlink, queget, queput, quewait
+
+8.   The DRAW FONT parameter (page 178 of DB/C Language Reference)
+     does nothing.  All characters are draw with the default font.
+
+
+9.   An additional routine is now required when writing
+     communications routines.  The following C routine needs to be
+     included in any user supplied DB/C module.
+
+     int combuf(channel, buffer, src, len)
+     int channel;
+     unsigned char * buffer;
+     unsigned char * src;
+     int len;
+     
+     Perform format processing of string before sending.  Allows
+     programmer to modify the data to be sent.  Under PC-DOS this
+     routine is used to prepend the Output Start (os) String and
+     append the Output End (oe) String to the message to be sent (see
+     DB/C Programmer's Guide, page 42-43).  The parameter channel is
+     the channel handle.  The parameter buffer is destination for the
+     data that is to be sent.  The parameter src is the data to be
+     sent from the SEND verb.  The return value is the new length of
+     the message buffer.
+
+10.  Page 69 of the DB/C Programmer's Guide incorrectly states that
+     the comtimer routine is called immediately after the comsend or
+     comrecv calls.  This has been changed,  the comtimer routine is
+     now called immediately before the call to comsend or comrecv.
+
+11.  Page 116 of the DB/C Language Reference incorrectly states that
+     UNPACKLIST uses any address variable for its destination list.
+     The UNPACKLIST verb will only unpack a list into a list of VAR @
+     type variables.
+
+12.  Page 133 of the DB/C Language Reference incorrectly states that
+     BKSPC is a valid function-key event for the GOTO verb.  The
+     BKSPC event will never be true after a keyin.
+
+13.  DBC_ROLLFILE on page 22 of the DB/C Programmer's Guide has been
+     changed.  If DBC_ROLLFILE=OFF, then information will not be
+     stored on disk and the ROLLOUT verb will behave the same as pre-
+     version 7 DB/C's did.
+
+14.  The SFORMAT verb on page 103 of the DB/C Language Reference
+     Manual is incorrectly documented.  SFORMAT does not accept
+     unqualified array references.
+15.  A VARLIST variable may not contain a single element of an array
+     variable.
+
+16.  The GVAR type variable is not supported.
+
+17.  The LIBRARY command now has a -S option.  The -S option allows
+     the LIBRARY command to be case sensitive in regards to
+     filenames.
+
+18.  Additional functionality has been added to the *EDIT keyin
+     function.
+        o The *INSMODE and *OVSMODE keyin controls set the insert
+          mode in a *EDIT field to be in either insert mode or
+          overstrike mode respectively.
+        
+        o Setting the environment variable DBC_EDITMODE=ON will cause
+          the INSERT KEY to be used as a toggle between insert and
+          overstrike mode during a *EDIT keyin field.
+
+19.  DBC_KEYIN, DBC_DISPLAY, DBC_KYDSPIPE and DBC_TERMDEF are not
+     valid environment variables under PC-DOS.
+
+20.  DBC_STATIC=OFF causes the STATIC=n option on FILE declarations
+     to be ignored.
+
+21.  Pressing Control-D while in the debugger will cause the debugger
+     to stop as if a break point was encountered.
+
+22.  LOADMOD instance names have a 8 character length limit.
+
+23.  DB/C Error Codes from 161-199, 461-499, 661-669, and 761-769 are
+     described in the Generic errors section in Chapter 18 of the
+     DB/C Programmer's Guide.  For example: Error I 661 can be found
+     under Generic errors: x61 file not open.
+
+24.  Error code E 556 has been added.  This error indicates that a
+     program has exceeded the maximum number of traps that are
+     supported under this release of DB/C.  The current maximum is
+     64.
+
+25.  Internal Errors 1621, 1627, 1630, 1642, 1651, and 1660 result
+     from file lock failures.  Internal Error 1665 results from
+     native i/o lock failures.  File locks can fail for a variety of
+     reasons.  These reasons include, but are not limited to, running
+     out of lock handles, running out of Dynamic Memory under Novell,
+     getting a network error during the request, loosing the network
+     connection during or before a request, and having the server
+     crash.
+
+26.  The LOADADR verb example on page 68 of the DB/C Language
+     Reference manual is incorrect.  The type of every variable in
+     the source list must be the same as the type of the destination
+     variable.  VAR2 and VAR3 must be numeric variables.
+
+27.  Page 41 of the DB/C Programmer's Guide states that the DB/C
+interpreter needs to be relinked to use serial communications.  This
+is no longer true.  DBC.EXE includes the serial communications module
+by default.  DBCSMALL.EXE does not include serial communications.
+
+28. Information for relinking the DB/C interpreter is included in a
+file named readme.lnk.
+
+*****************************************************************
+    CONSIDERATIONS WHEN CONVERTING FROM EARLIER RELEASES OF DB/C
+*****************************************************************
+
+1.   DB/C DATABUS object files (.dbc files) are upward compatible but
+     not downward compatible.  That is, .dbc files created by DBCMP
+     Release 3 through DBCMP Release 6.0 will run successfully under
+     the DB/C Release 7.0 run-time, but .dbc files created by DBCMP
+     Release 7.0 will not run on any prior releases.
+
+2.   Index (.isi) files and associative-index (.aim) files created by
+     DB/C Release 6.0 are upward compatible with DB/C Release 7.0.
+     .isi and .aim files created by Release 7.0 will not function
+     correctly with DB/C Release 6.0 or prior releases of DB/C.
+
+3.   The format of error messages has changed.  These are the error
+     messages returned in the common error message variable to the
+     master program and returned by TRAP.  The new format is
+     compatible with the proposed ANSI DATABUS Standard.  It is
+     described in Chapter 18 of the DB/C Programmer's Guide.  The
+     run-time option DBC_ERRORMSG=OLD will cause error messages to be
+     created as in DB/C Release 6.0 and before.
+
+4.   The handling of the return location from a character trap taken
+     during execution of KEYIN has reverted to the way it worked in
+     DB/C Release 5.0 and before.  That is, when a function key trap
+     is taken, the return will return to the statement after the
+     KEYIN statement, instead of the KEYIN statement itself.  This is
+     in conformance with the proposed ANSI DATABUS Standard.  The
+     run-time option DBC_TRAP=DBC6 will cause it to work as in
+     Release 6.0.  In addition, a new keyword has been added to TRAP
+     to allow control of this function on a trap by trap basis.  See
+     the documentation of TRAP PRIOR in the DB/C Language Reference.
+
+5.   The ROLLOUT operation on the MS-DOS version of dbc.exe causes a
+     work file to be created that contains the program and data area.
+     This memory is then made available to utilities during execution
+     of ROLLOUT.  When the command or commands complete, the contents
+     of the work file are read back into memory.  This does not
+     provide the facility to restart programs from a ROLLOUT point.
+     The work file is not useable in any manner.  The effect of this
+     change is slow down the ROLLOUT operation somewhat.  Note that
+     EXECUTE operates as before, so if speed is important and memory
+     is not, change your ROLLOUT statements to EXECUTE statements.
+6.   The default CANCEL_KEY has been changed to the ESCAPE_KEY.
+     Previous releases of DB/C have the TAB_KEY as the default
+     CANCEL_KEY.  See page 15 of the DB/C Programmer's Guide for
+     instructions on changing the default CANCEL_KEY.
+
+
+*****************************************************************
+                         VMS CONSIDERATIONS
+*****************************************************************
+The RMS record format of DB/C .TXT, .ISI, .AIM, and .DBC type files
+are now FIXED 512 byte records.  Release 5, used RMS UNDEFINED record
+format. If converting from release 5, all files should be
+reformatted, indexed, aimdexed, and compiled.  TEXT type .TXT files
+are still RMS STREAM_LF record format.  DB/C will allow accessing
+other types of RMS SEQUENTIAL organized files when opening the files
+in EXCLUSIVE mode.  Since the utilities default to exclusive opens,
+the utilities can now open files created by the VMS editor without
+being reformatted.
+
+Some Databus operations will not work correctly with TEXT (RMS
+STREAM_LF) type files.  Known limitations are partial writes, random
+writes beyond the physical EOF (ie. writing the 10th record in a 1
+record file) and updates that are not the full length of the records.
+DB/C will work correctly for all operations on DB/C (.TXT) type
+files.
+
+Version 7 of DB/C requires VMS 5.3 or higher.  Another requirement is
+DBC.EXE needs SYSLCK privilege to execute properly.  Executing
+DBC.EXE with SYSLCK privilege can be accomplished by either granting
+all users SYSLCK privilege or use the INSTALL command to install
+DBC.EXE as a shareable image that has /PRIV=(SYSLCK).  The following
+command can be added to SYS$MANAGER:SYSTARTUP_V5.COM to run the
+install command at boot time:
+
+INSTALL ADD/OPEN/HEADER/SHARED/PRIV=(SYSLCK) DISK:[DIRECTORY]DBC.EXE
+
+If DBC.EXE is executed without SYSLCK privilege, you will get an
+INTERNAL ERROR 16XX and error = (5, 0, 10484).
+
+DBC.EXE also flushes the RMS buffers after every write to the end-of-
+file.  There is a runtime environment option DBC_FLUSH=OFF which will
+turn off the flushing.  This appears to work with VMS 5.3, but the
+VMS Support at Digital say that it should not work and that a RMS
+SYS$FLUSH call is needed to update the information returned from a
+RMS SYS$DISPLAY call.  Use this option at your own risk.  This option
+cannot be placed in an environment file.
+
+
+*****************************************************************
+                          OS/2 Considerations
+*****************************************************************
+
+1. All files from the DB/C distribution that end in .DLL should be
+loaded into the directory indicated by the LIBPATH variable in the
+file CONFIG.SYS.
+
+
+*****************************************************************
+                               FASTDBC
+*****************************************************************
+
+A rudimentary fourth generation language, FASTDBC, is included with
+DB/C Release 7.0.  Its documentation follows.
+
+FASTDBC is a programing tool that makes extensive use of user defined
+verbs written in DB/C DATABUS.  It enables the programmer to write
+sophisticated data entry type programs and report programs in a
+fraction of the time normally required.  These programs include an
+'SAA-like' interface (i.e. an action bar at the top of the screen,
+drop down menus, dialog boxes, etc.).  The following is an example of
+a simple data entry program:
+
+     inc fastdbc
+     inc zzfastdef
+
+     loadmod "fastdbc2<example>"
+     title center="EXAMPLE TITLE", right="05/15/90"
+     maint table=zz, record=zz.record, autosave
+     screen text="Example field one.........", field=zz.field1:
+          text="Example field two.........", field=zz.field2:
+          text="Example field three.......", field=zz.field3
+     action
+     stop
+
+The include file, zzfastdef.txt, is generated by FASTDBC.  It might
+look as follows:
+
+.
+. FILE DECLARATION - example
+.
+zz.record list
+zz.field1 char 10
+zz.field2 num 5.2
+zz.field3 char 25
+          listend
+zz        list
+          ifile keylen=10, fix=43
+          varlist "example"
+          varlist zz.field1
+          listend
+
+FASTDBC consists of the following files:
+     fastdbc.txt              fastdd.txt
+     fastdbc1.txt             fastcdef.txt
+     fastdbc2.txt             fastfdef.txt
+     fastdbc3.txt             fastddef.txt
+     fastdbc4.txt             fasttdef.txt
+
+fastdbc.txt is an include file that contains the definitions of the
+     user defined verbs with the list of parameter prototypes that is
+     valid for each of these.
+fastdbc1.txt includes the actual code that is executed for the TITLE,
+     MENU, ERROR, MESSAGE, LISTBOX, and FASTio verbs.  This file
+     should be preloaded via the DBC_PRELOAD environment variable.
+
+fastdbc2.txt includes the verbs for maintenance program
+     initialization, standard maintenance program functions (ADD,
+     NEXT, BACK, FIND, etc.), screen display, screen keyin, and
+     dialog boxes.
+
+fastdbc3.txt includes the verbs for report program initialization and
+     printing.
+
+fastdbc4.txt includes the verbs for actionbar initialization, and
+     program flow control.
+
+fastdd.txt is the program that controls the FASTDBC system.  It is
+     the maintenance program that prompts the user for file layout
+     information and then generates a new file definition include
+     module.
+
+fastcdef.txt, fastfdef.txt, fastddef.txt, and fasttdef.txt are file
+     definition includes.  These definition files are used by
+     fastdd.txt.
+To use the FASTDBC system, do the following:
+
+1.   Compile fastdbc1.txt, fastdbc2.txt fastdbc3.txt, fastdbc4.txt,
+     and fastdd.txt
+
+2.   Set the environment variable DBC_PRELOAD=fastdbc1
+
+3.   Set the environment variable DBC_BREAK=OFF
+
+4.   Set the environment variable DBC_XKEYS=ON
+
+5.   Run FASTDD.DBC (type DBC FASTDD on the command line)
+
+6.   The message 'Enter system code' will be displayed.  Type a two
+     letter system code.  (For example, the system code for an
+     accounts receivable system might be AR).  The message 'System
+     code does not exist.  OK to create (Y/N)?' will be displayed.
+     Answer Y.  There will be a short pause while the system files
+     are created and indexed.
+
+7.   Select the 'Data dictionary' option on the main menu.  The 'File
+     definition maintenance' screen is displayed.  Use the 'Add'
+     option to add a new file definition.
+
+8.   Select the 'Data Fields' option from the actionbar under the
+     'Options' heading.  The 'Data fields definition maintenance'
+     screen is displayed.  Use the 'Add' option to add definitions of
+     all the fields that make up the records of the file.  The only
+     valid types for fields are:  C, N, YN, MMDDYY, MMDDYYYY, YYMMDD,
+     and YYYYMMDD.  Additional types can be made available by adding
+     them to the 'Data types definition maintenance'.  To do this,
+     select the 'Data types' option from the actionbar under the
+     'Options' heading.
+
+9.   Use the 'Exit' option to return to the main menu.  Select the
+     'Generate' option and answer A (for ALL) when prompted.
+
+10.  Select the 'Edit program' option on the main menu.  The edit
+     screen is displayed.  Type the maintenance program here.  Make
+     sure to INCLUDE fastdbc.txt and the data definition module that
+     was just generated.  It may be helpful to use the fastdd.txt
+     module as an example.  See the DB/C Command Reference manual for
+     details on using the editor.
+
+11.  Exit the editor and select the 'Compile program' option on the
+     main menu.  If the program compiles without errors, then select
+     the 'Execute program' option on the main menu.  If there is
+     insufficient memory for the editor, the compiler, or the
+     interpreter, then simply exit the FASTDBC system and execute
+     these commands on the command line.
+The following are the FASTDBC user defined verbs:
+
+TITLE verb
+     TITLE displays a title on the top line of the screen.
+
+     Keyword parameters:
+          
+          LEFT=<varlit> displays a variable or literal left
+          justified.
+          
+          RIGHT=<varlit> displays a variable or literal right
+          justified.
+          
+          CENTER=<varlit> displays a variable or literal centered.
+
+MENU verb
+     The menu verb displays a list of menu items enclosed in a box.
+     The currently selected item is highlighted.  The user can select
+     an item by using the cursor keys to move the highlighted bar, by
+     typing the first letter of the desired item, or by pressing the
+     function key or control key associated with the item.  Pressing
+     <ENTER> causes the selected item to be executed.  Menus can be
+     nested five levels deep.
+
+     Keyword parameters:
+          
+          HORZ=<nvarlit> is the horizontal position of the menu box
+          on the screen
+          
+          VERT=<nvarlit> is the vertical position of the menu box on
+          the screen.
+          
+          WIDTH=<nvarlit> is the width of the menu box.
+          
+          LENGTH=<nvarlit> is the length of the menu box.
+          
+          TITLE=<cvarlit> is the title that appears as the first line
+          in the menu box.
+          
+          ITEM=<cvarlit> is the text that appears in the menu.
+          
+          PROGRAM=<cvarlit> is the program that is CHAIN'ed to when a
+          menu item is executed.  A PROGRAM parameter must follow the
+          ITEM  parameter with which it is associated.
+          
+          ROUTINE=<label> is the label that is CALL'ed when a menu
+          item is executed.  A ROUTINE parameter must follow the ITEM
+          parameter with which it is associated.
+          
+          TERMINATE=<label> is the label that is CALL'ed when a menu
+          item is executed.  A TERMINATE parameter must follow the
+          ITEM parameter with which it is associated.
+          
+          F1, F2,..., F12 is the function key that causes the menu
+          item to be selected.  A parameter of this type must follow
+          the ITEM parameter with which it is associated.
+          
+          CTLA, CTLB,..., CTLZ is the control key that causes the
+          menu item to be selected.  A parameter of this type must
+          follow the ITEM parameter with which it is associated.
+
+ERROR verb
+     The error verb displays a message in a box and then prompts the
+     user to 'Press any key to continue'.
+
+     Keyword parameters:
+          
+          HORZ=<nvarlit> is the horizontal position of the error box
+          on the screen.  If this parameter is not included, the
+          error box will be centered on the screen.
+          
+          VERT=<nvarlit> is the vertical position of the error box on
+          the screen.  If this parameter is not included, the error
+          box will be centered on the screen.
+          
+          WIDTH=<nvarlit> is the width of the error box.  If this
+          parameter is not specified, the error box will be wide
+          enough to accomodate the longest line.
+          
+          LENGTH=<nvarlit> is the length of the error box.  If this
+          parameter is not specified, the error box will be long
+          enough to accomodate all of the lines.
+          
+          TEXT=<cvarlit> is the message that is displayed.  Multiple
+          TEXT parameters are allowed.
+          
+          H=<nvarlit> is the horizontal position in the error box of
+          the message specified with the TEXT parameter.  If this
+          parameter is not specified, then the message will be
+          displayed at the first position in the error box.
+          
+          V=<nvarlit> is the vertical position in the error box of
+          the message specified with the TEXT parameter.  If this
+          parameter is not specified, then the message will be
+          displayed on the next line.
+
+MESSAGE verb
+     The message verb displays a message in a box.
+
+     Keyword parameters:
+          
+          HORZ=<nvarlit> is the horizontal position of the message
+          box on the screen.  If this parameter is not included, the
+          message box will be centered on the screen.
+          
+          VERT=<nvarlit> is the vertical position of the message box
+          on the screen.  If this parameter is not included, the
+          message box will be centered on the screen.
+          
+          WIDTH=<nvarlit> is the width of the message box.  If this
+          parameter is not specified, the message box will be wide
+          enough to accomodate the longest line.
+          
+          LENGTH=<nvarlit> is the length of the message box.  If this
+          parameter is not specified, the message box will be long
+          enough to accomodate all of the lines.
+          
+          TEXT=<cvarlit> is the message that is displayed.  Multiple
+          TEXT parameters are allowed.
+          
+          H=<nvarlit> is the horizontal position in the message box
+          of the message specified with the TEXT parameter.  If this
+          parameter is not specified, then the message will be
+          displayed at the first position in the message box.
+          
+          V=<nvarlit> is the vertical position in the message box of
+          the message specified with the TEXT parameter.  If this
+          parameter is not specified, then the message will be
+          displayed on the next line.
+
+MESSAGEERASE verb
+     The messageerase verb causes the most recent message box that
+     was displayed to be erased.  The portion of the screen that was
+     overwritten by the message box is restored.
+
+LISTBOX verb
+     This verb causes an array of variables to be displayed in a box.
+     One element is displayed per line.  The user can use the UP,
+     DOWN, PGUP, PGDN, HOME and END keys to move around in the box.
+     The currently selected element is displayed in reverse video
+     mode.  The index of the currently selected element is returned
+     when the user presses <ENTER>.  The portion of the screen that
+     was overwritten by the list box is restored.
+
+     Keyword parameters:
+          
+          HORZ=<nvarlit> is the horizontal position of the list box
+          on the screen.  If this parameter is not included, the list
+          box will be centered on the screen.
+          
+          VERT=<nvarlit> is the vertical position of the list box on
+          the screen.  If this parameter is not included, the list
+          box will be centered on the screen.
+          
+          WIDTH=<nvarlit> is the width of the list box.  If this
+          parameter is not specified, the list box will be wide
+          enough to accomodate the variables in the array.
+          
+          LENGTH=<nvarlit> is the length of the list box.  If this
+          parameter is not specified, the list box will be 15 lines
+          long unless there are fewer than 15 item in the list.  In
+          this case, the list box will have as many lines as there
+          are items in the list.
+          
+          TITLE=<cvarlit> is the title that will be displayed as the
+          first line in the list box.
+          
+          ARRAY=<list> is the array that will be displayed.
+          
+          COUNT=<nvarlit> is the maximum number of elements that are
+          displayed in the list box.
+          
+          RESULT=<nvar> is the variable in which the number of the
+          selected element is returned.
+
+MAINT verb
+     This verb causes the initilization needed for execution of a
+     maintenance program to take place.  The parameters passed to
+     this verb determine which functions are available (i.e. add,
+     change, etc.), which accelerator keys are available, and where
+     user exits are called.  This verb causes an actionbar to be
+     displayed with the headings File, Lookup, and Modify.  The
+     functions available under the File heading are Save and Exit.
+     The functions available under the Lookup heading are Find, Next,
+     Back, and Erase.  The functions available under the Modify
+     heading are Add, Changed, and Delete.  Additional functions can
+     be added under each of these headings, and the default functions
+     can be left out by specifying the parameters described below.
+
+     Keyword parameters:
+          
+          TABLE=<list1> is a list that contains the file or ifile
+          definition(s), the file name, and the key if it is an
+          ifile.  Both the file name and the key can be lists as
+          well.
+          
+          RECORD=<list2> is a list that contains the variables that
+          make up the records.
+          
+          FILEITEM=<cvarlit> is the name of the user written function
+          that appears under the File heading of the actionbar.
+          
+          LOOKUPITEM=<cvarlit> is the name of the user written
+          function that appears under the Lookup heading of the
+          actionbar.
+          
+          MODIFYITEM=<cvarlit> is the name of the user written
+          function that appears under the Modify heading of the
+          actionbar.
+          
+          OPTIONSITEM=<cvarlit> is the name of the user written
+          function that appears under the Options heading of the
+          actionbar.  Note, the Options heading is not included by
+          default.  It appears only if this parameter is specified.
+          
+          ROUTINE=<label> is the name if the user written function.
+          It must follow a FILEITEM, LOOKUPITEM, MODIFYITEM, or
+          OPTIONSITEM parameter.
+          
+          F1, F2,..., F12 is function key 1 thru 12.  It is an
+          accelerator key that causes the user written function with
+          which it is associated to be executed.  A parameter of this
+          type must follow a FILEITEM, LOOKUPITEM, MODIFYITEM,
+          OPTIONSITEM, or ROUTINE parameter.
+          
+          CTLA, CTLB,..., CTLZ is control-A through control-Z.  It is
+          an accelerator key that causes the user written function
+          with which it is associated to be executed.  A parameter of
+          this type must follow a FILEITEM, LOOKUPITEM, MODIFYITEM,
+          OPTIONSITEM, or ROUTINE parameter.
+          
+          AUTOSAVE is the automatic save flag.  If this flag is not
+          specified, then the message 'ok to save? (Y/N)' will appear
+          each time a record is written to the file.  The user is
+          prompted for a response.
+          
+          NOSAVE
+          
+          NOQUIT
+          
+          NOFIND
+          
+          NONEXT
+          
+          NOBACK
+          
+          NOADD
+          
+          NOCHANGE
+          
+          NODELETE
+          
+          NOERASE are the suppress function flags.  If a flag of this
+          type is specified, then the corresponding function will not
+          be available in the maintenance program.
+          
+          MAKEVIEW is the view flag.  This is the only function that
+          is not included by default.  If this parameter is
+          specified, then the View function will appear under the
+          Lookup heading.
+          
+          FINDKEY=<label>
+          
+          BEGIN=<label>
+          
+          END=<label>
+          
+          SAVE=<label>
+          
+          QUIT=<label>
+          
+          FIND=<label>
+          
+          NEXT=<label>
+          
+          BACK=<label>
+          
+          ADD=<label>
+          
+          ADDEND=<label>
+          
+          CHANGE=<label>
+          
+          DELETE=<label>
+          
+          GET=<label>
+          
+          PUT=<label>
+          
+          VIEW=<label> are the user exits.  label is the name of the
+          user written routine.  Most of these are located at the
+          beginning of the routines they correspond to.  (i.e. SAVE
+          is at the beginning to the save function.)  On return from
+          a user exit, the mainline code checks the value of the EOS
+          flag.  If it is set, then an unconditional return happens.
+          Otherwise, execution continues as normal.
+
+MAINTFLGSAVE verb
+     This verb causes the values of mnt.recflag, mnt.newflag, and
+     mnt.chgflag to be saved.  These flags are used to determine the
+     current state of a maintenance program.  This verb is typically
+     used when one maintenance program is executing and another
+     maintenance program is loaded.
+
+MAINTFLGREST verb
+     This verb restores the values of the mnt.recflag, mnt.newflag,
+     and mnt.chgflag.
+SCREEN verb
+     This verb is used to define the screen layout of a maintenance
+     program.
+
+     Keyword parameters:
+          
+          TEXT=<cvarlit> is the text that appears on the screen (i.e.
+          a description of a field).  If the H, V, HA, or VA
+          parameters are not specified (see below), then this
+          parameter causes the cursor to be positioned at the
+          beginning of the next line.
+          
+          FIELD=<cnvar> is the variable that is used for KEYIN.
+          Note, the order in which the variables are displayed on the
+          screen (i.e. top to bottom, left to right) determines the
+          order in which they are key'ed into.
+          
+          REPEATFIELD=<array>:<nvarlit> is the array type variable
+          that is used for KEYIN.  nvarlit defines the number of
+          elements in the array.  Each element is key'ed into on a
+          separate line.
+          
+          DATA=<var> is a variable that is displayed but not used for
+          KEYIN.
+          
+          H=<nvarlit> is the horizontal position of the following
+          TEXT, FIELD, or DATA item.
+          
+          V=<nvarlit> is the vertical position of the following TEXT,
+          FIELD, or DATA item.
+          
+          HA=<nvarlit> is the horizontal adjust parameter.  It is
+          used to specify the screen position of the following TEXT,
+          FIELD, or DATA item relative to the current position.
+          
+          VA=<nvarlit> is the vertical adjust parameter.  It is used
+          to specify the screen position of the following TEXT,
+          FIELD, or DATA item relative to the current position.
+          
+          UC is the upper case flag.  All character that are typed at
+          the keyboard are automatically converted to upper case.
+          
+          DE is the digit entry flag.  This option is only valid for
+          character type variables.  It causes digits to be the only
+          valid characters for this KEYIN.
+          
+          JR is the justify right flag.  This option causes the
+          characters entered to be right justified in the variable.
+          
+          ZF is the zero fill flag.  This option causes the variable
+          to be filled with zeros instead of blanks.
+          
+          YN is the Yes/No flag.  It causes the values Y, y, N, and n
+          to be the only valid characters for this KEYIN.
+          
+          MMDDYY
+          
+          MMDDYYYY
+          
+          YYMMDD
+          
+          YYYYMMDD are the date flags.  Only dates in the specified
+          format are valid for this KEYIN.
+          
+          NOCHANGE is the number of FIELD type fields that are
+          skipped during the CHANGE function.  The same fields are
+          key'ed into during the ADD function.  This is useful when
+          the first few fields on a screen are the fields that make
+          up the primary key.  Typically, these fields can not be
+          changed after they are added to the file.
+          
+          FIELDEXIT=<label> is the name of the user writtem function
+          that is called just prior to keyin of this variable.  If
+          the user written function returns with the EOS flag clear,
+          then keyin continues as usual.  Otherwise, keyin for the
+          variable does not happen.
+          
+          FIELDINIT=<cnvarlit> is the initial value of the variable.
+          
+          DISPLAY=<label> is the user written function that is called
+          at the beginning of the screendisplay function.
+          
+          ERASE=<label> is the user written function that is called
+          at the beginning of the screenerase function.
+          
+          VIEWFIELD=<cnvar> is the variable displayed in a column on
+          the view screen.  Multiple viewfields are allowed.  They
+          appear on the view screen in the order they are defined.
+          Note, this parameter is only relevant if the MAKEVIEW flag
+          was specified in the MAINT verb.
+          
+          VIEWDESC=<varlit> is the description of the current column.
+          Descriptions appear on the first line of the view screen.
+          If the length of the description is greater than the length
+          of the column variable and the VIEWWIDTH parameter is not
+          specified for the column, then the width of the column is
+          set equal to the length ot the description.
+          
+          VIEWWIDTH=<nvarlit> is the width of a view column.  If this
+          parameter is not specified, then the VIEWFIELD and/or
+          VIEWDESC are used to determine the column width.
+          
+          VIEWH=<nvarlit> is the horizontal position of the column on
+          the view screen.
+          
+          VIEWHA=<nvarlit> is the horizontal adjust position of the
+          column on the view screen.  The position is relative to the
+          previous column.
+          
+          VIEWDEFAULTHA=<nvarlit> is the number of blank spaces that
+          appear between columns on the view screen.  This paramter
+          is disregarded for columns for which the VIEWH or VIEWHA
+          paramter is specified.  If this paramter is not specified,
+          then two blanks are displayed between columns.
+
+SCREENDISPLAY verb
+     This verb causes a record to be displayed.
+
+SCREENKEYIN verb
+     This verb causes a keyin of the variables on the screen to
+     happen.
+
+     Positional parameter:
+          
+          <nvar> is the number of variables to skip before starting
+          keyin.
+
+SCREENERASE verb
+     This verb causes the currently displayed record to be erased.
+
+DIALOG verb
+     The dialog verb displays a message in a box and prompts the user
+     for input.  The user can exit the dialog box at any point by
+     pressing the f12 key.  In this case, the eos flag is set.  If
+     the variable to be key'ed into is a character variable and no
+     character are typed (i.e. only the <ENTER> key is pressed), then
+     the OVER flag is set.
+
+     Keyword parameters:
+          
+          HORZ=<nvarlit> is the horizontal position of the dialog box
+          on the screen.  If this parameter is not included, the
+          dialog box will be centered on the screen.
+          
+          VERT=<nvarlit> is the vertical position of the dialog box
+          on the screen.  If this parameter is not included, the
+          dialog box will be centered on the screen.
+          
+          WIDTH=<nvarlit> is the width of the dialog box.  If this
+          parameter is not specified, the dialog box will be wide
+          enough to accomodate the longest line.
+          
+          LENGTH=<nvarlit> is the length of the dialog box.  If this
+          parameter is not specified, the dialog box will be long
+          enough to accomodate all of the lines.
+          
+          TEXT=<cvarlit> is the text that is displayed.  Multiple
+          TEXT parameters are allowed.  If the H and V parameters are
+          not specified (see below), then this parameter causes the
+          cursor to be positioned at the beginning of the next line.
+          
+          FIELD=<cvarlit> is the variable that is key'ed into.
+          Multiple FIELD parameters are allowed.
+          
+          H=<nvarlit> is the horizontal position in the dialog box of
+          the previously specified TEXT or FIELD variable.
+          
+          V=<nvarlit> is the vertical position in the dialog box of
+          the previously specified TEXT or FIELD variable.
+          REQUIRED is the required entry flag.  If it is specified,
+          then the user can not press only the <ENTER> key for this
+          field.
+          
+          YESNO is the Yes/No flag.  It causes the values Y, y, N,
+          and n to be the only valid characters for this KEYIN.  If
+          the user enters Y (or y) then the equal flag is cleared.
+          If the user enters N (or n) then the equal flag is set.
+
+REPORT verb
+     This verb causes the initilization needed for execution of a
+     report program to take place.
+
+     Keyword parameters:
+          
+          TABLE=<list1> is a list that contains the file or ifile
+          definition(s), the file name, and the key if it is an
+          ifile.  Both the file name and the key can be lists as
+          well.
+          
+          RECORD=<list2> is a list that contains the variables that
+          make up the records.
+          
+          DISPLAY is the display flag.  It causes the report to be
+          displayed on the screen, rather than printed.
+          
+          PAGEWIDTH=<nvarlit> is the width of the page. The default
+          page width is 80.
+          
+          PAGELENGTH=<nvarlit> is the number of lines on the page.
+          The default page length is 66.
+          
+          TOPMARGIN=<nvarlit> is the length of the top margin.  The
+          default top margin length is 3.
+          
+          BOTTOMMARGIN=<nvarlit> is the length of the bottom margin.
+          The default bottom margin length is 3.
+          
+          LEFTMARGIN=<nvarlit> is the width of the left margin.  The
+          default left margin width is 10.
+          
+          RIGHTMARGIN=<nvarlit> is the width of the right margin.
+          The default right margin width is 10.
+          
+          NODATE is the suppress date flag.  If this parameter is not
+          specified, then the current date will be printed on the
+          first line after the top margin on each page.
+          NOPAGE is the suppress page number flag.  If this parameter
+          is not specified, then the page number will be printed on
+          the first line after the top margin on each page.
+          
+          TITLE=<cvarlit> is the title that appears centered on the
+          second line after the top margin on each page (or the first
+          line if NODATE and NOPAGE are specified)
+          
+          LTITLE=<cvarlit> is the title that appears left justified
+          on the second line after the top margin on each page (or
+          the first line if NODATE and NOPAGE are specified)
+          
+          RTITLE=<cvarlit> is the title that appears right justified
+          on the second line after the top margin on each page (or
+          the first line if NODATE and NOPAGE are specified)
+          
+          COL=<varlit> is the variable that is printed in this
+          column.
+          
+          DESC=<cvarlit> is the description that is printed at the
+          top of this column on each page.
+          
+          COLWIDTH=<nvarlit> is the width of this column.  If this
+          parameter is not specified, then the column width is equal
+          to the size of the variable to be printed.
+          
+          DEFAULTHA=<nvarlit> is the number of blanks between
+          columns.  The default number of blanks is 2.
+          
+          H=<nvarlit> is the horizontal position of this column.
+          Note, this parameter must be used for all columns or not
+          used at all.
+          
+          HA=<nvarlit> is the horizontal adjust parameter.  It
+          determines the position of this column relative to the
+          position of last column.  Note, this parameter must be used
+          for all columns or not used at all.
+          
+          BEFOREGROUP=<label> is the before group user written exit.
+          Every time the value of the current column changes, the
+          user written exit routine is called.  Note, it is also
+          called before the first line is printed.
+          
+          AFTERGROUP=<label> is the after group user written exit.
+          Every time the value of the current column changed, the
+          user written exit routine is called.
+          
+          GROUPTOTAL is the group total flag.  If this parameter is
+          specified, then a running total is calculated for the
+          current column.  The current column must be a numeric
+          variable.  The group total is printed every time the value
+          of an earlier column that was specified with BEFOREGROUP or
+          AFTERGROUP changes.
+          
+          GRANDTOTAL is the grand total flag.  If this parameter is
+          specified, then a grand total is displayed at the end of
+          the report.
+          
+          BEGIN=<label>
+          
+          END=<label>
+          
+          BEFOREREPORT=<label>
+          
+          AFTERREPORT=<label>
+          
+          BEFOREPAGE=<label>
+          
+          AFTERPAGE=<label>
+          
+          BEFOREGET=<label>
+          
+          BEFORELINE=<label>
+          
+          AFTERLINE=<label> are the user exits.  label is the name of
+          the user written routine.
+
+REPORTLINE verb
+     This verb causes a line to be printed on the report.
+
+     Positional parameter:
+          
+          <cnvarlit> is the line to be printed.
+
+ACTIONBAR verb
+     This verb is used to initialize the headings, menu items, and
+     accelerator keys that are available in the actionbar.
+
+     Keyword parameters:
+          
+          ENTRY=<cvarlit> is the heading that is displayed in the
+          actionbar.  A maximum of 20 ENTRY's are allowed.
+          
+          ITEM=<cvarlit> is an item that appears under the previously
+          defined entry heading.  A maximum of 100 item are allowed
+          for all ENTRY's.
+          
+          ROUTINE=<label> is the name of the user written routine
+          associated with the current item.
+          
+          F1, F2,..., F12 is function key 1 thru 12.  It is an
+          accelerator key that causes the user written function with
+          which it is associated to be executed.  A parameter of this
+          type must follow an ITEM or ROUTINE parameter.
+          
+          CTLA, CTLB,..., CTLZ is control-A through control-Z.  It is
+          an accelerator key that causes the user written function
+          with which it is associated to be executed.  A parameter of
+          this type must follow an ITEM or ROUTINE parameter.
+          
+          DESELECT=<nvar> is the deselect flag.  This parameter
+          causes the current item to toggle between an available and
+          and an unavailable state.  nvar is a variable defined in
+          user written code.  When nvar has a non-zero value, then
+          the current item is available.  Otherwise, it is
+          unavailable.  Unavailable items are marked with a - (minus
+          sign).  The user is not able to executed unavailable items.
+          
+          CHECKMARK=<nvar> is the checkmark flag.  This parameter
+          causes the current item to toggle between a MARK'ed and an
+          unMARK'ed state.  If the user executes a MARK'ed item, it
+          becomes unMARK'ed and visa-versa.  nvar is a variable
+          defined in user written code.  User written code can test
+          the state of the item at any time by comparing the value of
+          nvar to zero. MARK'ed items are marked with a * (asterisk).
+
+ACTION verb
+     This verb determines the flow of execution in a program.  It
+     waits for keystrokes indefinitely.  When a key is pressed, this
+     verb calls the routine associated with the key (as defined by
+     MAINT and ACTIONBAR).  If other keys are pressed during
+     execution of the called routine, they are put on a queue.  When
+     the called routine completes, control returns to the ACTION verb
+     which checks if there are any pending keys in the queue.
+
+ACTIONSTORE verb
+     This routine causes the label of a routine to be stored in a
+     table.  The ACTION verb uses this table to call a routine when
+     the corresponding key is pressed.
+
+     Keyword parameter:
+          
+          ROUTINE=<label>:<nvarlit> is the label of the routine to be
+          stored in the table.  nvarlit is the offset in the table of
+          this routine.
+
+ACTIONPUTQ verb
+     This verb causes the specified variable to be added to the end
+     of the global queue.  This queue is used by the ACTION verb to
+     control program flow.
+
+     Positional parameter:
+          
+          <cvarlit> is the variable to be added to the queue.
+ACTIONNOINTR verb
+     This routine causes the specified routine to be called if a key
+     is pressed during execution of the current routine.
+
+     Keyword parameter:
+          
+          ROUTINE=<label> is the label of the routine to be called.
+          ACTIONINTRCLR verb.  This routine reverses the action of
+          the ACTIONNOINTR routine.
+
+When writing a maintenance program using the verbs described above,
+     note the following:
+
+     Records are written to the file at the beginning of the function
+     that follows the function that caused the write.  For example,
+     if the user selects the ADD function, he/she is prompted for
+     input in the fields on the screen.  The record is written to the
+     file when the user makes another selection (i.e. when the user
+     selects the ADD function a second time, or when he/she selects
+     the FIND function etc.).
+
+     The flags mnt.recflag, mnt.chgflag, and mnt.newflag, and
+     mnt.msgflag are global variables defined in fastdbc.txt.  These
+     are important in testing the current state of a maintenance
+     program.  mnt.recflag is TRUE if a record is currently displayed
+     on the screen.  mnt.chgflag is TRUE if a change to the currently
+     displayed record has occured.  mnt.newflag is TRUE is a recorded
+     has been added, but has not yet been written to the file.
+     mnt.msgflag is TRUE if a message box is currently displayed on
+     the screen.
+
+     It is not necessary to loadmod all of the FASTDBC modules at the
+     beginning of a program.  For example, if the REPORT verb is not
+     invoked anywhere in the program, then there is no need to
+     loadmod fastdbc3.
+
+     It is possible to loadmod the same module multiple times.  When
+     this occurs, the program area is only loaded into memory one
+     time, but the data area can be loaded as many times as memory
+     permits.  This allows a maintenace program to be executed from
+     within another maintenance program.  When the secord program
+     completes, the first is in exactly the same condition as before
+     (i.e. the values of all the variables are preserved).
+
+The following are the FASTDBC file I/O user defined verbs for FILE
+and IFILE variables.  For these verbs, the parameters <list1> and
+<list2> are positional parameters.  They must be included.  Their
+meaning is as follows:
+
+     <list1> is a list that contains the file or ifile definition(s),
+     the file name, and the key if it is an ifile.Both the file name
+     and the key can be lists as well.
+     
+     <list2> is a list that contains the variables that make up the
+     records.
+
+FASTOPEN verb
+     This verb causes a file or ifile to be opened.
+
+     Positional parameter:
+          <list1>
+
+FASTCREATE verb
+     This verb causes a file or ifile to be created.
+
+     Positional parameter:
+          <list1>
+
+FASTCLOSE verb
+     This verb causes a file or ifile to be closed.
+
+     Positional parameter:
+          <list1>
+
+FASTREADverb
+     This verb causes a file or ifile to be read.  If it is a file,
+     then the first record is read.  If it is an ifile, then the
+     values of the variables that make up the key are appended
+     together and used to read the record.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTREADSEQ verb
+     This verb causes the next sequential record to be read from the
+     file or ifile.  Note, if it is an ifile, the record is not read
+     through the index.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTREADNEXT verb
+     This verb causes the next key sequential record to be read from
+     the ifile.  If it is a file, the over flag is set.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTREADBACK verb
+     This verb causes the record associated with the previous
+     sequential key to be read.  If it is a file, the over flag is
+     set.
+
+     Positional parameters:
+          <list1>, <list2>
+FASTWRITE verb
+     This verb causes a record to be written to the file or ifile.
+     If it is a file, then it is written as the first record.  If is
+     is an ifile, then it is written through the index.  If there are
+     multiple indexes for this ifile, then keys are inserted in the
+     other indexes.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTUPDATE verb
+     This verb causes the file or ifile to be updated.  If is is a
+     file, then the record is written as the first record.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTUPDATEALL verb
+     This verb causes the file or ifile to be updated.  If is is a
+     file, then the record is written as the first record.  If is as
+     an ifile, then the new key is built and compared against the
+     current key.  If the keys are different, the current key is
+     deleted and the new key is inserted.  Note, the error for
+     duplicate keys is only trapped for the insert on the primary
+     index.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTDELETE verb
+      This verb causes the current record to be deleted from the
+     ifile and the corresponding key to be deleted from all indexes.
+     This verb is only valid for ifiles.
+
+     Positional parameter:
+          <list1>
+
+FASTREADPART verb
+     This verb causes a partial read to the ifile to happen (i.e.
+     only the key is read).  This verb is only valid for ifiles.
+
+     Positional parameters:
+          <list1>, <list2>
+
+FASTREADNEXTPART verb
+     This verb causes a partial read key sequential to the ifile to
+     happen (i.e. only the key is read).  This verb is only valid for
+     ifiles.
+
+     Positional parameter:
+          <list1>
+FASTREADBACKPART verb
+     This verb causes a partial read key previous to the ifile to
+     happen (i.e. only the key is read).  This verb is only valid for
+     ifiles.
+
+     Positional parameter:
+          <list1>
+
+FASTREADWITHKEY verb
+     This verb causes the ifile to be read with the key specified in
+     the third parameter.  This verb is only valid for ifiles.
+
+     Positional parameters:
+          <list1>, <list2>, <cvarlit>
+
+FASTGETKEY verb
+     This verb causes the most recently read key to for the primary
+     index to be returned.
+
+     Positional parameter:
+          <cvar>
+
+FASTBUILDKEY verb
+     This verb causes the keys for all the indexes of the ifile to be
+     built and saved.
+
+     Positional parameters:
+          <list1>, <list2>
+          
+
+The FASTDBC programs are not copyrighted.  You are free to use and
+change them to suit your purposes.
+
+BEWARE - the FASTDBC programs are not supported by Subject, Wills &
+Company.  USE THEM AT YOUR OWN RISK.  We do think that they work, but
+if there are any bugs, we may or may not fix them.  If you do find
+problems, please bring them to our attention.
+
+We would like to hear your comments about the usefulness of FASTDBC.
+We also welcome any suggestions you may have for enhancements.  We do
+plan to enhancement FASTDBC in the future.

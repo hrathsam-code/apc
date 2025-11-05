@@ -1,0 +1,348 @@
+...................................................................
+.    BTCHNTRY/TEXT - ENTER CASH BATCH DATA - A/R CHECK BATCHES    .
+.    JAN 5, 1991 - MICRO SYSTEMS CONSULTANTS                      .
+...................................................................
+.
+         INCLUDE   COMMON
+.
+         INCLUDE   BATCHFD/TEXT
+.
+         INCLUDE   CUSTMAST/TEXT
+.
+CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS/ISAM"
+.
+REPLY    DIM       1
+ROW      FORM      2
+DROW     FORM      2
+COL      FORM      2
+CHKSUM   FORM      6.2
+NEWBATCH FORM      5
+DATE8    DIM       8
+IOSW     DIM       1
+ACCTIN   DIM       4
+KEYLINE  DIM       2
+LINENO   FORM      2
+CAMTIN   FORM      6.2
+ERRTYPE  DIM       10
+CHKCNT   FORM      2
+.
+         DISPLAY   *ES,*P01:01,"ACCOUNTS RECEIVABLE":
+                       *P24:01,"BATCH NUMBER ":
+                       *P40:01,"  .....":
+                       *P50:01,"BATCH DATE ":
+                       *P63:01,TODAY:
+                       *P01:02," CASH LEDGER ENTRY":
+                       *P24:02,"CHECK TOTAL ":
+                       *P37:02,BATCHTOT:
+                       *P50:02,"CHECK SUM   ":
+                       *P62:02,CHKSUM:
+                       *P01:06,"IF YOU ENTERED THIS PROGRAM ERRONEOUSLY ":
+                               "YOU MAY EXIT BY PRESSING F5 NOW"
+.
+         KEYIN     *P01:10,"PRESS ENTER TO RECORD CHECK BATCHES ",REPLY
+.
+         GOTO      EOJ  IF  F5
+.
+         CALL      CLRBATCH
+         MOVE      "00000"  TO  BATCHKEY
+         MOVE      BATCHKEY TO  BTCHRDKY
+         CALL      BTCHWRIT
+DISPLAY  DISPLAY   *P1:23,*HON,"BATCH RECORD HAS BEEN WRITTEN!"
+         GOTO      DISPLAY
+...........................................
+         CALL      OPENCUST
+.
+         GOTO      SHOWBTCH
+.
+.
+NOZERO   BEEP
+         DISPLAY   *P1:23,*EL,*HON,"NO BATCH CONTROL RECORD - ABORTING!":
+                   *W2,*HOFF
+         CHAIN     "ARMENU1"
+.
+START    CALL      BTCHOPEN
+.
+         DISPLAY   *P1:6,*EF
+.
+GETBATCH MOVE      "00000"  TO  BATCHKEY
+         CALL      GETBATCH
+.
+         CMATCH    "H",IOSW
+         GOTO      NOZERO IF NOT EQUAL
+.
+         MOVE      BCAMT1  TO    NEWBATCH    (GET BATCH NUMBER)
+         ADD       "1"       TO  NEWBATCH
+         MOVE      NEWBATCH  TO  BCAMT1
+.
+         CALL      BTCHUPDT
+...............................................................
+.
+SHOWBTCH DISPLAY   *P42:01,BATCHKEY
+.
+         BEEP
+.
+         CALL      CLRBATCH
+.
+         KEYIN     *P1:22,*EF,"ENTER CHECK TOTAL: ",BATCHTOT
+         DISPLAY   *P20:22,BATCHTOT
+         MOVE      " " TO REPLY
+BTOTOK   KEYIN     *P1:23,*EL,"CHECK TOTAL CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      GETBDATE IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      SHOWBTCH IF EQUAL
+         GOTO      SHOWBTCH
+.
+GETBDATE MOVE      TODAY  TO  DATE8
+.
+         DISPLAY   *P37:2,*HON,BATCHTOT,*HOFF
+.
+CLEARCHK MOVE      "0" TO CHKCNT
+.
+         DISPLAY   *P1:22,*EF,"BATCH DATE IS: ",DATE8
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"DATE CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      NXT1  IF  EQUAL
+         CMATCH    "N",REPLY
+         GOTO      ENTERDT IF EQUAL
+         BEEP
+         GOTO      GETBDATE
+.
+ENTERDT  KEYIN     *P1:22,*EF,"ENTER BATCH DATE (MM/DD/YY): ",DATE8
+         DISPLAY   *P1:23,*EL,"YOU ENTERED ",DATE8
+         MOVE      " " TO REPLY
+         KEYIN     *P25:23,"  OKAY? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      NXT1 IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      ENTERDT IF EQUAL
+         BEEP
+         GOTO      ENTERDT
+.
+         INCLUDE   BATCHIO/TEXT
+         INCLUDE   STDIOERR/TEXT
+         INCLUDE   STDPARER/TEXT
+         INCLUDE   STDFMTER/TEXT
+         INCLUDE   STDRANGE/TEXT
+         INCLUDE   CUSTIO/TEXT
+.
+NXT1     DISPLAY   *P1:22,*EF
+         RESET     DATE8  TO  7
+         CLEAR     BTCHDATE
+         APPEND    DATE8  TO  BTCHDATE
+         RESET     DATE8  TO  1
+         APPEND    DATE8  TO  BTCHDATE
+         RESET     DATE8  TO  4
+         RESET     BTCHDATE   TO  4
+         APPEND    DATE8  TO  BTCHDATE
+         RESET     BTCHDATE   TO  1
+         RESET     DATE8  TO  1
+         REP       " 0"   IN  BTCHDATE
+         DISPLAY   *P72:23,BTCHDATE,*W2
+.
+         DISPLAY   *P63:01,DATE8
+         MOVE      "0.00" TO CHKSUM
+         DISPLAY   *P62:2,CHKSUM
+.
+GETCHKS  DISPLAY   *P1:3,"LINE##",*P10:3,"ACCT##",*P18:3,"NAME":
+                   *P50:3,"CHECK AMOUNT":
+                   *P1:4,*EF
+.
+         MOVE      "3" TO ROW
+.
+KEYCHKS  DISPLAY   *P1:22,*EF:
+                   *P1:23,*EL,"ENTER CHECK DATA OR PRESS - F5 - IF DONE"
+.
+         ADD       "1" TO ROW
+         MOVE      ROW TO DROW
+         SUBTRACT  "3" FROM DROW
+.
+MODENTER DISPLAY   *P1:ROW,*HON,DROW,*HOFF
+.
+         KEYIN     *P10:ROW,ACCTIN
+         GOTO      EOJ  IF  F5
+.
+         MOVE      ACCTIN  TO  CUSTKEY
+         CALL      GETCUST
+         DISPLAY   *P18:ROW,CUSTNAME
+.
+         KEYIN     *P53:ROW,CAMTIN
+.
+RITEACCT DISPLAY   *P10:ROW,CUSTKEY,*P53:ROW,CAMTIN
+         MOVE      " " TO REPLY
+         KEYIN     *P1:22,*EL,"DATA CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      STORIT  IF  EQUAL
+         CMATCH    "N",REPLY
+         GOTO      ERASLINE  IF  EQUAL
+         BEEP
+         GOTO      RITEACCT
+.
+STORIT   MOVE      ACCTIN  TO ACCTARG
+         MOVE      CAMTIN  TO CHECKAMT
+         MOVE      DROW    TO BTCHINDX
+.
+         CALL      STORBTCH
+.
+         ADD       CAMTIN  TO  CHKSUM
+         DISPLAY   *P62:2,*HON,CHKSUM,*HOFF
+         DISPLAY   *P1:ROW,DROW
+.
+         COMPARE   "21",ROW
+         GOTO      EOJ IF NOT LESS
+.
+         GOTO      ASKMOR
+.
+ERASLINE DISPLAY   *P1:ROW,*EL,*W
+         SUBTRACT  "1" FROM  ROW
+         GOTO      KEYCHKS
+.
+EOJ      COMPARE   BATCHTOT TO CHKSUM
+         GOTO      BADBATCH IF NOT EQUAL
+.
+         DISPLAY   *P1:22,*EF,*HON,"BATCH IS IN BALANCE",*HOFF,*W1
+.
+         MOVE      BATCHKEY  TO  BTCHRDKY
+         MOVE      "B"       TO  BSTATUS
+         CALL      BTCHWRIT     (ADD THE NEW BATCH TO THE BATCHFILE)
+.
+         CMATCH    "H",IOSW
+         GOTO      MOREBTCH IF EQUAL
+.
+         BEEP
+         DISPLAY   *P1:22,*EF,*P1:23,*HON,"UNABLE TO ADD THIS BATCH RECORD! ":
+                   "PLEASE RE-ENTER!",*HOFF,*W2
+         CHAIN     "ARMENU1"
+.
+.
+MOREBTCH MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"MORE CHECK BATCHES?  (Y/N) ",REPLY
+.
+         CMATCH    "Y",REPLY
+         GOTO      NEXTBTCH IF EQUAL
+.
+         CMATCH    "N",REPLY
+         GOTO      EOJ2 IF EQUAL
+.
+         BEEP
+         GOTO      MOREBTCH
+.
+EOJ2     DISPLAY   *P1:22,*EF,*P1:23,*HON,"END OF CHECK BATCH ENTRY",*HOFF,*W
+         CHAIN     "ARMENU1"
+.
+NEXTBTCH DISPLAY   *P1:3,*EF
+         CALL      CLRBATCH
+.
+         GOTO      SHOWBTCH
+.
+.
+BADBATCH BEEP
+         DISPLAY   *P1:22,*EF,*HON,"BATCH OUT OF BALANCE",*HOFF,*W2
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,"CHANGE INPUT BATCH TOTAL? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      GTNWTOT IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      MORDTLS IF EQUAL
+         BEEP
+         GOTO      BADBATCH
+.
+GTNWTOT  KEYIN     *P1:22,*EF,*HON,"ENTER BATCH TOTAL: ",BATCHTOT,*RV,*HOFF
+         DISPLAY   *P1:22,*EF,*P37:02,*HON,BATCHTOT,*HOFF
+         MOVE      " " TO REPLY
+         KEYIN     *P1:23,*EL,"BATCH TOTAL CORRECT? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      EOJ IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      GTNWTOT IF EQUAL
+         BEEP
+         GOTO      GTNWTOT
+.
+MORDTLS  COMPARE   "18" TO CHKCNT
+         GOTO      MODDTLS  IF  EQUAL
+         GOTO      ADDMOR   IF  NOT  LESS
+.
+ASKMOR   MOVE      " " TO REPLY
+.
+         KEYIN     *P1:22,*EF,"ENTER MORE CHECKS? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      KEYCHKS IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      WHATTHEN IF EQUAL
+         BEEP
+         GOTO      ASKMOR
+.
+WHATTHEN MOVE      " " TO REPLY
+         KEYIN     *P1:22,*EF,"DO YOU WANT TO MODIFY EXISTING CHECKS? ":
+                   " (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      MODDTLS IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      CANCELIT IF EQUAL
+         BEEP
+         GOTO      WHATTHEN
+.
+CANCELIT BEEP
+         DISPLAY   *P1:22,*EF,*HON,"YOU DO NOT WANT TO CHANGE THE BATCH TOTAL":
+                   " NOR MODIFY LINES":
+                   *P1:23,"NOR TO ADD LINES - SO I AM CANCELING THIS BATCH!":
+                   *HOFF,*W2
+         BEEP
+         CALL      CLRBATCH
+.
+.....        MOVE      NEWBATCH TO BATCHKEY
+.....        MOVE      "C" TO BSTATUS
+.....        CALL      BTCHWRIT
+.
+         GOTO      MOREBTCH
+.
+ADDMOR   GOTO      KEYCHKS
+.
+MODDTLS  KEYIN     *P1:22,*EF,"ENTER LINE NUMBER TO MODIFY ",*DE,KEYLINE
+         GOTO      EOJ IF F5
+.
+         MOVE      KEYLINE  TO  LINENO
+         COMPARE   "19"  TO  LINENO
+         GOTO      BEEPLINE  IF  NOT LESS
+         MOVE      KEYLINE TO  ROW
+         MOVE      KEYLINE TO  DROW
+         ADD       "3"     TO  ROW
+.
+         MOVE      LINENO  TO  BTCHINDX
+         CALL      LOADBTCH
+.
+         MOVE      ACCTARG  TO ACCTIN
+         MOVE      CHECKAMT TO CAMTIN
+         SUBTRACT  CHECKAMT FROM CHKSUM
+.
+         DISPLAY   *P62:2,*HON,CHKSUM,*HOFF
+         GOTO      MODENTER
+.
+BEEPLINE BEEP
+         DISPLAY   *P1:23,*EL,*HON,"INVALID LINE NUMBER!",*HOFF,*W2:
+                   *P1:23,*EL
+         GOTO      MODDTLS
+.
+CLRBATCH TRAPCLR   PARITY
+         MOVE      "0" TO BTCHINDX
+.
+CLR1     ADD       "1"   TO  BTCHINDX
+         COMPARE   "19"  TO  BTCHINDX
+         GOTO      CLREXIT   IF  EQUAL
+.
+. BLANK THE ACCOUNT AND ZERO THE AMOUNT FIELDS
+.
+         MOVE      "0.00"  TO  CHECKAMT
+         MOVE      "    "  TO  ACCTARG
+         CALL      STORBTCH
+         GOTO      CLR1
+.
+CLREXIT  MOVE      "00"    TO  BTCHINDX
+         RETURN
+.
+         RETURN
+.........................................
+.
+.

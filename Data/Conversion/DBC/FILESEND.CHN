@@ -1,0 +1,8 @@
+copy accounts.txt accounts.snd
+copy arfile.txt   arfile.snd
+copy apmaster.txt apmaster.snd
+copy aptranfl.txt aptranfl.snd
+copy appaidfl.txt appaidfl.snd
+copy apdistfl.txt apdistfl.snd
+
+

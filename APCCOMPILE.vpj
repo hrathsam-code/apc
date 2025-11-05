@@ -1,0 +1,431 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+    Version="10.0"
+    VendorName="SlickEdit"
+    TemplateName="Other C/C++"
+    WorkingDir=".">
+    <Config
+        Name="Scout"
+        Type="cpp"
+        DebugCallbackName=""
+        OutputFile="%bdAPCCOMPILE"
+        CompilerConfigName="New Compiler">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                OutputExts="*.o"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="c:\sunbelt\plbwin99\code\plbcon -i %rpsource\plbwin.ini plbcmp %n%e,%n.PLC, -L=32 ZG E ZH ZI=0 ZT S ZN"/>
+            </Target>
+            <Target
+                Name="Link"
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -g -o "%o" %f %libs'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine="c:\sunbelt\plbwin99\code\plbwin99\plbwin.exe"/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o" %nPLC'/>
+            </Target>
+        </Menu>
+        <PostBuildCommands>
+            <Exec CmdLine="notepad.exe"/>
+        </PostBuildCommands>
+    </Config>
+    <Config
+        Name="Compile with Debug"
+        Type="cpp"
+        DebugCallbackName=""
+        OutputFile="%bdAPCCOMPILE"
+        CompilerConfigName="New Compiler">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                OutputExts="*.o"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="c:\sunbelt\plbwin99\code\plbcon -i %rpsource\plbwin.ini plbcmp %n%e,%n.PLC, -L=32 ZG E ZH ZI=0 ZT S ZN"/>
+            </Target>
+            <Target
+                Name="Link"
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -g -o "%o" %f %libs'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine="c:\sunbelt\plbwin99\code\plbwin99\plbwin.exe"/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o" %nPLC'/>
+            </Target>
+        </Menu>
+        <PostBuildCommands>
+            <Exec CmdLine="notepad.exe"/>
+        </PostBuildCommands>
+    </Config>
+    <Rules Name="Compile">
+        <Rule
+            InputExts="*.s"
+            OutputExts="*.o"
+            LinkObject="1">
+            <Exec CmdLine='as -o "%bd%n.o" "%f"'/>
+        </Rule>
+    </Rules>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.pls;*.io"
+            GUID="{31B81E15-8F70-4053-ABF5-CCA49AEE6A10}">
+            <F N="Source/About.pls"/>
+            <F N="Source/aboutChiron.pls"/>
+            <F N="Source/ACCTDAUD.PLS"/>
+            <F N="Source/ACCTDEIS.PLS"/>
+            <F N="Source/ACCTMNU1.PLS"/>
+            <F N="Source/ACCTPTIS.PLS"/>
+            <F N="Source/ACCTSLCT.PLS"/>
+            <F N="Source/ACCTSNAM.PLS"/>
+            <F N="Source/ACCTSTAT.pls"/>
+            <F N="Source/AGEDTLS.PLS"/>
+            <F N="Source/AGEING.PLS"/>
+            <F N="Source/AGELIST.PLS"/>
+            <F N="Source/AGESPCL.PLS"/>
+            <F N="Source/ALFARLST.PLS"/>
+            <F N="Source/ANSTEST.PLS"/>
+            <F N="Source/ANSWER.PLS"/>
+            <F N="Source/ANSWER2.PLS"/>
+            <F N="Source/ANSWVARS.PLS"/>
+            <F N="Source/APAVLIST.PLS"/>
+            <F N="Source/APCALNDR.PLS"/>
+            <F N="Source/APCASHRQ.PLS"/>
+            <F N="Source/APCKLIST.PLS"/>
+            <F N="Source/APCKPRNT.PLS"/>
+            <F N="Source/APCNTBLD.PLS"/>
+            <F N="Source/APCNTENT.PLS"/>
+            <F N="Source/APDATES.pls"/>
+            <F N="Source/APDCDLST.PLS"/>
+            <F N="Source/APDISACC.PLS"/>
+            <F N="Source/APDISBJ2.PLS"/>
+            <F N="Source/APDISBJR.PLS"/>
+            <F N="Source/APDSTMNT.PLS"/>
+            <F N="Source/APDUSCAN.PLS"/>
+            <F N="Source/apentry.pls"/>
+            <F N="Source/APLABELS.PLS"/>
+            <F N="Source/APLOVR20.PLS"/>
+            <F N="Source/APMAINT.PLS"/>
+            <F N="Source/APMANCHK.PLS"/>
+            <F N="Source/APMANHST.PLS"/>
+            <F N="Source/APMASTFD.PLS"/>
+            <F N="Source/APMASTHR.PLS"/>
+            <F N="Source/APMASTHU.PLS"/>
+            <F N="Source/APMASTKS.PLS"/>
+            <F N="Source/APMASTRD.PLS"/>
+            <F N="Source/APMASTRT.PLS"/>
+            <F N="Source/APMASTUP.PLS"/>
+            <F N="Source/APMASTVK.PLS"/>
+            <F N="Source/APMENU1.PLS"/>
+            <F N="Source/APMenu2.pls"/>
+            <F N="Source/APMSDISP.PLS"/>
+            <F N="Source/APPAIDFD.PLS"/>
+            <F N="Source/APPAIDKS.PLS"/>
+            <F N="Source/APPAIDRD.PLS"/>
+            <F N="Source/APPAIDUD.PLS"/>
+            <F N="Source/APPAIDWT.PLS"/>
+            <F N="Source/APPAYDUE.PLS"/>
+            <F N="Source/APPAYINQ.PLS"/>
+            <F N="Source/APPAYLST.PLS"/>
+            <F N="Source/APPAYSCN.PLS"/>
+            <F N="Source/APPCTLIQ.PLS"/>
+            <F N="Source/APPCTLS.PLS"/>
+            <F N="Source/APPCTLUD.PLS"/>
+            <F N="Source/APPINVC1.PLS"/>
+            <F N="Source/APPINVCL.PLS"/>
+            <F N="Source/APPINVCP.PLS"/>
+            <F N="Source/APPINVCS.PLS"/>
+            <F N="Source/APPMENU1.PLS"/>
+            <F N="Source/APPOST.PLS"/>
+            <F N="Source/APPRCHAN.PLS"/>
+            <F N="Source/APREVIEW.PLS"/>
+            <F N="Source/APTRANBK.PLS"/>
+            <F N="Source/APTRANDX.PLS"/>
+            <F N="Source/APTRANFD.PLS"/>
+            <F N="Source/APTRANKS.PLS"/>
+            <F N="Source/APTRANRD.PLS"/>
+            <F N="Source/APTRANRT.PLS"/>
+            <F N="Source/APTRANUP.PLS"/>
+            <F N="Source/APTRNINQ.PLS"/>
+            <F N="Source/aptrnls2.pls"/>
+            <F N="Source/APTRNLST.PLS"/>
+            <F N="Source/APVLIST.PLS"/>
+            <F N="Source/ARCLOSD.PLS"/>
+            <F N="Source/ARDELET.PLS"/>
+            <F N="Source/ARFLUPDT.PLS"/>
+            <F N="Source/ARINQ.PLS"/>
+            <F N="Source/ARLIST.PLS"/>
+            <F N="Source/ARMENU1.PLS"/>
+            <F N="Source/AROPNCLS.PLS"/>
+            <F N="Source/ARQUERY.PLS"/>
+            <F N="Source/artrm.pls"/>
+            <F N="Source/BALFUPDT.PLS"/>
+            <F N="Source/BANK.PLS"/>
+            <F N="Source/BatchEntry.pls"/>
+            <F N="Source/BTCHDEPS.PLS"/>
+            <F N="Source/BTCHDISP.PLS"/>
+            <F N="Source/BTCHDTDS.PLS"/>
+            <F N="Source/BTCHNTRY.PLS"/>
+            <F N="Source/BTCHPRNT.PLS"/>
+            <F N="Source/CALLERR1.PLS"/>
+            <F N="Source/CALLERR2.PLS"/>
+            <F N="Source/cashent.pls"/>
+            <F N="Source/CASHLDGR.PLS"/>
+            <F N="Source/CASHNTRY.PLS"/>
+            <F N="Source/CHECKDAT.PLS"/>
+            <F N="Source/chkentry.pls"/>
+            <F N="Source/chkentry2.pls"/>
+            <F N="Source/cinq.pls"/>
+            <F N="Source/CNTRY.PLS"/>
+            <F N="Source/CNVAP.PLS"/>
+            <F N="Source/cnvap2.pls"/>
+            <F N="Source/CnvBatches.pls"/>
+            <F N="Source/cnvbatches2.pls"/>
+            <F N="Source/cnvdist.pls"/>
+            <F N="Source/cnvvend.pls"/>
+            <F N="Source/COMMAR80.PLS"/>
+            <F N="Source/COMMON.PLS"/>
+            <F N="Source/convar.pls"/>
+            <F N="Source/convcust.pls"/>
+            <F N="Source/ConvPOFiles.pls"/>
+            <F N="Source/convShipTo.pls"/>
+            <F N="Source/ConvShipTo2.pls"/>
+            <F N="Source/CORPCTLS.PLS"/>
+            <F N="Source/CreateXData.pls"/>
+            <F N="Source/CreditCards.pls"/>
+            <F N="Source/CTLINQ.PLS"/>
+            <F N="Source/CTLUDPGM.PLS"/>
+            <F N="Source/Cust.pls"/>
+            <F N="Source/CUSTMAST.PLS"/>
+            <F N="Source/CUSTRDKS.PLS"/>
+            <F N="Source/CustTrack.pls"/>
+            <F N="Source/CustTrack2.pls"/>
+            <F N="Source/DANSAMP.PLS"/>
+            <F N="Source/DANSAMP2.PLS"/>
+            <F N="Source/datertn.pls"/>
+            <F N="Source/Default.PLS"/>
+            <F N="Source/Defaults.pls"/>
+            <F N="Source/DeleteInvoices.pls"/>
+            <F N="Source/DISTLOAD.pls"/>
+            <F N="Source/DISTSRCH.pls"/>
+            <F N="Source/DISTSTOR.pls"/>
+            <F N="Source/DISTTABL.pls"/>
+            <F N="Source/DISTUPDT.pls"/>
+            <F N="Source/fax.pls"/>
+            <F N="Source/fixapduedate.pls"/>
+            <F N="Source/FixARDet.pls"/>
+            <F N="Source/fixartrn.pls"/>
+            <F N="Source/fixartrn2.pls"/>
+            <F N="Source/fixartrn3.pls"/>
+            <F N="Source/FixBatchChecks.pls"/>
+            <F N="Source/FixBatchChecks2.pls"/>
+            <F N="Source/fixcheck2.pls"/>
+            <F N="Source/fixcheckrun.pls"/>
+            <F N="Source/fixcreditcards.pls"/>
+            <F N="Source/FixCustPhones.pls"/>
+            <F N="Source/FixCustShip.pls"/>
+            <F N="Source/fixcustTerms.pls"/>
+            <F N="Source/fixdist.pls"/>
+            <F N="Source/FixInacstiveCust.pls"/>
+            <F N="Source/FixInvDetails.pls"/>
+            <F N="Source/fixshipto.pls"/>
+            <F N="Source/fixterms.pls"/>
+            <F N="Source/fixtestdata.pls"/>
+            <F N="Source/fixvendgl.pls"/>
+            <F N="Source/GANSWER.PLS"/>
+            <F N="Source/GETDATE.PLS"/>
+            <F N="Source/GETDATE1.PLS"/>
+            <F N="Source/GetTracking.PLS"/>
+            <F N="Source/GLMAST.pls"/>
+            <F N="Source/GLMAST.pls2"/>
+            <F N="Source/herrick.pls"/>
+            <F N="Source/INVCNTRY.PLS"/>
+            <F N="Source/INVCSCRN.PLS"/>
+            <F N="Source/KillBatches.pls"/>
+            <F N="Source/LABELPT.pls"/>
+            <F N="Source/LABLSTAT.pls"/>
+            <F N="Source/LedgerCard.pls"/>
+            <F N="Source/MASMENU.PLS"/>
+            <F N="Source/MASTER.PLS"/>
+            <F N="Source/MASTER2.PLS"/>
+            <F N="Source/MASTEST.PLS"/>
+            <F N="Source/MSALHST.pls"/>
+            <F N="Source/MSCBRAG.PLS"/>
+            <F N="Source/MSEOD.pls"/>
+            <F N="Source/MSHISTRY.PLS"/>
+            <F N="Source/MSHSTADD.pls"/>
+            <F N="Source/MSPARTDE.pls"/>
+            <F N="Source/MSPARTLS.pls"/>
+            <F N="Source/MSPTUPDT.pls"/>
+            <F N="Source/MSPURHST.pls"/>
+            <F N="Source/MSSHOW.PLS"/>
+            <F N="Source/MSSLUPDT.pls"/>
+            <F N="Source/ncommon.PLS"/>
+            <F N="Source/NEWMASTR.PLS"/>
+            <F N="Source/Notes.pls"/>
+            <F N="Source/NWSTMNT1.PLS"/>
+            <F N="Source/OrderEntry.pls"/>
+            <F N="Source/PARTLIST.pls"/>
+            <F N="Source/phtype.pls"/>
+            <F N="Source/POENTRY.pls"/>
+            <F N="Source/POEntry2.pls"/>
+            <F N="Source/pontry.pls"/>
+            <F N="Source/PRINTCSH.pls"/>
+            <F N="Source/PRINTTST.PLS"/>
+            <F N="Source/PROGRAMA.PLS"/>
+            <F N="Source/PROGRAMB.PLS"/>
+            <F N="Source/PROGRAMC.PLS"/>
+            <F N="Source/prtageap.pls"/>
+            <F N="Source/prtageAR.pls"/>
+            <F N="Source/prtapdst.pls"/>
+            <F N="Source/prtapdst2.pls"/>
+            <F N="Source/prtapdst3.pls"/>
+            <F N="Source/prtapent.pls"/>
+            <F N="Source/PrtBatches.pls"/>
+            <F N="Source/PrtBatchR.pls"/>
+            <F N="Source/prtcashr.pls"/>
+            <F N="Source/prtcheck.pls"/>
+            <F N="Source/PrtCheck2.pls"/>
+            <F N="Source/prtchkrg.pls"/>
+            <F N="Source/prtchkrq.pls"/>
+            <F N="Source/prtcust.pls"/>
+            <F N="Source/prtinvrp.pls"/>
+            <F N="Source/prtlabel.pls"/>
+            <F N="Source/prtpymnt.pls"/>
+            <F N="Source/PRTSCRN.PLS"/>
+            <F N="Source/prtstmt.pls"/>
+            <F N="Source/PrtVendor.pls"/>
+            <F N="Source/prtvhst.pls"/>
+            <F N="Source/qotntry.pls"/>
+            <F N="Source/QTEntry2.pls"/>
+            <F N="Source/QUOTNTRY.pls"/>
+            <F N="Source/renamebatches.pls"/>
+            <F N="Source/SALEMENU.PLS"/>
+            <F N="Source/ScanDocument.pls"/>
+            <F N="Source/SendMail.pls"/>
+            <F N="Source/ShipUPS.pls"/>
+            <F N="Source/ShipUPS2.pls"/>
+            <F N="Source/ShipUPS3.pls"/>
+            <F N="Source/SMAPCDUD.PLS"/>
+            <F N="Source/SMMASTUD.PLS"/>
+            <F N="Source/SMMENU.PLS"/>
+            <F N="Source/SMUIDNDL.PLS"/>
+            <F N="Source/SMUIDNUD.PLS"/>
+            <F N="Source/SMUMNUUD.PLS"/>
+            <F N="Source/SMUSRLST.PLS"/>
+            <F N="Source/SMUSYSUD.PLS"/>
+            <F N="Source/SPLFILFD.pls"/>
+            <F N="Source/SPLFILPR.pls"/>
+            <F N="Source/SPLOPNFD.pls"/>
+            <F N="Source/SPLOPNFX.pls"/>
+            <F N="Source/SPLOPNPR.PLS"/>
+            <F N="Source/SPLOPNPX.pls"/>
+            <F N="Source/STATEMNT.PLS"/>
+            <F N="Source/testhttp.pls"/>
+            <F N="Source/testhttp2.pls"/>
+            <F N="Source/testmenu.pls"/>
+            <F N="Source/testprint2.pls"/>
+            <F N="Source/TRANFLUD.pls"/>
+            <F N="Source/ValidateAddress.pls"/>
+            <F N="Source/vendor.pls"/>
+            <F N="Source/ViewFedex.pls"/>
+            <F N="Source/ViewTrack.pls"/>
+            <F N="Source/ViewTrackOld.pls"/>
+            <F N="Source/vinq.pls"/>
+            <F N="Source/vinq2.pls"/>
+            <F N="Source/xdatajson.pls"/>
+            <F N="Source/xraw.pls"/>
+            <F N="Source/xraw1.pls"/>
+            <F N="Source/xsun.pls"/>
+            <F N="Source/xtycho.pls"/>
+            <F N="Source/XXXXX.PLS"/>
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.h++;*.inc;*.sh;*.cpy;*.if"
+            GUID="{A7F9780C-F3E1-4E52-96F4-3ACF362FAAF4}"/>
+        <Folder
+            Name="Resource Files"
+            Filters="*.ico;*.cur;*.dlg"
+            GUID="{98426284-C33C-4E21-8FF9-CC00DB1DCFE0}"/>
+        <Folder
+            Name="Bitmaps"
+            Filters="*.bmp"
+            GUID="{4E44A767-25B6-4D73-BC9E-11F90DCFA843}"/>
+        <Folder
+            Name="Other Files"
+            Filters=""
+            GUID="{CB3D2B1B-1032-480D-884E-64BA192DD574}"/>
+    </Files>
+    <List Name="RTE">
+    </List>
+</Project>

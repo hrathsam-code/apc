@@ -1,0 +1,16 @@
+.............................................................
+.           STDPARER ROUTINE   3/15/80 R. BACHARACH         .
+.              STANDARD PARITY ERROR ROUTINE                .
+.                                                           .
+. THIS ROUTINE WILL BE INCLUDED INTO ALL FILE I/O BOOKS     .
+. TO FACILITATE STANDARD PARITY ERROR DETECTION/NOTIF       .
+.............................................................
+. 
+STDPARER BEEP
+         FILEPI    0
+         DISPLAY   *ES,*P01:10,"PARITY ERROR ON ",IOTYPE," OF ",IOERFILE:
+                       *P01:12,"CALL MICRO SYSTEMS CONSULTANTS....."
+         BEEP
+         GOTO      STDPARER
+. 
+. 

@@ -1,0 +1,18 @@
+MASTER   FILE     KEYL=6,UNCOMPRESSED
+DCODE    INIT      "000000"
+DESC     DIM       20
+DSAL     FORM      "      .00"
+DCSL     FORM      "      .00"
+MTDS     FORM      "      .00"
+MTDC     FORM      "      .00"
+YTDS     FORM      "        .00"
+YTDC     FORM      "        .00"
+DSTDIV   INIT      "00"
+SEQ      FORM      "-1"
+         PREP      MASTER,"APDISTFL/TEXT:W"
+         KEYIN     *R,*P1:24,"DESC = ",DESC
+         WRITE     MASTER,SEQ;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC:
+                   DSTDIV
+         WEOF      MASTER,SEQ
+         CLOSE     MASTER
+         CHAIN     "APMENU1"

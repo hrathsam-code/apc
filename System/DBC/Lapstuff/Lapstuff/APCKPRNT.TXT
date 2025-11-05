@@ -1,0 +1,851 @@
+         INC       COMMON
+         INC       APTRANFD
+APTRANFL IFILE     KEYL=19,UNCOMPRESSED
+DESC     DIM       20
+AMT      FORM      6.2
+LDDAY    DIM       8
+         INC       APMASTFD
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+APPAIDFL IFILE     KEYL=19,UNCOMPRESSED
+CKMON    DIM       2
+CKDAY    DIM       2
+CKYR     DIM       2
+CKNO     FORM      6
+REPLY    DIM       1
+OPTION   FORM      1
+LINES    FORM      "00"
+OPT1     DIM       1
+KINVNO   DIM       6
+CKAMT    FORM      6.2
+CHKTOT   FORM      8.2
+. 
+DCHKTOT  DIM       11           DIM FIELD TO PRINT CHECK AMOUNT ( '*' FILLED )
+DISA     FORM      4.2
+.
+AGEDAYS  FORM      2
+.
+DISTOT   FORM      6.2
+AMOUNT   DIM       36
+NUM      DIM       11
+FTFLG    INIT      " "
+DUFLG    INIT      " "
+SVACCN   DIM       6
+PTAMT    FORM      6.2
+UPAMT    FORM      6.2
+STPFLG   INIT      " "
+DOLLARS  DIM       8
+CENTS    DIM       2
+APCHECKS FILE
+SEQ      FORM      "-1"
+DATEDESC DIM       15
+DATERROR DIM       1
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+FM       FORM      2
+FD       FORM      2
+FY       FORM      2
+BKUPFLG  DIM       1
+DATFLG   DIM       1
+PTDISA   FORM      4.2
+DISFLG   DIM       1
+CKDISTOT FORM      5.2
+CKNUMBER FORM      "000000"
+CKNUMBZ  FORM      "000000"
+DROW     FORM      "12"
+TPAIDDT  DIM       8
+RUNTOTS  FORM      8.2
+ALIGNX   INIT      "XXXXXXXXXXXXXXXXXXXXXXXXX"
+. 
+VOIDS    INIT      "V O I D     V O I D     V O I D     V O I D":
+                   "     V O I D     V O I D     V O I D"
+VOIDLINE DIM       80
+SPACES   INIT      "                                                  ":
+                   "                                "
+. 
+MONFORM  FORM      2
+.
+         INCLUDE   APCALNDR
+. 
+START    DISPLAY   *ES,*P01:01,*HON,"ACCOUNTS PAYABLE SYSTEM - ":
+                   "VENDOR PAYMENTS AND CHECK PRINTING PROGRAM ",*HOFF
+. 
+A1       MOVE      "X",BKUPFLG
+         MOVE      "CHECK DATE" TO DATEDESC
+. 
+. 
+. SET UP THE CURRENT DATE
+. 
+. ..............
+         MOVE      TODAY  TO  TMON
+         RESET     TODAY  TO  4
+         MOVE      TODAY  TO  TDAY
+         RESET     TODAY  TO  7
+         MOVE      TODAY  TO  TYEAR
+         RESET     TODAY  TO  1
+. 
+         CALL      CALCDATE
+. 
+         MOVE      TESTDATE  TO  CURRDATE
+. 
+         MOVE      TMON  TO  CKMON
+         REP       " 0"  IN  CKMON
+         MOVE      TDAY  TO  CKDAY
+         MOVE      TYEAR TO  CKYR
+. 
+         MOVE      MM TO CKMON
+         MOVE      DD TO CKDAY
+         MOVE      YY TO CKYR
+. 
+         OPEN      APMASTER,"APMASTER"
+         OPEN      APTRANFL,"APTRANFL"
+. 
+. 3/13/83 ADD OPEN OF APPAIDFL/ISI
+. 
+         OPEN      APPAIDFL,"APPAIDFL/ISAM"
+. 
+         PREP      APCHECKS,"APCHECKS/TEXT"
+. 
+. 
+         BEEP
+         DISPLAY   *P01:10,*HON,"PLEASE MOUNT ACCOUNTS PAYABLE CHECKS IN ":
+                                "THE PRINTER AS FOLLOWS":
+                   *P01:12,"THE LEFT SIDE OF THE FORM WILL BE SET AT ":
+                           "MINUS 7 ON THE ALIGNMENT RULER":
+                   *P01:13,"SET THE TOP OF THE PRINT HEAD AT THE VERY BOT":
+                           "TOM OF THE STUB TITLE BLOCK":
+                   *P01:14,"IT IS  N O T  NECESSARY TO SET TOP-OF-FORM ":
+                           "AS THE PROGRAM COUNTS LINES",*HOFF,*W2
+.
+         KEYIN     *P1:23,"TAP ENTER KEY WHEN READY TO PROCEED ",REPLY
+         BEEP
+.        DISPLAY   *P1:22,"MOUNT AND ALIGN CHECKS IN PRINTER"
+.        KEYIN     *P1:23,"HIT SPACE AND ENTER WHEN READY ",REPLY
+.        DISPLAY   *P1:22,*HOFF,*EF
+. 
+A1A      MOVE      "0.00"  TO  TAMT
+         MOVE      "0.00"  TO  PTDISA
+         MOVE      "0.00"  TO  PTAMT
+         MOVE      ALIGNX  TO  TINVNO
+         MOVE      ALIGNX  TO  NAME
+         MOVE      ALIGNX  TO  ADD1
+         MOVE      ALIGNX  TO  ADD2
+         MOVE      ALIGNX  TO  CITY
+         MOVE      ALIGNX  TO  STATE
+         MOVE      ALIGNX  TO  ZIP
+.        MOVE      "L"     TO  DUFLG
+.        CALL      STBPRT
+.        MOVE      "L"     TO  DUFLG
+.        CALL      CHKPRT
+         MOVE      " "     TO  DUFLG
+. 
+         MOVE      "0"     TO  LINES
+. 
+.        KEYIN     *P1:23,"ANOTHER ALIGNMENT CYCLE? ",REPLY
+.        MATCH     "N",REPLY
+.        GOTO      A1A IF NOT EQUAL
+         MOVE      "000000" TO CKNUMBER
+. 
+KEYCHECK BEEP
+         DISPLAY   *P01:10,*EF
+. 
+         KEYIN     *P1:22,*EF,"EXAMINE THE STUBS AND ENTER THE FIRST":
+                   " USABLE CHECK NUMBER":
+                   *P1:23,"NOTE THAT THE  S T U B  PRINTS FIRST! ",CKNUMBER
+.
+. 
+         DISPLAY   *P01:22,*EF
+. 
+         DISPLAY   *P1:23,"CHECK NUMBER ENTERED IS ",CKNUMBER
+. 
+         MOVE      " " TO REPLY
+         KEYIN     *P40:23,"IS THAT CORRECT ? (Y/N) ",REPLY
+. 
+         DISPLAY   *P1:22,*EF
+         CMATCH    "Y" TO REPLY
+         GOTO      KEYCHECK IF NOT EQUAL
+. 
+         SUBTRACT  "1" FROM CKNUMBER   (SET IT BACK FOR INCREMENTING)
+. 
+A3A      DISPLAY   *P15:03,*EF,*HON,"VENDOR PAYMENT OPTIONS ARE: ":
+                   *P15:04,"1. TO PAY ALL INVOICES FOR GIVEN ACCOUNT":
+                   *P15:05,"2. TO LIST AND REPLY":
+                   *P15:06,"3. TO PAY BY INVOICE NUMBER":
+                   *P15:07,"4. TO PAY GIVEN AMOUNT":
+                   *P15:08,"5. TO PAY ALL INVOICES (NN) DAYS OLD OR OLDER":
+                   *P15:09,"6. SELECT NEW FUNCTION",*HOFF
+.
+         GOTO      SETROWS
+.
+DAY30A   MOVE      "30" TO AGEDAYS
+         MOVE      " "  TO REPLY
+.
+         KEYIN     *P15:11,*EF,"N O T E :   FOR OPTION 5 - DEFAULT IS 30 DAYS":
+                   *P15:12,"            TAP ENTER TO RETAIN, F5 TO CHANGE ":
+                           "PERIOD ",REPLY
+         GOTO      GETDAYZ IF F5
+.
+.FALLTHRU MEANS RETAIN THE 30 DAY AGING PERIOD
+.
+         GOTO      DAY30
+.
+GETDAYZ  MOVE      " " TO REPLY
+         KEYIN     *P1:20,*EF,"ENTER AGING PERIOD IN DAYS (2 DIGITS) ":
+                   AGEDAYS
+.
+CKDAYZ   DISPLAY   *P1:21,*EL,"YOU ENTERED ",AGEDAYS," FOR PERIOD"
+         KEYIN     *P1:22,"OKAY ? (Y/N) ",REPLY
+         DISPLAY   *P1:11,*EF
+         CMATCH    "Y",REPLY
+         GOTO      DAY30 IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      GETDAYZ IF EQUAL
+         BEEP
+         GOTO      CKDAYZ
+. 
+SETROWS  MOVE      "12"  TO  DROW
+         DISPLAY   *P1:20,*EF
+. 
+. RESET DROW IN CASE WE COME BACK HERE AFTER DIFFERENT TYPES OF PAYMENT
+. 
+A4       DISPLAY   *P1:11,*EF
+         KEYIN     *P1:11,*HON,"ENTER SELECTION BY NUMBER ",*DE,OPT1,*HOFF
+         MOVE      OPT1,OPTION
+         BRANCH    OPTION OF A5,A3,A3,A3,DAY30A,EOJ
+         GOTO      A4
+. 
+DAY30    DISPLAY   *P1:08,*HON,"SELECTED",*HOFF,*W
+         DISPLAY   *P1:11,*EF
+. 
+. ALLOW THE FOLLOWING LOGIC RATHER THAN REQUIRING THE USER
+. TO ENTER INDIVIDUAL VENDOR NUMBERS
+. 
+SETACCT  MOVE      "000001"  TO ACCKEY
+. 
+. NOW READ FOR POSITIONING WITHIN THE FILE
+. 
+         INC       APMASTRD
+. 
+. NOW BEGIN TO LOOP WITHIN THE APMASTER .
+. 
+. THE PURPOSE OF THE FOLLOWING LOGIC IS TO CHECK ALL TRANSACTIONS
+. FOR ALL VENDORS, AND PAY ALL INVOICES THAT ARE 30 OR MORE DAYS OLD
+.
+. 
+. THE LOGIC WILL HANDLE ALL VENDORS, IN KEY SEQUENCE
+. 
+VENDLOOP TRAPCLR   IO
+. 
+         INCLUDE   APMASTKS        (READ THE APMASTER - KEY SEQUENTIALLY)
+. 
+         GOTO      EOJ  IF OVER (AT END-OF-FILE GO TO EOJVEND)
+. 
+LOOPDTLS TRAPCLR   IO
+. 
+         INCLUDE   APCKNEW
+. 
+. 
+. 
+A3       DISPLAY   *P1:13,*EF
+         CALL      RESETROW
+.
+         COMPARE   "2" TO OPTION
+         GOTO      COMP3 IF NOT EQUAL
+         DISPLAY   *P1:5,*HON,"SELECTED",*HOFF,*W
+         GOTO      A3XX
+. 
+COMP3    COMPARE   "3" TO OPTION
+         GOTO      SHW4 IF NOT EQUAL
+         DISPLAY   *P1:6,*HON,"SELECTED",*HOFF,*W
+         GOTO      A3XX
+. 
+SHW4     DISPLAY   *P1:7,*HON,"SELECTED",*HOFF,*W
+. 
+A3XX     KEYIN     *P1:23,*EF,"ENTER VENDOR NUMBER TO PAY - OR PRESS ":
+                   "F5 KEY TO TERMINATE ",ACCKEY
+. 
+         GOTO      A3A IF F5
+. 
+         CMATCH    "*",ACCKEY
+         GOTO      A3A IF EQUAL
+. 
+         MOVE      ACCKEY,SVACCN
+         INC       APMASTRD
+         GOTO      A3 IF OVER
+.
+ISHEOK   MOVE      " " TO REPLY
+         DISPLAY   *P1:23,*EL,"VENDOR IS ",NAME
+         KEYIN     *P40:23,"CORRECT VENDOR ? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      OKVENDR IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      A3XX IF EQUAL
+         BEEP
+         GOTO      ISHEOK
+.
+OKVENDR  DISPLAY   *P40:13,*EL,NAME
+         CALL      APMASTVK
+. 
+         BRANCH    OPTION OF A5,A25,A450,A65
+         GOTO      A4
+. 
+A5       DISPLAY   *P1:13,*EF
+         KEYIN     *P1:23,*EF,"ENTER VENDOR NUMBER TO PAY - OR PRESS ":
+                   "F5 KEY TO TERMINATE ",ACCNO
+         CALL      RESETROW
+. 
+         GOTO      A3A IF F5
+. 
+         CMATCH    "*" TO ACCNO
+         GOTO      A3A IF EQUAL
+. 
+         MOVE      ACCNO,SVACCN
+         MOVE      ACCNO,ACCKEY
+         INC       APMASTRD
+.
+         DISPLAY   *P40:13,NAME
+.
+         GOTO      A5 IF OVER
+         CALL      APMASTVK
+         MOVE      ACCNO TO TRNKEY
+         RESET     TRNKEY TO 6
+         APPEND    "             " TO TRNKEY
+         RESET     TRNKEY TO 1
+         MOVE      " ",FTFLG
+         READ      APTRANFL,TRNKEY;;
+.
+A6       TRAPCLR   PARITY  (NOP)
+         INC       APTRANKS
+         GOTO      A7 IF NOT OVER
+         MATCH     " ",FTFLG
+         GOTO      A7A IF NOT EQUAL
+A6A      BEEP
+         DISPLAY   *P1:23,*EF,"NO TRANSACTIONS OF FILE FOR THIS VENDOR!":
+                   *W2,*P1:23,*EL
+         GOTO      A5
+.
+A7       MATCH     TACCN,ACCNO
+         GOTO      A8 IF EQUAL
+         MATCH     " ",FTFLG
+         GOTO      A6A IF EQUAL
+A7A      CALL      CHKPRT
+         GOTO      A5
+A8       MOVE      "X",FTFLG
+         MOVE      "D",DUFLG
+         MOVE      TACCN,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    TYEAR,TRNKEY
+         APPEND    TMON,TRNKEY
+         APPEND    TDAY,TRNKEY
+         APPEND    TINVNO TO TRNKEY
+         APPEND    TCNT TO TRNKEY
+         RESET     TRNKEY
+         MOVE      TAMT,PTAMT
+         CALL      DSPINV
+         CALL      CKDISA
+         CMATCH    "X",DISFLG
+         GOTO      A9 IF NOT EQUAL
+         MOVE      TDISA,PTDISA
+         SUB       TDISA,PTAMT
+         GOTO      A10
+A9       MOVE      "0",PTDISA
+A10      CALL      STBPRT
+         GOTO      A6
+A25      MOVE      " ",FTFLG
+         MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "             ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+.
+A26      TRAPCLR   PARITY (NOP)
+         INC       APTRANKS
+         GOTO      A270 IF OVER
+A27      MATCH     TACCN,SVACCN
+         GOTO      A27B IF EQUAL
+A270     MATCH     " ",FTFLG
+         GOTO      A27A IF NOT EQUAL
+         DISPLAY   *P1:23,*EF,"NO TRANSACTIONS ON FILE FOR THIS VENDOR!":
+                   *W2,*P1:23,*EL
+         GOTO      A3
+A27A     CALL      CHKPRT
+         GOTO      A3
+A27B     MOVE      "X",FTFLG
+         CALL      DSPINV
+         RESET     TRNKEY,6
+         APPEND    TYEAR,TRNKEY
+         APPEND    TMON,TRNKEY
+         APPEND    TDAY,TRNKEY
+         APPEND    TINVNO,TRNKEY
+         APPEND    TCNT,TRNKEY
+         RESET     TRNKEY
+         GOTO      A46
+A450     MOVE      " ",FTFLG
+. 
+A45      KEYIN     *P1:23,"ENTER INVOICE NO. or PRESS F5 IF FINISHED ":
+                   *JR,KINVNO
+         DISPLAY   *P1:23,*EL
+         GOTO      A45F5 IF F5
+. 
+         MATCH     "     *" TO KINVNO
+         GOTO      A45A IF NOT EQUAL
+. 
+A45F5    CMATCH    " ",FTFLG
+         GOTO      A3 IF EQUAL
+         CALL      CHKPRT
+         GOTO      A3
+. 
+A45A     MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "      ",TRNKEY
+         APPEND    KINVNO,TRNKEY
+         APPEND    " ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+.
+A45A1    TRAPCLR   PARITY (NOP)
+         INC       APTRANKS
+         GOTO      A460 IF NOT OVER
+. 
+A45B     DISPLAY   *P1:23,*EL,"INVOICE ",KINVNO," NOT ON FILE!",*W2:
+                   *P1:23,*EL
+         GOTO      A45
+. 
+A460     MATCH     ACCNO,TACCN
+         GOTO      A45B IF NOT EQUAL
+         MATCH     KINVNO,TINVNO
+         GOTO      A45A1 IF NOT EQUAL
+A461     RESET     TRNKEY,6
+         APPEND    TYEAR,TRNKEY
+         APPEND    TMON,TRNKEY
+         APPEND    TDAY,TRNKEY
+         APPEND    TINVNO,TRNKEY
+         APPEND    TCNT,TRNKEY
+         RESET     TRNKEY
+         CALL      DSPINV
+         MOVE      "X",FTFLG
+. 
+A46      KEYIN     *P1:23,*EL,"PAY THIS INVOICE ?  (Y)es, (N)o, ":
+                   "(P)artial  ",REPLY
+         DISPLAY   *P1:23,*EL
+. 
+         CMATCH    "N",REPLY
+         GOTO      A46 IF EOS
+         GOTO      A46A IF EQUAL
+         CMATCH    "P",REPLY
+         GOTO      A47 IF EQUAL
+         CMATCH    "Y",REPLY
+         GOTO      A46B IF EQUAL
+         GOTO      A46
+A46A     COMPARE   "2",OPTION
+         GOTO      A26 IF EQUAL
+         GOTO      A50
+A46B     MOVE      TAMT,PTAMT
+         CALL      CKDISA
+         CMATCH    "X",DISFLG
+         GOTO      A46B1 IF NOT EQUAL
+         MOVE      TDISA,PTDISA
+         SUB       TDISA,PTAMT
+         GOTO      A46B2
+A46B1    MOVE      "0",PTDISA
+A46B2    MOVE      "D",DUFLG
+         CALL      STBPRT
+A46C     COMPARE   "2",OPTION
+         GOTO      A26 IF EQUAL
+         GOTO      A50
+A47      MOVE      TAMT,PTAMT
+. 
+         KEYIN     *P1:23,*EL,"ENTER AMOUNT TO PAY ",CKAMT
+         DISPLAY   *P1:23,*EL
+. 
+         CALL      CKDISA
+         CMATCH    "X",DISFLG
+         GOTO      A48 IF NOT EQUAL
+         MOVE      TDISA,PTDISA
+         SUB       TDISA,PTAMT
+         GOTO      A49
+A48      MOVE      "0",PTDISA
+A49      COMPARE   CKAMT TO PTAMT
+         GOTO      A46B2 IF EQUAL
+         GOTO      A47 IF LESS
+         MOVE      "U",DUFLG
+         MOVE      PTAMT TO UPAMT
+         SUB       CKAMT,UPAMT
+         MOVE      CKAMT,PTAMT
+         CALL      STBPRT
+         GOTO      A46C
+.
+A50      TRAPCLR   PARITY  (NOP)
+         INC       APTRANKS
+         GOTO      A45 IF OVER
+         MATCH     ACCNO,TACCN
+         GOTO      A45 IF NOT EQUAL
+         MATCH     KINVNO,TINVNO
+         GOTO      A45 IF NOT EQUAL
+         GOTO      A461
+. 
+A65      KEYIN     *P1:23,*EL,"ENTER AMOUNT TO PAY ",CKAMT
+         DISPLAY   *P1:23,*EL
+. 
+         MOVE      " ",FTFLG
+         MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "             ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+.
+A66      TRAPCLR   PARITY (NOP)
+         INC       APTRANKS
+         GOTO      A670 IF OVER
+A67      MATCH     TACCN,SVACCN
+         GOTO      A67B IF EQUAL
+A670     MATCH     " ",FTFLG
+         GOTO      A67A IF NOT EQUAL
+. 
+         DISPLAY   *P1:23,*EL,"NO TRANSACTIONS ON FILE FOR THIS VENDOR":
+                   *W2,*P1:23,*EL
+. 
+         GOTO      A3
+. 
+A67A     CALL      CHKPRT
+         GOTO      A3
+A67B     MOVE      "X",FTFLG
+         RESET     TRNKEY,6
+         APPEND    TYEAR,TRNKEY
+         APPEND    TMON,TRNKEY
+         APPEND    TDAY,TRNKEY
+         APPEND    TINVNO,TRNKEY
+         APPEND    TCNT,TRNKEY
+         RESET     TRNKEY
+         MOVE      TAMT,PTAMT
+         CALL      DSPINV
+         CALL      CKDISA
+         CMATCH    "X",DISFLG
+         GOTO      A67C IF NOT EQUAL
+         MOVE      TDISA,PTDISA
+         SUB       TDISA,PTAMT
+         GOTO      A67D
+A67C     MOVE      "0",PTDISA
+A67D     COMPARE   CKAMT TO PTAMT
+         GOTO      A68 IF EQUAL
+         GOTO      A69 IF LESS
+         MOVE      "U",DUFLG
+         MOVE      PTAMT TO UPAMT
+         SUB       CKAMT,UPAMT
+         MOVE      CKAMT,PTAMT
+         MOVE      "X",STPFLG
+         GOTO      A70
+A68      MOVE      "D",DUFLG
+         MOVE      CKAMT,PTAMT
+         MOVE      "X",STPFLG
+         GOTO      A70
+A69      MOVE      "D",DUFLG
+         SUB       PTAMT FROM CKAMT
+A70      CALL      STBPRT
+         MATCH     "X",STPFLG
+         GOTO      A66 IF NOT EQUAL
+         CALL      CHKPRT
+         GOTO      A3
+. 
+. 
+STBPRT   COMPARE   "13",LINES
+         CALL      VOIDCHK IF EQUAL
+. 
+         PRINT     *2,TINVNO,*15,TMON,"/",TDAY,"/",TYEAR,*28,TAMT:
+                   *43,TAMT,*57,PTDISA,*70,PTAMT
+. 
+. 
+         ADD       PTAMT,CHKTOT
+         ADD       PTAMT,RUNTOTS
+         ADD       PTDISA,DISTOT
+         ADD       PTDISA,CKDISTOT
+         ADD       "1",LINES
+. 
+. LOGIC INSERTED HERE FOR ALIGNMENT PHASE
+. 
+.        CMATCH    "L",DUFLG
+.        GOTO      STBPRT3 IF EQUAL
+. 
+         CMATCH    "U",DUFLG
+         GOTO      STBPRT1 IF EQUAL
+. 
+. 
+.   NOTE  M A J O R  LOGIC CHANGES HERE.... 3/13/83
+. 
+.   ADD LOGIC TO WRITE TO APPAIDFL/ISI... THE A/P PAID HISTORY FILE!
+. 
+.   THIS WRITE WILL USE THE CONTENTS OF TRNKEY (19 POS) FOR ITS KEY VALUE
+. 
+. FOR THIS REASON IT IS NECESSARY TO INCREMENT THE CHECK NUMBER HERE IN THE
+. 
+. STUB PRINT PHASE, OTHERWISE WE WILL HAVE THE WRONG CKNUMBER WRITTEN TO THE
+. 
+. APPAIDFL/ISI (A/P PAYMENTS HISTORY FILE)
+. 
+         MOVE      CKNUMBER TO  CKNUMBZ
+         ADD       "1"      TO  CKNUMBZ
+.
+. 
+         INCLUDE   APPAIDWT
+. 
+. 
+. NOW WE WILL DELETE THE ITEM FROM THE APTRANFL/ISI
+. 
+         DELETE    APTRANFL,TRNKEY
+. 
+         MOVE      " ",DUFLG
+         RETURN
+. 
+STBPRT1  CMATCH    "X",DISFLG
+         GOTO      STBPRT2 IF NOT EQUAL
+         MOVE      "0",TDISA
+.
+STBPRT2  TRAPCLR   PARITY (NOP)
+         MOVE      UPAMT,TAMT
+         INC       APTRANUP
+. 
+STBPRT3  MOVE      " ",DUFLG
+         RETURN
+. 
+. 
+. 
+         INCLUDE   APDATES
+.
+CHKPRT   MOVE      CHKTOT,NUM
+. 
+. DETERMINE IF THE CHECK IS NEGATIVE AND VOID THE PRINT IF IT IS!
+. 
+         MOVE      SPACES TO VOIDLINE
+         COMPARE   ".01" TO CHKTOT
+         GOTO      CHKPBY1  IF  NOT LESS
+. 
+.  LESS FLAG IS ON - CHECK IS  N E G A T I V E
+. 
+         MOVE      VOIDS TO  VOIDLINE
+. 
+. 
+CHKPBY1  ADD       "1"  TO  CKNUMBER
+. 
+         MOVE      "***",AMOUNT
+         RESET     AMOUNT,3
+         RESET     NUM,8
+         LENSET    NUM
+         RESET     NUM
+         MOVE      NUM,DOLLARS
+         RESET     NUM,11
+         LENSET    NUM
+         RESET     NUM,10
+         MOVE      NUM,CENTS
+         RESET     NUM
+CHKPRT1  CMATCH    " ",DOLLARS
+         GOTO      CHKPRT2 IF NOT EQUAL
+         CMOVE     "*",DOLLARS
+         BUMP      DOLLARS,1
+         GOTO      CHKPRT1
+CHKPRT2  APPEND    DOLLARS,AMOUNT
+         APPEND    "* DOLLARS AND *",AMOUNT
+         APPEND    CENTS,AMOUNT
+         APPEND    "* CENTS",AMOUNT
+         RESET     AMOUNT
+CHKPRT3  PRINT     " "
+         ADD       "1",LINES
+. 
+. NOW PRINT A LINE TOTAL ON LINE
+. 
+         COMPARE   "15",LINES
+         GOTO      COMP26 IF NOT EQUAL
+. 
+         PRINT     *45,"REMITTANCE TOTAL IS ",*67,CHKTOT
+         ADD       "1" TO LINES
+. 
+COMP26   COMPARE   "25",LINES
+. 
+. 6/29/83 LOWER COUNT FROM 26 TO 25 LINES AND ADD NEW BLANK LINE
+.         AFTER THE PRINT OF THE $ LINE.
+.         THE NET AFFECT OF THIS IS TO RAISE THE PRINT OF THE $ LINE
+. 
+         GOTO      CHKPRT3 IF NOT EQUAL
+. ==========================================================
+.  FILL SPACES WITH '*' IN CHECK TOTAL FIELD
+. 
+         MOVE      CHKTOT TO DCHKTOT
+CHKPRT4  CMATCH    " " TO DCHKTOT
+         GOTO      CHKPRT5 IF NOT EQUAL
+         CMOVE     "*" TO DCHKTOT
+         BUMP      DCHKTOT BY 1
+         GOTO      CHKPRT5 IF EOS
+         GOTO      CHKPRT4
+CHKPRT5  RESET     DCHKTOT
+. 
+. ===========================================================
+. 
+         MOVE      TODAY TO CKMON
+         REP       " 0"  IN CKMON
+         RESET     TODAY TO 4
+         MOVE      TODAY TO CKDAY
+         RESET     TODAY TO 7
+         MOVE      TODAY TO CKYR
+         RESET     TODAY TO 1
+. 
+         PRINT     *8,AMOUNT,*44,CKMON,"/",CKDAY,"/",CKYR,*67,DCHKTOT
+         PRINT     " "       (NEW 6/29/83 TO COMPENSATE FOR RAISED $ LINE)
+. 
+         PRINT     " "
+         PRINT     " "
+         PRINT     *11,NAME,"     ",SVACCN
+         PRINT     *11,ADD1
+         PRINT     *11,ADD2
+         PRINT     *11,CITY," ",STATE," ",ZIP
+         PRINT     " "
+........ PRINT     " "
+         PRINT     *1,VOIDLINE      (ONLY CONTAINS  VOID  IF NEGATIVE CHECK)
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+. 
+. INSERT LOGIC HERE FOR ALIGNMENT PHASE
+. 
+         CMATCH    "L",DUFLG
+         GOTO      STBPRT3 IF EQUAL
+. 
+         MOVE      "0",LINES
+         SUB       CHKTOT,TOTDUE
+         SUB       CKDISTOT,TOTDUE
+         INC       APMASTUP
+         WRITE     APCHECKS,SEQ;SVACCN,CKMON,CKDAY,CKYR,NAME,CHKTOT,CKDISTOT:
+                                CKNUMBER
+         WEOF      APCHECKS,SEQ
+         MOVE      "0",CHKTOT
+         MOVE      "0",CKDISTOT
+         MOVE      " ",STPFLG
+         RETURN
+. 
+. 
+VOIDCHK  ADD       "1"  TO  CKNUMBER
+. 
+. INCREMENT CHECK NUMBER TO ALLOW FOR VOIDED CHECKS USING VALID NUMBERS
+. 
+VDCHK    PRINT     " "
+         ADD       "1",LINES
+. 
+         COMPARE   "24",LINES
+         GOTO      VDCHK IF NOT EQUAL
+         PRINT     *6,"**** THIS CHECK IS VOID ****",*65:
+                   "**********"
+         PRINT     " "
+         PRINT     " "
+         PRINT     *15,"*** SAVE STUB - CONTAINS LINES"
+         PRINT     *15,"FOR A SUBSEQUENT CHECK ***"
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         PRINT     " "
+         WRITE     APCHECKS,SEQ;SVACCN,CKMON,CKDAY,CKYR:
+                   "** THIS CHECK IS VOID ** ","        .00","     .00":
+                   CKNUMBER
+         WEOF      APCHECKS,SEQ
+         MOVE      "0",LINES
+         RETURN
+. 
+EOJVEND  MATCH     " ",FTFLG
+         GOTO      EOJ IF EQUAL
+         CALL      CHKPRT
+. 
+EOJ      CLOSE     APTRANFL
+. 
+         MOVE      "000000" TO ACCKEY
+. 
+         INCLUDE   APMASTHR
+. 
+         PRINT     " ",*FLUSH
+. 
+. NOW UPDATE THE APCONTRL FIGURE AND SAVE LAST CHECK NUMBER USED!
+. 
+         SUBTRACT  RUNTOTS FROM APCONTRL
+         MOVE      APCONTRL TO  TOTDUE
+         MOVE      CKNUMBER TO  EXT
+. 
+         INCLUDE   APMASTHU
+. 
+         CLOSE     APMASTER
+         CLOSE     APPAIDFL
+         WEOF      APCHECKS,SEQ
+         CLOSE     APCHECKS
+         BEEP
+         DISPLAY   *ES,*P01:10,*HON,"CHECK PRINTING IS NOW COMPLETE! ":
+                       *P01:14,"PLEASE LOAD STOCK PAPER ON THE PRINTER":
+                   " IMMEDIATELY!":
+                       *P01:16,"SO THAT THE CHECK LISTING MAY BE PRINTED!"
+         KEYIN     *P01:18,*HON,"PRESS THE ENTER KEY WHEN YOU ARE READY ":
+                   "WITH THE STOCK PAPER ",*HOFF,REPLY
+. 
+         PRINT     *F,"ACCOUNTS PAYABLE CHECK PRINT RUN FOR ",TODAY
+         PRINT     " "
+         PRINT     *1,"LAST CHECK NUMBER PRINTED WAS ",CKNUMBER
+         PRINT     " "
+         PRINT     *3,"TOTAL OF CHECK AMOUNTS PAID = ",RUNTOTS
+         PRINT     " "
+         PRINT     *3,"DISCOUNT AMOUNT TAKEN       =   ",DISTOT
+         PRINT     " "
+. 
+. NOW CHAIN AND PRINT THE A/P CHECK LISTING
+. 
+         BEEP
+         RELEASE
+. 
+         CHAIN     "APCKLIST"
+. .....................................................................
+. 
+DSPINV   ADD       "1"   TO  DROW
+         COMPARE   "23"  TO  DROW
+         CALL      RESETROW  IF  EQUAL
+         DISPLAY   *P1:12,"INVOICE ##   VENDOR    DATE  ":
+                   *P31:12,"DESCRIPTION",*P58:12,"AMOUNT"
+         DISPLAY   *P1:DROW,TINVNO:
+                   *P11:DROW,TACCN:
+                   *P21:DROW,TMON,"/",TDAY,"/",TYEAR:
+                   *P31:DROW,TDESC:
+                   *P55:DROW,TAMT
+         RETURN
+. 
+RESETROW DISPLAY   *P1:13,*EF
+         MOVE      "13" TO DROW
+         RETURN
+. 
+CKDISA   COMPARE   "0",TDISA
+         GOTO      CKDISA2 IF EQUAL
+. 
+. 3/13/83 BYPASS ALL DISCOUNT LOGIC FOR AMERICAN
+. 
+         GOTO      CKDISA2
+. 
+. ............................
+         MOVE      "Y" TO REPLY
+........ KEYIN     *R,*P1:24,"TAKE DISCOUNT ON THIS INVOICE? ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      CKDISA IF EOS
+         GOTO      CKDISA1 IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      CKDISA2 IF EQUAL
+         GOTO      CKDISA
+CKDISA1  MOVE      "X",DISFLG
+         RETURN
+CKDISA2  MOVE      " ",DISFLG
+         RETURN
+. 
+         INC       GETDATE
+         INC       APMASTVK
+         INC       APTRANBK

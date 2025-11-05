@@ -1,0 +1,12 @@
+.
+. file definition for fast DB/C control file
+.
+
+fdbcc.record	list
+fdbcc.desc	char 40
+		listend
+
+fdbcc		list
+		file fix=40
+		varlist fastdbc.syscode, "FASTC"
+		listend

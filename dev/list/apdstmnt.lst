@@ -1,0 +1,22 @@
+
+
+
+PAGE    1      apdstmnt                                                                                       02-11-19 11:35:27
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apdstmnt -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    3.    INCLUDE  B: common.pls
+   24.    INCLUDE  C: callerr1.inc
+   12. C                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   28.    INCLUDE  D: callerr2.inc
+
+   Output: c:\apc\plc\apdstmnt.plc                                                                                                                                                                                                                                   
+       227 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:27 11:35:27
+  000013A8 DATA;  0000028A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

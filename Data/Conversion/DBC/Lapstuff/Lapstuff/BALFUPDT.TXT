@@ -1,0 +1,90 @@
+.......................................................................
+. UPDATE THE A/R BALANCE FORWARD FILE - MODULE NAME BALFUPDT
+. 
+. WRITTEN 10/11/81 BY R. BACHARACH
+.                     MICRO SYSTEMS CONSULTANTS
+.                     41 TEELE DRIVE
+.                     CORAM, NEW YORK 11727
+.                     516-698-5577
+.......................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   BALFWDFL
+. 
+ANSWER   DIM       1
+REPLY    DIM       1
+READSW   INIT      "N"
+IOSW     INIT      "M"
+PASSWORD DIM       10
+BOATS    INIT      "BOATS"
+MONEY    INIT      "MONEY"
+. 
+. 
+GETPSWD  KEYIN     *ES,*P01:04,"PLEASE ENTER YOUR PASSWORD !",*EOFF,PASSWORD
+         MATCH     BOATS   TO PASSWORD
+         GOTO      OKAY    IF EQUAL
+         MATCH     MONEY   TO PASSWORD
+         GOTO      OKAY    IF EQUAL
+         BEEP
+         DISPLAY   *ES,*P01:04,"* * *  S E C U R I T Y   V I O L A T I ":
+                   "O N  * * *":
+                   *P01:06,"ONLY AUTHORIZED PERSONS MAY ALTER THE ":
+                           "ACCOUNTS RECEIVABLE DATA "
+. 
+         CHAIN     "ARMENU1 "
+. 
+OKAY     DISPLAY   *ES,*P20:01,*HON,"A/R BALANCE FORWARD FILE CORRECTIONS":
+                               *HOFF
+         CALL      OPENBALF
+         TRAPCLR   IO
+WHAT     KEYIN     *P01:23,*EL,"(R)ead, (W)rite, or (E)nd ? ",REPLY
+         CMATCH    "R",REPLY
+         GOTO      CHECK IF EQUAL
+         CMATCH    "W",REPLY
+         GOTO      CHECK IF EQUAL
+         CMATCH    "E",REPLY
+         GOTO      EOJ IF EQUAL
+         BEEP
+         GOTO      WHAT
+. 
+EOJ      CHAIN     "APPMENU1"
+. 
+CHECK    CMATCH    "W",REPLY
+         GOTO      CHECKRD  IF  EQUAL
+         CALL      GTBALFWD
+         CMATCH    "H",IOSW
+         GOTO      BUMMIT IF NOT EQUAL
+         DISPLAY   *P01:10,ARDATE," AMERICAN A/R ",*P25:10,LBALFWD:
+                   *P01:15,"AMERICAN DAILY CREDITS ",*P25:15,LBALCRED
+         MOVE      " " TO ANSWER
+         KEYIN     *P01:23,*EL,"CHANGE AMTS ? (Y/N) ",ANSWER
+         CMATCH    "Y",ANSWER
+         GOTO      WHAT IF NOT EQUAL
+         KEYIN     *P25:11,*RV,LBALFWD:
+                   *P25:16,*RV,LBALCRED
+. 
+. FALLTHRU AND WRITE THE RECORD
+. 
+DOWRITE  CALL      PTBALFWD
+         BEEP
+         DISPLAY   *P01:23,*EL,"RECORD SUCCESSFULLY UPDATED! ",*W3
+         GOTO      WHAT
+. 
+BUMMIT   BEEP
+         DISPLAY   *P1:23,*EL,"UNABLE TO READ BALANCE FORWARD FILE! ",*W3
+         GOTO      BUMMIT
+.
+CHECKRD  CMATCH    "R",READSW
+         GOTO      DOWRITE  IF  EQUAL
+         MOVE      " "  TO  ANSWER
+         DISPLAY   *P01:23,"YOU DID NOT READ FILE YET!  ARE YOU SURE ?":
+                           " (Y/N) ",ANSWER
+         CMATCH    "Y",ANSWER
+         GOTO      DOWRITE  IF  EQUAL
+         BEEP
+         DISPLAY   *P01:23,*EL,"I DIDNT THINK SO! ",*W3
+         GOTO      WHAT
+. 
+         INCLUDE   BALFWDIO
+. 

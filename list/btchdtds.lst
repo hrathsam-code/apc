@@ -1,0 +1,26 @@
+
+
+
+PAGE    1      btchdtds                                                                                       02-11-19 11:35:41
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP btchdtds -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.pls
+    9.    INCLUDE  C: batchfd2.txt
+   11.    INCLUDE  D: custmast.txt
+   61.    INCLUDE  E: dateschk.txt
+  127.    INCLUDE  F: batchio.txt
+  128.    INCLUDE  G: stdioerr.txt
+  129.    INCLUDE  H: stdparer.txt
+  130.    INCLUDE  I: stdfmter.txt
+  131.    INCLUDE  J: stdrange.txt
+  132.    INCLUDE  K: custio.txt
+
+   Output: c:\apc\plc\btchdtds.plc                                                                                                                                                                                                                                   
+       881 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:35:41 11:35:41
+  00002C54 DATA;  00000AA6  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

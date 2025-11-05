@@ -1,0 +1,298 @@
+.
+. WORKVAR.INC -	work variables
+.
+Space         INIT              " "
+SingleQuote        INIT              "'"
+singlequote2       INIT              "''"
+
+ProgName   DIM               12
+DateTime      DIM               16
+CMDLINE    DIM               40
+alertstring dim                 255
+OSCOMMAND  INIT              "WINHELP "
+LOCKTITLE  INIT              "LOCKING Error occured during I/O operation"
+WeekDayD   DIM               1                                                 //HR 7/14/2009
+WeekDay    FORM              1                                                 //HR 7/14/2009
+YES        DIM               1
+ANS        FORM              1
+LINE       FORM              2
+COUNT      FORM              2
+SEQ        FORM              "-1"
+SeqEOF     form              "-3"
+PAGE       FORM              4
+FNAME      DIM               8
+FILLER     DIM               20
+WORK       FORM              9.4
+FirstRow      FORM              "-1"
+SCFM          DIM               20
+UpdateAlternateLocations FORM   1
+
+
+
+NextYear	 FORM				       4
+NextPeriod FORM							 2
+YYYY       DIM               4
+YY         DIM               2         Year field
+MM         DIM               2         Month Field
+MMF           FORM              2                      //HR 6/9/2004
+DDF           FORM              2                      //HR 6/9/2004
+DD         DIM               2         Day Field
+CC         DIM               2         Century Field
+RETURNFL   FORM              1   ...1=ERRORRETURN
+TRAPERR    DIM               19   ...trap error message
+TRAPFL     FORM              2   ...assigns number to each routine within incl.
+TRAPDESC   DIM               7
+CancelFlag    FORM              1           //Used to Set/Unset Cancellation into Modal Dialog window
+TR1        INIT              "READ"
+TR2        INIT              "READ2"
+TR3        INIT              "ADD"
+TR4        INIT              "DELETE"
+TR5        INIT              "UPDATE"
+TR6        INIT              "BINTEST"
+TR7        INIT              "READKS"
+TR8        INIT              "READKS2"
+SCRDESC    INIT              "Superior Washer & Gasket"
+BACKFL     FORM              2
+ERRFL      FORM              2
+FILDESC    DIM               8
+RECTYP     DIM               1
+TIME       INIT              "HH/MM/SS"                             //DIM               8
+WORKF      FORM              7
+TODAY8     DIM               8
+SPNAME     DIM               12
+
+MenuTag            FORM              3
+MenuItem           DIM               20
+
+CancelTitle INIT             "&Cancel"
+ExitTitle  INIT              "&Exit"
+SaveTitle  INIT              "&Save"
+ChangeTitle INIT             "&Change"
+ClearTitle INIT             "&Clear"
+NewTitle   INIT              "&New"
+LastASCII  INIT              "~"       ...Last ASCII character (for finding last record)
+FirstASCII INIT              " "       ...First ASCII character (for finding First record)
+SingleLine Const             "18"
+SubSingleLine CONST          "14"
+DoubleLine Const             "36"
+ZEROSEQ    FORM              "0"
+......
+. HR Added 3/7/2006
+FPTR          FORM              3
+LPTR          FORM              3
+LPTR2         FORM              3
+Length2       FORM              3
+Length        FORM              3
+......
+
+SortOrder     FORM              2
+SortColumn    FORM              2
+SortHeader    FORM              2(0..99)
+SortType      FORM              2(0..99)
+SortMask      DIM               20
+
+$YESNO     DEFINE            4
+RESULT     form              4
+CBResult      FORM              4
+RESULT4    FORM              3
+RESULT9    FORM              3
+CROSSYR    DIM               4
+DATE10     DIM               10
+
+NWK4          FORM              4
+NWK6          FORM              6
+AWK4          DIM               4
+AWK6          DIM               6
+FirstFlag     DIM               1           //Used for checking if routines have already passed through
+FirstPrint    DIM               1           //Used to see if we've printed anything yet...If Not, don't do a *F
+PrintGuiMode  INIT              "Y"
+RunType       FORM              1           //What type of report is this??? ( 0 = All, 1 = By Customer)
+
+ExportFilePath DIM               100        //HR 6/2/2005
+ExportFileName DIM               50         //HR 6/2/2005
+ExportFile     DIM               200        //HR 6/2/2005
+ExportFL       FILE                         //HR 6/2/2005
+
+UpdateTimer   TIMER
+
+...DATE6      DIM               6
+DATE8      DIM               8
+wrk1       DIM               1
+wrk2       DIM               2
+Status     FORM              1                (0=New Record, 1=Updating Status, 2=New Record, 3=Record Found)
+ValidFlag  FORM              1                (0=All fields are OK, 1=All fields are not valid!!!)
+CharCount  FORM              4
+TestChars  DIM               100
+ProgLoaded FORM              "0"              (Has program been loaded 0=No, 1=Yes)
+SearchTitle DIM              40
+EnvData    DIM               100              . Environmental Data variable (Clock INI)
+AlertReturn init                0x7f
+Slash         INIT              "/"
+
+PassedVar  DIM               %1
+
+
+$BACKGROUND                        DEFINE   2147483657    ;Hex value 0x80000001
+$ACTIVECAPTION                     DEFINE   2147483650    ;Hex value 0x80000002
+$INACTIVECAPTION                   DEFINE   2147483651    ;Hex value 0x80000003
+$MENU                              DEFINE   2147483652    ;Hex value 0x80000004
+$WINDOW                            DEFINE   2147483653    ;Hex value 0x80000005
+$WINDOWFRAME                       DEFINE   2147483654    ;Hex value 0x80000006
+$MENUTEXT                          DEFINE   2147483655    ;Hex value 0x80000007
+$WINDOWTEXT                        DEFINE   2147483656    ;Hex value 0x80000008
+$CAPTIONTEXT                       DEFINE   2147483657    ;Hex value 0x80000009
+$ACTIVEBORDER                      DEFINE   2147483658    ;Hex value 0x8000000A
+$INACTIVEBORDER                    DEFINE   2147483659    ;Hex value 0x8000000B
+$APPWORKSPACE                      DEFINE   2147483660    ;Hex value 0x8000000C
+$HIGHLIGHT                         DEFINE   2147483661    ;Hex value 0x8000000D
+$HIGHLIGHTTEXT                     DEFINE   2147483662    ;Hex value 0x8000000E
+$BTNFACE                           DEFINE   2147483663    ;Hex value 0x8000000F
+$BTNSHADOW                         DEFINE   2147483664    ;Hex value 0x80000010
+$GRAYTEXT                          DEFINE   2147483665    ;Hex value 0x80000011
+$BTNTEXT                           DEFINE   2147483666    ;Hex value 0x80000012
+$INACTIVECAPTIONTEXT               DEFINE   2147483667    ;Hex value 0x80000013
+$BTNHIGHLIGHT                      DEFINE   2147483668    ;Hex value 0x80000014
+$BGColorRed    INIT              "0xF90000"
+$BGColorYellow INIT              "0xFFFF00"
+$BGColorWhite   INIT              "0xFFFFFF"
+$BGColorBlack   INIT              "0x000000"
+$Color         DIM               10
+
+.
+. Variables & Defines for 'Record' Alert titles
+.
+FirstTitle INIT              "Find First Failed"
+LastTitle  INIT              "Find Last Failed"
+PrevTitle  INIT              "Find Previous Record Failed"
+NextTitle  INIT              "Find Next Record Failed"
+
+.
+. Other Alert Titles
+.
+DelTitle   INIT              "Delete Record?"
+DelOKTitle INIT              "Record Deleted?"
+SureTitle  INIT              "Are you Sure?"
+
+BnkFlag    DIM               %1
+APTRMFlag  DIM               %1
+BuyerFlag  DIM               %1
+VNDFlag    DIM               %1
+CLASSFlag  DIM               %1
+PRJCTFlag  DIM               %1
+CNTRYFlag  DIM               %1
+TYPEFlag   DIM               %1
+APCTLFlag  DIM               %1
+VOUCHFlag  DIM               %1
+GLMSTFlag  DIM               %1
+CMPNYFlag  DIM               %1
+USERFlag   DIM               %1
+.
+. Variables that are used througout the programs
+. These are setup & loaded when the PASSWORD program
+. is used.
+.
+$UserID    DIM               %20
+$CompanyName DIM             %40
+$Password  DIM               %20
+$LoginName DIM               %20
+$RealName  DIM               %30
+$GroupID   DIM               %6
+$Dept      DIM               %6
+$Security  DIM               %2
+$Active    FORM              %1
+$SelectAll FORM              %1
+$ReadAhead FORM              %1
+$LoggedOn  FORM              %1
+$Entity    DIM               %8
+$Station   DIM               %12
+.
+$SearchKey DIM               %30
+$UserLocation      DIM               %1
+
+
+           GOTO              #EXIT
+           INCLUDE           PIMMACRO.INC
+           INCLUDE           PASSW.FD
+           INCLUDE              Sequence.FD
+#EXIT
+LOADPASSWD EXTERNAL          "PASSWORD;STARTPGM"
+BANKPGM    EXTERNAL          "BANK;STARTPGM"
+TYPEPGM    EXTERNAL          "TYPE;STARTPGM"
+APTRMPGM   EXTERNAL          "APTRM;STARTPGM"
+BUYERPGM   EXTERNAL          "BUYER;STARTPGM"
+VENDORPGM  EXTERNAL          "VEND;STARTPGM"
+CLASSPGM   EXTERNAL          "CLASS;STARTPGM"
+APCLASSPGM EXTERNAL          "APCLASS;STARTPGM"
+CNTRYPGM   EXTERNAL          "CNTRY;STARTPGM"
+PRJCTPGM   EXTERNAL          "PRJCT;STARTPGM"
+APCTLPGM   EXTERNAL          "APCTL;STARTPGM"
+VOUCHPGM   EXTERNAL          "VOUCH;STARTPGM"
+CMPNYPGM   EXTERNAL          "CMPNY;STARTPGM"
+GLMSTPGM   EXTERNAL          "GLMST;STARTPGM"
+USERPGM    EXTERNAL          "PASSW;STARTPGM"
+
+
+ConvDateToDays EXTERNAL         "datertn;CalDateToDays"
+ConvDaysToDate EXTERNAL         "datertn;LinearDateToCalDate"
+
+SWRCHTYPE  EXTERNAL          "TYPE;BRWSETYPE"
+VIEWBANK   EXTERNAL          "BANK;BROWSEFILE"
+ViewVendor EXTERNAL          "Vendor;BROWSEFILE"
+VIEWGLMast EXTERNAL          "GLMST;BROWSEFILE"
+VIEWCMPNY  EXTERNAL          "CMPNY;BROWSEFILE"
+VIEWTYPE   EXTERNAL          "TYPE;BROWSEFILE"
+VIEWAPTYPE EXTERNAL          "APTYPE;BROWSEFILE"
+VIEWCNTRY  EXTERNAL          "CNTRY;BROWSEFILE"
+VIEWBUYER  EXTERNAL          "BUYER;BROWSEFILE"
+VIEWAPTRM  EXTERNAL          "APTRM;BROWSEFILE"
+VIEWARTRM  EXTERNAL          "ARTRM;BROWSEFILE"
+VIEWCLASS  EXTERNAL          "CLASS;BROWSEFILE"
+VIEWAPCLASS EXTERNAL         "APCLASS;BROWSEFILE"
+VIEWPRJCT  EXTERNAL          "PRJCT;BROWSEFILE"
+VIEWVEND   EXTERNAL          "VEND;BROWSEFILE"
+VIEWSTATE  EXTERNAL          "STATE;BROWSEFILE"
+VIEWCUST   EXTERNAL          "CUST;BROWSEFILE"
+ViewParts  EXTERNAL          "Parts;BROWSEFILE"
+..HR 2/22/2005  ViewSource EXTERNAL          "bsrcdinp;BROWSEFILE"
+ViewSource EXTERNAL          "bsrcdinp;BROWSEFILE"
+ViewSLSMN  EXTERNAL          "SLSMN;BROWSEFILE"
+ViewInside EXTERNAL          "newireps;BROWSEFILE"
+ViewInsideRep EXTERNAL          "newireps;BROWSEFILE"
+ViewCOMM   EXTERNAL          "Comm;BROWSEFILE"
+ViewReason EXTERNAL          "Reason;BROWSEFILE"
+ViewComod  EXTERNAL          "Comod;BROWSEFILE"
+ViewPlate  EXTERNAL          "Plate;BROWSEFILE"
+ViewMaterialMaster EXTERNAL     "MatlMast;BROWSEFILE"
+
+VendorInq     external          "VINQ;STARTPGM"
+PrintOpenAP   external          "PRTOPNAP;STARTPGM"
+PrintVendor   external          "PRTVEND;STARTPGM"
+PrintVendorA  external          "PRTVENDA;STARTPGM"
+PrintAgingAP  external          "PrtAgeAP;STARTPGM"
+PrintVendPerf external          "PRTPERFM;STARTPGM"
+PrintAPDistr  external          "PRTAPGL;STARTPGM"
+PrintBank     external          "PRTBANK;STARTPGM"
+PrintAPTerms  external          "PRTAPTRM;STARTPGM"
+PrintChkList  external          "PRTCHKLS;STARTPGM"
+PrintVouchReg external          "PRTVCHRG;STARTPGM"
+PrintChkAudit external          "PRTCHKRG;STARTPGM"
+PrintChkReq   external          "PRTCHKRQ;STARTPGM"
+PrintAutoChk  external          "PRTCHCK;STARTPGM"
+PrintReconc   external          "PRTCHKCL;STARTPGM"
+CheckReqEdit  external          "CHECK;STARTPGM"
+ChngVchStatus external          "VCHAPPRV;STARTPGM"
+CustInquiry   EXTERNAL          "CINQ;STARTPGM"
+
+CheckInquiry  external          "CHCKINQ;STARTPGM"
+.=============================================================================
+. Print Program LoadMods
+.
+PrintStamps   EXTERNAL          "PRTSTAMP;StartProgram"
+PrintStatemnt EXTERNAL          "STATMNT3;StartProgram"
+PrintInvoice  EXTERNAL          "INVRPTC2;StartProgram"
+PrintScreen   EXTERNAL          "PrtScrn;StartProgram"
+CommentInq    EXTERNAL          "Comments;STARTPGM"
+
+UpdateFaxLog  EXTERNAL          "XFerFaxl;StartProgram"
+
+CONVDATE      EXTERNAL          "STANDARD;CONVDATE"

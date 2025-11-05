@@ -1,0 +1,81 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    DefaultEmail.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-25-2019 At 12:52                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00103   07-24-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $DefaultEmailVAR
+$DefaultEmailVAR                 EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+DefaultEmail                     RECORD
+EmailType                        Form               6                   1 - 6
+EmailFrom                        Dim                60                  7 - 66
+MessageType                      Form               2                  67 - 68       //1=Text,2=Html, 3=RichHtml
+Subject                          Dim                300                69 - 368
+BodyText                         Dim                4000              369 - 4368
+StartDate                        Dim                8                4369 - 4376
+EndDate                          Dim                8                4377 - 4384
+Inactive                         Form               1                4385 - 4385
+                                 RECORDEND
+;
+;======================================================================================;
+TempDefaultEmail                    record          like   DefaultEmail                    
+OrigDefaultEmail                    record          like   DefaultEmail                    
+SaveDefaultEmail                    record          like   DefaultEmail                    
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+DefaultEmailTXTNM                          INIT         "DefaultEMail"
+DefaultEmailISI1NM                         INIT               "DefaultEmail.ISI"
+DefaultEmailI1DEF                           init            "-n,z,y,1-6"
+.
+. By EmailType
+. 1-6
+.
+DefaultEmailKY                   DIM                 6
+;=============================================================================;
+;
+DefaultEmailFLST                         FILELIST
+DefaultEmailFL                      IFILE              name="DefaultEmail.ISI",FIX=5192,NODUP,NOPATH
+                                    FILELISTEND
+ 
+DefaultEmailFileSize       CONST      "5192"
+ 
+DefaultEmailProg           INIT       "DefaultEmail Program"
+DefaultEmailDesc           INIT       "DefaultEmail Maintenance"
+DefaultEmailTITLE          INIT       "DefaultEmail Record"
+DefaultEmailHelp           INIT       "DefaultEmail.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $DefaultEmailVARIO
+            INCLUDE DefaultEmail.IO 
+          %ENDIF          //End of IO Include File

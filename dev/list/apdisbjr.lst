@@ -1,0 +1,50 @@
+
+
+
+PAGE    1      apdisbjr                                                                                       02-11-19 11:35:26
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apdisbjr -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: common.pls
+    6.    INCLUDE  B: appaidfd.pls
+    8.    INCLUDE  C: apmastfd.pls
+   54.    INCLUDE  D: disttabl.txt
+   56.    INCLUDE  E: apcalndr.pls
+   58.    INCLUDE  F: callerr1.inc
+   12. F                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   62.    INCLUDE  G: callerr2.inc
+   92.    INCLUDE  H: diststor.pls
+  227.    INCLUDE  I: apmastrd.pls
+  229.    INCLUDE  J: apmastks.pls
+  238.    INCLUDE  K: appaidrd.pls
+  249.    INCLUDE  L: apmastrd.pls
+  264.    INCLUDE  M: apmastks.pls
+  276.    INCLUDE  N: appaidrd.pls
+  282.    INCLUDE  O: appaidks.pls
+  301.    INCLUDE  P: apmastrd.pls
+  363.                                         ADD       "1"   TO  DROW
+                                                  *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  372.    INCLUDE  Q: apmastrd.pls
+  414.    INCLUDE  R: distsrch.txt
+  422.    INCLUDE  S: distload.txt
+  424.    INCLUDE  T: distupdt.txt
+  432.    INCLUDE  U: distsrch.txt
+  438.    INCLUDE  V: diststor.pls
+  446.    INCLUDE  W: distupdt.txt
+  517.    INCLUDE  X: apdates.pls
+  528.                                         PRINT     " ",*FLUSH 
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  539.    INCLUDE  Y: distsrch.txt
+  548.    INCLUDE  Z: distload.txt
+
+   Output: c:\apc\plc\apdisbjr.plc                                                                                                                                                                                                                                   
+      1288 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:26 11:35:26
+  00003B38 DATA;  00000C2C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

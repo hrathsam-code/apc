@@ -1,0 +1,104 @@
+.................................................................
+. SMSEOD/TXT - PROGRAM PROCESSES END-OF-DAY FOR DATA ENTRY FILES
+.................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   MSPARTSF/TXT
+. 
+PAGES    FORM      3
+. 
+NPARTSFL IFILE
+NPARTS01 INIT      "NPARTS01/ISI"
+NPARTS02 INIT      "NPARTS02/ISI"
+NPARTS03 INIT      "NPARTS03/ISI"
+NPARTS04 INIT      "NPARTS04/ISI"
+. 
+TERMINAL DIM       2
+TIME     INIT      "HH/MM/SSS"
+LINES    FORM      2
+REPLY    DIM       1
+WHO      DIM       20
+WHOCNT   FORM      4
+. 
+         INCLUDE   TIMEINCL/TXT
+. 
+START    DISPLAY   *ES,*P1:1,*HON,"INVENTORY HISTORY END-OF-DAY PROCESSING":
+                       *P1:2,"  S U P E R    -   E N D   O F   D A Y  "
+. 
+         MOVE      "000" TO PAGES
+         CLOCK     TIME  TO TIME
+. 
+         OPEN      NPARTSFL,NPARTS01
+         MOVE      "01"  TO  TERMINAL
+         MOVE      "0"   TO WHOCNT
+         CALL      LOOP01
+. 
+         OPEN      NPARTSFL,NPARTS02
+         MOVE      "02"  TO  TERMINAL
+         MOVE      "0"   TO  WHOCNT
+         CALL      LOOP01
+. 
+         OPEN      NPARTSFL,NPARTS03
+         MOVE      "03"  TO  TERMINAL
+         MOVE      "0"   TO  WHOCNT
+         CALL      LOOP01
+. 
+         OPEN      NPARTSFL,NPARTS04
+         MOVE      "04"  TO  TERMINAL
+         MOVE      "0"   TO  WHOCNT
+         CALL      LOOP01
+. 
+         GOTO      XX
+. 
+WHAT     KEYIN     *P1:24,*HON,"CREATE NEW DATA ENTRY FILES ? ",REPLY
+         CMATCH    "N",REPLY
+         GOTO      BYPASS IF EQUAL
+         CMATCH    "Y",REPLY
+         GOTO      XX IF  EQUAL
+         BEEP
+         GOTO      WHAT
+. 
+XX       ROLLOUT   "CHAIN MSFLBLD1"
+. 
+. ROLLIN WILL NOW TIME STAMP THE SUPEREOJ EFFORT
+. 
+         INCLUDE   TIMEIO/TXT
+. 
+BYPASS   CHAIN     "MSHISTRY"
+. 
+. 
+LOOP01   READKS    NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+         MOVE      MSSIZE  TO  WHO
+         CALL      HEADER
+. 
+LP1      READKS    NPARTSFL;MSSTATUS,MSPARTNO,MSSIZE,MSDESC,MSXRFPT1,MSXRFPT2
+         GOTO      LOOPEND IF OVER
+         PRINT     *1,MSPARTNO,*22,MSSIZE,*55,MSDESC,*88,MSXRFPT1:
+                   *110,MSXRFPT2
+         ADD       "1"  TO  WHOCNT
+         ADD       "1"  TO  LINES
+         COMPARE   "53",LINES
+         CALL      HEADER  IF  NOT LESS
+         GOTO      LP1
+         RETURN
+. 
+LOOPEND  PRINT     *C,*L,*L,"** END OF DATA ENTRY ":
+                   "FOR ",WHO," ** TOTAL RECORDS ENTERED = ":
+                   WHOCNT," ** "
+         RETURN
+. 
+HEADER   ADD       "1"  TO  PAGES
+         PRINT     *F,*1,"INVENTORY DATA ENTRY VALIDATION LIST":
+                   "   -  DATA ENTRY BY ",WHO:
+                   " TERMINAL ",TERMINAL:
+                   " AS OF ",TODAY,"  TIME ",TIME,"  PAGE ",PAGES
+. 
+         PRINT     " "
+         PRINT     *1,"PART NUMBER",*22,"SIZE",*55,"DESCRIPTION":
+                   *88,"CROSS-REFERENCE 1",*110,"CROSS-REFERENCE 2"
+         PRINT     " "
+         MOVE      "4"  TO  LINES
+         RETURN
+. 
+. 

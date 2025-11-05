@@ -1,0 +1,91 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APTYPE.FD                                                      ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/21/2005 AT 12:53AM                                          ;
+;                                                                             ;
+;  PURPOSE:    A/P Type Master File Definitions                               ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   07/21/2005   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+.
+           %IFNDEF   $APTypeVAR
+$APTypeVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     APType            Length    From - To      Description
+.---------------------------------------------------------------------------
+APType        RECORD
+Code          DIM               4            1 - 4
+Desc          DIM               15           5 - 19
+Active        FORM              1           20 - 20
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+APTypeK1SIZE CONST            "4"                                   (Length of the Key variable)
+.
+. By Code
+.
+APTypeI1DEF  INIT             "1-4"                                 (Index definitions for Key 1)
+.
+APTypeFSIZE  CONST             "20"                                  (Length of each Record)
+
+APTypeKY    DIM                APTypeK1SIZE                            (The Actual 'Key' variable)
+
+APTypePROG  INIT               "APType Master"
+APTypeTITLE INIT               "APType Code"                           (Description used later for headers, etc)
+APTypeHELP  INIT               "APTRM.HLP"                             (Name of the Help file for later purposes)
+
+APTypeTXTNM  INIT              "$APDATA\","APType.TXT"                 .Actual Text Filename  (i.e. CUSTFL.TXT)
+APTypeISI1NM INIT              "$APDATA\","APType.ISI"                 .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+APTypeFLST  FILELIST
+           %IFDEF            APTypeKY
+APTypeFL    IFILE             Name=APTypeISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY2
+APTypeFL2   IFILE             Name=APTypeISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY3
+APTypeFL3   IFILE             Name=APTypeISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY4
+APTypeFL4   IFILE             Name=APTypeISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY5
+APTypeFL5   IFILE             Name=APTypeISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY6
+APTypeFL6   IFILE             Name=APTypeISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY7
+APTypeFL7   IFILE             Name=APTypeISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY8
+APTypeFL8   IFILE             Name=APTypeISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            APTypeKY9
+APTypeFL9   IFILE             Name=APTypeISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         %IFNDEF           $APTypeIO
+           INCLUDE           APType.IO
+         %ENDIF

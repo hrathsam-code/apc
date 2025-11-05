@@ -1,0 +1,98 @@
+.................................................................
+. MSSALEIO/TXT - MODULE PROVIDES I/O FACILITY FOR MSSALES/ISI   .
+.                                                               .
+.    MODULE REQUIRES INCLUDE OF MSSALESF/TXT FILE DESCRIPTION   .
+.................................................................
+. 
+MSSLOPEN TRAP      NOSALE IF IO
+         TRAP      STDPARER  IF PARITY
+         TRAP      STDFMTER  IF FORMAT
+         TRAP      STDRANGE  IF RANGE
+         MOVE      "MSSALES/ISI"  TO  IOERFILE
+         MOVE      "OPEN"         TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         OPEN      MSSALEFL,MSSALENM
+         MOVE      "H"            TO  IOSW
+. 
+MSSLRTRN RETURN
+. 
+NOSALE   BEEP
+         DISPLAY   *P01:23,*EL,*HON,"SALES HISTORY FILE NOT ON-LINE!":
+                   " - REINDEX NECESSARY!",*HOFF,*W2
+         GOTO      NOSALE
+. 
+MSSLREAD TRAP      NOSLFND IF IO
+         TRAP      STDPARER   IF  PARITY
+         TRAP      STDFMTER   IF  FORMAT
+         TRAP      STDRANGE   IF  RANGE
+         MOVE      "MSSALES/ISI"  TO  IOERFILE
+         MOVE      "READ"         TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSSALEFL
+         READ      MSSALEFL,MSSALEKY;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                                     MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                                     MSSLCUST,MSSLPRC,MSSLCNAM
+         GOTO      NOSLFND IF OVER
+         MOVE      "H"     TO IOSW
+         RETURN
+. 
+NOSLFND  BEEP
+         DISPLAY   *P01:23,*EL,*HON,"SALES HISTORY RECORD FOR ",MSSALEKY:
+                   " NOT FOUND - RETRY! ",*HOFF,*W2,*P1:23,*EL
+         RETURN
+. 
+MSSLRDKS TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSSALES/ISI"  TO  IOERFILE
+         MOVE      "READKS"       TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSSALEFL
+         READKS    MSSALEFL;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                            MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                            MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+. OVER CONDITION MEANS WE HAVE ENCOUNTERED THE END-OF-FILE ON READKS
+. 
+         GOTO      MSSLRTRN IF OVER
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+MSSLWRIT TRAP      MSSLDUPE IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSSALES/ISI"  TO  IOERFILE
+         MOVE      "WRITE"        TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSSALEFL
+         WRITE     MSSALEFL,MSSALEKY;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                                     MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                                     MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+MSSLDUPE BEEP
+         DISPLAY   *P1:23,*EL,*HON,"SALES RECORD FOR ",MSSALEKY," ALREADY ":
+                   "EXISTS! ",*HOFF,*W2,*P1:23,*EL
+         RETURN
+. 
+MSSLUPDT TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSSALES/ISI"  TO  IOERFILE
+         MOVE      "UPDATE"       TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSSALEFL
+         UPDATE    MSSALEFL;MSSLPART,MSSLJULD,MSSLSUFX,MSSLTYPE:
+                            MSSLNUMB,MSSLUOP,MSSLQTY,MSSLDATE:
+                            MSSLCUST,MSSLPRC,MSSLCNAM
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+...........................................................................

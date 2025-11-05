@@ -1,0 +1,57 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    fixbatchchecks                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    08/05/2019 at 11:07am                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   08/05/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+                    include            Workvar.inc
+                    include            ARDet.FD
+                    include            BatchChecks.FD
+                    include            Sequence.FD
+
+CustomerID          dim                6
+
+                    call               OpenARDet
+                    call               OpenBatchChecks
+                    call               OpenSequence
+
+                    loop
+                      keyin              *ES,*P10:10,"Enter Customer Number : ",CustomerID
+                    until            (Escape)
+                      packkey            ARDetKY5 from $Entity,"20190803"
+                      call               RDARDet5
+                      loop
+                        call               KPARDet5
+                      until (ReturnFl = 1 or ARDet.TransDate < "20190725")
+                        squeeze            ARDEt.CustomerID,ARDet.CustomerID
+                        continue           if (ARDet.CustomerID != CustomerID)
+
+                        clear              BatchChecks
+                        move               $Entity,BatchChecks.Entity
+                        move               ARDet.TransDate,BatchChecks.CheckDate
+                        move               ARDet.CustomerID,BatchChecks.CustomerID
+                        move               ARDet.Reference,BatchChecks.CheckNo
+                        GetNextSeq         BatChk
+                        move               Sequence.SeqNo,BatchChecks.SeqNo
+                        move               ARDet.Amount,BatchChecks.Amount
+                        move               ARDet.TransSubCode,BatchChecks.Type
+                        call               WrtBatchChecks
+                      repeat
+                    repeat
+

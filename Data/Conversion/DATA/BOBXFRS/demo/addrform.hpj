@@ -1,0 +1,31 @@
+; This file is maintained by HCW. Do not modify this file directly.
+
+; This help project requires hc 3.1
+;This is a demonstration of the PL/B help integration.
+[OPTIONS]
+HCW=0
+ERRORLOG=address.err
+LCID=0x409 0x0 0x0 ;English (United States)
+REPORT=Yes
+CONTENTS=Contents
+TITLE=My Address Book
+HLP=.\addrform.hlp
+
+[FILES]
+.\addrform.rtf
+
+[MAP]
+name_ID 10
+address_ID 11
+cityst_ID 12
+zipcode_ID 13
+phone_ID 14
+new_ID 20
+save_ID 21
+next_ID 22
+previous_ID 23
+delete_ID 24
+quit_ID 25
+
+[CONFIG]
+BrowseButtons()

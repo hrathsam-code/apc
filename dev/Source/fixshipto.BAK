@@ -1,0 +1,56 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    convshipto                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    05/23/2019 at 2:35pm                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   05/23/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+                    include            WorkVar.INC
+                    include            Sequence.FD
+                    include            Cust.FD
+                    include            Cntry.FD
+                    include            ShipTo.FD
+
+Field1              dim                10
+Field2              dim                5
+Country             dim                40
+Zip1                dim                5
+Zip2                dim                5
+CountryFile         ifile
+CountryKey          dim                40
+CountryCode         dim                3
+SaveShipTo          form               4
+Cust2               record             like Cust
+CustName10          dim                10
+
+InputFile           file
+                    call               OpenShipTo
+
+                    call               RDShipTo
+                    loop
+                    call               KSShipTo
+                    until              (ReturnFl = 1)
+                      chop             ShipTo.Zip,ShipTo.Zip
+                      count            Result,ShipTo.Zip
+                      if               (result >= 6)
+                      unpack           ShipTo.Zip into Zip1,Zip2
+                      packkey          ShipTo.Zip from Zip1,"-",Zip2
+                      endif
+Harry1
+                      call               UPDShipTo
+                    repeat

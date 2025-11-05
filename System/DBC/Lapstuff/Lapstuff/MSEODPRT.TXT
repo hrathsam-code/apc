@@ -1,0 +1,89 @@
+.................................................................
+. MSEODPRT/TXT - PROGRAM PROCESSES END-OF-DAY FOR DATA ENTRY FILES
+.................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   MSPARTSF/TEXT
+. 
+         INCLUDE   MSSALESF/TEXT
+.
+         INCLUDE   MSPURCHF/TEXT
+PAGES    FORM      3
+. 
+NPARTSFL IFILE     KEYL=20,UNCOMPRESSED
+NPARTSNM INIT      "NEWPARTS/ISAM"
+. 
+TERMINAL DIM       2
+TIME     INIT      "HH/MM/SSS"
+LINES    FORM      2
+REPLY    DIM       1
+WHO      DIM       20
+WHOCNT   FORM      4
+ROLLNAME INIT      "ROLLFILE/SYST"
+SEQ      FORM      "-1"
+.
+NPURCH   FILE
+NPURCHNM INIT      "SORTHIST/TEXT:MSDATA"
+.
+FORM5    FORM      5
+PRTQTY   DIM       5
+. 
+START    DISPLAY   *ES,*P1:1,*HON,"INVENTORY HISTORY SALES/PO PROCESSING":
+                             *HOFF
+. 
+         MOVE      "000" TO PAGES
+         CLOCK     TIME  TO TIME
+         CALL      HEADER
+. 
+         OPEN      NPURCH,NPURCHNM       (SEQUENTIAL FILE, SORTED ON PART#)
+         MOVE      "0"   TO WHOCNT
+         CALL      LOOP01
+. 
+.
+         ROLLOUT   "CHAIN MSFLBILD",ROLLNAME
+. 
+         BEEP
+         DISPLAY   *ES,*P1:4,*HON,"NEW PARTS DATA ENTRY FILE PREPARED ",*W5:
+                   *HOFF
+.
+BYPASS   CHAIN     "MSHISTRY"
+. 
+LOOP01   READ      NPURCH,SEQ;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE,MSPONUMB:
+                              MSPOUOP,MSPOQTY,MSPODATE,MSPOPRC,MSPOVNAM
+.
+         GOTO      LOOPEND IF OVER
+.
+         CMATCH    "X",MSSTATUS
+         GOTO      LOOP01 IF EQUAL
+         MOVE      MSPOQTY TO FORM5
+         MOVE      FORM5   TO PRTQTY
+.
+         PRINT     *1,MSPOPART," ",MSPOTYPE," ",MSPONUMB," ":
+                   *45,PRTQTY," ",MSPODATE," ",MSPOPRC," ",MSPOUOP:
+                   *70,MSPOVNAM
+.
+         ADD       "1"  TO  WHOCNT
+         ADD       "1"  TO  LINES
+         COMPARE   "53",LINES
+         CALL      HEADER  IF  EQUAL
+         GOTO      LOOP01
+         RETURN
+. 
+LOOPEND  PRINT     *C,*L,*L,"** END OF DATA ENTRY ":
+                   "FOR ",WHO," ** TOTAL RECORDS ENTERED = ":
+                   WHOCNT," ** "
+         RETURN
+. 
+HEADER   ADD       "1"  TO  PAGES
+         PRINT     *F,*1,"SALES/PURCHASES DATA ENTRY VALIDATION LIST":
+                   *50," AS OF ",TODAY,"  TIME ",TIME,"  PAGE ",PAGES
+. 
+         PRINT     " "
+         PRINT     *1,"PART NUMBER",*22,"T TRANSACTION NO.":
+                   *43,"QUANTITY  DATE  PRICE  UOM   ACCOUNT"
+         PRINT     " "
+         MOVE      "4"  TO  LINES
+         RETURN
+. 
+. 

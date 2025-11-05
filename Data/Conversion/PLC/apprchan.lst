@@ -1,0 +1,127 @@
+
+
+
+PAGE    1      APPRCHAN.PLS IDE                                                                               03-22-04 14:51:04
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APPRCHAN.PLS","F:\PLC\APPRCHAN.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    1.    INCLUDE  A: mscbrag.txt
+    3.    INCLUDE  B: common.pls
+  125.                                         GOTO      EOJ IF NOT EQUAL
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+
+   Output: f:\plc\apprchan.plc                                                                                                                                                                                                                                       
+       184 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 14:51:03 14:51:04
+  00001070 DATA;  000002FE  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APPRCHAN.PLS IDE                                                                               03-22-04 14:51:04
+                                         
+
+" 0                                        D      52.  *
+"000000                                    D      57.  *    93.     109.     126.  
+"APMENU1                                   D     140.  *
+"C:\DBC\APDISTFL.ISI                       D      43.  *
+"X                                         D      44.  *
+0                                          F      98.  *    99.     114.     115.     130.     131.     132.     133.  
+                                                     *   134.     135.  
+55                                         F      61.  *
+9                                          F      72.  *
+A1                                         X      59.  *    83.  
+A2                                         X      73.  *    62.  
+A50                                        X      84.  *    60.  
+A50A                                       X      86.  *    88.      92.  
+A50B                                       X      93.  *    89.  
+A51                                        X      95.  *   101.  
+A60                                        X     102.  *    96.     104.     108.  
+A60A                                       X     109.  *   105.  
+A61                                        X     111.  *   117.  
+A70                                        X     118.  *   112.     120.     124.  
+A70A                                       X     126.  *   121.  
+A71                                        X     128.  *   137.  
+ACCTNUMB                                   D      14. B*
+ANS                                        D      23.  *    86.      87.      90.     102.     103.     106.     118.  
+                                                     *   119.     122.  
+APDISTFL                                   i       5.  *    43.      58.      59.      94.      95.     100.     110.  
+                                                     *   111.     116.     127.     128.     136.     138.  
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+BKUPFLG                                    D      36.  *    44.  
+CNAME                                      D      27.  *    58.      64.  
+DATE6                                      D      10. B*
+DATEDESC                                   D      28.  *
+DATERROR                                   D      29.  *
+DATFLG                                     D      37.  *
+DCODE                                      D       6.  *    57.      58.      59.      80.      93.      94.      95.  
+                                                     *   100.     109.     110.     111.     116.     126.     127.     128.  
+                                                     *   136.  
+DCSL                                       F       9.  *    59.      95.      99.     100.     111.     116.     128.  
+                                                     *   131.     136.  
+DD                                         D      31.  *    48.      55.  
+DESC                                       D       7.  *    59.      80.      95.     100.     111.     116.     128.  
+                                                     *   136.  
+DIVNO                                      D      14.  *    59.      95.     100.     111.     116.     128.     136.  
+DSAL                                       F       8.  *    59.      73.      77.      80.      95.      97.      98.  
+                                                     *   100.     111.     116.     128.     130.     136.  
+ENVS                                       D      11. B*
+EOJ                                        X     138.  *    91.     107.     123.     125.     129.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FD                                         F      34.  *
+FIRSTIME                                   D      17. B*
+
+
+
+PAGE    3      APPRCHAN.PLS IDE                                                                               03-22-04 14:51:04
+                                         
+
+FM                                         F      33.  *
+FROMPGM                                    D      16. B*
+FY                                         F      35.  *
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LINES                                      F      21.  *    61.      72.      82.  
+MM                                         D      30.  *    46.      52.      54.  
+MTDC                                       F      11.  *    59.      95.     100.     111.     115.     116.     128.  
+                                                     *   133.     136.  
+MTDS                                       F      10.  *    59.      73.      74.      78.      80.      95.      97.  
+                                                     *   100.     111.     113.     114.     116.     128.     132.     136.  
+PAGE                                       F      22.  *    63.      67.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+TDC                                        F      16.  *
+TDS                                        F      15.  *    77.      85.  
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TMC                                        F      18.  *
+TMS                                        F      17.  *    78.      85.  
+TODAY                                      D       8. B*    46.      47.      48.      49.      50.      51.  
+TODDAY                                     D      25.  *    55.      66.  
+TODMON                                     D      24.  *    54.      66.  
+TODYEAR                                    D      26.  *    56.      66.  
+TYC                                        F      20.  *
+TYS                                        F      19.  *    79.      85.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+YTDC                                       F      13.  *    59.      95.     100.     111.     116.     128.     135.  
+                                                     *   136.  
+YTDS                                       F      12.  *    59.      74.      79.      81.      95.     100.     111.  
+                                                     *   113.     116.     128.     134.     136.  
+YY                                         D      32.  *    50.      56.  
+ZCODE                                      D      38.  *    58.  
+

@@ -1,0 +1,375 @@
+.......................................................................
+. AGED RECEIVABLES DETAIL REPORT:   MODULE NAME   "COMMAR80/TEXT"
+. 
+. PRODUCING REPORT FOR INPUT ACCOUNT HAVING OPEN INVOICES/CREDITS
+. 
+.......................................................................
+. 
+. WRITTEN  10/13/90 BY  R. BACHARACH
+.                       MICRO SYSTEMS CONSULTANTS
+.......................................................................
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   RCVBLES
+. 
+ARFILES  IFILE     KEYL=10,UNCOMPRESSED
+ARCLOSED INIT      "ARCLOSED/ISAM"
+. 
+         INCLUDE   DATETBLZ
+. 
+CUSTFILE IFILE     KEYL=6,UNCOMPRESSED
+CSTNAME  INIT      "ACCTSTAT/ISAM"
+. 
+CURRSTAT DIM       2
+.
+. 
+         INCLUDE   CUSTMAST
+. 
+CURRACCT DIM       4
+FIRSTSW  INIT      "1"
+PAGEZ    FORM      3
+SUMMARY  INIT      "S"
+LINEZ    FORM      2
+RECCNT   FORM      "00"
+RLIMIT   FORM      "71"
+SHORTRUN DIM       1
+REPLY    DIM       1
+COMPANY  DIM       1
+IOSW     DIM       1
+STARTKEY DIM       10
+NUMCUST  FORM      4
+PDTOTL   FORM      6.2
+CREDTOTL FORM      6.2
+SHAZBAT  DIM       1
+. 
+ASTER45  INIT      "****************************************"
+. 
+PTYPE    DIM       7
+WKSUB    FORM      6.2
+WKPRINT  FORM      6.2
+NETBAL   FORM      6.2
+UPFLAG   INIT      "N"
+ZEROS    INIT      "000000.00"
+TOTCURNT FORM      "0000000.00"
+TOT130   FORM      "0000000.00"
+TOT3160  FORM      "0000000.00"
+TOT6190  FORM      "0000000.00"
+TOTOV90  FORM      "0000000.00"
+TOTNET   FORM      "00000000.00"
+.
+STATEKEY DIM       6
+DUMMY2   DIM       20
+.
+MONTH    DIM       2
+NMONTH   FORM      2
+MM       DIM       2
+.
+TESTDATE DIM       6
+TMON     DIM       2
+TYR      DIM       2
+YY       DIM       2
+ADDTOTL  FORM      7.2
+ACCTTOTL FORM      7.2
+STATTOTL FORM      9.2
+. 
+.
+COMPDISP INIT      "AMERICAN PRECISION PRODUCTS"
+.
+...................................................................
+.
+         INCLUDE   ACCTTABL/TEXT
+.
+...................................................................
+. 
+INITIATE MOVE      "0",PAGEZ
+         MOVE      "0",LINEZ
+         MOVE      " ",REPLY
+. 
+         CALL      OPENCUST
+         OPEN      ARFILES,ARCLOSED
+. 
+         MOVE      TODAY  TO  MM
+         RESET     TODAY  TO  7
+         MOVE      TODAY  TO  YY
+         RESET     TODAY  TO  1
+.
+         REP       " 0"  IN MM
+. 
+KEY1     DISPLAY   *ES,*P01:04,*HON,"COMMISSION CALCULATION PROGRAM":
+                   *P01:06,"THIS PROGRAM PRINTS TOTALS FOR  P A I D  INVOICES":
+                           " ONLY!":
+                   *HOFF
+. 
+         KEYIN     *P1:6,*HON,"LOAD STATEMENT (NARROW) PAPER AND PRESS ":
+                   "ENTER WHEN READY ":
+                   *P1:8,"SET LEFT PAPER MARGIN AT -8",*HOFF,REPLY
+.
+         MOVE      " " TO REPLY
+GETOUT   KEYIN     *P1:23,*EL,"DO YOU WANT TO PRINT THIS REPORT? (Y/N) ":
+                   REPLY
+.
+         CMATCH    "Y",REPLY
+         GOTO      BYPP IF EQUAL
+.
+         CHAIN     "ARMENU1"
+.
+BYPP     MOVE      " " TO REPLY
+         DISPLAY   *P1:23,*EL
+.
+..........................................................................
+.
+         INCLUDE   BYPLIST/TEXT
+.
+..........................................................................
+.
+         MOVE      " " TO REPLY
+.
+WHATMTH  MOVE      "00" TO MONTH
+.
+         DISPLAY    *P1:8,*EF,*HON,"REPORTING PERIOD IS ",MM,"/",YY,*HOFF
+         KEYIN      *P1:9,*HON,"PRESS F1 IF OK, F5 TO CHANGE REPORTING ":
+                    "PERIOD ",*HOFF,REPLY
+         GOTO      GOTMTH IF F1
+.
+         GOTO      GETMTH  IF F5
+         BEEP
+         GOTO      WHATMTH
+.
+GETMTH   KEYIN     *P1:8,*EF,*HON,"ENTER REPORTING MONTH AND YEAR ":
+                   *+,MM,"/",YY,*HOFF
+         MOVE      " " TO REPLY
+         GOTO      WHATMTH
+.
+.
+GOTMTH   MOVE      MM TO MONTH
+         REP       " 0"  IN MONTH
+         REP       " 0"  IN MM
+         MOVE      MONTH TO NMONTH 
+         CALL      HDR
+.
+SUMMARY  MOVE      "S" TO SUMMARY
+.......       KEYIN     *P1:10,"PRINT (D)etail or (S)ummary REPORT ? ",SUMMARY
+         CMATCH    "S",SUMMARY 
+         GOTO      CUST1 IF EQUAL
+         CMATCH    "D",SUMMARY
+         GOTO      CUST1 IF EQUAL
+         BEEP
+         GOTO      SUMMARY
+.
+CUST1    CLEAR     STATEKEY
+         APPEND    "AL    " TO STATEKEY
+         RESET     STATEKEY TO 1
+         READ      CUSTFILE,STATEKEY;DUMMY2
+.
+. ABOVE READ POSITIONS US AT ALABAMA, BYPASSING CANADA
+.
+. NOW INITIATE THINGS BY READING THE CUSTOMER FILE KEY SEQUENTIALLY
+. UNTIL END-OF-FILE STOPS THE WORKS!
+.
+CUSTOMR  INCLUDE   GTCSTKS
+         DISPLAY   *P01:23,CUSTSTAT," ",CUSTKEY
+.
+         GOTO      EOJ IF OVER
+.
+............................................................
+.   10/13/90  - CHECK IF THIS IS AN ACCOUNT TO BE BYPASSED
+.............................................................
+.
+         CALL      BYPACCTS
+.
+         CMATCH     "B",BYPSW
+         GOTO      CUSTOMR IF EQUAL
+.
+...............................................................
+.
+         CMATCH    "1",FIRSTSW
+         GOTO      FLOOP IF NOT EQUAL
+.
+         MOVE      " "  TO  FIRSTSW
+         MOVE      CUSTKEY  TO  CURRACCT
+         MOVE      CUSTSTAT TO  CURRSTAT
+. 
+. PUSH THE START KEY
+. 
+FLOOP    MATCH     CURRSTAT TO CUSTSTAT
+         CALL      STATBRK  IF NOT EQUAL
+.
+         MOVE      CUSTSTAT TO CURRSTAT
+         MOVE      CUSTKEY  TO CURRACCT
+.
+         MOVE      CURRACCT   TO  STARTKEY
+         RESET     STARTKEY   TO  4
+         APPEND    "      "    TO  STARTKEY
+         RESET     STARTKEY   TO  10
+         LENSET    STARTKEY
+         RESET     STARTKEY   TO  1     (HUTCH ALSO!  STARTKEY IS LONELY!)
+. 
+         READ      ARFILES,STARTKEY;INVKEY,INVTYPE,INVCOMP,INVSTAT
+. 
+LIBIT    MOVE      "A"    TO  COMPANY
+. 
+RDLOOP   TRAPCLR   IO
+         TRAP      RCVIOERR IF IO
+         READKS    ARFILES;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,IPMNTS:
+                           IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                           ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                           IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                           IDOLSLFT,IPRGDTE
+.
+         GOTO      ACCTBRK IF OVER
+.
+         MATCH     "00000" TO INVKEY
+         GOTO      RDLOOP  IF EQUAL
+.
+         MATCH     INVCUST TO CURRACCT
+         GOTO      ACCTBRK IF NOT EQUAL
+.
+.
+         MATCH     "X" TO BYPSW
+         GOTO      RDLOOP IF EQUAL
+.
+.........................................................
+.
+.NOW CHECK INVOICE/CREDIT DATE FOR INCLUSION
+.
+         MOVE      IPRGDTE TO  TMON
+         REP       " 0"    IN  TMON
+.
+         RESET     IPRGDTE    TO  7
+         MOVE      IPRGDTE   TO  TYR
+         RESET     IPRGDTE   TO  1
+.
+         MATCH     MM  TO  TMON
+         GOTO      TESTYR  IF  EQUAL
+         GOTO      RDLOOP
+.
+TESTYR   MATCH     YY  TO  TYR
+         GOTO      FSTCHK IF EQUAL
+         GOTO      RDLOOP
+.
+FSTCHK   CMATCH    "1",FIRSTSW
+         GOTO      RDLP1  IF  NOT  EQUAL
+. 
+......................................................
+RDLP1    CMATCH    "1",FIRSTSW
+         CALL      FIRSTONE IF EQUAL
+. 
+         MOVE      INVTOTL  TO  ADDTOTL
+.
+         CMATCH    "I",INVTYPE
+         GOTO      DEBIT IF  EQUAL
+         CMATCH    "D",INVTYPE
+         GOTO      DEBIT IF  EQUAL
+.
+         MULT      "-1"  BY  ADDTOTL
+.
+DEBIT    ADD       ADDTOTL  TO  ACCTTOTL
+         ADD       ADDTOTL  TO  STATTOTL
+. 
+         DISPLAY   *P1:23,*CLICK
+C3       GOTO      RDLOOP
+. 
+. 
+FIRSTONE MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+         MOVE      INVCUST  TO  CURRACCT
+         CALL      HDR
+         MOVE      " ",FIRSTSW
+         RETURN
+. 
+HDR      ADD       "1"  TO  PAGEZ
+         PRINT     *F
+         PRINT     "  "
+         PRINT     " "
+         PRINT     " "
+         PRINT     *24,"AMERICAN PRECISION COMPONENTS",*61,"PAGE ",PAGEZ
+         PRINT     *24,"COMMISSIONS CALCULATION LISTING":
+                   *61,"AS OF ",TODAY
+         PRINT     " "
+         PRINT     *25,"FOR REPORTING PERIOD OF ",MM,"/",YY
+. 
+TITPRNT  PRINT     " "
+         MOVE      "10"  TO  LINEZ
+.
+         PRINT     *5,"ACCOUNT ",*45,"COMMISSIONABLE TOTAL"
+         PRINT     *1,"NUMBER   NAME"
+         RETURN
+. 
+ACCTBRK  ADD       ACCTTOTL    TO  TOTNET
+.
+. DON'T PRINT A ZERO ACCOUNT
+.
+         COMPARE   "0.00"    TO  ACCTTOTL
+         GOTO      CUSTOMR   IF  EQUAL
+.
+         COMPARE   "54",LINEZ
+         CALL      HDR IF NOT LESS
+.
+. 
+         PRINT     *3,CUSTKEY,*10,CUSTNAME:
+                   *50,ACCTTOTL
+.
+         ADD       "1"  TO  LINEZ
+.
+         MOVE      "0.00" TO ACCTTOTL
+.
+         GOTO      CUSTOMR
+.
+........................................................................
+.
+         INCLUDE   BYPACCTS/TEXT 
+.
+........................................................................
+. 
+. 
+         INCLUDE   CUSTIO
+. 
+         INCLUDE   RCVBLSIO
+. 
+         INCLUDE   DATECALC
+. 
+EOJ      BEEP
+         CALL      STATBRK
+         CALL      REPTOTS
+.
+         DISPLAY   *ES,*P01:04,"END OF COMMISSIONS CALC. LISTING",*W5
+.
+         RELEASE
+         CHAIN     "APMENU1 "
+. 
+INVCRTRN RETURN
+. 
+REPTOTS  CALL      HDR
+         PRINT     *L,*L
+         PRINT     *1,ASTER45,ASTER45
+         PRINT     " "
+         PRINT     *10,"COMPANY TOTALS:"
+RPT1     PRINT     *10,COMPDISP,*58,TOTNET
+         PRINT     " "
+         PRINT     *1,ASTER45,ASTER45
+         RETURN
+. 
+STATBRK  COMPARE   "0.00"  TO  STATTOTL
+         GOTO      STATBYPS IF EQUAL
+.
+         COMPARE   "54" TO LINEZ
+         CALL      HDR IF NOT LESS
+         PRINT     " "
+         PRINT     *10,"STATE TOTALS FOR: ",CURRSTAT:
+                   *52,"-------> ",STATTOTL
+         PRINT     *1,ASTER45,ASTER45
+         PRINT     " "
+         ADD       "4" TO LINEZ
+.
+. 10/13/90   PAGE BREAK ON STATE BREAK FOR NON-ZERO STATE
+.
+         CALL      HDR
+.
+STATBYPS MOVE      "0.00" TO STATTOTL
+.
+         MOVE      CUSTSTAT TO CURRSTAT
+.
+         RETURN
+.

@@ -1,0 +1,45 @@
+*******************************************************************************
+Runtime : 'Version 9.6Cb 11 Sep 2013'
+Date : 9-12-13  Time: 08:25:02
+08:25:02  FhHttpConnect: Connected Ok!
+
+08:25:02  Http Send Start: -->
+GET /cgi-bin/timer.pl HTTP/1.0
+
+
+08:25:02  Http Send End: <--
+
+08:25:02  Http Recv Data Start: -->
+
+HTTP/1.1 200 OK
+Date: Thu, 12 Sep 2013 13:25:07 GMT
+Server: Apache/2.4.6 (Unix)
+Last-Modified: Thu, 12 Sep 2013 13:25:06 GMT
+ETag: "22d-4e62faa8c1080"
+Accept-Ranges: bytes
+Content-Length: 557
+Connection: close
+Content-Type: text/html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final"//EN>
+<html>
+<body>
+<TITLE>What time is it?</TITLE>
+<H2> US Naval Observatory Master Clock Time</H2> <H3><PRE>
+<BR>Sep. 12, 13:25:06 UTC		Universal Time
+<BR>Sep. 12, 09:25:06 AM EDT	Eastern Time
+<BR>Sep. 12, 08:25:06 AM CDT	Central Time
+<BR>Sep. 12, 07:25:06 AM MDT	Mountain Time
+<BR>Sep. 12, 06:25:06 AM PDT	Pacific Time
+<BR>Sep. 12, 05:25:06 AM AKDT	Alaska Time
+<BR>Sep. 12, 03:25:06 AM HAST	Hawaii-Aleutian Time
+</PRE></H3><P><A HREF="http://www.usno.navy.mil"> US Naval Observatory</A>
+
+</body></html>
+
+
+08:25:02  Http Recv Data End: <--
+
+08:25:02  Http Disconnect:
+08:25:02  Http Completed: Ok!
+

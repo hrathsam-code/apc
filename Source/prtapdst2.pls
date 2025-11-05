@@ -1,0 +1,514 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    prtapdst2                                                      ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/28/2019 at 12:07pm                                          ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/28/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+              INCLUDE           NCOMMON.TXT
+              INCLUDE           WORKVAR.INC
+
+ItemCount     FORM              6
+TransDate     DIM               8
+DueDate       DIM               8
+..today      DIM                8
+ToDate        DIM               8
+FromDate      DIM               8
+DiscDate      DIM               8
+HoldFlag      DIM               1
+PostDate      DIM               8
+AgingDays     FORM              3
+CityState     DIM               42
+VDiscTotals   FORM              10.2
+VNetTotals    FORM              10.2
+VGrossTotals  FORM              10.2
+GTDiscTotal   FORM              10.2
+PaymentType   DIM               8
+GrossAmt      FORM              10.2
+NetAmt        FORM              7.2
+PrintDetails  FORM              1           //HR 8/28/2003
+TransactionTotals FORM          6
+VendorPrinted DIM               1
+PrintGLInfo   FORM              1
+PrtEntity     DIM               2
+GLAmount      FORM              7.2
+GLType        DIM               2
+SubEntityTotalCr FORM             10.2
+SubEntityTotalDb FORM             10.2
+SubEntityTotalNet FORM             10.2
+GLTotalsCR    FORM              10.2
+GLTotalsDb    FORM              10.2
+GLTotalsNet   FORM              10.2           //HR 11/15/2005
+ReportTotalsCr FORM             10.2
+ReportTotalsDb FORM             10.2
+ReportTotalsNet FORM            10.2           //HR 10/15/2005
+
+SubEntityCount FORM             7
+ValidGLCode   DIM               1
+
+VendorGross   FORM              10.2
+VendorNet     FORM              10.2
+VendorDisc    FORM              10.2
+
+ReferencGross FORM              10.2
+ReferencNet   FORM              10.2
+ReferencDisc  FORM              10.2
+PaymentDesc   DIM               10
+.
+DiscountTotal FORM              10.2
+GrossTotal    form             10.2
+NetTotal      FORM              10.2
+AllGLCodeFlag FORM              1
+FromGLCode    DIM               6
+ToGLCode      DIM               6
+SelectedType  FORM              2
+SavedGLCode   DIM               6
+SavedReferenceNo DIM              10
+SameGLCode    DIM               1
+SubEntity     DIM               8
+TestDate      DIM               8
+PrtFromDAte   DIM               8
+PrtToDate     DIM               8
+.
+X             FORM              3
+
+              GOTO              #S
+              INCLUDE           APTRN.FD
+              INCLUDE           APDET.FD
+              include           Sequence.FD
+              INCLUDE           CMPNY.FD
+              INCLUDE           GLMast.FD
+              INCLUDE           APDist.FD
+              INCLUDE           Vendor.FD
+              include                  Check.FD
+              include                  CheckDet.FD
+              INCLUDE           VHST.FD
+              INCLUDE           PrintRtn.INC
+PRTAPDST      PLFORM            PRTAPDST.PLF
+#S
+STARTPGM      routine
+              WINHIDE
+              OPEN              VendorFLST,READ
+              OPEN                 APTRNFLST,READ
+              OPEN              APDETFLST,READ
+              CALL              OPENCMPNY
+              OPEN              GLMastFLST,READ
+              OPEN              APDistFLST,READ
+              open              CheckFLST,READ
+              open              CheckDetailFLST,READ
+
+              FORMLOAD          PRTAPDST
+              CLOCK             TimeStamp,TODAY8
+              SETPROP           DTFromDate,text=TODAY8
+              SETPROP           DTToDate,text=TODAY8
+
+              LOOP
+                WAITEVENT
+              REPEAT
+
+              GOTO              ExitProgram
+.
+. We'll never get to this spot!!
+.....................................................
+StartPrint
+              MOVE              "Accounts Payable Distribution Report",ReportTitle
+
+              CALL              PrintPreviewInit
+              return               if (printInitFailed = "N")
+
+              SETMODE           *MCURSOR=*Wait
+              MOVE              " ",APDETKY4
+              GETITEM           RAllGLCode,0,AllGLCodeFlag
+              IF                (AllGLCodeFlag = 0)
+                GETITEM           EFromGLCode,0,FromGLCode
+                GETITEM           EToGLCode,0,ToGLCode
+              ENDIF
+
+              GETITEM           CBPrintOptions,0,PrintDetails
+
+              GETPROP           DTFromDate,text=FromDate
+              UNPACK            FromDate into CC,YY,MM,DD
+              PACKKEY           PrtFromDate FROM MM,Slash,DD,Slash,YY
+
+              GETPROP           DTToDate,text=ToDate
+              UNPACK            ToDate into CC,YY,MM,DD
+              PACK              PrtToDate FROM MM,Slash,DD,Slash,YY
+
+              MOVE              "Y",FirstFlag
+
+              GETITEM           RAllGLCode,0,AllGLCodeFlag
+              IF                (AllGLCodeFlag = 0)
+                GETITEM           EFromGLCode,0,FromGLCode
+                MOVE              "      ",ToGLCode
+                GETITEM           EToGLCode,0,ToGLCode
+                SETLPTR           ToGLCode,6
+              ENDIF
+
+              call                CreateTempAPDist
+                    open               APDistFL2,"APDistTemp",READ
+
+              CALL              PrintHeader
+              CALL              RDGLMast
+Harry1
+              MOVE              "0",ReportTotalsDb
+              MOVE              "0",ReportTotalsCr
+              MOVE              "0",ReportTotalsNet
+              LOOP
+                CALL            KSGLMast
+              UNTIL             (ReturnFl = 1)
+
+              MOVE              "0",GLTotalsDb
+              MOVE              "0",GLTotalsCr
+              MOVE              "0",GLTotalsNet
+              MOVE              "N",ValidGLCode
+
+              MOVE              "N",FirstFlag
+              MOVE              "0",TransactionTotals
+              MOVE              "N",VendorPrinted
+              MOVE              "Y",SameGLCode
+.
+. 440001 - 1 - 10/01/2005
+. 440001 - 2 - 12/01/2005
+. 440001 - 3 - 10/01/2005
+. 440001 - 2 - 10/01/2005
+. After we find the LAST date (OVER condition), set the key to GLCode,SubEntity,99999999...
+.                              Read....
+.                              READKS
+.
+              MOVE              FromDate,TestDate
+              LOOP
+                PACKKEY           APDistKY2 FROM $Entity,GLMast.Account,SubEntity,FromDate,"       "   //Read the first Entity
+                CALL              RDAPDist2
+                MOVE              "0",SubEntityTotalCR
+                MOVE              "0",SubEntityTotalDb
+                MOVE              "0",SubEntityTotalNet
+                MOVE              "0",SubEntityCount
+             UNTIL              (SameGLCode = "N")
+                LOOP
+                  CALL               KSAPDist2
+                  IF              (APDist.GLCode != GLMast.Account or ReturnFL = 1)
+..Fuckup Code                    CALL              PrintGLSubEntityTotals if (SubEntityCount = 1)
+Harry123
+                    CALL              PrintGLSubEntityTotals if (ValidGLCode = "Y")                //HR 11/17/2005
+                    MOVE            "N",SameGLCode
+                    BREAK
+                  ENDIF
+
+                  IF                (APDist.SubEntity != SubEntity and APDist.GLCode = GLMast.Account)
+Harry2
+                    CALL              PrintGLSubEntityTotals if (ValidGLCode = "Y")                //HR 02/16/2006
+                    MOVE              APDist.SubEntity,SubEntity
+                    BREAK
+                  ENDIF
+
+..NEVER HAPPENS                  IF                (APDist.TransDate > ToDate)
+Harry3
+..NEVER HAPPENS                    CALL              PrintGLSubEntityTotals if (ValidGLCode = "Y")
+..NEVER HAPPENS                    PACKKEY           APDistKY2 FROM $Entity,GLMast.Account,SubEntity,"99999999","       "   //Read the first Entity
+..NEVER HAPPENS                    CALL              RDAPDist2
+..NEVER HAPPENS                    CALL              KSAPDist2
+..NEVER HAPPENS                    IF                (ReturnFl != 1 and GLMast.Account = APDist.GLCode)
+..NEVER HAPPENS                      MOVE              APDist.SubEntity,SubEntity
+..NEVER HAPPENS                      BREAK
+..NEVER HAPPENS                    ELSE
+..NEVER HAPPENS                      MOVE        "N",SameGLCode
+..NEVER HAPPENS                      BREAK
+..NEVER HAPPENS                    ENDIF
+..NEVER HAPPENS                  ENDIF
+
+                MOVE              "Y",ValidGLCode
+                ADD               "1",SubEntityCount
+                ADD               "1",TransactionTotals
+                ADD               APDist.CreditAmount,SubEntityTotalCR
+                ADD               APDist.DebitAmount,SubEntityTotalDb
+
+                ADD               APDist.CreditAmount,SubEntityTotalNet       //HR 11/15/2005
+                ADD               APDist.DebitAmount,SubEntityTotalNet        //HR 11/15/2005
+
+                ADD               APDist.CreditAmount,GLTotalsCR
+                ADD               APDist.DebitAmount,GLTotalsDb
+                CALC              GLTotalsNet = GLTotalsNet + (APDist.DebitAmount + APDist.CreditAmount)
+
+                ADD               APDist.CreditAmount,ReportTotalsCR
+                ADD               APDist.DebitAmount,ReportTotalsDb
+                CALC              ReportTotalsNet = ReportTotalsNet + (APDist.DebitAmount + APDist.CreditAmount)
+
+                CALL              PrintLine if (VendorPrinted = "N")
+
+                MOVE              "Y",VendorPrinted
+                ADD               "1",ItemCount
+
+                CALL              PrintDetails
+
+              REPEAT
+              REPEAT
+              CALL              PrintGLTotals if (ValidGLCode = "Y")
+              REPEAT
+              CALL              PrintTotals
+              CALL              PrintClose
+              SETMODE           *MCURSOR=*Arrow
+
+              GOTO              ExitProgram
+;==========================================================================================================
+PrintLine
+              CHOP              Vendor.City,Vendor.City
+              PACK              CityState,Vendor.City,", ",Vendor.State,"  ",Vendor.Zip
+
+              MOVE              APDist.GLCode,GLMastKY
+              CALL              RDGLMast
+
+           IF                   (PrintDetails = 1)   //Report Details!!!
+             EndOfPage
+             PrtPage           P;*font=DetailFont:
+                               *alignment=*left:
+                               *boldon:
+                               *p=020:PrintLineCnt,GLMast.Account:
+                               *p=150:PrintLineCnt,GLMast.Desc:
+                               *font=SubLineFont:
+                               *boldoff
+
+             ADD               SingleLine,PrintLineCnt
+           ENDIF
+           RETURN
+;=============================================================================
+PrintGLSubEntityTotals
+              RETURN            if (SubEntityCount = 0)     //Don't print em' if there's nothing to print!!!!
+
+              IF                (PrintDetails = 1)          //Print SubTotal lines only when printing Details
+              PRTPAGE           P;*font=SubLineFont:
+                                *alignment=*left:
+                                *Pensize=1:
+                                *p=30:(PrintLineCnt - 2):
+                                *Line=760:(PrintLineCnt - 2)
+
+              ENDIF
+
+              CHOP              SubEntity
+              CHOP              GLMast.Desc
+
+              PrtPage           P;*font=SubLineFont:
+                                *alignment=*left:
+                                *p=030:(PrintLineCnt):
+                                *ha=10:
+                                *boldon:
+                                *LL:
+                                GLMast.Account," - ",GLMast.Desc:
+                                "  Entity - (",*LL,SubEntity,")":
+                                ":":
+                                *alignment=*decimal
+
+              PrtPage           P;*alignment=*left:
+                                *font=SubLineFont:
+                                *alignment=*decimal:
+                                *BlankOn:
+                                *p=515:(PrintLineCnt),SubEntityTotalDb:
+                                *p=615:(PrintLineCnt),SubEntityTotalCr:
+                                *p=715:(PrintLineCnt),SubEntityTotalNet:
+                                *alignment=*left:
+                                *BlankOff
+              ADD               SingleLine,PrintLineCnt
+              RETURN
+;=============================================================================
+PrintDetails
+           unpack            APDist.TransDate,CC,YY,MM,DD
+           PACK              TransDate FROM MM,"/",DD,"/",YY
+
+           UNPACK            APTRN.DiscDate,CC,YY,MM,DD
+           PACK              DiscDate FROM MM,"/",DD,"/",YY
+
+           UNPACK            APTRN.DueDate,CC,YY,MM,DD
+           PACK              DueDate FROM MM,"/",DD,"/",YY
+
+           Add                APDetail.Amount,GrossTotal
+
+           Add                APTRN.DiscAmt,DiscountTotal
+           calc               NetTotal = NetTotal + (APDetail.Amount - APTRN.DiscAmt)
+           ADD                APDist.DebitAmount,APDist.CreditAmount,NetAmt
+           EndOfPage
+
+           IF                   (PrintDetails = 1)   //Report Details!!!
+
+             PACKKEY           APTRNKY2,$Entity,APDist.Voucher
+             CALL              RDAPTRN2
+
+             move              APDist.SubEntity,PrtEntity
+
+             PrtPage           P;*alignment=*left:
+                               *font=SubLineFont:
+                               *p=40:PrintLineCnt,APTRN.Vendor:
+                               *p=120:PrintLineCnt,APTRN.Invoice:
+                               *p=300:PrintLineCnt,TransDate:
+                               *alignment=*decimal:
+                               *BlankOn:
+                               *Overlayon:
+                               *p=515:PrintLineCnt,APDist.DebitAmount:
+                               *p=615:PrintLineCnt,APDist.CreditAmount:
+                               *p=715:PrintLineCnt,NetAmt:
+                               *alignment=*left:
+                               *OverLayOff:
+                               *BlankOff:
+                               *p=740:PrintLineCnt,PrtEntity
+             ADD               SubSingleLine,PrintLineCnt
+           ENDIF
+
+           ADD               APTRN.DiscAmt,ReferencDisc
+           ADD               APDetail.Amount,ReferencGross
+           ADD               NetAmt,ReferencNet
+           RETURN
+.=============================================================================
+. Print the Totals for each Vendor
+.=============================================================================
+PrintGLTotals
+              RETURN            if (VendorPrinted = "N")
+
+              CALC              VNetTotals = VNetTotals + VGrossTotals - VDiscTotals
+
+              IF                   (PrintDetails = 1)   //Report Details!!!
+                PRTPAGE           P;*font=SubLineFont:
+                                  *alignment=*left:
+                                  *Pensize=1:
+                                  *p=30:(PrintLineCnt - 2):
+                                  *Line=760:(PrintLineCnt - 2):
+                                  *p=30:(PrintLineCnt):
+                                  *Line=760:(PrintLineCnt)
+              ENDIF
+
+
+              PrtPage           P;*font=SubLineFont:
+                                *alignment=*left:
+                                *p=055:(PrintLineCnt + 5),"Totals for ":
+                                *ha=10:
+                                *LL:
+                                GLMast.Account," - ",GLMast.Desc:
+                                ":":
+                                *alignment=*decimal:
+                                *BlankOn:
+                                *p=515:(PrintLineCnt + 5),GLTotalsDb:
+                                *p=615:(PrintLineCnt + 5),GLTotalsCr:
+                                *p=715:(PrintLineCnt + 5),GLTotalsNet:
+                                *BlankOff:
+                                *boldon:
+                                *boldoff
+.
+              ADD               DoubleLine,PrintLineCnt
+              RETURN
+.=============================================================================
+PrintTotals
+..HR 7/25/2005                CALL              PrintHeader
+                EndOfPage
+
+                PRTPAGE           P;*font=SubLineFont:
+                                 *alignment=*left:
+                                 *Pensize=1:
+                                 *p=30:(PrintLineCnt - 2):
+                                 *Line=760:(PrintLineCnt - 2):
+                                 *p=30:(PrintLineCnt - 4):
+                                 *Line=760:(PrintLineCnt - 4):
+                                 *font=SubLineFont:
+                                 *alignment=*left:
+                                 *boldon:
+                                 *p=155:PrintLineCnt,"A/P Distribution Totals :":
+                                 *alignment=*decimal:
+                                 *BlankOn:
+                                 *boldon:
+                                 *p=515:(PrintLineCnt),ReportTotalsDb:
+                                 *p=615:(PrintLineCnt),ReportTotalsCr:
+                                 *p=715:(PrintLineCnt),ReportTotalsNet:
+                                 *boldoff
+
+              ADD               (SingleLine),PrintLineCnt
+
+              ADD               (DoubleLine * 2),PrintLineCnt
+              PRTPAGE           P;*font=DetailFont,*boldon:
+                                "Total A/P Distributions Processed :":                        //HR 6/5/2003
+                                *alignment=*left:
+                                ItemCount:
+                                *boldoff
+
+              ADD               DoubleLine,PrintLineCnt
+            RETURN
+.
+ExitProgram
+              winshow
+              CHAIN             FROMPGM
+              STOP
+.=============================================================================
+PrintCustomHeader
+                PRTPAGE           P;*alignment=*left:
+                                  *font=DetailFont:
+                                  *BoldOn:
+                                  *p=170:PrintLineCnt,"Report Parameters : ":
+                                  "Date Range - ",PrtFromDate," - ":
+                                  PrtToDate:
+                                  *BoldOff
+                ADD               SingleLine,PrintLineCnt
+
+              IF                (PrintDetails = 1)
+                PRTPAGE           P;*alignment=*left:
+                                  *font=SubLineFont:
+                                  *p=035:PrintLineCnt,"Vendor":
+                                  *p=125:PrintLineCnt,"Invoice":
+                                  *p=295:PrintLineCnt,"Invoice Date":
+                                  *p=480:PrintLineCnt,"Debit Amt":
+                                  *p=580:PrintLineCnt,"Credit Amt":
+                                  *p=685:PrintLineCnt,"Net Amt"
+                ADD               SingleLine,PrintLineCnt
+              ELSE
+                PRTPAGE           P;*alignment=*left:
+                                  *font=SubLineFont:
+                                  *p=030:PrintLineCnt,"G/L Code":
+                                  *p=115:PrintLineCnt,"G/L Description":
+                                  *p=295:PrintLineCnt,"Invoice Date":
+                                  *p=480:PrintLineCnt,"Debit Amt":
+                                  *p=580:PrintLineCnt,"Credit Amt":
+                                  *p=685:PrintLineCnt,"Net Amt"
+                ADD               SingleLine,PrintLineCnt
+              ENDIF
+              RETURN
+;==========================================================================================================
+CreateTempAPDist
+APDistTemp          ifile
+                    prep               APDistTemp,"APDistTemp.txt","APDistTemp.ISI","1-8,31-38,9-16,23-30,40-46,171-173","190"
+                    open               APDistTemp,"APDistTemp.isi",Exclusive
+                    PACKKEY           CheckKY3 FROM $Entity,FromDate,"   "
+                    CALL              PrintHeader
+                    CALL              RDCheck3
+                    LOOP
+                      CALL              KSCheck3
+                    UNTIL             (ReturnFL = 1 or Check.CheckDate > ToDate)
+
+                      CALL              RDCheckDetail
+
+                      PACKKEY           CheckDetailKY FROM $Entity,Check.BankCode,Check.CheckNo,Check.SeqMajor
+                      CALL              RDCheckDetail
+                      LOOP
+                        CALL              KSCheckDetail
+                      UNTIL             (ReturnFl = 1 or Check.CheckNo != CheckDetail.CheckNo)
+
+.                        packkey            APTRNKY2 from CheckDetail.Entity,CheckDetail.Voucher
+.                        call               RDAPTrn2
+                        packkey            APDistKY3 from Check.Entity,CheckDetail.Voucher
+                        call               RDAPDist3
+                        loop
+                          call               KSAPDist3
+                        until (ReturnFl = 1 or APDist.SeqMajor != CheckDetail.Voucher)
+                          write              APDistTemp;APDist
+                        repeat
+                      repeat
+                    repeat
+                    return

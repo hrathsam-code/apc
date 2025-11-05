@@ -1,0 +1,49 @@
+<Regex TypeCode="R">
+	<Expression>
+		<![CDATA[^(:b{#1:i}. {#0:p}?+\n:b\*error\*|:b{#1:i}.?+\n:b\*error\*|:b{#1:i}.?+\n:b\*warning\*)]]>
+	</Expression>
+	<TestCase>
+		<![CDATA[  33.    INCLUDE  S: datamenu.plf
+   57.    INCLUDE  T: c:\apc\source\security.inc
+   91.                                           FORMLOAD          MAIN2
+                                                                        *ERROR*
+Invalid PLFORM specified!
+  113.    INCLUDE  U: search4.plf
+  135.      00001CBA                             RETURN
+                                                       *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  181.    INCLUDE  V: glmastrpt.plf
+
+  111. H   INCLUDE  J: prntprog.plf
+  150. H   INCLUDE  K: print.fd
+   85. K    INCLUDE  L: print.io
+  153. H   INCLUDE  M: cust.fd
+   39. M                              Addr3                            Dimr                30                191 - 220      //131 - 160
+                                                                           *ERROR*
+Invalid operation syntax.
+
+
+  930.    INCLUDE  W: menudefs.inc
+    306.                                                      move               "11000",Default.ARAcct
+                                                                                              *ERROR*
+Invalid OPERAND: Undefined variable 'DEFAULT'.
+                                                                                              *ERROR*
+Space required as statement terminator.
+ 1448.    1                                                 move               Default.ARAcct,ARDist.GLCode
+                                                                                      *ERROR*
+Invalid OPERAND: Undefined variable 'DEFAULT'.
+                                                                                      *ERROR*
+Prepostion or comma expected.
+                                                                                      *ERROR*
+Invalid OPERAND: Expected: DIM, FORM, INTEGER, Varlist
+                                                                                      *ERROR*
+Working ^+:b{#1:i}.
+
+9999
+
+THIS WORKS!!!!
+^:b{#1:i}.?+\n:b\*error\*
+^:b{#1:i}.?+\n:b\*warning\*
+]]>
+	</TestCase>
+</Regex>

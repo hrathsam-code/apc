@@ -1,0 +1,30 @@
+
+
+
+PAGE    1      appayinq                                                                                       02-11-19 11:35:31
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP appayinq -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    2.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.pls
+    7.    INCLUDE  C: appaidfd.pls
+    9.    INCLUDE  D: apmastfd.pls
+   25.    INCLUDE  E: callerr1.inc
+   12. E                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   29.    INCLUDE  F: callerr2.inc
+   70.    INCLUDE  G: apmastrd.pls
+   98.    INCLUDE  H: appaidrd.pls
+  104.    INCLUDE  I: appaidks.pls
+  152.                                         GOTO      WHO
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\appayinq.plc                                                                                                                                                                                                                                   
+       378 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:35:31 11:35:31
+  00001834 DATA;  00000336  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

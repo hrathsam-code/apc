@@ -1,0 +1,446 @@
+. NCL STUDS CORPORATE EDP CONTROLS UPDATE PROGRAM
+. 
+. WRITTEN BY R. BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                           41 TEELE DRIVE
+.                           CORAM, NEW YORK 11727
+.                           (516) 698-9648
+         INCLUDE   COMMON
+. 
+NAME     INIT      "NCLCTRLS/ISI:NCLRES" (FILE NAME)
+REPLY    DIM       1
+INFILE   FORM      "1"  (1/2 CURRENT INPUT)
+LASTCMD  INIT      " "  (LAST COMMAND EXECUTED)
+INPUT    IFILE     (ISAM INPUT )
+SWITCH   FORM      1 (ONE-SHOT)
+PRIMEKEY DIM       3
+*............................................................
+.FIELD   TYPE      LENGTH    FROM-TO   DESCRIPTION
+.-----   ----      ------    -------   -----------
+FIELD01  DIM        3          1-  3   COMPANY ISAM KEY
+FIELD02  DIM        8          4- 11   DATE OF LAST UPDATE
+NFIELD03 FORM       5                  (NUMERIC WORK FIELD)
+FIELD03  DIM        5         12- 16   NEXT INVOICE NUMBER        5.0
+NFIELD04 FORM       4                  (NUMERIC WORK FIELD)
+FIELD04  DIM        4         17- 20   NEXT P.O. NUMBER           4.0
+NFIELD05 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD05  DIM       10         21- 30   DAILY INVENTORY $ RECEIVED 7.2
+NFIELD06 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD06  DIM       10         31- 40   DAILY INVENTORY $ SOLD     7.2
+NFIELD07 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD07  DIM       10         41- 50   DAILY CASH RECEIVED/PROCES 7.2
+NFIELD08 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD08  DIM       10         51- 60   MTD INVENTORY $ RECEIVED   7.2
+NFIELD09 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD09  DIM       10         61- 70   MTD INVENTORY $ SOLD       7.2
+NFIELD10 FORM       7.2                (NUMERIC WORK FIELD)
+FIELD10  DIM       10         71- 80   MTD CASH RECEIVED/PROCESSE 7.2
+NFIELD11 FORM       8.2                (NUMERIC WORK FIELD)
+FIELD11  DIM       11         81- 91   YTD INVENTORY VALUE RECEIV 8.2
+NFIELD12 FORM       8.2                (NUMERIC WORK FIELD)
+FIELD12  DIM       11         92-102   YTD INVENTORY VALUE SOLD   8.2
+NFIELD13 FORM       8.2                (NUMERIC WORK FIELD)
+FIELD13  DIM       11        103-113   YTD CASH RECEIVED/PROCESSE 8.2
+WORK03   DIM        3
+WORK04   DIM        4
+WORK05   DIM        5
+WORK08   DIM        8
+WORK10   DIM       10
+WORK11   DIM       11
+SAVE     DIM       11
+. 
+         INCLUDE   LOGDATA/TXT
+. 
+TIME     INIT      "HH/MM/SS"
+. 
++............................................................
+. MAINLINE FOLLOWS
+. FILE OPENING SEQUENCE
+. 
+         CLOCK     TIME TO TIME
+. 
+         INCLUDE   LOGIO/TXT
+. 
+         MOVE      "NCLCTLUD" TO LOGTYPE
+         MOVE      "MODIFY NCL CTLS" TO LOGINFO
+         CALL      LOGWRITE
+         BEEP
+         DISPLAY   *ES,*P01:12,"NCL STUDS CORPORATE CONTROLS UPDATE ":
+                               "PROGRAM":
+                   *P01:14,"WARNING!  USING THIS PROGRAM TO ALTER THE DATA":
+                           " IN THE EDP CONTROLS RECORD":
+                   *N,"MAY ADVERSELY AFFECT YOUR INTERNAL AUDIT TRAIL":
+                   *N,"PLEASE USE THIS PROGRAM ONLY IN THE EVENT THAT":
+                      " AN ERROR HAS BEEN DETECTED THAT ":
+                   *N,"REQUIRES YOU TO MODIFY THIS DATA":
+                   *P01:19,"FAILURE TO USE THIS PROGRAM PROPERLY":
+                   " WILL DEFINITELY CAUSE IMBALANCES":
+                   *N,"IN YOUR MONTH-END/YEAR-END CLOSE, OR BOTH"
+         KEYIN     *P01:24,"IF YOU STILL WISH TO UPDATE THE DATA,":
+                           " KEY Y ",REPLY
+         CMATCH    "Y" TO REPLY
+         GOTO      EOJ IF NOT EQUAL
+*............................................................
+. OPEN INPUT FILE
+         TRAP      NOFILE IF IO
+         OPEN      INPUT,NAME
+         GOTO      OPENED
+NOFILE   BEEP
+         DISPLAY   *ES,"WARNING! WARNING! WARNING!":
+                   *N,"THE NCL CORPORATE EDP CONTROLS FILE IS MISSING":
+                   *N,"CALL R BACHARACH, MICRO SYSTEMS CONSULTANTS":
+                      "IMMEDIATELY AT 698-5577",*W,*W
+         GOTO      NOFILE
+OPENED   TRAPCLR   IO
+*............................................................
+. INITIAL SCREEN DISPLAY SEQUENCE
+         DISPLAY   *ES:
+                   *P16:01,"CORPORATE CONTROL DATA FOR NCL STUDS INC.":
+                   *P01:03,"COMPANY: NCL   DATE: ________   NEXT INVOICE## ":
+                   "_____   NEXT P.O.## ____":
+                   *P24:05,"DAILY CONTROL INFORMATION":
+                   *P16:07,"INVENTORY VALUE RECEIVED:   __________":
+                   *P16:08,"INVENTORY VALUE SOLD:       __________":
+                   *P16:09,"CASH RECEIVED/PROCESSED:    __________":
+                   *P18:11,"MONTH-TO-DATE CONTROL INFORMATION":
+                   *P16:13,"INVENTORY VALUE RECEIVED:   __________":
+                   *P16:14,"INVENTORY VALUE SOLD:       __________":
+                   *P16:15,"CASH RECEIVED/PROCESSED:    __________":
+                   *P19:17,"YEAR-TO-DATE CONTROL INFORMATION":
+                   *P16:19,"INVENTORY VALUE RECEIVED:   ___________":
+                   *P16:20,"INVENTORY VALUE SOLD:       ___________":
+                   *P16:21,"CASH RECEIVED/PROCESSED:    ___________":
+                   *EL
+*............................................................
+. GET COMMAND
+         TABPAGE   ****
+LOOP     DISPLAY   *P1:24,*EL,"(G)et Record  (C)hange Record  (E)nd Job"
+GETCMD   KEYIN     *P70:24,"_",*P70:24,REPLY
+         CMATCH    "E" TO REPLY
+         GOTO      GETCMD IF EOS
+         GOTO      EOJ IF EQUAL
+         CMATCH    "G" TO REPLY
+         GOTO      GET IF EQUAL
+         CMATCH    "C" TO REPLY
+         GOTO      CHANGE IF EQUAL
+         BEEP
+         GOTO      GETCMD
+*............................................................
+. GET A RECORD
+GET      CMATCH    " " TO LASTCMD
+         CALL      WRITE IF NOT EQUAL
+         MOVE      "G" TO LASTCMD
+....     KEYIN     *P01:23,"PLEASE GIVE ME THE KEY  (LIB) OR (REP) ",PRIMEKEY
+         MOVE      "NCL" TO PRIMEKEY
+         CMATCH    " " TO PRIMEKEY
+         GOTO      GET IF EOS
+         MOVE      "1" TO INFILE
+....     MATCH     "LIB" TO PRIMEKEY
+....     CALL      MOVLIB IF EQUAL
+....     MATCH     "NCL" TO PRIMEKEY
+....     CALL      MOVREP IF EQUAL
+GET1     READ      INPUT,PRIMEKEY;FIELD01:
+                   FIELD02:
+                   FIELD03:
+                   FIELD04:
+                   FIELD05:
+                   FIELD06:
+                   FIELD07:
+                   FIELD08:
+                   FIELD09:
+                   FIELD10:
+                   FIELD11:
+                   FIELD12:
+                   FIELD13
+         GOTO      DISPVAR IF NOT OVER
+         BEEP
+         DISPLAY   *P63:24,"RECORD NOT FOUND",*W,*W
+         MOVE      " " TO LASTCMD
+         GOTO      LOOP
+. 
+MOVREP   DISPLAY   *P43:01,"REPUBLIC FASTENERS INC.  "
+         RETURN
+MOVLIB   DISPLAY   *P43:01,"LIBERTY FASTENERS INC.   "
+         RETURN
+*............................................................
+. DISPLAY VARIABLES
+DISPVAR  DISPLAY   *P63:24,*EL:
+                   *P10:03,FIELD01:
+                   *P22:03,FIELD02:
+                   *P47:03,FIELD03:
+                   *P66:03,FIELD04:
+                   *P44:07,FIELD05:
+                   *P44:08,FIELD06:
+                   *P44:09,FIELD07:
+                   *P44:13,FIELD08:
+                   *P44:14,FIELD09:
+                   *P44:15,FIELD10:
+                   *P44:19,FIELD11:
+                   *P44:20,FIELD12:
+                   *P44:21,FIELD13
+         GOTO      LOOP
+*............................................................
+. KEYIN VARIABLES
+CHANGE   CMATCH    " " TO LASTCMD
+         GOTO      LOOP IF EQUAL
+*............................................................
+. COMPANY ISAM KEY
+. (R    )
+         DISPLAY   *P10:03,FIELD01
+. 
+.   NOTE THAT THE KEY MAY  N O T BE CHANGED
+*............................................................
+. DATE OF LAST UPDATE
+. (     )
+K02      MOVE      FIELD02 TO SAVE
+K02K     KEYIN     *P22:03,WORK08
+         CMATCH    " " TO WORK08
+         GOTO      K02A IF NOT EOS
+         MOVE      SAVE TO FIELD02
+         DISPLAY   *P22:03,FIELD02
+         GOTO      K03
+K02A     CLEAR     FIELD02
+         MOVE      WORK08 TO FIELD02
+*............................................................
+. NEXT INVOICE NUMBER        5.0
+. ( N   )
+K03      MOVE      FIELD03 TO SAVE
+K03K     KEYIN     *P47:03,WORK05
+         CMATCH    " " TO WORK05
+         GOTO      K03A IF NOT EOS
+         MOVE      SAVE TO FIELD03
+         DISPLAY   *P47:03,FIELD03
+         GOTO      K04
+K03A     CLEAR     FIELD03
+         MOVE      WORK05 TO FIELD03
+K03B     MOVE      "0" TO NFIELD03
+         CMATCH    " " TO FIELD03
+         GOTO      K03C IF EOS
+         TYPE      FIELD03     (NUMERIC FIELD)
+         GOTO      K03K IF NOT EQUAL
+         MOVE      FIELD03 TO NFIELD03
+K03C     MOVE      NFIELD03 TO FIELD03
+         DISPLAY   *P47:03,FIELD03
+*............................................................
+. NEXT P.O. NUMBER           4.0
+. ( N   )
+K04      MOVE      FIELD04 TO SAVE
+K04K     KEYIN     *P66:03,WORK04
+         CMATCH    " " TO WORK04
+         GOTO      K04A IF NOT EOS
+         MOVE      SAVE TO FIELD04
+         DISPLAY   *P66:03,FIELD04
+         GOTO      K05
+K04A     CLEAR     FIELD04
+         MOVE      WORK04 TO FIELD04
+K04B     MOVE      "0" TO NFIELD04
+         CMATCH    " " TO FIELD04
+         GOTO      K04C IF EOS
+         TYPE      FIELD04     (NUMERIC FIELD)
+         GOTO      K04K IF NOT EQUAL
+         MOVE      FIELD04 TO NFIELD04
+K04C     MOVE      NFIELD04 TO FIELD04
+         DISPLAY   *P66:03,FIELD04
+*............................................................
+. DAILY INVENTORY $ RECEIVED 7.2
+. ( N   )
+K05      MOVE      FIELD05 TO SAVE
+K05K     KEYIN     *P44:07,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K05A IF NOT EOS
+         MOVE      SAVE TO FIELD05
+         DISPLAY   *P44:07,FIELD05
+         GOTO      K06
+K05A     CLEAR     FIELD05
+         MOVE      WORK10 TO FIELD05
+K05B     MOVE      "0" TO NFIELD05
+         CMATCH    " " TO FIELD05
+         GOTO      K05C IF EOS
+         TYPE      FIELD05     (NUMERIC FIELD)
+         GOTO      K05K IF NOT EQUAL
+         MOVE      FIELD05 TO NFIELD05
+K05C     MOVE      NFIELD05 TO FIELD05
+         DISPLAY   *P44:07,FIELD05
+*............................................................
+. DAILY INVENTORY $ SOLD     7.2
+. ( N   )
+K06      MOVE      FIELD06 TO SAVE
+K06K     KEYIN     *P44:08,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K06A IF NOT EOS
+         MOVE      SAVE TO FIELD06
+         DISPLAY   *P44:08,FIELD06
+         GOTO      K07
+K06A     CLEAR     FIELD06
+         MOVE      WORK10 TO FIELD06
+K06B     MOVE      "0" TO NFIELD06
+         CMATCH    " " TO FIELD06
+         GOTO      K06C IF EOS
+         TYPE      FIELD06     (NUMERIC FIELD)
+         GOTO      K06K IF NOT EQUAL
+         MOVE      FIELD06 TO NFIELD06
+K06C     MOVE      NFIELD06 TO FIELD06
+         DISPLAY   *P44:08,FIELD06
+*............................................................
+. DAILY CASH RECEIVED/PROCES 7.2
+. ( N   )
+K07      MOVE      FIELD07 TO SAVE
+K07K     KEYIN     *P44:09,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K07A IF NOT EOS
+         MOVE      SAVE TO FIELD07
+         DISPLAY   *P44:09,FIELD07
+         GOTO      K08
+K07A     CLEAR     FIELD07
+         MOVE      WORK10 TO FIELD07
+K07B     MOVE      "0" TO NFIELD07
+         CMATCH    " " TO FIELD07
+         GOTO      K07C IF EOS
+         TYPE      FIELD07     (NUMERIC FIELD)
+         GOTO      K07K IF NOT EQUAL
+         MOVE      FIELD07 TO NFIELD07
+K07C     MOVE      NFIELD07 TO FIELD07
+         DISPLAY   *P44:09,FIELD07
+*............................................................
+. MTD INVENTORY $ RECEIVED   7.2
+. ( N   )
+K08      MOVE      FIELD08 TO SAVE
+K08K     KEYIN     *P44:13,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K08A IF NOT EOS
+         MOVE      SAVE TO FIELD08
+         DISPLAY   *P44:13,FIELD08
+         GOTO      K09
+K08A     CLEAR     FIELD08
+         MOVE      WORK10 TO FIELD08
+K08B     MOVE      "0" TO NFIELD08
+         CMATCH    " " TO FIELD08
+         GOTO      K08C IF EOS
+         TYPE      FIELD08     (NUMERIC FIELD)
+         GOTO      K08K IF NOT EQUAL
+         MOVE      FIELD08 TO NFIELD08
+K08C     MOVE      NFIELD08 TO FIELD08
+         DISPLAY   *P44:13,FIELD08
+*............................................................
+. MTD INVENTORY $ SOLD       7.2
+. ( N   )
+K09      MOVE      FIELD09 TO SAVE
+K09K     KEYIN     *P44:14,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K09A IF NOT EOS
+         MOVE      SAVE TO FIELD09
+         DISPLAY   *P44:14,FIELD09
+         GOTO      K10
+K09A     CLEAR     FIELD09
+         MOVE      WORK10 TO FIELD09
+K09B     MOVE      "0" TO NFIELD09
+         CMATCH    " " TO FIELD09
+         GOTO      K09C IF EOS
+         TYPE      FIELD09     (NUMERIC FIELD)
+         GOTO      K09K IF NOT EQUAL
+         MOVE      FIELD09 TO NFIELD09
+K09C     MOVE      NFIELD09 TO FIELD09
+         DISPLAY   *P44:14,FIELD09
+*............................................................
+. MTD CASH RECEIVED/PROCESSE 7.2
+. ( N   )
+K10      MOVE      FIELD10 TO SAVE
+K10K     KEYIN     *P44:15,WORK10
+         CMATCH    " " TO WORK10
+         GOTO      K10A IF NOT EOS
+         MOVE      SAVE TO FIELD10
+         DISPLAY   *P44:15,FIELD10
+         GOTO      K11
+K10A     CLEAR     FIELD10
+         MOVE      WORK10 TO FIELD10
+K10B     MOVE      "0" TO NFIELD10
+         CMATCH    " " TO FIELD10
+         GOTO      K10C IF EOS
+         TYPE      FIELD10     (NUMERIC FIELD)
+         GOTO      K10K IF NOT EQUAL
+         MOVE      FIELD10 TO NFIELD10
+K10C     MOVE      NFIELD10 TO FIELD10
+         DISPLAY   *P44:15,FIELD10
+*............................................................
+. YTD INVENTORY VALUE RECEIV 8.2
+. ( N   )
+K11      MOVE      FIELD11 TO SAVE
+K11K     KEYIN     *P44:19,WORK11
+         CMATCH    " " TO WORK11
+         GOTO      K11A IF NOT EOS
+         MOVE      SAVE TO FIELD11
+         DISPLAY   *P44:19,FIELD11
+         GOTO      K12
+K11A     CLEAR     FIELD11
+         MOVE      WORK11 TO FIELD11
+K11B     MOVE      "0" TO NFIELD11
+         CMATCH    " " TO FIELD11
+         GOTO      K11C IF EOS
+         TYPE      FIELD11     (NUMERIC FIELD)
+         GOTO      K11K IF NOT EQUAL
+         MOVE      FIELD11 TO NFIELD11
+K11C     MOVE      NFIELD11 TO FIELD11
+         DISPLAY   *P44:19,FIELD11
+*............................................................
+. YTD INVENTORY VALUE SOLD   8.2
+. ( N   )
+K12      MOVE      FIELD12 TO SAVE
+K12K     KEYIN     *P44:20,WORK11
+         CMATCH    " " TO WORK11
+         GOTO      K12A IF NOT EOS
+         MOVE      SAVE TO FIELD12
+         DISPLAY   *P44:20,FIELD12
+         GOTO      K13
+K12A     CLEAR     FIELD12
+         MOVE      WORK11 TO FIELD12
+K12B     MOVE      "0" TO NFIELD12
+         CMATCH    " " TO FIELD12
+         GOTO      K12C IF EOS
+         TYPE      FIELD12     (NUMERIC FIELD)
+         GOTO      K12K IF NOT EQUAL
+         MOVE      FIELD12 TO NFIELD12
+K12C     MOVE      NFIELD12 TO FIELD12
+         DISPLAY   *P44:20,FIELD12
+*............................................................
+. YTD CASH RECEIVED/PROCESSE 8.2
+. ( N   )
+K13      MOVE      FIELD13 TO SAVE
+K13K     KEYIN     *P44:21,WORK11
+         CMATCH    " " TO WORK11
+         GOTO      K13A IF NOT EOS
+         MOVE      SAVE TO FIELD13
+         DISPLAY   *P44:21,FIELD13
+         GOTO      LOOP
+K13A     CLEAR     FIELD13
+         MOVE      WORK11 TO FIELD13
+K13B     MOVE      "0" TO NFIELD13
+         CMATCH    " " TO FIELD13
+         GOTO      K13C IF EOS
+         TYPE      FIELD13     (NUMERIC FIELD)
+         GOTO      K13K IF NOT EQUAL
+         MOVE      FIELD13 TO NFIELD13
+K13C     MOVE      NFIELD13 TO FIELD13
+         DISPLAY   *P44:21,FIELD13
+         GOTO      LOOP
+*............................................................
+. DISK-WRITE SEQUENCE
+WRITE    UPDATE    INPUT;PRIMEKEY:     COMPANY ISAM KEY
+                   FIELD02:     DATE OF LAST UPDATE
+                   FIELD03:     NEXT INVOICE NUMBER        5.0
+                   FIELD04:     NEXT P.O. NUMBER           4.0
+                   FIELD05:     DAILY INVENTORY $ RECEIVED 7.2
+                   FIELD06:     DAILY INVENTORY $ SOLD     7.2
+                   FIELD07:     DAILY CASH RECEIVED/PROCES 7.2
+                   FIELD08:     MTD INVENTORY $ RECEIVED   7.2
+                   FIELD09:     MTD INVENTORY $ SOLD       7.2
+                   FIELD10:     MTD CASH RECEIVED/PROCESSE 7.2
+                   FIELD11:     YTD INVENTORY VALUE RECEIV 8.2
+                   FIELD12:     YTD INVENTORY VALUE SOLD   8.2
+                   FIELD13      YTD CASH RECEIVED/PROCESSE 8.2
+         RETURN
+*............................................................
+. END OF JOB
+         TABPAGE   ****
+EOJ      CMATCH    " " TO LASTCMD
+         CALL      WRITE IF NOT EQUAL
+         CHAIN     "NCLCTLS"
+. 

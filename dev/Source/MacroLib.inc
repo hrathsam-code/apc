@@ -1,0 +1,2051 @@
+#FPTR         FORM              3
+#LPTR         FORM              3
+#Length       FORM              3
+#Space        INIT              " "
+#SearchFileName DIM             100
+#SearchFileProgram DIM             100
+
+#PRVDayFlg FORM              1
+SETDAYLINE MACRO             &Num
+           GETITEM           CB&Num,0,#PRVDayFlg
+           IF                (#PRVDayFlg = 1)
+             SETITEM           CB&Num,0,0
+             SETPROP           CTFrom&Num,*enabled=0
+             SETPROP           CTTo&Num,*enabled=0
+                SETPROP             ST&Num,FGCOLOR=$GRAYTEXT
+           ELSE
+             SETITEM           CB&Num,0,1
+             SETPROP           CTFrom&Num,*enabled=1
+             SETPROP           CTTo&Num,*enabled=1
+                SETPROP             ST&Num,FGCOLOR=$BTNTEXT
+           ENDIF
+           MEND
+;==========================================================================================================
+GetNextSeq    MACRO             &Key
+              MOVE              "&Key",SequenceKY
+              CALL              RDSequence
+              IF                (ReturnFL = 1)
+                MOVE              "&Key",Sequence.Code
+                MOVE              "1",Sequence.SeqNo
+                CALL              WrtSequence
+              ELSE
+                ADD               "1",Sequence.SeqNo
+                CALL              UpdSequence
+              ENDIF
+              MEND
+;==========================================================================================================
+.
+. Macro used to Validate 'Key' specific fields within databases.  The
+. macro is being used instead of a call routine just so that I can look
+. at the code to validate it
+.
+CANFIND    MACRO             &OBJECT,&FILE
+           GETCOUNT          &OBJECT
+.
+. Is there data in this field?  If it hasn't been used just yet, ignore it
+.
+. If the Entry is blank, then do not care about the
+. validation just yet.  If there is something there,
+. then run the routine to test to see if it's really
+. there.
+.
+           IF                (Charcount > 0)
+             ResetVar          &FILE|KY
+             GETITEM           &OBJECT,0,&FILE|KY           .Setup the appropriate Key
+             SETLPTR           &FILE|KY
+             CALL              RD&FILE
+             IF                (RETURNFL = 1)
+               PARAMTEXT         &FILE|TITLE,&FILE|KY,"",""
+               ALERT             STOP,"^0: ^1 does not exist!",RESULT,"ERROR in field"
+               SETITEM           &OBJECT,1,0
+               SETITEM           &OBJECT,2,99
+               SETFOCUS          &OBJECT
+               CLEAREVENTS
+               RETURN
+             ENDIF
+           ENDIF
+           MEND
+.
+MUSTFIND   MACRO             &Object,&File
+           CANFIND           &Object,&File
+           IF                (CharCount = 0)
+             PARAMTEXT         &File|TITLE,"","",""
+             ALERT             CAUTION,"A blank ^0 is not allowed.  A valid ^0 must be entered",RESULT,"Error in field"
+             SETFOCUS        &Object
+             CLEAREVENTS
+             RETURN
+           ENDIF
+           MEND
+.
+. Macro used to Validate & Display 'Key' specific fields within databases.
+. The macro is being used instead of a call routine just so that I can look
+. at the code to validate it
+.
+CANDISP    MACRO             &OBJECT,&FILE,&DISPOBJ,&DISPFIELD
+.
+. Is there data in this field?  If it hasn't been used just yet, ignore it
+.
+. If the Entry is blank, then do not care about the
+. validation just yet.  If there is something there,
+. then run the routine to test to see if it's really
+. there.
+.
+           DELETEITEM        &DISPOBJ,0
+           ResetVar          &FILE|KY
+           MOVE              "1",RETURNFL
+           GETCOUNT          &OBJECT
+           IF                (Charcount > 0)
+             ResetVar          &FILE|KY
+             GETITEM           &OBJECT,0,&FILE|KY           .Setup the appropriate Key
+             SETLPTR           &FILE|KY
+             CALL              RD&FILE
+             IF                (RETURNFL = 1)
+               PARAMTEXT         &FILE|TITLE,&FILE|KY,"",""
+               ALERT             STOP,"^0: ^1 does not exist!",RESULT,"ERROR in field"
+               SETITEM           &OBJECT,1,0
+               SETITEM           &OBJECT,2,99
+               CLEAREVENTS
+               SETFOCUS          &OBJECT
+             ELSE
+               %IFDEF               &FILE|REC.&DISPFIELD
+               SETITEM           &DISPOBJ,0,&FILE|REC.&DISPFIELD
+               %ELSE
+               SETITEM           &DISPOBJ,0,&FILE.&DISPFIELD
+               %ENDIF
+             ENDIF
+           ENDIF
+           MEND
+.
+MUSTDISP   MACRO             &Object,&File,&DISPOBJ,&DISPFIELD
+           CANDISP           &Object,&File,&DISPOBJ,&DISPFIELD
+           IF                (CharCount = 0)
+             PARAMTEXT         &File|TITLE,"","",""
+             ALERT             CAUTION,"A blank ^0 is not allowed.  A valid ^0 must be entered",RESULT,"Error in field"
+             CLEAREVENTS
+             SETFOCUS        &Object
+           ENDIF
+           MEND
+.
+READAHEAD  MACRO             &OBJECT,&FILE,&Field
+POS&id     FORM              3
+POSA&id    FORM              3
+LEN&id     FORM              3
+LENSAV&id  FORM              3
+           %IFDEF           $ReadAhead
+           IF                ($ReadAhead = 1)                 ..User has selected to Read Ahead
+           %ENDIF
+             GETITEM           &OBJECT,1,POS&id
+             GETITEM           &OBJECT,0,LEN&id
+
+             IF                (LEN&id = LENSAV&id)
+               GETITEM           &OBJECT,0,&FILE|KY
+               MOVE              POS&id,POSA&id
+               SUB               "1",POSA&id
+               SETLPTR           &FILE|KY,POSA&id
+               SETITEM           &OBJECT,0,&FILE|KY
+               SETITEM           &OBJECT,1,99
+               SETITEM           &OBJECT,2,99
+               IF                (POSA&id = 0)
+                 MOVE              "0",LENSAV&id
+               ENDIF
+             ELSE
+               ResetVar          &FILE|KY
+               CLEAR             &FILE|KY
+               GETITEM           &OBJECT,0,&FILE|KY
+               CALL              RD|&FILE                     ..We've read a record
+               IF                (RETURNFL = 1)
+                 CALL              KS|&FILE                   ..or we've read a Key Sequential
+
+                 %IFDEF               &FILE|REC.&Field
+                 MATCH             &FILE|KY,&FILE|REC.&Field
+                 %ELSE
+                 MATCH             &FILE|KY,&FILE.&Field
+                 %ENDIF
+
+                 IF                EQUAL
+
+                   %IFDEF               &FILE|REC.&Field
+                   SETITEM           &OBJECT,0,&FILE|REC.&Field
+                   %ELSE
+                   SETITEM           &OBJECT,0,&FILE.&Field
+                   %ENDIF
+
+                   SETITEM           &OBJECT,1,POS&id
+                   SETITEM           &OBJECT,2,99
+                 ENDIF
+               ENDIF
+               MOVE              LEN&id,LENSAV&id
+             ENDIF
+
+           %IFDEF           $ReadAhead
+           ENDIF
+           %ENDIF
+
+           MEND
+
+ResetVar   Macro             &FieldName
+           SetLptr           &FieldName
+           Reset             &FieldName
+           Fill              " ",&FieldName
+           Clear             &FieldName
+           Mend
+
+PackFull Macro               &FieldName,&Packlist
+           ResetVar          &FieldName
+           PackKey           &FieldName,MNOQUOTE(&Packlist)
+           SetLptr           &FieldName
+           Mend
+
+PACKSAMP   MACRO             &VARSRC,&VARDEST=
+           %IF               MDEFAULT(&VARDEST)
+             PACK              &VARSRC,&VARSRC
+           %ELSE
+             PACK              &VARSRC,&VARDEST
+           %ENDIF
+           MEND
+;==========================================================================================================
+.
+. MAcro to Add Columns to the CTListView
+.
+CTADDCOL   MACRO             &Field1,&Size1:
+                             &Field2=,&Size2=:
+                             &Field3=,&Size3=:
+                             &Field4=,&Size4=:
+                             &Field5=,&Size5=:
+                             &Field6=,&Size6=:
+                             &Field7=,&Size7=:
+                             &Field8=,&Size8=:
+                             &Field9=,&Size9=
+
+#COL&id             FORM               2
+#ColumnLength       form                5
+HarryVar            EQUATE             MPARAMNUM()
+                    clear              #ColumnLength
+
+
+
+                   LVSearchPLB.InsertColumn USING &Field1,&Size1,0
+                   add               &Size1,#ColumnLength
+
+                   %IF               MDEFAULT(&Field2) = 0
+                     LVSearchPLB.InsertColumn USING &Field2,&Size2,1
+                     add               &Size2,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field3) = 0
+                     LVSearchPLB.InsertColumn USING &Field3,&Size3,2
+                     add               &Size3,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field4) = 0
+                     LVSearchPLB.InsertColumn USING &Field4,&Size4,3
+                     add               &Size4,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field5) = 0
+                     LVSearchPLB.InsertColumn USING &Field5,&Size5,4
+                     add               &Size5,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field6) = 0
+                     LVSearchPLB.InsertColumn USING &Field6,&Size6,5
+                     add               &Size6,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field7) = 0
+                     LVSearchPLB.InsertColumn USING &Field7,&Size7,6
+                     add               &Size7,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field8) = 0
+                     LVSearchPLB.InsertColumn  USING &Field8,&Size8,7
+                     add               &Size8,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field9) = 0
+                     LVSearchPLB.InsertColumn USING &Field9,&Size9,8
+                     add               &Size9,#ColumnLength
+                   %ENDIF
+
+                   setprop           WSearch,title=SearchTitle
+                   MEND
+;==========================================================================================================
+. MAcro to Add Columns to any ListView
+.
+CreateListView     MACRO             &ListView:
+                                     &Field1,&Size1:
+                                     &Field2=,&Size2=:
+                                     &Field3=,&Size3=:
+                                     &Field4=,&Size4=:
+                                     &Field5=,&Size5=:
+                                     &Field6=,&Size6=:
+                                     &Field7=,&Size7=:
+                                     &Field8=,&Size8=:
+                                     &Field9=,&Size9=
+
+#COL&id            FORM              2
+..HarryVar           EQUATE            MPARAMNUM()
+                   clear             #ColumnLength
+
+                   &ListView.InsertColumn USING &Field1,&Size1,0
+                   add               &Size1,#ColumnLength
+
+                   %IF               MDEFAULT(&Field2) = 0
+                     &ListView.InsertColumn USING &Field2,&Size2,1
+                     add               &Size2,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field3) = 0
+                     &ListView.InsertColumn USING &Field3,&Size3,2
+                     add               &Size3,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field4) = 0
+                     &ListView.InsertColumn USING &Field4,&Size4,3
+                     add               &Size4,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field5) = 0
+                     &ListView.InsertColumn USING &Field5,&Size5,4
+                     add               &Size5,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field6) = 0
+                     &ListView.InsertColumn USING &Field6,&Size6,5
+                     add               &Size6,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field7) = 0
+                     &ListView.InsertColumn USING &Field7,&Size7,6
+                     add               &Size7,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field8) = 0
+                     &ListView.InsertColumn  USING &Field8,&Size8,7
+                     add               &Size8,#ColumnLength
+                   %ENDIF
+
+                   %IF               MDEFAULT(&Field9) = 0
+                     &ListView.InsertColumn USING &Field9,&Size9,8
+                     add               &Size9,#ColumnLength
+                   %ENDIF
+                   MEND
+;==========================================================================================================
+.
+.
+. Macro used to LOAD the Search Window with a specific Table of information
+. The info required for this Macro is the FILE (i.e. VEND, TYPE, etc) as well
+. as the fields within this Record
+.
+CTLoadTable MACRO            &File:
+                             &Field1=:
+                             &Field2=:
+                             &Field3=:
+                             &Field4=:
+                             &Field5=:
+                             &Field6=:
+                             &Field7=:
+                             &Field8=:
+                             &Field9=:
+                             &Field10=:
+                             &Field11=:
+                             &Field12=:
+                             &Field13=:
+                             &Field14=:
+                             &Field15=:
+                             &Field16=
+
+#LINE&id   DIM               300
+#Row&id    FORM              6
+Found&id   DIM               1
+
+           MOVE              "N",Found&id
+
+           CALL              OPEN|&File
+
+           SETMODE           *mcursor=*wait
+
+           MOVE              " ",&File|KY
+           CALL              RD|&File
+           CLEAR             #LINE&id
+
+           LOOP
+             CALL            KS|&File
+           UNTIL             (RETURNFL = 1)
+
+           %IF               MPARAMNUM() = 3
+           chop                      &File|.&Field2,&File|.&Field2
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2
+           %ENDIF
+
+           %IF               MPARAMNUM() = 4
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3
+           %ENDIF
+
+           %IF               MPARAMNUM() = 5
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4
+           %ENDIF
+
+           %IF               MPARAMNUM() = 6
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5
+           %ENDIF
+
+           %IF               MPARAMNUM() = 7
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6
+           %ENDIF
+
+           %IF               MPARAMNUM() = 8
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7
+           %ENDIF
+
+           %IF               MPARAMNUM() = 9
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8
+           %ENDIF
+
+           %IF               MPARAMNUM() = 10
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9
+           %ENDIF
+
+           %IF               MPARAMNUM() = 11
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10
+           %ENDIF
+
+           %IF               MPARAMNUM() = 12
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11
+           %ENDIF
+
+           %IF               MPARAMNUM() = 13
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12
+           %ENDIF
+
+           %IF               MPARAMNUM() = 14
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12
+           %ENDIF
+
+           %IF               MPARAMNUM() = 15
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+           chop                      &File|.&Field13,&File|.&Field13
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12:
+                                         *SubItem12=&File|.&Field13
+           %ENDIF
+
+           %IF               MPARAMNUM() = 16
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+           chop                      &File|.&Field13,&File|.&Field13
+           chop                      &File|.&Field14,&File|.&Field14
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12:
+                                         *SubItem12=&File|.&Field13:
+                                         *SubItem13=&File|.&Field14
+           %ENDIF
+
+           %IF               MPARAMNUM() = 17
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+           chop                      &File|.&Field13,&File|.&Field13
+           chop                      &File|.&Field14,&File|.&Field14
+           chop                      &File|.&Field15,&File|.&Field15
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12:
+                                         *SubItem12=&File|.&Field13:
+                                         *SubItem13=&File|.&Field14:
+                                         *SubItem14=&File|.&Field15
+           %ENDIF
+
+           %IF               MPARAMNUM() = 18
+           chop                      &File|.&Field2,&File|.&Field2
+           chop                      &File|.&Field3,&File|.&Field3
+           chop                      &File|.&Field4,&File|.&Field4
+           chop                      &File|.&Field5,&File|.&Field5
+           chop                      &File|.&Field6,&File|.&Field6
+           chop                      &File|.&Field7,&File|.&Field7
+           chop                      &File|.&Field8,&File|.&Field8
+           chop                      &File|.&Field9,&File|.&Field9
+           chop                      &File|.&Field10,&File|.&Field10
+           chop                      &File|.&Field11,&File|.&Field11
+           chop                      &File|.&Field12,&File|.&Field12
+           chop                      &File|.&Field13,&File|.&Field13
+           chop                      &File|.&Field14,&File|.&Field14
+           chop                      &File|.&Field15,&File|.&Field15
+           LVSearchPLB.InsertItemEx using *Text=&File|.&Field1:
+                                         *SubItem1=&File|.&Field2:
+                                         *SubItem2=&File|.&Field3:
+                                         *SubItem3=&File|.&Field4:
+                                         *SubItem4=&File|.&Field5:
+                                         *SubItem5=&File|.&Field6:
+                                         *SubItem6=&File|.&Field7:
+                                         *SubItem7=&File|.&Field8:
+                                         *SubItem8=&File|.&Field9:
+                                         *SubItem9=&File|.&Field10:
+                                         *SubItem10=&File|.&Field11:
+                                         *SubItem11=&File|.&Field12:
+                                         *SubItem12=&File|.&Field13:
+                                         *SubItem13=&File|.&Field14:
+                                         *SubItem14=&File|.&Field15:
+                                         *SubItem15=&File|.&Field16
+           %ENDIF
+
+
+
+.           LVSearchPLB.InsertItemEx using *Text=&File.&Field1:
+.                                         *SubItem1=&File.&Field2:
+.                                         *SubItem2=&File.&Field3:
+.                                         *SubItem3=&File.&Field4:
+.                                         *SubItem4=&File.&Field5:
+.                                         *SubItem5=&File.&Field6:
+.                                         *SubItem6=&File.&Field7:
+.                                         *SubItem7=&File.&Field8:
+.                                         *SubItem8=&File.&Field9:
+.                                         *SubItem9=&File.&Field10:
+.                                         *SubItem10=&File.&Field11:
+.                                         *SubItem11=&File.&Field12:
+.                                         *SubItem12=&File.&Field13:
+.                                         *SubItem13=&File.&Field14:
+.                                         *SubItem14=&File.&Field15
+.                                        *SubItem15=&File.&Field16:
+.                                        *SubItem16=&File.&Field17
+.                                        *SubItem17=&File.&Field18:
+.                                        *SubItem18=&File.&Field19
+.                                        *SubItem19=&File.&Field20:
+.                                        *SubItem20=&File.&Field21
+.                                        *SubItem21=&File.&Field22:
+.                                        *SubItem22=&File.&Field23
+.                                        *SubItem23=&File.&Field24:
+.                                        *SubItem24=&File.&Field5
+.                                        *SubItem25=&File.&Field26:
+.                                        *SubItem26=&File.&Field27
+.                                        *SubItem27=&File.&Field28:
+.                                        *SubItem28=&File.&Field29
+.                                        *SubItem29=&File.&Field30:
+.                                        *SubItem30=&File.&Field31
+.                                        *SubItem31=&File.&Field32:
+.                                        *SubItem32=&File.&Field33
+
+
+           %IFDEF               &File|1
+           READKEY              &File|1,&File|KY
+           %ELSE
+           %IFDEF               &File|Fl
+           READKEY              &File|Fl,&File|KY
+           %ELSE
+           READKEY              &File,&File|KY
+           %ENDIF
+           %ENDIF
+           chop                 &File|KY,&File|KY
+
+           MATCH             $SearchKey,&File|.&Field1
+           IF                (EQUAL AND Found&id = "N")
+             MOVE              "Y",Found&id
+           ENDIF
+
+           REPEAT
+           SETMODE           *mcursor=*Arrow
+           setfocus          LVSearchPLB
+           LVSearchPLB.GetNextItem giving result using *Flags=1,*Start=FirstRow
+           display                     "NextItem : ",result
+           if       (result = -1)                             //Nothing selected
+           LVSearchPLB.SetItemState    using *Index=0,*State=3,*StateMask=3
+           endif
+
+           MEND
+;==========================================================================================================
+;==========================================================================================================
+NEW
+
+;==========================================================================================================
+.
+.
+. Macro used to LOAD the Search Window with a specific Table of information
+. The info required for this Macro is the FILE (i.e. VEND, TYPE, etc) as well
+. as the fields within this Record
+.
+CTLoadTable2       MACRO             &File:
+                                     &SearchCriteria:
+                                     &Field1=:
+                                     &Field2=:
+                                     &Field3=:
+                                     &Field4=:
+                                     &Field5=:
+                                     &Field6=:
+                                     &Field7=:
+                                     &Field8=:
+                                     &Field9=:
+                                     &Field10=:
+                                     &Field11=:
+                                     &Field12=:
+                                     &Field13=:
+                                     &Field14=:
+                                     &Field15=:
+                                     &Field16=
+
+#LINE&id           DIM               300
+#Row&id            FORM              6
+Found&id           DIM               1
+
+                   MOVE              "N",Found&id
+
+                   CALL              OPEN|&File
+
+                   SETMODE           *mcursor=*wait
+
+                   MOVE              " ",&File|KY
+                   CALL              RD|&File
+                   CLEAR             #LINE&id
+
+                   LOOP
+                     CALL            KS|&File
+                   UNTIL             (RETURNFL = 1)
+                   continue          if (&SearchCriteria)
+
+
+                   %IF               MPARAMNUM() = 4
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 5
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 6
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 7
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 8
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 9
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 10
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 11
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 12
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 13
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 14
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 15
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 16
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+                   chop                      &File|REC.&Field13,&File|REC.&Field13
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12:
+                                                 *SubItem12=&File|REC.&Field13
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 17
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+                   chop                      &File|REC.&Field13,&File|REC.&Field13
+                   chop                      &File|REC.&Field14,&File|REC.&Field14
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12:
+                                                 *SubItem12=&File|REC.&Field13:
+                                                 *SubItem13=&File|REC.&Field14
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 18
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+                   chop                      &File|REC.&Field13,&File|REC.&Field13
+                   chop                      &File|REC.&Field14,&File|REC.&Field14
+                   chop                      &File|REC.&Field15,&File|REC.&Field15
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12:
+                                                 *SubItem12=&File|REC.&Field13:
+                                                 *SubItem13=&File|REC.&Field14:
+                                                 *SubItem14=&File|REC.&Field15
+                   %ENDIF
+
+                   %IF               MPARAMNUM() = 19
+                   chop                      &File|REC.&Field2,&File|REC.&Field2
+                   chop                      &File|REC.&Field3,&File|REC.&Field3
+                   chop                      &File|REC.&Field4,&File|REC.&Field4
+                   chop                      &File|REC.&Field5,&File|REC.&Field5
+                   chop                      &File|REC.&Field6,&File|REC.&Field6
+                   chop                      &File|REC.&Field7,&File|REC.&Field7
+                   chop                      &File|REC.&Field8,&File|REC.&Field8
+                   chop                      &File|REC.&Field9,&File|REC.&Field9
+                   chop                      &File|REC.&Field10,&File|REC.&Field10
+                   chop                      &File|REC.&Field11,&File|REC.&Field11
+                   chop                      &File|REC.&Field12,&File|REC.&Field12
+                   chop                      &File|REC.&Field13,&File|REC.&Field13
+                   chop                      &File|REC.&Field14,&File|REC.&Field14
+                   chop                      &File|REC.&Field15,&File|REC.&Field15
+                   LVSearchPLB.InsertItemEx using *Text=&File|REC.&Field1:
+                                                 *SubItem1=&File|REC.&Field2:
+                                                 *SubItem2=&File|REC.&Field3:
+                                                 *SubItem3=&File|REC.&Field4:
+                                                 *SubItem4=&File|REC.&Field5:
+                                                 *SubItem5=&File|REC.&Field6:
+                                                 *SubItem6=&File|REC.&Field7:
+                                                 *SubItem7=&File|REC.&Field8:
+                                                 *SubItem8=&File|REC.&Field9:
+                                                 *SubItem9=&File|REC.&Field10:
+                                                 *SubItem10=&File|REC.&Field11:
+                                                 *SubItem11=&File|REC.&Field12:
+                                                 *SubItem12=&File|REC.&Field13:
+                                                 *SubItem13=&File|REC.&Field14:
+                                                 *SubItem14=&File|REC.&Field15:
+                                                 *SubItem15=&File|REC.&Field16
+                   %ENDIF
+
+
+
+.           LVSearchPLB.InsertItemEx using *Text=&File.&Field1:
+.                                         *SubItem1=&File.&Field2:
+.                                         *SubItem2=&File.&Field3:
+.                                         *SubItem3=&File.&Field4:
+.                                         *SubItem4=&File.&Field5:
+.                                         *SubItem5=&File.&Field6:
+.                                         *SubItem6=&File.&Field7:
+.                                         *SubItem7=&File.&Field8:
+.                                         *SubItem8=&File.&Field9:
+.                                         *SubItem9=&File.&Field10:
+.                                         *SubItem10=&File.&Field11:
+.                                         *SubItem11=&File.&Field12:
+.                                         *SubItem12=&File.&Field13:
+.                                         *SubItem13=&File.&Field14:
+.                                         *SubItem14=&File.&Field15
+.                                        *SubItem15=&File.&Field16:
+.                                        *SubItem16=&File.&Field17
+.                                        *SubItem17=&File.&Field18:
+.                                        *SubItem18=&File.&Field19
+.                                        *SubItem19=&File.&Field20:
+.                                        *SubItem20=&File.&Field21
+.                                        *SubItem21=&File.&Field22:
+.                                        *SubItem22=&File.&Field23
+.                                        *SubItem23=&File.&Field24:
+.                                        *SubItem24=&File.&Field5
+.                                        *SubItem25=&File.&Field26:
+.                                        *SubItem26=&File.&Field27
+.                                        *SubItem27=&File.&Field28:
+.                                        *SubItem28=&File.&Field29
+.                                        *SubItem29=&File.&Field30:
+.                                        *SubItem30=&File.&Field31
+.                                        *SubItem31=&File.&Field32:
+.                                        *SubItem32=&File.&Field33
+
+
+           %IFDEF               &File|1
+           READKEY              &File|1,&File|KY
+           %ELSE
+           %IFDEF               &File|Fl
+           READKEY              &File|Fl,&File|KY
+           %ELSE
+           READKEY              &File,&File|KY
+           %ENDIF
+           %ENDIF
+           chop                 &File|KY,&File|KY
+
+           MATCH             $SearchKey,&File|REC.&Field1
+           IF                (EQUAL AND Found&id = "N")
+             MOVE              "Y",Found&id
+           ENDIF
+
+           REPEAT
+           SETMODE           *mcursor=*Arrow
+           MEND
+
+.=============================================================================
+. Macro used to LOAD the Search Window with a specific Table of information
+. The info required for this Macro is the FILE (i.e. VEND, TYPE, etc) as well
+. as the fields within this Record
+.
+
+CTLoadRecord MACRO           &File:
+                             &Record:
+                             &Key:
+                             &Field1=:
+                             &Field2=:
+                             &Field3=:
+                             &Field4=:
+                             &Field5=:
+                             &Field6=:
+                             &Field7=:
+                             &Field8=:
+                             &Field9=:
+                             &Field10=:
+                             &Field11=:
+                             &Field12=:
+                             &Field13=:
+                             &Field14=:
+                             &Field15=:
+                             &Field16=
+
+#LINE&id   DIM               300
+#Row&id    FORM              6
+Found&id   DIM               1
+
+           MOVE              "N",Found&id
+
+           CLEAR             #LINE&id
+
+           PACK              #LINE&id FROM &Record.&Field1,";"
+
+           %IF               MDEFAULT(&Field2) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field2,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field3) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field3,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field4) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field4,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field5) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field5,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field6) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field6,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field7) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field7,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field8) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field8,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field9) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field9,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field10) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field10,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field11) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field11,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field12) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field12,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field12) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field12,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field13) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field13,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field14) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field14,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field15) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field15,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field16) = 0
+             PACK              #LINE&id FROM #LINE&id,&Record.&Field16,";"
+           %ENDIF
+
+           LVSearchPLB.AddItem  GIVING #Row&id USING #LINE&id
+           PACKKEY              &Record|KY,&Key
+           chop                 &Record|KY,&Record|KY
+
+           SETPROP           LVSearchPLB,*ListCargo(#Row&id)=&Record|KY
+           MATCH             $SearchKey,&Record.&Field1
+           IF                (EQUAL AND Found&id = "N")
+             SETPROP           LVSearchPLB,*Selected=#Row&id
+             MOVE              "Y",Found&id
+           ENDIF
+           MEND
+.=============================================================================
+.
+. Macro to Call the Browse window if the Lookup Function key is pressed.
+. The lookup function key is the F2 key (Unix system favorite)
+.
+F2SEARCH   MACRO             &Object,&File=
+#Result&id FORM              3
+           MOVE              "N",PassedVar
+           EVENTINFO         0,RESULT=#Result&id
+           IF                ( #Result&id = "113")            .F2 function key has been pressed
+             GETITEM           &Object,0,$SearchKey
+             %IF               MDEFAULT(&File)
+               CALL              BROWSEFILE
+             %ELSE
+               TRAP              NoProgram if CFail
+               MOVE               &File|TITLE,#SearchFileName
+               MOVE              "VIEW|&File",#SearchFileProgram
+               CALL              VIEW|&File
+               TRAPCLR           CFail
+             %ENDIF
+             SETITEM           &Object,0,$SearchKey
+             SETITEM           &Object,1,0
+             SETITEM           &Object,2,999
+             SETFOCUS          &Object
+           ENDIF
+           MEND
+;=============================================================================
+NoProgram
+              PACK              AlertString FROM #SearchFileName," Search Program (",#SearchFileProgram,") does not exist"
+              ALERT             stop,AlertString,result,"Program Error"
+              RETURN
+.=============================================================================
+.
+. Macro to Call the Browse window if the Lookup Function key is pressed.
+. The lookup function key is the F2 key (Unix system favorite)
+.
+F3SEARCH   MACRO             &Object,&File=,&Column=
+#Result&id FORM              3
+           MOVE              "N",PassedVar
+           EVENTINFO         0,RESULT=#Result&id
+           IF                ( #Result&id = "113")            .F2 function key has been pressed
+             GETITEM           &Object,0,$SearchKey
+             %IF               MDEFAULT(&File)
+               CALL              BROWSEFILE
+             %ELSE
+               TRAP              NoProgram if CFail
+               MOVE               &File|TITLE,#SearchFileName
+               MOVE              "VIEW|&File",#SearchFileProgram
+               CALL              VIEW|&File using "&Column"
+               TRAPCLR           CFail
+             %ENDIF
+             SETITEM           &Object,0,$SearchKey
+             SETITEM           &Object,1,0
+             SETITEM           &Object,2,999
+             SETFOCUS          &Object
+           ENDIF
+           MEND
+.=============================================================================
+. Macro to Call the Browse window if a Button is pressed.
+. The lookup function key is normally going to be called from a
+. Search Button
+.
+BTSEARCH   MACRO             &Object,&File=
+#Result&id FORM              3
+           EVENTINFO         0,RESULT=#Result&id
+           GETITEM           &Object,0,$SearchKey
+           %IF               MDEFAULT(&File)
+             CALL              BROWSEFILE
+           %ELSE
+             TRAP              NoProgram if CFail
+             MOVE              &File|TITLE,#SearchFileName
+             MOVE              "VIEW|&File",#SearchFileProgram
+             CALL              VIEW|&File
+             TRAPCLR           CFail
+           %ENDIF
+           SETITEM           &Object,0,$SearchKey
+           SETFOCUS          &Object
+           SETITEM           &Object,1,0
+           SETITEM           &Object,2,999
+           MEND
+.=============================================================================
+. Macro to Call the Browse if the 'Find' Button is pressed.  This is
+. different in some cases, because what we're finding so to speak, is the
+. actual record.  This routine DOES NOT set the ojbect to the Searched
+. variable
+.
+FindSearch MACRO             &Object,&File=
+#Result&id FORM              3
+           EVENTINFO         0,RESULT=#Result&id
+           GETITEM           &Object,0,$SearchKey
+           %IF               MDEFAULT(&File)
+             CALL              BROWSEFILE
+           %ELSE
+             TRAP              NoProgram if CFail
+             MOVE               &File|TITLE,#SearchFileName
+             MOVE              "VIEW|&File",#SearchFileProgram
+             CALL              VIEW|&File
+             TRAPCLR           CFail
+           %ENDIF
+.          SETITEM           &Object,0,$SearchKey
+.          SETFOCUS          &Object
+.          SETITEM           &Object,1,0
+.          SETITEM           &Object,2,999
+           MEND
+.=============================================================================
+. Macro used to get the number of characters within an object variable
+. The 'Count' will be stored in the standard variable TestChars
+.
+GETCOUNT           MACRO             &Object
+                   GETITEM           &Object,0,TestChars
+                   COUNT             CharCount,TestChars
+                   MEND
+.=============================================================================
+. Macro to Enable/Disable any ActiveX Sheridan Toolbar
+.
+ENABLETOOL         MACRO             &Tool
+                   %IF               DEFINED(ATMenu)
+                   SETPROP           ATMenu.Tools("&Tool"),*Enabled=1
+                   %ELSE
+                   SETPROP           MenuToolBar.Buttons("&Tool"),Enabled=1
+                   %ENDIF
+                   MEND
+.=============================================================================
+. Macro to Enable the Database Menu item from Toolbar
+.
+EnableDBMenu       MACRO             &Tool
+                   SETPROP           MenuDatabase.Items("&Tool"),Enabled=1
+                   MEND
+.=============================================================================
+. Macro to Disable the Database Menu item from Toolbar
+.
+DisableDBMenu      MACRO             &Tool
+                   SETPROP           MenuDatabase.Items("&Tool"),Enabled=0
+                   MEND
+.=============================================================================
+. Macro to Enable the Database Menu item from Toolbar
+.
+EnableGoToMenu     MACRO             &Tool
+                   SETPROP           MenuGoTo.Items("&Tool"),Enabled=1
+                   MEND
+.=============================================================================
+. Macro to Disable the Database Menu item from Toolbar
+.
+DisableGoToMenu    MACRO             &Tool
+                   SETPROP           MenuGoTo.Items("&Tool"),Enabled=0
+                   MEND
+
+
+;=============================================================================
+. Macro to Enable/Disable the Contact Menu Toolbar
+.
+EnableCTool   MACRO             &Tool
+              SETPROP           MenuContactToolBar.Buttons("&Tool"),Enabled=1
+              MEND
+;=============================================================================
+. Macro to Enable/Disable the Contact Menu Toolbar
+.
+DisableCTool  MACRO             &Tool
+              SETPROP           MenuContactToolBar.Buttons("&Tool"),Enabled=0
+              MEND
+.=============================================================================
+. Macro to Enable/Disable any ActiveX Sheridan Toolbar
+.
+DISABLETOOL MACRO             &Tool
+           %IF               DEFINED(ATMenu)
+           SETPROP           ATMenu.Tools("&Tool"),*Enabled=0
+           %ELSE
+           SETPROP           MenuToolBar.Buttons("&Tool"),Enabled=0
+           %ENDIF
+            MEND
+.=============================================================================
+. ClearEvents Macro is used to clear ALL the events on Event Queue
+.
+ClearEvents MACRO
+           LOOP
+             CLEAREVENT
+           UNTIL             OVER
+           REPEAT
+           MEND
+.=============================================================================
+. Like Macro used to define variables "like" a pre-existing variable
+.
+MakeLike   MACRO             &Var1,&Var2
+.
+. Define Length variable
+.
+           %IFNDEF           LEN123456
+LEN123456    FORM              5
+           %ENDIF
+
+
+           %IF               DTYPE( &Var1 ) = 8     //Integer
+           %IF               DTYPE( &Var1 ) = 16    //Form
+&Var2      FORM              ^
+
+
+           %ENDIF
+.
+. DIM Variable.  We're going to use the SMAKE command
+. Make sure that the Variable that we're giong to use
+. has yet to be created.  If it's been created before,
+. simply ignore it
+
+           %IF               DTYPE( &Var1 ) = 43    //DIM
+&Var2        DIM               ^
+             MOVEPLEN          &Var1,LEN123456
+             SMAKE             &Var2,LEN123456
+           %ENDIF
+
+           MEND
+.=============================================================================
+. Check to see if we're att the End of the Page.  If so, call the
+. Print Header routine.
+.
+EndofPage  MACRO
+           IF                (PrintOrientation=PO_LANDSCAPE)
+             IF                (PrintLineCnt >= 710)
+               CALL              PrintHeader
+             ENDIF
+           ELSE
+             IF                (PrintLineCnt >= 950)
+               CALL              PrintHeader
+             ENDIF
+           ENDIF
+
+           MEND
+.=============================================================================
+. Macro used to Get the data from an Object.
+.
+;GetObjText MACRO             &Object,&Var
+;           %IF               &Var
+.=============================================================================
+JustifyCust   MACRO             &CustomerID
+              MOVE              &CustomerID,NWK6
+              IF                (NWK6 < 1000)
+                MOVE              &CustomerID TO NWK4
+                MOVE              NWK4 TO AWK4
+                REPLACE           " 0" IN AWK4
+                MOVE              "      " TO AWK6
+                PACK              &CustomerID,"  ",AWK4
+              ELSE
+                MOVE              NWK6,&CustomerID
+              ENDIF
+              MEND
+.=============================================================================
+GetMSDate     MACRO             &DTPicker,&DateVar
+              GETPROP           &DTPicker,*Value=DATE10
+              EXPLODE           DATE10,"/",MMF,DDF,YYYY
+              PACKKEY           &DateVar,YYYY,MMF,DDF
+              REPLACE           " 0",&DateVar
+              MEND
+.=============================================================================
+GetMSDate2    MACRO             &DTPicker,&DateVar
+              GETPROP           &DTPicker,*Value=DATE10
+              EXPLODE           DATE10,"/",MMF,DDF,YY
+              IF                (YY < "50")
+                MOVE              "20",CC
+              ELSE
+                MOVE              "19",CC
+              ENDIF
+              PACKKEY           &DateVar,CC,YY,MMF,DDF
+              REPLACE           " 0",&DateVar
+              MEND
+.=============================================================================
+PutMSDate     MACRO             &DTPicker,&DateVar
+              UNPACK            &DateVar,CC,YY,MM,DD
+              PACKKEY           DATE10,MM,slash,DD,slash,YY
+              REPLACE           " 0",DATE10
+              IF                (DATE10 != "00/00/00")
+                SETPROP           &DTPicker,*Value=DATE10
+              ENDIF
+              MEND
+.=============================================================================
+MakeInvisible MACRO             &Object
+              SETPROP           &Object,visible=0
+              MEND
+.=============================================================================
+MakeVisible   MACRO             &Object
+              SETPROP           &Object,visible=1
+              MEND
+.=============================================================================
+ClearObj      MACRO             &Object
+              SETITEM           &Object,0,""
+              MEND
+.=============================================================================
+GetObjData    MACRO             &Object,&Data
+              GETITEM           &Object,0,&Data
+              MEND
+.=============================================================================
+EnableDate    MACRO             &CheckBox,&MSDateObject
+CBox&id       FORM              1
+              GETITEM           &CheckBox,0,CBox&id
+              IF                (CBox&id = 1)
+                SETPROP           &MSDateObject,Enabled=0
+                SETITEM         &CheckBox,0,0
+              ELSE
+                SETPROP           &MSDateObject,Enabled=1
+                SETITEM         &CheckBox,0,1
+              ENDIF
+              MEND
+.=============================================================================
+MPrint        MACRO             &PrintDevices,&PrintLine
+#PrintDevices EQUATE            &PrintDevices
+
+              %IF               #PrintDevices >= 1
+              PRTPAGE            PFile1;MNOQUOTE(&PrintLine)
+              %ENDIF
+
+              %IF               #PrintDevices >= 2
+              PRTPAGE            PFile2;MNOQUOTE(&PrintLine)
+              %ENDIF
+
+              %IF               #PrintDevices >= 3
+              PRTPAGE            PFile3;MNOQUOTE(&PrintLine)
+              %ENDIF
+
+              %IF               #PrintDevices >= 4
+              PRTPAGE            PFile4;MNOQUOTE(&PrintLine)
+              %ENDIF
+
+              %IF               #PrintDevices >= 5
+              PRTPAGE            PFile5;MNOQUOTE(&PrintLine)
+              %ENDIF
+
+              %IF               #PrintDevices >= 6
+              PRTPAGE            PFile6;MNOQUOTE(&PrintLine)
+              %ENDIF
+              MEND
+.=============================================================================
+CreateReIndex      MACRO             &Table,&Index=
+                   ADD               "1",X
+                   PACK              SortString(X) FROM "-QIndex.Log ",&Table|TXTNM,",",&Table|ISI|&Index|NM,",L",&Table|FileSize," ",&Table|I|&Index|DEF
+                   INDEX             SortString(X),Cancel=BOK,Output=IndexDL
+                   IF                over
+                     SET               FailureFlag
+                     PACK              AlertString FROM "Error Reindexing ",&Table|ISI|&Index|NM,AlertReturn:
+                                       "Error : ",S$ERROR$
+                     ALERT             stop,AlertString,result,"ReIndexing Error"
+                     PACK              AlertString FROM "Error Reindexing ":
+                                                        &Table|TXTNM,",",&Table|ISI|&Index|NM,",L",&Table|FileSize," ",&Table|I|&Index|DEF
+                     GOTO              #End|&Table|Reindex
+                   ENDIF
+                   MEND
+;==========================================================================================================
+CreateReAamdex     MACRO             &Table,&Index
+                   ADD               "1",X
+.                   PACK              SortString(X) FROM "-QIndex.Log ",&Table|TXTNM,",",&Table|ISI|&Index|NM,",L",&Table|FileSize," ",&Table|I|&Index|DEF
+
+
+                   PACK              SortString(X) FROM "-QIndex.Log ",&Table|TXTNM,",",&Table|AAM|&Index|NM,",L",&Table|FileSize," ",&Table|A|&Index|DEF
+                   AAMDEX            SortString(X),Cancel=BOK,Output=IndexDL
+                   IF                over
+                     SET               FailureFlag
+                     PACK              AlertString FROM "Error ReAamdexing ",&Table||AAM|&Index|NM,AlertReturn:
+                                       "Error : ",S$ERROR$
+                     ALERT             stop,AlertString,result,"ReAamdexing Error"
+                   ENDIF
+                   MEND
+;==========================================================================================================
+ReIndex            MACRO             &Table
+
+                   %IFDEF            &Table|KY
+                     CreateReIndex           &Table,1
+                   %ENDIF
+                   %IFDEF            &Table|KY2
+                     CreateReIndex           &Table,2
+                   %ENDIF
+                   %IFDEF            &Table|KY3
+                     CreateReIndex           &Table,3
+                   %ENDIF
+                   %IFDEF            &Table|KY4
+                     CreateReIndex           &Table,4
+                   %ENDIF
+                   %IFDEF            &Table|KY5
+                     CreateReIndex           &Table,5
+                   %ENDIF
+                   %IFDEF            &Table|KY6
+                     CreateReIndex           &Table,6
+                   %ENDIF
+                   %IFDEF            &Table|KY7
+                     CreateReIndex           &Table,7
+                   %ENDIF
+                   %IFDEF            &Table|KY8
+                     CreateReIndex           &Table,8
+                   %ENDIF
+                   %IFDEF            &Table|KY9
+                     CreateReIndex           &Table,9
+                   %ENDIF
+
+                   %IFDEF            &Table|AAMKY1
+                     CreateReAamdex           &Table,1
+                   %ENDIF
+#End|&Table|Reindex
+                   MEND
+;=============================================================================
+RightJustify  MACRO             &Variable
+              CHOP              &Variable
+              MOVELPTR          &Variable,#FPTR
+              MOVEPLEN          &Variable,#Length
+              SUBTRACT          #FPTR,#Length
+              SINSERT           &Variable,#Space,#Length
+              IF                Less                        //Variable is 'Blank'
+                Fill              " ",&Variable
+              ENDIF
+              RESET             &Variable
+              MEND
+;==========================================================================================================
+. Macro used to LOAD the Search Window with a specific Table of information
+. The info required for this Macro is the FILE (i.e. VEND, TYPE, etc) as well
+. as the fields within this Record
+.
+
+CTLoadRecord2 MACRO           &File:
+                              &Record:
+                              &Key:
+                              &Field1=:
+                              &Field2=:
+                              &Field3=:
+                              &Field4=:
+                              &Field5=:
+                              &Field6=:
+                              &Field7=:
+                              &Field8=:
+                              &Field9=:
+                              &Field10=:
+                              &Field11=:
+                              &Field12=:
+                              &Field13=:
+                              &Field14=:
+                              &Field15=:
+                              &Field16=
+
+#LINE&id   DIM               300
+#Row&id    FORM              6
+Found&id   DIM               1
+
+           MOVE              "N",Found&id
+
+           CLEAR             #LINE&id
+
+           PACK              #LINE&id FROM &Field1,";"
+
+           %IF               MDEFAULT(&Field2) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field2,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field3) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field3,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field4) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field4,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field5) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field5,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field6) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field6,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field7) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field7,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field8) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field8,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field9) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field9,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field10) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field10,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field11) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field11,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field12) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field12,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field12) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field12,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field13) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field13,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field14) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field14,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field15) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field15,";"
+           %ENDIF
+           %IF               MDEFAULT(&Field16) = 0
+             PACK              #LINE&id FROM #LINE&id,&Field16,";"
+           %ENDIF
+
+           LVSEARCHPLB.SetItemTextAll  GIVING #Row&id USING *Index=0,*Text=#LINE&id,*Delimiter=";"
+           PACKKEY              &Record|KY,&Key
+           chop                 &Record|KY,&Record|KY
+
+.           SETPROP           LVSearch,*ListCargo(#Row&id)=&Record|KY
+.           MATCH             $SearchKey,&Field1
+.           IF                (EQUAL AND Found&id = "N")
+.             SETPROP           LVSearchPLB,*Selected=#Row&id
+.             MOVE              "Y",Found&id
+.           ENDIF
+           mend
+
+;=============================================================================
+; Macro used to determine if a CheckBox is clicked or not.  Included with it
+; is an EndIfClicked to close it properly.  Macro requires a CheckBox Object but
+; can also use a RadioGroup Object if desired with the same results
+;
+IfChecked     MACRO             &CheckBoxObject
+CBResult|&id  INTEGER           1
+              GETITEM           &CheckBoxObject,0,CBResult|&id
+              IF                (CBResult|&id)
+              MEND
+;
+EndIfClicked  MACRO
+              ENDIF
+              MEND
+;
+EndIfChecked  MACRO
+              ENDIF
+              MEND
+;=============================================================================
+;Absolule Value Macro
+;
+AbsVal        MACRO             &var1,&var2=
+              IF                (&var1 < 1)
+                %IF               MDEFAULT(&var2)
+                MULTIPLY             "-1",&var1
+                %ELSE
+                MULTIPLY             "-1",&var1,&var2
+                %ENDIF
+              ELSE
+                %IF               MDEFAULT(&var2) = 0
+                MOVE              &var1,&var2
+                %ENDIF
+              ENDIF
+              MEND
+;==========================================================================================================
+DefineReadRoutines macro            &File,&Key=1
+;
+; Test Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+TST&File           READ             &File|FL,&File|KY;;
+                   %else
+TST&File|&Key      READ             &File|FL|&Key,&File|KY|&Key;;
+                   %endif
+                   GOTO             #ERROR IF OVER
+                   GOTO             #VALID
+;
+; Random Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+RD&File            READ             &File|FL,&File|KY;&File|REC
+                   %else
+RD&File|&Key       READ             &File|FL|&Key,&File|KY|&Key;&File|REC
+                   %endif
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;
+; Random Locked Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+RD&File|LK         READLK           &File|FL,&File|KY;&File|REC
+                   %else
+RD&File|&Key|LK    READLK           &File|FL|&Key,&File|KY|&Key;&File|REC
+                   %endif
+
+                   GOTO             #LOCKED IF LESS
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;
+; &Key Sequential Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+KS&File            READKS           &File|FL;&File|REC
+                   %else
+KS&File|&Key       READKS           &File|FL|&Key;&File|REC
+                   %endif
+
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;
+; &Key Locked Sequential Read for PRIMARY Index
+;
+
+                   %if              MDefault(&Key)
+KS&File|LK         READKSLK         &File|FL;&File|REC
+                   %else
+KS&File|&Key|LK    READKSLK         &File|FL|&Key;&File|REC
+                   %endif
+
+                   GOTO             #LOCKED IF LESS
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;
+; &Key Previous Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+KP&File            READKP           &File|FL;&File|REC
+                   %else
+KP&File|&Key       READKP           &File|FL|&Key;&File|REC
+                   %endif
+
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;
+; &Key Locked Previous Read for PRIMARY Index
+;
+                   %if              MDefault(&Key)
+KP&File|LK         READKPLK         &File|FL;&File|REC
+                   %else
+KP&File|&Key|LK    READKPLK         &File|FL|&Key;&File|REC
+                   %endif
+
+                   GOTO             #LOCKED IF LESS
+                   GOTO             #ERROR IF OVER
+                   %if              $Log|&File|Changes = $On
+                   move             &File|REC,Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+Exit|&File|&id
+                   mend
+;==========================================================================================================
+MakeIORoutines     macro            &File,&Keys=
+;
+; Deletion for PRIMARY Index
+;
+DEL&File
+DEL&File|LK
+                   DELETE           &File|FLST
+                   %if              $Log|&File|Changes = $On
+                   write            &File|LogFL,SeqEOF;"D",Orig&File|REC
+                   %endif
+                   GOTO             #VALID
+;==========================================================================================================
+; Update I/O operation
+
+UPD&File
+UPD&File|LK
+                   UPDATE           &File|FLST;&File|REC
+                   %if              $Log|&File|Changes = $On
+                   write            &File|LogFL,SeqEOF;"C",Orig&File|REC,&File|REC
+                   %endif
+                   GOTO             #VALID
+;==========================================================================================================
+; Write I/O operation
+
+WRT&File
+                   WRITE            &File|FLST;&File|REC
+                   %if              $Log|&File|Changes = $On
+                   write            &File|LogFL,SeqEOF;"A",&File|REC
+                   %endif
+                   GOTO             #VALID
+;==========================================================================================================
+; Preparation of &Fileer Transaction Files
+;
+PREP&File
+                   %IFDEF           &File|KY
+                     PREPARE          &File|FL,&File|TXTNM,&File|ISI1NM,&File|I1DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY2
+                     PREPARE          &File|FL2,&File|TXTNM,&File|ISI2NM,&File|I2DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY3
+                     PREPARE          &File|FL3,&File|TXTNM,&File|ISI3NM,&File|I3DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY4
+                     PREPARE          &File|FL4,&File|TXTNM,&File|ISI4NM,&File|I4DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY5
+                     PREPARE          &File|FL5,&File|TXTNM,&File|ISI5NM,&File|I5DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY6
+                     PREPARE          &File|FL6,&File|TXTNM,&File|ISI6NM,&File|I6DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY7
+                     PREPARE          &File|FL7,&File|TXTNM,&File|ISI7NM,&File|I7DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY8
+                     PREPARE          &File|FL8,&File|TXTNM,&File|ISI8NM,&File|I8DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+
+                   %IFDEF           &File|KY9
+                     PREPARE          &File|FL9,&File|TXTNM,&File|ISI9NM,&File|I9DEF,&File|FileSize,EXCLUSIVE
+                   %ENDIF
+                   RETURN
+;==========================================================================================================
+; Opening of &FileX File
+;
+OPEN&File
+                   GETFILE          &File|FL
+                   RETURN           IF ZERO
+                   TRAP             #NoFileError if IO
+                   OPEN             &File|FLST,SHARE,LOCKMANUAL,SINGLE,NOWAIT
+                   %if              $Log|&File|Changes = $On
+                   OPEN             &File|LogFL,&File|LogNm,SHARE
+                   %endif
+                   RETURN
+;==========================================================================================================
+; Opening of xxxxx File in Read-Only mode
+;
+OPEN&File|RO
+                   GETFILE          &File|FL
+                   RETURN           IF ZERO
+                   TRAP             #NoFileError if IO
+                   OPEN             &File|FLST,READ
+                   %if              $Log|&File|Changes = $On
+                   OPEN             &File|LogFL,&File|LogNm,SHARE
+                   %endif
+                   RETURN
+.=============================================================================
+#NoFileError
+                   BEEP
+                   pack             AlertString from "Error Opening ",&File|PROG," File"
+                   ALERT            stop,AlertString,result,"File I/O error"
+                   STOP
+;==========================================================================================================
+; Standard Return Values for I/O Include
+;
+#ERROR
+                   MOVE             "1" TO RETURNFL
+                   RETURN
+#LOCKED
+                   MOVE             "2" TO RETURNFL
+                   RETURN
+#VALID
+                   MOVE             "0" TO RETURNFL
+                   RETURN
+#End
+                   mend
+c

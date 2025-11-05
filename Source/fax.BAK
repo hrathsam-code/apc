@@ -1,0 +1,476 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    FAX.PLS                                                        ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07/21/2004 AT 2:11PM                                           ;
+;                                                                             ;
+;  PURPOSE:    Fax Software module                                            ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   09/21/2004   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;=============================================================================;
+
+              INCLUDE           WorkVar.INC
+
+FaxPort       INIT              "4559"
+FaxServer     COMFILE
+ServerAddr    INIT              "192.168.10.187"
+Mode          INIT              "R"
+UserName      INIT              "Harry"
+Commsg        DIM               256
+tmout         FORM              "20"
+crlf          INIT              0x0d,0x0a ; use init because order is important
+lf            INIT              0x0a
+response      DIM               4
+FaxCmdStatus  DIM               3
+FaxJob        DIM               3
+FaxNumber     INIT              "2738088"
+#FaxNumber    DIM               10
+MaxDials      FORM              "5"                 //HR 9/28/04 Changed from 03
+MaxAttempts   FORM              "5"                 //HR 9/28/04 Changed from 03
+Quote         INIT              34
+#FaxTimeToSend DIM              ^
+Dim30         DIM               28
+FaxJobID      DIM               3
+LocalIP       INIT              "192.168.10.27"
+FTPServer     INIT              "192.168.10.187"
+user          INIT              "harry"
+pass          INIT              "tim1156"
+#FTPFileName  DIM               40
+..SEQEof        FORM              "-3"
+StatusTime    DIM               20
+#FaxSubject   DIM               ^
+FaxAuditFL    FILE
+ComCloseMode  FORM              "1"
+FaxFile       FILE              ^
+FaxCommand    DIM               250
+#SubmitFaxNo  DIM               12
+InvalidChars  INIT              39,32                      //HR 1/29/2007
+FaxShortTitle DIM               39                         //HR 3/20/2013
+
+CreateFax     ROUTINE           #FTPFileName,#FaxNumber,#FaxTimeToSend,#FaxSubject,FaxFile
+.              MOVE              "NOW",FaxTimeToSend
+;
+; Connect into the Fax Server using specified Port
+;
+              OPEN              FaxAuditFL,"Faxaudit.txt"
+              write             FaxAuditFL,SEQEof;"FileName :",#FTPFileName:
+                                                  "   Fax Number :",#FaxNumber:
+                                                  "   Fax Time :",#FaxTimeToSend:
+                                                  "   Fax Subject :",#FaxSubject
+
+..HR NewSystem 2/3/2005              CALL              clrflag
+..HR NewSystem 2/3/2005              CALL              "Socket;connect" USING FaxServer,ServerAddr,FaxPort,mode
+..HR NewSystem 2/3/2005              IF                OVER
+..HR NewSystem 2/3/2005                CALL              CloseFaxSession2
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+
+..HR 12/3/2004              RETURN            IF (OVER)
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+;
+; Are we connected?  If so, the Fax Response should be 220 to let us know so
+;
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "220")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+;
+; Login with appropriate Username for Faxing
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"USER ",UserName,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+
+;
+; Are we a valid User?  If not, do not proceed any further since we can't anymore!!!
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "230")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+;
+; Let's setup the appropriate job information for this specific fax
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"TZONE LOCAL",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the TimeZone set properly to Eastern Standard Time?
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "200")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+..HR NewSystem 2/3/2005              UNPACK            ComMsg into Dim30,FaxJobID
+;
+; Use the "Default" Job information for this Job
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JOB Default",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was it set to the proper response?  (i.e. "200")
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "200")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+;
+; Create a "New" Job using the Defaults from the previous Fax Command Sent
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JNEW",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the "New" Job created successfully??
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "200")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+..HR NewSystem 2/3/2005              UNPACK            ComMsg into Dim30,FaxJobID
+;
+; Set the Fax Number for this specified Job
+;
+..HR 10/16/2011              MATCH             "631",#FaxNumber
+..HR 10/16/2011              IF                EQUAL                    //Long Distance
+..HR 10/16/2011                PACK              commsg,"JPARM DialString ",#FaxNumber,crlf
+..HR 10/16/2011                PACK              #SubmitFaxNo FROM #FaxNumber
+..HR 10/16/2011              ELSE
+                PACK              commsg,"JPARM DialString 1",#FaxNumber,crlf
+                PACK              #SubmitFaxNo FROM "1",#FaxNumber
+..HR 10/16/2011              ENDIF
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the Fax Number received OK?
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK
+; Use the "Default" Job information for this Job
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM FromUser ",UserName,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the Fax From User set OK?
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK
+;
+; Set the Maximum Number of Dial Attempts to allow
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM MAXDIALS ",MaxDials,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Maximum Number of Dial Attempts to allow
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM MAXTries ",MaxAttempts,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Page Length to the standard 8.5" x 11"
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM PageLength 297",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Page Width to the standard 8.5" x 11"
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM PageWidth 210",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Page Chop to standard (for use with Fax Header & Footer information
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM PageChop ",quote,"none",quote,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Fax Retry Time to 10 minutes
+;
+..HR 9/28/04 Changed from 03          PACK              commsg,"JPARM RetryTime 0003",crlf
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM RetryTime 0010",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+; Set the Fax Scheduled Priority
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM SchedPri 127",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Fax Visual Resolution
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM VRes 196",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Fax Visual Resolution
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM SendTime ",#FaxTimeToSend,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Job Info for this particular Fax Job
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM JobInfo Test Job Information",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Job Info for this particular Fax Job
+;
+..HR 9/27/04              PACK              commsg,"JPARM UsrKey Subject Fax Invoice Info",crlf
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM UsrKey ",#FaxSubject,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Notification E-mail address if desired
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM NOTIFYADDR invoices@superiorwasher.com",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Notification desired response (i.e. Resent, Sent OK, etc.)
+;
+..HR               PACK              commsg,"JPARM Notify Done+Requeue",crlf
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM Notify none",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  Set the Last Time that we can be trying this job
+;
+..HR 9/28/04              PACK              commsg,"JPARM LastTime 000800",crlf
+..HR 2/2/2005              PACK              commsg,"JPARM LastTime 000800",crlf
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM LastTime 003600",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+..HR NewSystem 2/3/2005              CALL              IsFaxResponseOK         //Check for "OK" response from Fax Server
+;
+;  OK, We've gotten this far now....Let's just attach out appropriate file to this
+;  Fax job and Away we Go!!!!!!
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JPARM Document /tmp/",#FTPFileName,crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the document attached properly to this fax?
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "200")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+;
+;  Guess what we need to do now that we've setup all of the parameters????
+;  Just submit the job and wait for the fax to be Faxed!!!!
+;
+..HR NewSystem 2/3/2005              PACK              commsg,"JSUBM",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+;
+; Was the Fax/Job submitted successfully???  Could this be it???
+;
+..HR NewSystem 2/3/2005              IF                (FaxCmdStatus != "200")
+..HR NewSystem 2/3/2005                CALL              SendFaxEmail
+..HR NewSystem 2/3/2005                RETURN
+..HR NewSystem 2/3/2005              ENDIF
+;
+;  Goodnight everybody!!!!  Let's just Quit if we need to and disconnect
+;  from the Fax System
+;
+CloseFaxSession
+..HR NewSystem 2/3/2005              PACK              commsg,"QUIT",crlf
+..HR NewSystem 2/3/2005              CALL              "Socket;send" USING FaxServer,commsg,tmout
+..HR NewSystem 2/3/2005              CALL              ReceiveFaxData
+CloseFaxSession2
+..HR NewSystem 2/3/2005              CLOCK             TimeStamp,StatusTime
+..HR 2/2/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+..HR NewSystem 2/3/2005              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+..HR 2/2/2005              comclose          FaxServer                //HR 11/4/2004
+..HR NewSystem 2/3/2005              COMCLOSE          FaxServer,ComCloseMode
+
+..HR 1/29/2007              REPLACE           "' ",#FaxSubject
+              REPLACE           InvalidChars,#FaxSubject             //HR 1/29/2007
+              MOVE              "1",MaxAttempts
+              MOVE              #FaxSubject,FaxShortTitle
+
+
+              PACK              FaxCommand FROM "sendfax -a ",#FaxTimeToSend," ":
+                                                "-E ":                              //Error Correction Mode
+..HR 1.11.2014                                                 "-f invoices@superiorwasher.com ":
+                                                "-m ":                              //Vres =196
+                                                "-n ":                              //No Cover Page
+                                                "-P 127 ":                          //Scheduled Priority
+..HR 3/20/2013                                                "-i '",#FaxSubject,"' ":            //Fax Subject
+                                                "-i '",FaxShortTitle,"' ":            //Fax Subject
+                                                "-t ",MaxAttempts," ":              //Maximum Attempts
+                                                "-T ",MaxDials," ":                 //Maximum # of dials
+                                                "-k now+48hours ":                  //Maximum
+                                                "-d ",#SubmitFaxNo," ":             //Fax Number
+                                                "/var/spool/hylafax/tmp/",#FTPFileName
+..HR 4/19/2007                                              " >>/faxjobs/"
+
+              WRITE             FaxFile,SeqEOF;*LL,FaxCommand,lf;
+              RETURN
+.=============================================================================
+.SendFaxData
+.              CALL              "Socket;recv" USING FaxServer,commsg,tmout
+.              IF                (EOS or OVER)
+.                CALL              clrflag
+.                COMCLOSE          FaxServer
+.                SETFLAG           OVER
+.                RETURN
+.              ENDIF
+.
+.              MOVE              commsg,FaxCmdStatus
+.              RETURN
+.=============================================================================
+ReceiveFaxData
+              CALL              "Socket;recv" USING FaxServer,commsg,tmout
+              IF                (EOS or OVER)
+                CALL              clrflag
+                write             FaxAuditFL,SEQEof;StatusTime,"ERROR reading Fax Server: ",commsg
+..HR 2/2/2005                COMCLOSE          FaxServer
+                COMCLOSE          FaxServer,ComCloseMode
+                SETFLAG           OVER
+                RETURN
+              ENDIF
+              MOVE              commsg,FaxCmdStatus
+              RETURN
+.=============================================================================
+CLRFLAG       SETFLAG           NOT ZERO
+              SETFLAG           NOT OVER
+              SETFLAG           NOT EOS
+              SETFLAG           NOT LESS
+              CLEAR             FaxCmdStatus
+              RETURN
+
+.=============================================================================
+SendFaxEMail
+              call              CloseFaxSession
+              write             FaxAuditFL,SEQEof;StatusTime,"   ",commsg
+              write             FaxAuditFL,SEQEof;"ERROR sending Fax    FileName :",#FTPFileName:
+                                                  "   Fax Number :",#FaxNumber:
+                                                  "   Fax Time :",#FaxTimeToSend:
+                                                  "   Fax Subject :",#FaxSubject:
+                                                  "  Closing COM Port ..."
+
+              CALL              clrflag
+..HR 2/2/2005              COMCLOSE          FaxServer
+              COMCLOSE          FaxServer,ComCloseMode
+              RETURN
+.=============================================================================
+IsFaxResponseOK
+;
+; Did we receive a valid response from the Fax Server after issuing a Job Command?
+;
+              IF                (FaxCmdStatus != "213")
+                CALL              SendFaxEmail
+                NORETURN                  //Pop the previous call from the Stack
+              ENDIF
+              RETURN

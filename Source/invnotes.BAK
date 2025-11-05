@@ -1,0 +1,77 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    invNotes.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06-20-2019 At 10:18                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00103   06-20-2019   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $invNotesVAR
+$invNotesVAR                     EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+invNotes                         RECORD
+Entity                           Dim                8                   1 - 8
+SeqMajor                         Form               9                   9 - 17
+SeqMinor                         Form               3                  18 - 20
+Comments                         Dim                1000               21 - 1020
+                                 RECORDEND
+;
+;======================================================================================;
+TempinvNotes                        record          like   invNotes                        
+OriginvNotes                        record          like   invNotes                        
+SaveinvNotes                        record          like   invNotes                        
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+invNotesTXTNM                          INIT         "InvNotes.txt"
+invNotesISI1NM                         INIT               "invNotes.ISI"
+invNotesI1DEF                           init            "-n,z,y,1-8,9-17,18-20"
+.
+. By Entity, SeqMajor, SeqMinor
+. 1-8, 9-17, 18-20
+.
+invNotesKY                       DIM                20
+;=============================================================================;
+;
+invNotesFLST                         FILELIST
+invNotesFL                          IFILE              name="invNotes.ISI",FIX=1020,NODUP,NOPATH
+                                    FILELISTEND
+ 
+invNotesFileSize       CONST      "1020"
+ 
+invNotesProg           INIT       "invNotes Program"
+invNotesDesc           INIT       "invNotes Maintenance"
+invNotesTITLE          INIT       "invNotes Record"
+invNotesHelp           INIT       "invNotes.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $invNotesVARIO
+            INCLUDE invNotes.IO 
+          %ENDIF          //End of IO Include File

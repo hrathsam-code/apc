@@ -1,0 +1,322 @@
+. 
+. ACCOUNTS PAYABLE REVIEW LISTING
+. 
+         INCLUDE   COMMON
+. 
+         INC       APMASTFD
+         INC       APTRANFD
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+APTRANFL IFILE     KEYL=19,UNCOMPRESSED
+INVNO    DIM       7
+DESC     DIM       20
+AMT      FORM      6.2
+LDDAY    DIM       8
+SEQ      FORM      "-1"
+OPTION   FORM      1
+LINES    FORM      "55"
+PAGE     FORM      4
+TODMON   DIM       2
+TODDAY   DIM       2
+TODYEAR  DIM       2
+FTFLG    DIM       1
+OVFLG    DIM       1
+XACTFLG  DIM       1
+TIME     DIM       1
+TIM2     DIM       1
+NO       FORM      3
+CNT      FORM      3
+CNAME    DIM       25
+REPLY    DIM       1
+DATEDESC DIM       15
+DATERROR DIM       1
+MM DIM 2
+DD DIM 2
+YY DIM 2
+FM FORM 2
+FD FORM 2
+FY FORM 2
+BKUPFLG  DIM       1
+DATFLG   DIM       1
+DASH     INIT      "---------------------------------------------"
+. 
+BEGIN    DISPLAY   *ES,*P01:01,*HON,"PRINT SUPERIOR WASHER & GASKET ":
+                                    " - A/P VENDOR REVIEW "
+         OPEN      APMASTER,"APMASTER"
+         MOVE      "X",BKUPFLG
+         MOVE      "REPORT DATE" TO DATEDESC
+........ CALL      GETDATE
+. 
+         MOVE      TODAY TO MM
+         RESET     TODAY TO 4
+         MOVE      TODAY TO DD
+         RESET     TODAY TO 7
+         MOVE      TODAY TO YY
+         RESET     TODAY TO 1
+. 
+         MOVE      MM TO TODMON
+         MOVE      DD TO TODDAY
+         MOVE      YY TO TODYEAR
+A0       MOVE      "000000",ACCKEY
+         INC       APMASTHR
+         GOTO      AXX IF NOT OVER
+         BEEP
+         DISPLAY   *P1:24,"NO HEADER IN APMASTER FILE",*W,*W,*W,*W
+         CHAIN     "APMENU1"
+AXX      MOVE      NAME TO CNAME
+         MOVE      " ",FTFLG
+         MOVE      " ",OVFLG
+         MOVE      " ",XACTFLG
+         MOVE      " ",TIME
+         MOVE      " ",TIM2
+         MOVE      "0",CNT
+         MOVE      "0",NO
+         MOVE      "55",LINES
+         MOVE      "0",PAGE
+         DISPLAY   *P01:10,*EF:
+                   *P1:10,"(1) PRINT ALL VENDORS AND TRANSACTIONS":
+                   *P1:11,"(2) PRINT ONLY VENDORS WITH NO TRANSACTIONS":
+                   *P1:12,"(3) PRINT ONLY VENDORS WITH TRANSACTIONS":
+                   *P1:13,"(4) START PRINTING WITH CERTAIN VENDOR ##":
+                   *P1:14,"(5) MENU RETURN "
+A1       KEYIN     *P1:16,"ENTER OPTION ## 1-5 = ",OPTION
+         BRANCH    OPTION OF OPT1,OPT2,OPT3,OPT4,OPT5
+         STOP
++ =============================================================================
+.      OPTION 1 - PRINT ALL ACCOUNTS AND TRANSACTIONS
+. =============================================================================
+OPT1     OPEN      APTRANFL,"APTRANFL"
+A2       MOVE      " ",FTFLG
+         INC       APMASTKS
+         GOTO      OPT1CLS IF OVER
+         CALL      PRTACCT
+         MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "             ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+         MATCH     " ",FTFLG
+         GOTO      A2A IF EQUAL
+         MATCH     "X",OVFLG
+         GOTO      A2C IF EQUAL
+         GOTO      A3
+A2A      TRAPCLR   PARITY
+         INC       APTRANKS
+         GOTO      A2B IF OVER
+         MOVE      "X",FTFLG
+         GOTO      A3
+A2B      MOVE      "X",OVFLG
+         MATCH     "X",XACTFLG
+         GOTO      A2C IF NOT EQUAL
+         CALL      PRTDASH
+         GOTO      A2
+A2C      CALL      PRTNOTRN
+         GOTO      A2
+A3       MATCH     TACCN,ACCNO
+         GOTO      A4 IF NOT EQUAL
+         MATCH     "X",TIME
+         CALL      PRTTRHD IF NOT EQUAL
+         CALL      PRTTRAN
+         MATCH     "X",OVFLG
+         GOTO      A2A IF NOT EQUAL
+A3A      CALL      PRTDASH
+         GOTO      A2
+A4       MATCH     "X",XACTFLG
+         GOTO      A3A IF EQUAL
+         CALL      PRTNOTRN
+         GOTO      A2
+OPT1CLS  CLOSE     APTRANFL
+         GOTO      A0
+. =============================================================================
+.   OPTION 2 - PRINT ACCOUNTS WITH NO TRANSACTIONS
+. =============================================================================
+OPT2     TRAPCLR   PARITY
+         INC       APMASTKS
+         GOTO      OPT2CLS IF OVER
+         MATCH     "1",ACCST
+         GOTO      OPT2 IF EQUAL
+         CALL      PRTACCT
+         CALL      PRTNOTRN
+         GOTO      OPT2
+OPT2CLS  GOTO      A0
+. =============================================================================
+.    OPTION 3 - PRINT ALL ACCOUNTS WITH TRANSACTIONS
+. =============================================================================
+OPT3     OPEN      APTRANFL,"APTRANFL"
+         MOVE      "0000000000000000000",TRNKEY
+         READ      APTRANFL,TRNKEY;;
+A6       TRAPCLR   PARITY
+         INC       APTRANKS
+         GOTO      OPT3CLS IF OVER
+.
+         MATCH     " ",FTFLG
+         GOTO      A7 IF EQUAL
+         MATCH     TACCN,ACCNO
+         GOTO      A8 IF EQUAL
+         CALL      PRTDASH
+A7       MOVE      TACCN TO ACCKEY
+         INC       APMASTRD
+         GOTO      A6 IF OVER
+         CALL      APMASTVK
+         MOVE      "X",FTFLG
+         CALL      PRTACCT
+A8       MATCH     "X",TIME
+         CALL      PRTTRHD IF NOT EQUAL
+         CALL      PRTTRAN
+         GOTO      A6
+OPT3CLS  CALL      PRTDASH
+         CLOSE     APTRANFL
+         GOTO      A0
+. =============================================================================
+.     OPTION 4 - PRINT STARTING WITH A CERTAIN VENDOR NUMBER
+. =============================================================================
+OPT4     OPEN      APTRANFL,"APTRANFL"
+A9       DISPLAY   *P01:22,*EF
+         KEYIN     *P1:22,*HON,"BEGINNING VENDOR NO. = ",ACCKEY
+         KEYIN     *P1:23,*HON,"NUMBER OF VENDORS = ",NO
+         INC       APMASTRD
+         GOTO      A9 IF OVER
+         CALL      APMASTVK
+         ADD       "1",CNT
+         CALL      PRTACCT
+         MATCH     "1",ACCST
+         GOTO      A10 IF EQUAL
+         CALL      PRTNOTRN
+         GOTO      A11
+A10      MOVE      "X",FTFLG
+         MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "             ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+A100     TRAPCLR   PARITY
+         INC       APTRANKS
+         GOTO      A10C IF NOT OVER
+         MOVE      "X",OVFLG
+A10A     MATCH     "X",XACTFLG
+         GOTO      A10B IF NOT EQUAL
+         CALL      PRTDASH
+         GOTO      A11
+A10B     CALL      PRTNOTRN
+         GOTO      A11
+A10C     MATCH     TACCN,ACCNO
+         GOTO      A10D IF EQUAL
+         GOTO      A10A
+A10D     MATCH     "X",TIM2
+         CALL      PRTTRHD IF NOT EQUAL
+         CALL      PRTTRAN
+         MOVE      "X",TIME
+         GOTO      A100
+A11      COMPARE   NO,CNT
+         GOTO      OPT4CLS IF EQUAL
+         MOVE      " ",FTFLG
+         ADD       "1",CNT
+         INC       APMASTKS
+         GOTO      OPT4CLS IF OVER
+         CALL      PRTACCT
+         MOVE      ACCNO,TRNKEY
+         RESET     TRNKEY,6
+         APPEND    "             ",TRNKEY
+         RESET     TRNKEY
+         READ      APTRANFL,TRNKEY;;
+         MATCH     "X",FTFLG
+         GOTO      A13 IF EQUAL
+         MATCH     "1",ACCST
+         GOTO      A12 IF EQUAL
+         CALL      PRTNOTRN
+         GOTO      A11
+A12      TRAPCLR   PARITY
+         INC       APTRANKS
+         GOTO      A13 IF NOT OVER
+         MOVE      "X",OVFLG
+         MATCH     "X",XACTFLG
+         GOTO      A12A IF NOT EQUAL
+         CALL      PRTDASH
+         GOTO      A11
+A12A     CALL      PRTNOTRN
+         GOTO      A11
+A13      MATCH     TACCN,ACCNO
+         GOTO      A14 IF NOT EQUAL
+         MATCH     "X",TIME
+         CALL      PRTTRHD IF NOT EQUAL
+         CALL      PRTTRAN
+         MATCH     "X",OVFLG
+         GOTO      A12 IF NOT EQUAL
+A13A     CALL      PRTDASH
+         GOTO      A11
+A14      MATCH     "X",XACTFLG
+         GOTO      A13A IF EQUAL
+         CALL      PRTNOTRN
+         GOTO      A11
+OPT4CLS  CLOSE     APTRANFL
+         GOTO      A0
+.
+OPT5     RELEASE
+         CHAIN     "APMENU1"
+. 
+. 
+PRTHD    ADD       "1",PAGE
+         PRINT     *F,*48,CNAME
+         PRINT     *51,"A / P   R E V I E W",*101,"PAGE NO: ",PAGE
+         PRINT     " "
+         PRINT     *54,"FOR: ",TODMON,"/",TODDAY,"/",TODYEAR
+         PRINT     " "
+         PRINT     " "
+         MOVE      "8",LINES
+         RETURN
+. 
+. 
+PRTACCT  COMPARE   "50",LINES
+         CALL      PRTHD IF NOT LESS
+         PRINT     *3,"VENDOR NO.  ",ACCNO,*26,NAME,"  STATUS ",ACCST:
+                    *67,"CURRENT DUE ",*79,CURR,*95,"M-T-D DEBITS  ",MTDD
+         PRINT     *26,ADD1:
+                   *67,"OVER 30 DUE ",*79,OVR30,*95,"M-T-D CREDITS ",MTDC
+         PRINT     *26,ADD2:
+                   *67,"OVER 60 DUE ",*79,OVR60,*95,"LAST PAYMENT    ":
+                       MMON,"/",MDAY,"/",MYEAR
+         PRINT     *26,CITY,"  ",STATE,"  ",ZIP:
+                   *67,"OVER 90 DUE ",*79,OVR90,*95,"AMOUNT PAID    ",LPAT
+         PRINT     *67,"TOTAL DUE",*79,TOTDUE
+         PRINT     " "
+         ADD       "6" TO LINES
+         RETURN
+. 
+PRTTRHD  COMPARE   "55",LINES
+         CALL      PRTHD IF NOT LESS
+         PRINT     *38,"----- PAYABLES TRANSACTIONS -----"
+         PRINT     " "
+         PRINT     *11,"VEND.",*20,"ITEM",*27,"INVOICE",*38,"DESCRIPTION":
+                   *64,"AMOUNT",*73,"DISCOUNT",*83,"DISCOUNT"
+         PRINT     *20,"DATE",*27,"NUMBER",*75,"DATE",*85,"AMOUNT"
+         ADD       "4",LINES
+         MOVE      "X",TIME
+         MOVE      "X",TIM2
+         RETURN
+PRTTRAN  COMPARE   "55" TO LINES
+         CALL      PRTHD IF NOT LESS
+         PRINT     *11,TACCN,*20,TMON,"/",TDAY,*28,TINVNO,*38,TDESC:
+                   *61,TAMT,*73,TLDDAY,*83,TDISA
+         ADD       "1",LINES
+         MOVE      "X",XACTFLG
+         RETURN
+. 
+. NOTE THE ROUTINE ABOVE USED TO PRINT THE TINVNO "COUNT" (TCNT) FIELD
+.      TO ALLOW FOR IDENTIFICATION OF MULTIPLE TRANS AGAINST VENDOR
+.      INVOICE NUMBER !
+. 
+PRTNOTRN COMPARE   "55" TO LINES
+         CALL      PRTHD IF NOT LESS
+         PRINT     *40,"NO TRANSACTIONS FOR THIS VENDOR"
+         ADD       "1",LINES
+PRTDASH  COMPARE   "55" TO LINES
+         CALL      PRTHD IF NOT LESS
+         PRINT     " "
+         PRINT     *1,DASH,DASH,DASH
+         PRINT     " "
+         ADD       "3",LINES
+         MOVE      " ",XACTFLG
+         MOVE      " ",TIME
+         RETURN
+         INC       GETDATE
+         INC       APMASTVK
+         INC       APTRANBK

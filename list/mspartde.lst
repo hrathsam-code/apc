@@ -1,0 +1,41 @@
+
+
+
+PAGE    1      mspartde                                                                                       02-11-19 11:35:50
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP mspartde -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+   24.    INCLUDE  B: common.txt
+   33.    INCLUDE  C: mspartsf.txt
+   35.    INCLUDE  D: mspurchf.txt
+   37.    INCLUDE  E: mssalesf.txt
+   39.    INCLUDE  F: datetblz.txt
+   77.    INCLUDE  G: apmastfd.txt
+   79.    INCLUDE  H: custmast.txt
+   88.    INCLUDE  I: callerr1.inc
+   12. I                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   90.    INCLUDE  J: caller2.inc
+  112.    INCLUDE  K: mspartio.txt
+  114.    INCLUDE  L: mssaleio.txt
+  116.    INCLUDE  M: mspoio.txt
+  118.    INCLUDE  N: stdioerr.txt
+  120.    INCLUDE  O: stdfmter.txt
+  122.    INCLUDE  P: stdparer.txt
+  124.    INCLUDE  Q: stdrange.txt
+  126.    INCLUDE  R: custio.txt
+  477.    INCLUDE  S: apmastrd.txt
+  572.                                         GOTO      DATAIN
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  588.    INCLUDE  T: msporecs.txt
+
+   Output: c:\apc\plc\mspartde.plc                                                                                                                                                                                                                                   
+      1493 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:35:50 11:35:50
+  00003610 DATA;  00001658  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

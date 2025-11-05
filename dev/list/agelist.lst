@@ -1,0 +1,37 @@
+
+
+
+PAGE    1      agelist                                                                                        02-11-19 11:35:21
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP agelist -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   23.    INCLUDE  A: common.txt
+   25.    INCLUDE  B: rcvbles.txt
+   30.    INCLUDE  C: date.685
+   31.    INCLUDE  D: apcalndr.txt
+   37.    INCLUDE  E: custmast.txt
+   39.    INCLUDE  F: balfwdfl.txt
+   77.    INCLUDE  G: callerr1.inc
+   12. G                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   81.    INCLUDE  H: callerr2.inc
+  286.                                                   *100,AMTOV90P,*115,NETBAL,*FLUSH 
+                                                                                         *WARNING*
+Warning: I/O control not implemented.
+  308.    INCLUDE  I: custio.txt
+  310.    INCLUDE  J: rcvblsio.txt
+  312.    INCLUDE  K: datecalc.txt
+  313.    INCLUDE  L: apdates.txt
+  344.                                         PRINT     *1,ASTER45,ASTER45,ASTER45,*FLUSH 
+                                                                                          *WARNING*
+Warning: I/O control not implemented.
+  350.    INCLUDE  M: balfwdio.txt
+
+   Output: c:\apc\plc\agelist.plc                                                                                                                                                                                                                                    
+      1145 LINES;      0 ERRORS;      3 WARNINGS; Start/Stop: 11:35:21 11:35:21
+  0000278C DATA;  00000DAE  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

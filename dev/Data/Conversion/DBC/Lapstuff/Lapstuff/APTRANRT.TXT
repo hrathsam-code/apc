@@ -1,0 +1,4 @@
+. 
+         WRITE     APTRANFL,TRNKEY;TACCN,TYEAR,TMON,TDAY,TINVNO,TCNT:
+                                   TDESC,TAMT,TLDDAY,TDISA,TDCODE
+. 

@@ -1,0 +1,151 @@
+
+
+
+PAGE    1      APLABELS.PLS IDE                                                                               03-22-04 14:50:15
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APLABELS.PLS","F:\PLC\APLABELS.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    3.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.txt
+    7.    INCLUDE  C: apmastfd.pls
+   27.    INCLUDE  D: callerr1.inc
+   31.    INCLUDE  E: callerr2.inc
+   50.                                         PRINT     *1," ",*FLUSH 
+                                                                      *WARNING*
+Warning: I/O control not implemented.
+   68.    INCLUDE  F: apmastks.pls
+  102.    INCLUDE  G: apmastrd.pls
+  107.    INCLUDE  H: apmastks.pls
+
+   Output: f:\plc\aplabels.plc                                                                                                                                                                                                                                       
+       290 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 14:50:15 14:50:16
+  00001588 DATA;  000002E8  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APLABELS.PLS IDE                                                                               03-22-04 14:50:16
+                                         
+
+"                                          D      30. E*
+"                                          D      76.  *
+"                                          D      77.  *
+"                                          D      84.  *   115.     116.  
+"000000                                    D      59.  *
+"APMASTER.ISI                              D      37.  *
+"PRINT A/P VENDOR LABELS                   D      29.  *
+"X                                         D      40.  *    70.     103.     109.  
+A0                                         X      59.  *    57.  
+A1                                         X      67.  *    62.      79.  
+A1A                                        X      76.  *    71.      73.  
+A1B                                        X      78.  *    75.  
+A2                                         X      97.  *    57.     100.  
+A3                                         X     106.  *   119.  
+A3A                                        X     109.  *   105.  
+A3B                                        X     115.  *   110.     112.  
+A3C                                        X     117.  *   114.  
+AA                                         X      54.  *    58.  
+ACCKEY                                     D       9. C*    59.      60.      61.     101.       2. G
+ACCNO                                      D      13. C*    60.      61.       2. F     2. G     2. H   118.  
+ACCST                                      D      21. C*     3. F     3. G     3. H
+ACCTNUMB                                   D      14. B*
+ADD1                                       D      15. C*     2. F    83.       2. G     2. H
+ADD2                                       D      16. C*     2. F    84.      86.       2. G     2. H
+ADDR2A                                     D      21.  *
+ADDR2B                                     D      22.  *
+APCONTFL                                   i      10.  *    74.     113.  
+APCONTRL                                   F      43. C*
+APMASTER                                   i       9.  *    37.      60.       2. F     2. G     2. H   120.  
+APOVRFLG                                   D      10. C*   103.  
+APPCODE                                    D      31. B*
+APPSECUR                                   F      32. B*
+APRT                                       X      81.  *    78.     117.  
+BACCNO                                     D      15.  *    97.      99.     101.  
+BC1                                        X      92.  *    85.  
+BC3                                        X      90.  *
+CITY                                       D      17. C*     2. F    87.      88.      92.      93.       2. G     2. H
+CITY2                                      D      23.  *
+CNTPRT                                     D      18.  *    72.     111.  
+CONT                                       D      36. C*     5. F    74.       5. G     5. H   113.  
+CONTFLG                                    D      13.  *    40.      70.     109.  
+CONTNM                                     D      11.  *    74.      76.     113.     115.  
+CRDRAT                                     D      22. C*     3. F     3. G     3. H
+CURR                                       F      26. C*     4. F     4. G     4. H
+D                                          O 5    12. D*    13. E    16. E    31. E
+DATE6                                      D      10. B*
+DDATA                                      D      13. D*    13. E
+DIVNO                                      D      35. C*     5. F     5. G     5. H
+EACCNO                                     D      16.  *    98.      99.     118.  
+ENVS                                       D      11. B*
+EOJ                                        X     120.  *    69.     104.     108.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+
+
+
+PAGE    3      APLABELS.PLS IDE                                                                               03-22-04 14:50:16
+                                         
+
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+EXT                                        D      34. C*     5. F     5. G     5. H
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*    28. E    66.     122.  
+FUT                                        D      38. C*     5. F     5. G     5. H
+INDXIT                                     X      26. E*    22. E
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LPAGE                                      F      44. C*
+LPAT                                       F      33. C*     5. F     5. G     5. H
+MAINLINE                                   X      30. E*    22. E
+MDAY                                       D      31. C*     4. F     4. G     4. H
+MMON                                       D      30. C*     4. F     4. G     4. H
+MTDC                                       F      28. C*     4. F     4. G     4. H
+MTDD                                       F      27. C*     4. F     4. G     4. H
+MYEAR                                      D      32. C*     4. F     4. G     4. H
+NAME                                       D      14. C*     2. F    82.       2. G     2. H
+NAME2                                      D      20.  *
+NULL                                       X      24. E*    22. E
+OPTION                                     F      14.  *    56.      57.  
+OVR30                                      F      25. C*     3. F     3. G     3. H
+OVR60                                      F      24. C*     3. F     3. G     3. H
+OVR90                                      F      23. C*     3. F     3. G     3. H
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+REPLY                                      D      17.  *    30. E    44.      51.      52.      64.  
+RESULT                                     F      11. D*    16. E    22. E
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+S0                                         X      40.  *    38.  
+S02                                        X      42.  *
+S1                                         X      45.  *    53.  
+SECURITY                                   F       9. B*
+STATE                                      D      18. C*     2. F    87.      88.      92.      93.       2. G     2. H
+STATE2                                     D      24.  *
+TAXC                                       D      20. C*     3. F     3. G     3. H
+TELE                                       D      12.  *    74.      77.     113.     116.  
+TELEFONE                                   D      37. C*
+TESTIT                                     X      22. E*    16. E
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TITLTEXT                                   D       9. D*    29.      15. E
+TODAY                                      D       8. B*
+TOTDUE                                     F      29. C*     4. F     4. G     4. H
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+
+
+
+PAGE    4      APLABELS.PLS IDE                                                                               03-22-04 14:50:16
+                                         
+
+ZIP                                        D      19. C*     2. F    87.      88.      92.      93.       2. G     2. H
+ZIP2                                       D      25.  *
+

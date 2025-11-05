@@ -1,0 +1,43 @@
+         MOVE      "00" TO ACCTINDX
+         MOVE      "00" TO ACCTLIMT
+.
+         DISPLAY   *P1:22,*EF,"YOU MAY ENTER UP TO 100 ACCOUNTS TO BYPASS":
+                              " - 11/10/90 R.B."
+KEYACCTS KEYIN     *P1:23,*EL,"ENTER ACCOUNT NUMBER TO BYPASS, OR PRESS F5":
+                   " TO PRINT ",ACCTIN
+         GOTO      ACCTEXIT IF F5
+.
+         ADD       "01" TO ACCTINDX
+         COMPARE   "101" TO ACCTINDX
+         GOTO      TOOMUCH IF EQUAL
+.
+         STORE     ACCTIN INTO ACCTINDX OF ACCT1,ACCT2,ACCT3,ACCT4,ACCT5:
+                                           ACCT6,ACCT7,ACCT8,ACCT9,ACCT10:
+                                           ACCT11,ACCT12,ACCT13,ACCT14,ACCT15:
+                                           ACCT16,ACCT17,ACCT18,ACCT19,ACCT20:
+                                           ACCT21,ACCT22,ACCT23,ACCT24,ACCT25:
+                                           ACCT26,ACCT27,ACCT28,ACCT29,ACCT30:
+                                           ACCT31,ACCT32,ACCT33,ACCT34,ACCT35:
+                                           ACCT36,ACCT37,ACCT38,ACCT39,ACCT40:
+                                           ACCT41,ACCT42,ACCT43,ACCT44,ACCT45:
+                                           ACCT46,ACCT47,ACCT48,ACCT49,ACCT50:
+                                           ACCT51,ACCT52,ACCT53,ACCT54,ACCT55:
+                                           ACCT56,ACCT57,ACCT58,ACCT59,ACCT60:
+                                           ACCT61,ACCT62,ACCT63,ACCT64,ACCT65:
+                                           ACCT66,ACCT67,ACCT68,ACCT69,ACCT70:
+                                           ACCT71,ACCT72,ACCT73,ACCT74,ACCT75:
+                                           ACCT76,ACCT77,ACCT78,ACCT79,ACCT80:
+                                           ACCT81,ACCT82,ACCT83,ACCT84,ACCT85:
+                                           ACCT86,ACCT87,ACCT88,ACCT89,ACCT90:
+                                           ACCT91,ACCT92,ACCT93,ACCT94,ACCT95:
+                                           ACCT96,ACCT97,ACCT98,ACCT99,ACCT100
+.
+         ADD       "01" TO ACCTLIMT
+         GOTO      KEYACCTS
+.
+TOOMUCH  BEEP
+         DISPLAY   *P1:23,*EL,*HON,"YOU HAVE ENTERED 100 ACCOUNTS ALREADY! ":
+                   *W3,*HOFF,*P1:23,*EL
+.
+ACCTEXIT TRAPCLR   PARITY
+.

@@ -1,0 +1,115 @@
+ 
+ 
+ 
+ 
+ 
+	 LISTOFF
+*==============================================================================
+. ADMIN	support	equates
+.
+. Last Revision	Date:  28 Jul 2003
+.
+. Revision History:
+.
+	 %IFDEF	   $ADMEQU_HISTORY
+.:: 02 Jan 03 -	Create Admin equate include definitions.		  :8.7
+.:: 27 Feb 03 -	Added $ADMITEMSRVLOGCUR, $ADMITEMSRVLOGMAX,		  :8.7A
+.::		$ADMITEMSRVLOGSTART, and $ADMITEMSRVLOGRECS.		  :8.7A
+.:: 20 Mar 03 -	Added $ADMLOG for the ADMSETINFO action	commands.	  :8.7A
+.:: 28 Apr 03 -	Added $ADMITEMUSERNAME,	$ADMITEMCOMPUTERNAME,		  :8.7B
+.::		$ADMITEMMODULENAME, $ADMITEMAAMFILENAME,		  :8.7B
+.::		$ADMITEMISIFILENAME, $ADMITEMPRTFILENAME,		  :8.7B
+.::		$ADMITEMTXTFILENAME, $ADMITEMSRVNAME,			  :8.7B
+.::		$ADMITEMSRVUSERNAME, $ADMITEMSRVCOMPUTERNAME, and	  :8.7B
+.::		$ADMITEMFILENAMEALL.					  :8.7B
+.:: 28 Jul 03 -	Added $ADMCMDLOGMSGLEVEL0, $ADMCMDLOGMSGLEVEL1,	and	  :8.7C
+.::		$ADMCMDLOGMSGLEVEL2.					  :8.7C
+.::
+	 %ENDIF
+ 
+*------------------------------------------------------------------------------
+. Admin	General	Ids
+.
+$CHILDTASKLIST	EQU	0
+$ADMINTASKLIST	EQU	1
+ 
+*------------------------------------------------------------------------------
+. Admin	Child Data Types
+.
+$ADMITEMADMID		EQU	0
+$ADMITEMUSERIP		EQU	1
+$ADMITEMPROGRAMNAME	EQU	2
+$ADMITEMFILENAME	EQU	3
+$ADMITEMFILENAMEALL	EQU	3					  8.7B
+$ADMITEMUPTIME		EQU	4
+$ADMITEMLOGLEVEL	EQU	5
+$ADMITEMCLIVER		EQU	6
+$ADMITEMTASKID		EQU	7
+$ADMITEMFULLCLIVER	EQU	8
+$ADMITEMSHAREDMEM	EQU	9
+$ADMITEMKEYNAME		EQU	10
+$ADMITEMLOGSTATE	EQU	11
+$ADMITEMSENDBYTES	EQU	12
+$ADMITEMRECVBYTES	EQU	13
+$ADMITEMRUNTYPE		EQU	14
+$ADMITEMIDLETIME	EQU	15
+$ADMITEMUSERNAME	EQU	16					  8.7B
+$ADMITEMCOMPUTERNAME	EQU	17					  8.7B
+$ADMITEMMODULENAME	EQU	18					  8.7B
+$ADMITEMAAMFILENAME	EQU	19					  8.7B
+$ADMITEMISIFILENAME	EQU	20					  8.7B
+$ADMITEMPRTFILENAME	EQU	21					  8.7B
+$ADMITEMTXTFILENAME	EQU	22					  8.7B
+ 
+*------------------------------------------------------------------------------
+. Admin	Server Data Types
+.
+$ADMITEMSRVVER		EQU	100
+$ADMITEMLOGONCNT	EQU	101
+$ADMITEMLOGONFAIL	EQU	102
+$ADMITEMSRVUPTIME	EQU	103
+$ADMITEMSRVTYPE		EQU	104	// 1-Application,2-File	Manager,3-Automation
+$ADMITEMSRVEXENAME	EQU	105
+$ADMITEMSRVININAME	EQU	106
+$ADMITEMSRVLOGNAME	EQU	107
+$ADMITEMSRVCHILDCNT	EQU	108
+$ADMITEMSRVCHILDMAX	EQU	109
+$ADMITEMSRVLOGCUR	EQU	110	// Server current log file position
+$ADMITEMSRVLOGMAX	EQU	111	// Server log file maximum records
+$ADMITEMSRVLOGSTART	EQU	112	// Server log starting data record
+$ADMITEMSRVLOGRECS	EQU	113	// Server log file data	records
+$ADMITEMSRVNAME		EQU	114					  8.7B
+$ADMITEMSRVUSERNAME	EQU	115					  8.7B
+$ADMITEMSRVCOMPUTERNAME	EQU	116					  8.7B
+ 
+*------------------------------------------------------------------------------
+. Admin	PL/B Runtime Data Types
+.
+$ADMITEMLOCKIO		EQU	200
+$ADMITEMRECORDLOCK	EQU	201
+$ADMITEMXPIO		EQU	202
+$ADMITEMW33RETRY	EQU	203
+ 
+*------------------------------------------------------------------------------
+. Admin	Commands
+.
+$ADMCMDSOFTTERM		EQU 1
+$ADMCMDHARDTERM		EQU 2
+$ADMCMDLOGGINGON	EQU 3
+$ADMCMDLOGGINGOFF	EQU 4
+$ADMCMDSETLOGLEVEL	EQU 5	; Value	parameter is 0-2
+$ADMCMDSETADMFLAGS	EQU 6	; (Reserved Sunbelt Internal Usage)
+$ADMCMDSHUTDOWNLOGON	EQU 7
+$ADMCMDLOGMSGLEVEL0	EQU 8
+$ADMCMDLOGMSGLEVEL1	EQU 9
+$ADMCMDLOGMSGLEVEL2	EQU 10
+ 
+*------------------------------------------------------------------------------
+. Admin	Setinfo	Actions
+.
+$ADMADD		EQU	1
+$ADMDELETE	EQU	2
+$ADMREPLACE	EQU	3
+$ADMLOG		EQU	4
+.
+	 LISTON

@@ -1,0 +1,704 @@
+Patch spwc860c contains the following changes:
+
+Date:  04-16-2002
+
+Subject:  Patch RELEASE 8.6C Runtime Files
+
+*==============================================================================
+    These files have been changed as follows:
+
+PLBSERVE - Modified the TIFF multiple page processing to send a single image to
+           a PLBCLIENT when creating a PICT object.  This improves the
+           performance since only a single image is sent to the client for a
+           given creation operation.
+
+         - Corrected a problem where the Locale Decimal setting was not being
+           sent to the PLBCLIENT workstation.  This was preventing the EDITTEXT
+           object from accepting a decimal point for the DECIMAL setting of the
+           EDITTYPE property.
+
+         - Corrected problems for UNIX implementations with forward byte order
+           platforms.
+
+PLBCLIENT- Modified the PICT object processing to allow a single TIFF image to
+           be received for a create operation.
+
+         - Modified the Main window menu 'File/Print Setup' item to execute the
+           Windows Print Setup dialog.  This menu item is to allow a user to
+           select a default printer.
+
+         - Modified to provide MDI window support.
+
+         - Corrected a problem where the Locale Decimal setting was not being
+           set by the PLBCLIENT task.  This was preventing the EDITTEXT object
+           from accepting a decimal point for the DECIMAL setting of the
+           EDITTYPE property.
+
+         - Corrected a GPF problem caused when more than 500 DESTROY operations
+           for a LINE object were executed.
+
+         - Corrected problems that could cause a GPF error when accessing a
+           Unix PLBSERVE server on a forward byte order platform.
+
+PLBWIN   - Corrected a problem where the SEARCHPATH statement was removing
+PLB386     all blanks from the PLB_PATH buffer.  This caused problems
+UNIX       when a directory name contains blank characters.  This problem
+           is corrected by only removing blank characters before and
+           after the field delimiter character.
+
+         - Corrected problem with AAM Read when a specified key was
+           more than 4 bytes longer than the real key field length.
+           An I43 error for invalid key number would be generated in
+           error.
+
+PLBWIN   - Modified the Main window menu 'File/Print Setup' item to execute
+           the Windows Print Setup dialog.  This menu item is to allow
+           a user to select a default printer.
+
+         - Modified TIFF JPEG compression to support a JPEG compressed
+           TIFF image that has been stored as multiple TIFF strips.
+
+         - Modified the COMOPEN statement to support extended baud rates
+           when using a local communications port under PLBWIN.  The
+           extended baud rates supported for PLBWIN are 57600, 115200,
+           128000, and 256000.
+
+         - Modified the GETFILE statement to support a new keyword named
+           'COMHANDLE={nvar|ivar}'.  This keyword returns the Windows
+           FILE HANDLE created by COMOPEN for a Windows local
+           communications port.  The returned FILE HANDLE can be used
+           to perform specialized operations using WINAPI.
+
+         - Modified the runtime to support MDI (Multiple Document Interface)
+           for WINDOW objects.  This change allows a Window object to
+           to be declared as a MDI Client window that can then host
+           multiple MDI Child windows.  Properties and methods have been
+           provided to support the MDI capabilities as follows:
+
+           WINDOW Properties for MDI support:
+
+           WINTYPE=dnumnvar              (See PLBEQU.INC)
+
+             The window type property has been modified to provide support
+             for following new types:
+
+             MDICLIENT  - This type is specified with a value of 6.
+
+                     This type creates a window that contains a MDI client
+                     window to support MIDCHILD type windows. The
+                     properties: MDIBORDER, MDISCROLL, MDITOP, MDILEFT,
+                     MDIHEIGHT and MDIWIDTH can be used to manipulate
+                     the MDI client window. Also the MDILayout and MDIShow
+                     methods also affect the MDI client window.
+
+             MDICHILD   - This type is specified with a value of 7.
+
+                     This type creates a MDI child window for use with a
+                     host MDICLIENT style window.
+
+           AUTOSCROLL=dnumnvar           (See PLBEQU.INC)
+             This property provides automatic scrollbar handling for a
+             window. This property is used in conjunction with the MINSCROLLH,
+             MINSCROLLV, and SCROLLBAR properties of a WINDOW object.
+
+             If a window object is sized less than either the MINSCROLLH,
+             or MINSCROLLV properties, a scrollbar is shown and scrolling
+             is automatically handled.
+
+             Additionally, when autoscrolling is on, the client area of the
+             window object automatically scrolls to make the control with
+             input focus visible.
+
+           MINSCROLLH=dnumnvar           (See PLBEQU.INC)
+             This property is used in conjunction with the AUTOSCROLL property
+             to specify the minimum horizontal size the window can shrink to
+             before scrollbars appear.
+
+           MINSCROLLV=dnumnvar           (See PLBEQU.INC)
+             This property is used in conjunction with the AUTOSCROLL property
+             to specify the minimum vertical size the window can shrink to
+             before scrollbars appear.
+
+           INTASKBAR=dnumnvar             (See PLBEQU.INC)
+             This property forces a top-level window onto the taskbar when
+             the window is visible and the WINBORDER type for the window is
+             'FIXEDTOOL' or 'SIZABLETOOL'.  This property is ignored when
+             the WINBORDER type is any other setting.
+
+           MDIBORDER=dnumnvar             (See PLBEQU.INC)
+             This property defines when a MDI client window in a window object
+             is to have a border.
+
+           MDIHEIGHT=dnumnvar             (See PLBEQU.INC)
+             This property specifies the height in pixels for the MDI client
+             window. If this property is zero, the bottom of the MDI client
+             is pinned to the bottom of the WINDOW object.
+
+           MDILEFT=dnumnvar               (See PLBEQU.INC)
+             This property specifies the left position in pixels for the
+             MDI client window.
+
+           MDISCROLL=dnumnvar             (See PLBEQU.INC)
+             This property specifies what type of scrollbars are to be
+             provided for the MDI client window in a window object. Actual
+             scrollbar handling is automatically performed.
+
+           MDITOP=dnumnvar                (See PLBEQU.INC)
+             This property specifies the top position in pixels for the
+             MDI client window.
+
+           MDIWIDTH=dnumnvar              (See PLBEQU.INC)
+             This property specifies the width in pixels for the MDI client
+             window. If this property is zero, the right of the MDI client
+             is pinned to the right of the WINDOW object.
+
+           TOPMOST=dnumnvar               (See PLBEQU.INC)
+             This property applies only to top-level windows and is
+             ignored for child windows. This property specifies that a
+             window should be placed above all non-topmost windows and
+             should stay above them, even when the window is deactivated.
+
+           WINBORDER=dnumnvar             (See PLBEQU.INC)
+
+             This property specifies the type of window border for the
+             window object.
+
+             The allowed window borders are as follows:
+
+             NOBORDER
+               This style creates a window with no border and no caption.
+
+             FIXEDSINGLE
+               This style creates a window with a single border that can't be
+               sized.
+
+             FIXED3D
+               This style creates a window with a 3D border that can't be
+               sized.
+
+             SIZABLE3D
+               This style is the same as FIXED3D, but allows the window to be
+               sized.
+
+             FIXEDDIALOG
+               Creates a window that has a double border and can't be sized.
+
+             SIZABLE
+               This style is the same as FIXEDSINGLE, but allows the window to
+               be sized.
+
+             FIXEDTOOL
+               This style creates a tool window. This type is a window intended
+               to be used as a floating toolbar. A tool window has a title bar
+               that is shorter than a normal title bar, and the window title is
+               drawn using a smaller font. A tool window does not appear in the
+               taskbar or in the dialog that appears when the user presses
+               ALT+TAB.  If a tool window has a system menu, its icon is not
+               displayed on the title bar. However, you can display the system
+               menu by right-clicking or by typing ALT+SPACE.
+
+              SIZABLETOOL
+               This style is the same as FIXEDTOOL, but allows the window to be
+               sized.
+
+             dnumnvar values:
+
+             $NONE           EQU     0       // Use a default based on WINTYPE
+             $NOBORDER       EQU     1
+             $FIXEDSINGLE    EQU     2
+             $FIXED3D        EQU     3
+             $SIZABLE3D      EQU     4
+             $FIXEDDIALOG    EQU     5
+             $SIZABLE        EQU     6
+             $FIXEDTOOL      EQU     7
+             $SIZABLETOOL    EQU     8
+
+           WINDOW New Methods:
+
+                .--------------------
+                . Activate Method
+                .
+                The Activate method activates the window of the WINDOW object.
+
+                The method uses the following format:
+
+                [label] {object}.Activate [GIVING {return}]
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . Close Method
+                .
+                The Close method sends a WM_CLOSE event to the window of the
+                WINDOW object.
+
+                The method uses the following format:
+
+                [label] {object}.Close [GIVING {return}]
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. This causes the CLOSE event of a WINDOW object to be
+                     invoked.
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+
+                .--------------------
+                . Erase Method
+                .
+                The Erase method erases the entire graphical window for
+                a window object.
+
+                The method uses the following format:
+
+                [label] {object}.Erase [GIVING {return}]
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. This method performs the same action as a
+                     WINERASE statement.
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . GetActiveMdiChild Method
+                .
+                The GetActiveMdiChild method return the object id
+                property of the active MDI child window.
+
+                The method uses the following format:
+
+                [label] {object}.GetActiveMdiChild [GIVING {return}]
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. Zero is return is there is no active MDI child window.
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . MDILayout Method
+                .
+                The MDILayout method is used to arrange the MDI
+                child windows in a MDI client window to allow for
+                easier navigation and manipulation of MDI child windows.
+                MDI child windows can be tiled horizontally and
+                vertically, cascaded, or arranged as icons for minimized
+                child windows within the MDI client window.
+
+                The method uses the following format:
+
+                [label] {object}.MDILayout [GIVING {return}]:
+                                            USING [*Layout=]{layout}
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                     layout  is a required decimal number or
+                             Numeric Variable that specifies a parameter
+                             value as defined in item (1.) below.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. The {layout} parameter can be one of:
+
+                     $ArrangeIcons  EQU 1
+
+                        All MDI child icons are arranged within the client
+                        region of the MDI client window.
+
+                     $Cascade       EQU 2
+
+                        All MDI child windows are cascaded within the client
+                        region of the MDI client window.
+
+                     $TileHorizontal EQU 3
+
+                        All MDI child windows are tiled horizontally within
+                        the client region of the MDI client window.
+
+                     $TileVertical   EQU 4
+
+                        All MDI child windows are tiled vertically within
+                        the client region of the MDI client window.
+
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . MDIShow Method
+                .
+                The MDILayout method shows or hides the MDI client window.
+
+                The method uses the following format:
+
+                [label] {object}.MDIShow [GIVING {return}]:
+                                          USING [*Show=]{show}
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                     show    is a required decimal number or Numeric
+                             Variable that specifies 0 to hide
+                             or 1 to show the MDI client window.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  2. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . Refresh Method
+                .
+                The Refresh method repaints the objects on the screen.
+
+                The method uses the following format:
+
+                [label] {object}.Refresh [GIVING {return}]
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. This method performs the same action as the
+                     WINREFRESH statement.
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  3. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . Show Method
+                .
+                The Show method shows, hides, minimizes, maximizes,
+                or restores a window.
+
+                The method uses the following format:
+
+                [label] {object}.Show [GIVING {return}] USING [*Mode=]{mode}
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                     mode    is a required decimal number or Numeric
+                             Variable that specifies the show mode.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. The {mode} parameter can be one of:
+
+                     $SW_HIDE            EQU 0
+                       Hides the window and activates another window.
+
+                     $SW_SHOWNORMAL      EQU 1
+                       Activates and displays a window. If the window is
+                       minimized or maximized, the system restores it to
+                       its original size and position.
+
+                     $SW_SHOWMINIMIZED   EQU 2
+                       Activates the window and displays it as a
+                       minimized window.
+
+                     $SW_SHOWMAXIMIZED   EQU 3
+                        Activates the window and displays it as a
+                        maximized window.
+
+                     $SW_MAXIMIZE        EQU 3
+                       Maximizes the specified window.
+
+                     $SW_SHOWNOACTIVATE  EQU 4
+                       Displays a window in its most recent size and
+                       position. This value is similar to SW_SHOWNORMAL,
+                       except the window is not activated.
+
+                     $SW_SHOW            EQU 5
+                        Activates the window and displays it in its
+                        current size and position.
+
+                     $SW_MINIMIZE        EQU 6
+                       Minimizes the specified window and activates
+                       the next top-level window in the Z order.
+
+                     $SW_SHOWMINNOACTIVE EQU 7
+                       Displays the window as a minimized window.
+                       This value is similar to SW_SHOWMINIMIZED,
+                       except the window is not activated.
+
+                     $SW_SHOWNA          EQU 1
+                       Displays the window in its current size and position.
+                       This value is similar to SW_SHOW, except the window
+                       is not activated.
+
+                     $SW_RESTORE         EQU 8
+                       Activates and displays the window. If the window
+                       is minimized or maximized, the system restores
+                       it to its original size and position. An application
+                       should specify this flag when restoring a minimized
+                       window.
+
+                  2. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (RUE).
+                  3. The OVER and EOS Condition Flags are always
+                     cleared (FALSE).
+
+                .--------------------
+                . PrintForm Method
+                .
+                The PrintForm method uses a specified HDC and prints the
+                entire contents of the {object} window including the
+                non-client area.
+
+                The method uses the following format:
+
+                [label] {object}.PrintForm [GIVING {return}]:
+                                           USING [*PRINTDC=]{hdc}:
+                                                 [*LEFT=]{left}:
+                                                 [*TOP=]{top}:
+                                                 [*WIDTH=]{width}:
+                                                 [*HEIGHT=]{height}
+
+                Where:
+
+                     label   is an optional Program Execution Label.
+
+                     object  is a required WINDOW object to be accessed.
+
+                     return  is an optional Numeric Variable that gets
+                             the return value.
+
+                     hdc     is a handle to the destination device context.
+                             The {hdc} value can be obtained using the
+                             the GETFILE statement with the HDC keyword
+                             for a PFILE that has been opened using a
+                             PRTOPEN operation.
+
+                     left    is the x-coordinate, in logical units, of the
+                             upper-left corner of the destination rectangle.
+
+                     top     is the y-coordinate, in logical units, of the
+                             upper-left corner of the destination rectangle.
+
+                     width   is the width, in logical units, of the
+                             destination rectangle.
+
+                     height  is the height, in logical units, of the
+                             destination rectangle.
+
+                Flags Affected: EOS, OVER, ZERO
+
+                Note the following:
+
+                  1. When the HDC input parameter for this method has been
+                     obtained for a PRTOPEN PFILE, then this method must be
+                     executed after a PRTPAGE operation that has printed data.
+                  2. If the {width} and {height} parameters are set to a value
+                     of zero, then this method uses the current display and
+                     printer resolutions to determine a default width and
+                     height to be used when printing the form.
+                  3. The logical units is the current units defined for the
+                     {hdc} device context being used.
+                  4. The returned value is zero if the method did not print the
+                     form.  The returned value is non-zero if the form was
+                     printed.
+                  5. If the value returned is zero, the ZERO (or EQUAL)
+                     Condition Flag is set (TRUE).
+                  6. The OVER and EOS Condition Flags are always cleared
+                     (FALSE).
+
+                Example:
+
+                  Prt       PFile
+                  Frm       Plform             APRINT.PLF
+                  Hdc       Integer            4
+                  .
+                            FormLoad           Frm
+                            PrtOpen            Prt, "-", ""
+                            PrtPage            Prt;*P1:1, "Form Print Test"
+                            GetFile            Prt,HDC=Hdc
+                            Form001.PrintForm  Using Hdc, 0, 50, 0, 0
+                            PrtClose           Prt
+
+         - A new special character sequence '<w' or '<W' has been added
+           for a MENU/SUBMENU object.  When this character sequence is
+           specified in the first name field of the {Menu-data}, then
+           this causes a MDI window menu list to be appended to the client
+           frame menu.
+
+         - Corrected a problem where a SETPROP of a GRIDLINE property for
+           a LISTVIEW object did not work when setting the property ON.
+
+         - Corrected a problem where a disabled ActiveX Control would
+           halt tabbing.
+
+         - Corrected a problem where a TREEVIEW object might not be
+           repainted when activated in a collection.
+
+         - Corrected a problem where resizing a STATTEXT on the main
+           window would cause main window characters to be erased.
+
+         - Modified the runtime to accept '_Item_' as a method name
+           representation to force  'Item' to be executed as a true
+           method for an ActiveX Control.  The '_Item_' syntax is only
+           required when the ActiveX Control identifies 'Item' to be
+           a true control method.  This specialized method syntax name is
+           implemented to address a problem where the 'Item' method for
+           the Microsoft Internet Control 'ShellWindows' was not executing
+           properly.
+
+         - Corrected a problem where an O119 subcode 21 error was occurring
+           on a FORMLOAD statement when the PLF form was an 'Objects Only'
+           form type and contained no objects.  The form only contained
+           resources.
+
+         - Modified the LISTVIEW SortColumn method to properly sort
+           numeric values when the *TYPE parameter is set for numeric
+           sorting.
+
+         - Modified the LISTVIEW SortColumn method to set the SORTORDER
+           property to $SORTNONE.  This changes corrects indeterminate
+           sort results caused when the SORTORDER property was set.
+
+PLBCMP   - Added support for the MDI objects and properties.
+
+PLBDSIGN - Modified the designer to simplify the object properties window
+           operations.  Selecting a property now allows a property value to be
+           edited in place.  Also, selection of a property may cause one or two
+           buttons to appear in the property field.  Clicking the button with
+           an arrow causes a selection list to appear.  Clicking the button
+           with three dots causes a property dialog to appear. Also, double
+           clicking on a previously selected property causes the property value
+           to be changed to the next selection in a property list.  Double
+           clicking on a selected property value allows cut, copy, and paste
+           operations to be performed.
+
+         - Modified the designer to support MDI windows
+
+         - Enabled the designer File/Print menu selection to print the current
+           active form window.
+
+         - Corrected a problem where a GPF error would occur if an Export Code
+           operation was performed and a FORM used the the $ITEMACTIVATE event
+           for a LISTVIEW object.
+
+         - Corrected a problem where the Search operation might not work.
+
+UTILITY  - The index and aamdex utilities have been modified to support the
+           PLB_NOPATH uet/ini keyword.  This keyword causes the utilities to
+           automatically use the 'z' option so that no path information is
+           stored into the AAM/ISI header.
+
+         - Corrected a problem where the new option for creating a log file did
+           not work if -L was used instead of -l.  This correction affects
+           SUNADXNT, SUNIDXNT, SUNSRTNT, SUNAAMDX, SUNINDEX and SUNSORT.
+
+         - Corrected a problem where SUNADXNT could cause a GPF error when
+           executing a NT based platform and the utility output was redirected
+           to a log file.
+
+         - Modified the SUNADXNT/SUNAAMDX utilities to increase the filename
+           buffer sizes from 14 to 60 characters.  This change is to eliminate
+           the possible indeterminate execution of the utilities due to a
+           buffer overflow situation.
+
+PLBEQU   - Added definitions for MDI support.
+
+PLBMETH  - Added definitions for MDI support.
+
+SUNFHSYS - Modified to implement enhanced interface for SUNBELT ODBC driver
+           when accessing the file manager.
+
+         - Modified to correct a problem in the SUNFM file manager that was
+           causing a F01 error when reading an all blank field into a FORM
+           variable with a decimal point.

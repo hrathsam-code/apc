@@ -1,0 +1,173 @@
++......................................................................
+.            S T D T C A L C     MODULE         4/12/82  R.BACHARACH
+. 
+.......................................................................
+. 
+. THIS MODULE WILL BE USED TO HOUSE ALL ROUTINES REQUIRED FOR 
+. DATE MANIPULATION AND DATE RANGE CALCULATION, FOR USE IN THE
+. ACCOUNTS RECEIVABLES SUB-SYSTEM AS WELL AS OTHER SUB-SYSTEMS.
+. 
+. THIS MODULE REQUIRES THAT THE MODULE   D A T E T B L Z  BE INCLUDED
+. FOR SUCCESSFUL COMPILE
+. 
+CALCCRNT MOVE      TODAY  TO  WKDATE
+         REP       " 0"   IN  WKDATE
+         MOVE      WKDATE TO  CCMON
+         RESET     WKDATE TO  4
+         MOVE      WKDATE TO  CCDAY
+         RESET     WKDATE TO  7
+         MOVE      WKDATE TO  CCYR
+         RESET     WKDATE
+. 
+         MOVE      "000000"  TO  CURDATE
+         MOVE      CCMON  TO  CURDATE
+         RESET     CURDATE  TO  3
+         MOVE      CCDAY  TO  CURDATE
+         RESET     CURDATE  TO  5
+         MOVE      CCYR   TO  CURDATE
+         RESET     CURDATE  TO  6
+         LENSET    CURDATE
+         RESET     CURDATE
+. 
+         MOVE      CCYR   TO  YRFORM
+. 
+         MOVE      YRFORM TO  SVCURRYR
+. 
+         MOVE      CCMON  TO  MONFORM
+         MOVE      CCDAY  TO  DAYFORM
+         MOVE      YRFORM TO  DTCURNT
+         MULT      "365"  BY  DTCURNT      (GET YRS x 365)
+. .........................................................................
+. 
+. NOTE HERE THAT WE ARE INCREMENTING THE MONTH TO INSURE
+. THAT WE HAVE ACTUAL ACCUMULATED DAYS TO IDENTIFY THE END
+. OF THE "CURRENT MONTH" PRIOR TO THE AGEING CALCULATION
+. ..........................................................................
+         ADD       "1"    TO  MONFORM
+. ..........................................................................
+         CALL      MONDAYS      (GET DAYS FOR MONTH FROM TABLE)
+. ..........................................................................
+ADMONWK  ADD       MONWORK  TO  DTCURNT
+         SUB       "1"      TO  DTCURNT    (SET LOWER LIMIT)
+. 
+. 
+. NOW CALCULATE THE AGEING DAYS BEFORE LEAVING THIS ROUTINE
+. 
+         MOVE      DTCURNT  TO  DTTODAY
+         ADD       "29"     TO  DTTODAY   (FOR MONTH-END DAYS)
+. 
+         MOVE      DTCURNT  TO  DT130PD
+         SUB       "30"   FROM  DT130PD
+. 
+         MOVE      DT130PD  TO  DT3160PD
+         SUB       "30"   FROM  DT3160PD
+. 
+         MOVE      DT3160PD TO  DT6190PD
+         SUB       "30"   FROM  DT6190PD
+. 
+         MOVE      DT6190PD TO  DTOV90PD
+         SUB       "30"   FROM  DTOV90PD
+. 
+         RETURN
+. 
+. 
+MONDAYS  TRAPCLR   PARITY    (THAT IS THE DAYS ACCUMULATED PRIOR TO DAY
+.                             ONE OF THIS MONTH, THIS CALENDAR YEAR!)
+         MOVE      MONFORM  TO  CINDX1
+         SUB       "1"    FROM  CINDX1     (SET IN BACK TO LAST MONTH)
+         CALL      GETMONTH
+. 
+EOJMDAYS RETURN
+. 
+. 
+GETMONTH MOVE      "000"    TO    MONWORK
+         LOAD      MONWORK  FROM  CINDX1  OF  JAN,FEB,MAR,APR,MAY,JUN:
+                                              JUL,AUG,SEP,OCT,NOV,DEC,XXDEC
+                   RETURN
+. 
+. 
+AGEIT    TRAPCLR   PARITY    (CALCULATE THE AGEING BY COMPARISON
+.                             AGAINST THE DATE FIELDS PREVIOUSLY CALC`D)
+. 
+. FIRST YOU MUST TAKE THE 6 DIGIT TRANSACTION DATE (FORMAT MMDDYY)
+. FROM THE ACCESSED RECORD AND MOVE IT TO WKDATE6 IN THE USER AREA)
+. 
+         MOVE      WKDATE6  TO  CCMON
+         RESET     WKDATE6  TO  3
+         MOVE      WKDATE6  TO  CCDAY
+         RESET     WKDATE6  TO  5
+         MOVE      WKDATE6  TO  CCYR
+         RESET     WKDATE6
+         MOVE      "000000" TO  CCDATE
+         MOVE      CCMON    TO  CCDATE
+         RESET     CCDATE   TO  3
+         MOVE      CCDAY    TO  CCDATE
+         RESET     CCDATE   TO  5
+         MOVE      CCYR     TO  CCDATE
+         RESET     CCDATE   TO  6
+         LENSET    CCDATE
+         RESET     CCDATE
+. 
+         MOVE      CCYR     TO  YRFORM
+         MOVE      YRFORM   TO  CMPDAYS
+         MULT      "365"    BY  CMPDAYS
+. 
+. NOW ALLOW THE MONTH TO BE DECREMENTED BY "1" IN THE MONDAYS ROUTINE
+. TO PERMIT PROPER AGEING
+. 
+         MOVE      CCMON    TO  MONFORM
+         COMPARE   "01"     TO  MONFORM
+         GOTO      CALMON2  IF  NOT  EQUAL
+. 
+. 
+. WHAT IF THE YEAR IS CURRENT BUT MONTH IS JANUARY?
+. 
+         COMPARE   YRFORM   TO  SVCURRYR
+         GOTO      CALMON2   IF  NOT EQUAL
+. 
+. FALLTHRU MEANS ITEM TO BE AGED IS OF CURRENT YEAR AND MONTH IS JANUARY!
+. 
+         SUB       "365"    FROM CMPDAYS
+         MOVE      "14"     TO   MONFORM
+. 
+. 
+CALMON2  CALL      MONDAYS                   2/28/82
+. 
+         ADD       MONWORK  TO  CMPDAYS
+         MOVE      CCDAY    TO  DAYFORM
+         ADD       DAYFORM  TO  CMPDAYS     (COMPARISON DAYS CALC`D)
+. 
+. NOW FIND OUT WHERE IT GOES
+. 
+         COMPARE   CMPDAYS,DTOV90PD
+         GOTO      CK6190PD  IF  LESS
+         MOVE      "5"  TO  COLUMNSW
+         ADD       WKAMT    TO  AMTOV90P
+         GOTO      AGERTRN
+. 
+CK6190PD COMPARE   CMPDAYS,DT6190PD
+         GOTO      CK3160PD IF LESS
+         MOVE      "4"  TO  COLUMNSW
+         ADD       WKAMT    TO  AMT6190P
+         GOTO      AGERTRN
+. 
+CK3160PD COMPARE   CMPDAYS,DT3160PD
+         GOTO      CK130PD  IF LESS
+         MOVE      "3"  TO  COLUMNSW
+         ADD       WKAMT    TO  AMT3160P
+         GOTO      AGERTRN
+. 
+CK130PD  COMPARE   CMPDAYS,DT130PD
+         GOTO      CURNT    IF LESS
+         MOVE      "2"  TO  COLUMNSW
+         ADD       WKAMT    TO  AMT130P
+         GOTO      AGERTRN
+. 
+CURNT    MOVE      "1"  TO  COLUMNSW
+         ADD       WKAMT    TO  AMTCURNT
+. 
+AGERTRN  RETURN
+. 
+. 
+. END OF AGEING ROUTINES.....
+.........................................................

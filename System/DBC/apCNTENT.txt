@@ -1,0 +1,53 @@
+.
+MESS     IFILE     KEYL=3,UNCOMPRESSED
+MNO      DIM       3
+NAME     DIM       20
+TELE     DIM       12
+MENO     FORM      3
+MEN2     DIM       3
+KEY      DIM       3
+ANS      DIM       6
+RPL      DIM       1
+SEQ      FORM      "-1"
+         OPEN      MESS,"APCONTFL"
+S1       DISPLAY   *ES
+         DISPLAY   *P30:2,"  CONTACT PERSON ENTRY  "
+         KEYIN   *P10:6,"CONTACT NO. = ",MEN2
+         CMATCH    "*",MEN2
+         GOTO      S10 IF EQUAL
+         MOVE      MEN2,MENO
+         MOVE      MEN2,KEY
+         COMPARE   "999",MENO
+         GOTO      S10 IF EQUAL
+         COMPARE   "0",MENO
+         GOTO      S1 IF EQUAL
+         READ      MESS,KEY;KEY,NAME,TELE
+         GOTO      S2 IF OVER
+         DISPLAY   *P19:8,*EL,NAME:
+                   *P19:10,*EL,TELE
+         MOVE      "   ",MEN2
+S23      KEYIN     *P24:12," (C)ontinue  (D)elete ? ":
+                   ANS
+         CMATCH    "C",ANS
+         GOTO      S1 IF EQUAL
+         CMATCH    " ",ANS
+         GOTO      S23 IF EOS
+         CMATCH    "D",ANS
+         GOTO      S30 IF EQUAL
+         BEEP
+         GOTO      S1
+S2       KEYIN     *P10:8,"NAME    = ",NAME
+         CMATCH    " ",NAME
+         GOTO      S2 IF EOS
+S3       KEYIN     *P10:10,"TELEPHONE   = ",TELE
+         CMATCH    " ",TELE
+         GOTO      S3 IF EOS
+         KEYIN     *P5:20," ADD THIS RECORD ? (Y/N) ",RPL
+         CMATCH    "Y",RPL
+         GOTO      S1 IF NOT EQUAL
+         WRITE     MESS,KEY;KEY,NAME,TELE
+         DISPLAY   *ES
+         GOTO      S1
+S30      DELETE    MESS,KEY
+         GOTO      S1
+S10      STOP

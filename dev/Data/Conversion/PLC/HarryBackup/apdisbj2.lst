@@ -1,0 +1,510 @@
+
+
+
+PAGE    1      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:56
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APDISBJ2.PLS","F:\PLC\APDISBJ2.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    2.    INCLUDE  A: mscbrag.txt
+    9.    INCLUDE  B: common.pls
+   11.    INCLUDE  C: appaidfd.pls
+   15.    INCLUDE  D: apmastfd.pls
+   67.    INCLUDE  E: disttabl.txt
+   71.    INCLUDE  F: apcalndr.pls
+   73.    INCLUDE  G: callerr1.inc
+   77.    INCLUDE  H: callerr2.inc
+  125.    INCLUDE  I: diststor.pls
+  188.                                         KEYIN     *P1:2,"PRINT (Y)EAR-TO-DATE OR (M)ONTH ? (Y/M) ",HOWTO
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  269.    INCLUDE  J: apmastrd.pls
+  271.    INCLUDE  K: apmastks.pls
+  280.    INCLUDE  L: appaidrd.pls
+  291.    INCLUDE  M: apmastrd.pls
+  306.    INCLUDE  N: apmastks.pls
+  318.    INCLUDE  O: appaidrd.pls
+  327.    INCLUDE  P: appaidks.pls
+  346.    INCLUDE  Q: apmastrd.pls
+  415.                                         ADD       "1"   TO  DROW
+                                                  *WARNING*
+Warning: Statement has no label and follows unconditional goto.
+  424.    INCLUDE  R: apmastrd.pls
+  463.    INCLUDE  S: distsrch.txt
+  471.    INCLUDE  T: distload.pls
+  473.    INCLUDE  U: distupdt.txt
+  481.    INCLUDE  V: distsrch.txt
+  487.    INCLUDE  W: diststor.pls
+  495.    INCLUDE  X: distupdt.txt
+  566.    INCLUDE  Y: apdates.pls
+  586.    INCLUDE  Z: distsrch.txt
+  595.    INCLUDE AA: distload.txt
+
+   Output: f:\plc\apdisbj2.plc                                                                                                                                                                                                                                       
+      1341 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 14:49:55 14:49:57
+  00003708 DATA;  00000CE2  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+"                                          D      30. H*
+"                                          D     109.  *
+"                                          D     248.  *
+"                                          D     277.  *
+"                                          D     315.  *   112.     182.     223.     224.     297.     335.     478.  
+                                                     *   535.     584.  
+" 0                                        D      99.  *   100.     101.     105.     164.     417.  
+"* ALL PAYMENTS *                          D     131.  *
+"* S U M M A R Y *                         D     144.  *
+"*DETAIL/LAST 60 DAYS*                     D     140.  *
+"000000                                    D     267.  *
+"1                                         D     115.  *
+"A                                         D     210.  *
+"APDISTFL.ISI                              D     161.  *
+"BAD READ ON DIST FILE                     D     599.  *
+"D                                         D     132.  *   209.  
+"M                                         D     185.  *
+0                                          F     113.  *   114.     129.     432.     460.     466.      27. U    28. U
+                                                     *   479.     491.     492.      27. X    28. X   513.     529.     545.  
+                                                     *    13. Y    14. Y    15. Y    16. Y    30. Y   583.     589.     609.  
+1                                          F     200.  *
+13                                         F     202.  *
+1900                                       F      54. Y*
+2000                                       F      50. Y*
+22                                         F     559.  *
+3                                          F     544.  *
+365                                        F      24. Y*
+4                                          F     555.  *   563.  
+5                                          F     156.  *
+51                                         F     122.  *
+55                                         F     444.  *   447.  
+57                                         F     502.  *
+60                                         F     175.  *
+9                                          F      25. Y*    36. Y    43. Y
+99                                         F      19. Y*
+ACCKEY                                     D       9. D*   267.       2. J   289.       2. M   310.     314.     345.  
+                                                     *     2. Q   421.       2. R
+ACCNO                                      D      13. D*     2. J     2. K   273.     275.       2. M     2. N   307.  
+                                                     *   310.       2. Q     2. R
+ACCST                                      D      21. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+ACCTNUMB                                   D      14. B*
+ADD1                                       D      15. D*     2. J     2. K     2. M     2. N     2. Q     2. R
+ADD2                                       D      16. D*     2. J     2. K     2. M     2. N     2. Q     2. R
+ADDEM                                      X     557.  *   561.  
+ADDVNDS                                    X     528.  *   523.  
+APCONTRL                                   F      43. D*
+APDISTFL                                   i      17.  *   161.     602.  
+APMASTER                                   i      22.  *   160.       2. J     2. K     2. M     2. N     2. Q     2. R
+APMASTNM                                   D      23.  *   160.  
+APOVRFLG                                   D      10. D*
+APPAIDFL                                   i      19.  *   159.     252.       5. L     5. O     5. P
+APPAIDNM                                   D      20.  *   159.  
+APPCODE                                    D      31. B*
+
+
+
+PAGE    3      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+APPSECUR                                   F      32. B*
+APR                                        F       8. F*    32. Y
+ASTER                                      D      34.  *
+AUG                                        F      12. F*    33. Y
+BBPASS                                     X      41. Y*    37. Y
+BLNKLOOP                                   X     121.  *   127.  
+CALCDATE                                   X      12. Y*   173.     394.  
+CALINDX                                    F      18. F*    14. Y    29. Y    32. Y
+CALSET                                     F      19. F*    13. Y    30. Y    32. Y    35. Y
+CHEK4101                                   X     405.  *   402.  
+CITY                                       D      17. D*     2. J     2. K     2. M     2. N     2. Q     2. R
+CKNUMBER                                   D      24. C*     6. L     6. O     6. P   340.     399.  
+CONT                                       D      36. D*     5. J     5. K     5. M     5. N     5. Q     5. R
+CORRVEND                                   X     297.  *   304.  
+CRDRAT                                     D      22. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+CURR                                       F      26. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+CURRDATE                                   F      21. F*   174.     175.     395.  
+D                                          O 5    12. G*    13. H    16. H    31. H
+DAMT1                                      F      61. E*    17. I     6. T     9. U    17. W     9. X     6.AA
+DAMT10                                     F      70. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT11                                     F      71. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT12                                     F      72. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT13                                     F      73. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT14                                     F      74. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT15                                     F      75. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT16                                     F      76. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT17                                     F      77. E*    19. I     8. T    11. U    19. W    11. X     8.AA
+DAMT18                                     F      78. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT19                                     F      79. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT2                                      F      62. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT20                                     F      80. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT21                                     F      81. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT22                                     F      82. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT23                                     F      83. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT24                                     F      84. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT25                                     F      85. E*    20. I     9. T    12. U    20. W    12. X     9.AA
+DAMT26                                     F      86. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT27                                     F      87. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT28                                     F      88. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT29                                     F      89. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT3                                      F      63. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT30                                     F      90. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT31                                     F      91. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT32                                     F      92. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT33                                     F      93. E*    21. I    10. T    13. U    21. W    13. X    10.AA
+DAMT34                                     F      94. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT35                                     F      95. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT36                                     F      96. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT37                                     F      97. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT38                                     F      98. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT39                                     F      99. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT4                                      F      64. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT40                                     F     100. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+
+
+
+PAGE    4      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+DAMT41                                     F     101. E*    22. I    11. T    14. U    22. W    14. X    11.AA
+DAMT42                                     F     102. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT43                                     F     103. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT44                                     F     104. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT45                                     F     105. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT46                                     F     106. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT47                                     F     107. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT48                                     F     108. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT49                                     F     109. E*    23. I    12. T    15. U    23. W    15. X    12.AA
+DAMT5                                      F      65. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT50                                     F     110. E*    24. I    13. T    16. U    24. W    16. X    13.AA
+DAMT6                                      F      66. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT7                                      F      67. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT8                                      F      68. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DAMT9                                      F      69. E*    18. I     7. T    10. U    18. W    10. X     7.AA
+DATE6                                      D      10. B*
+DATEFLG                                    D      27. F*
+DATESIX                                    D      69.  *   103.     105.  
+DAYN                                       F      22. F*    41. Y    42. Y
+DCOD1                                      D       8. E*     7. I     7. S    24. T     7. V     7. W     7. Z    24.AA
+DCOD10                                     D      17. E*     9. I    25. T     9. W    25.AA
+DCOD11                                     D      18. E*     9. I    25. T     9. W    25.AA
+DCOD12                                     D      19. E*     9. I    25. T     9. W    25.AA
+DCOD13                                     D      20. E*     9. I    25. T     9. W    25.AA
+DCOD14                                     D      21. E*     9. I    25. T     9. W    25.AA
+DCOD15                                     D      22. E*     9. I    26. T     9. W    26.AA
+DCOD16                                     D      23. E*     9. I    26. T     9. W    26.AA
+DCOD17                                     D      24. E*     9. I    26. T     9. W    26.AA
+DCOD18                                     D      25. E*    10. I    26. T    10. W    26.AA
+DCOD19                                     D      26. E*    10. I    26. T    10. W    26.AA
+DCOD2                                      D       9. E*     7. I    24. T     7. W    24.AA
+DCOD20                                     D      27. E*    10. I    26. T    10. W    26.AA
+DCOD21                                     D      28. E*    10. I    26. T    10. W    26.AA
+DCOD22                                     D      29. E*    10. I    26. T    10. W    26.AA
+DCOD23                                     D      30. E*    10. I    27. T    10. W    27.AA
+DCOD24                                     D      31. E*    10. I    27. T    10. W    27.AA
+DCOD25                                     D      32. E*    10. I    27. T    10. W    27.AA
+DCOD26                                     D      33. E*    11. I    27. T    11. W    27.AA
+DCOD27                                     D      34. E*    11. I    27. T    11. W    27.AA
+DCOD28                                     D      35. E*    11. I    27. T    11. W    27.AA
+DCOD29                                     D      36. E*    11. I    27. T    11. W    27.AA
+DCOD3                                      D      10. E*     8. I    24. T     8. W    24.AA
+DCOD30                                     D      37. E*    11. I    27. T    11. W    27.AA
+DCOD31                                     D      38. E*    11. I    28. T    11. W    28.AA
+DCOD32                                     D      39. E*    11. I    28. T    11. W    28.AA
+DCOD33                                     D      40. E*    11. I    28. T    11. W    28.AA
+DCOD34                                     D      41. E*    12. I    28. T    12. W    28.AA
+DCOD35                                     D      42. E*    12. I    28. T    12. W    28.AA
+DCOD36                                     D      43. E*    12. I    28. T    12. W    28.AA
+DCOD37                                     D      44. E*    12. I    28. T    12. W    28.AA
+DCOD38                                     D      45. E*    12. I    28. T    12. W    28.AA
+DCOD39                                     D      46. E*    12. I    29. T    12. W    29.AA
+DCOD4                                      D      11. E*     8. I    24. T     8. W    24.AA
+
+
+
+PAGE    5      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+DCOD40                                     D      47. E*    12. I    29. T    12. W    29.AA
+DCOD41                                     D      48. E*    12. I    29. T    12. W    29.AA
+DCOD42                                     D      49. E*    13. I    29. T    13. W    29.AA
+DCOD43                                     D      50. E*    13. I    29. T    13. W    29.AA
+DCOD44                                     D      51. E*    13. I    29. T    13. W    29.AA
+DCOD45                                     D      52. E*    13. I    29. T    13. W    29.AA
+DCOD46                                     D      53. E*    13. I    29. T    13. W    29.AA
+DCOD47                                     D      54. E*    13. I    30. T    13. W    30.AA
+DCOD48                                     D      55. E*    13. I    30. T    13. W    30.AA
+DCOD49                                     D      56. E*    13. I    30. T    13. W    30.AA
+DCOD5                                      D      12. E*     8. I    24. T     8. W    24.AA
+DCOD50                                     D      57. E*    14. I    30. T    14. W    30.AA
+DCOD6                                      D      13. E*     8. I    24. T     8. W    24.AA
+DCOD7                                      D      14. E*     8. I    25. T     8. W    25.AA
+DCOD8                                      D      15. E*     8. I    25. T     8. W    25.AA
+DCOD9                                      D      16. E*     8. I    25. T     8. W    25.AA
+DCODE                                      D       6. E*    24. T    24.AA   597.  
+DDATA                                      D      13. G*    13. H
+DDD                                        D      44.  *    94.     100.     103.  
+DEC                                        F      16. F*    33. Y
+DESC2                                      D      55.  *   599.     602.     604.  
+DISTAMT                                    F     172. E*    17. I     6. T     5. U     9. U    27. U    17. W   491.  
+                                                     *   492.       5. X     9. X    27. X     6.AA   604.     605.  
+DISTAMTT                                   F     174. E*    26. I    15. T     6. U    18. U    28. U    26. W     6. X
+                                                     *    18. X    28. X    15.AA
+DIVNO                                      D      35. D*     5. J     5. K     5. M     5. N     5. Q     5. R
+DROW                                       F      26.  *   415.     544.     555.     557.     558.     559.     563.  
+DTRTRN                                     X      47. Y*    44. Y
+ENDBLP                                     X     129.  *   123.  
+ENVS                                       D      11. B*
+EOJ                                        X     569.  *   287.     308.     329.     369.     376.     541.  
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+EXT                                        D      34. D*     5. J     5. K     5. M     5. N     5. Q     5. R
+FEB                                        F       6. F*    32. Y
+FIRSTIME                                   D      17. B*   115.     332.     335.  
+FMT1                                       X     355.  *   324.     357.  
+FROMPGM                                    D      16. B*    28. H   579.  
+FUT                                        D      38. D*     5. J     5. K     5. M     5. N     5. Q     5. R
+GETYEAR                                    X      18. Y*
+GLMDSE                                     D      61.  *   405.  
+GOPRINT                                    X     109.  *
+HDRCONT                                    X     145.  *   143.  
+HDRX                                       X     142.  *   139.  
+HEADER                                     X     135.  *   240.     448.     503.     582.  
+HOWOK                                      X     196.  *   186.     192.  
+HOWTO                                      D      53.  *   182.     185.     188.     191.     196.     362.  
+INDXIT                                     X      26. H*    22. H
+INVNUMB                                    D      13. B*
+IO1                                        X     351.  *   323.     353.  
+IOERFILE                                   D      28. B*
+
+
+
+PAGE    6      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+IPMONTH                                    D      38.  *   151.     198.     199.     204.     247.     368.  
+IPYEAR                                     D      39.  *   205.     206.     246.  
+JAN                                        F       5. F*    32. Y
+JUL                                        F      11. F*    33. Y
+JUN                                        F      10. F*    32. Y
+KEYMONTH                                   X     182.  *   194.     201.     203.  
+LINES                                      F      32.  *   156.     440.     444.     447.     502.     517.     526.  
+LISTNAME                                   D      37.  *   131.     140.     144.     145.  
+LISTTYPE                                   D      35.  *   132.     142.     209.     214.     215.     217.     383.  
+                                                     *   419.     508.     522.  
+LPAGE                                      F      44. D*
+LPAT                                       F      33. D*     5. J     5. K     5. M     5. N     5. Q     5. R
+MAINLINE                                   X      30. H*    22. H
+MAR                                        F       7. F*    32. Y
+MAY                                        F       9. F*    32. Y
+MDAY                                       D      31. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+MMM                                        D      43.  *    92.      99.     103.  
+MMON                                       D      30. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+MONEXIT                                    X     609.  *   593.  
+MONFORM                                    F      28.  *
+MONLOOP                                    X     591.  *   607.  
+MONTHN                                     F      40.  *   199.     200.     202.     204.  
+MONTHTOT                                   X     582.  *   574.  
+MOREVEND                                   X     536.  *   540.  
+MTDC                                       F      28. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+MTDD                                       F      27. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+MULTWORK                                   X      23. Y*    52. Y    56. Y
+MYEAR                                      D      32. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+N50                                        F      59. E*     7. S     7. V     7. Z
+NAME                                       D      14. D*     2. J     2. K     2. M   295.       2. N     2. Q   347.  
+                                                     *     2. R   516.  
+NEWCODE                                    X     478.  *   465.     467.  
+NOGOOD                                     X     548.  *   293.  
+NOTFIRST                                   X     362.  *   333.     337.  
+NOV                                        F      15. F*    33. Y
+NULL                                       X      24. H*    22. H
+OCT                                        F      14. F*    33. Y
+OK                                         X     313.  *   300.  
+OPENFILZ                                   X     159.  *   133.  
+OVR30                                      F      25. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+OVR60                                      F      24. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+OVR90                                      F      23. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+PAGES                                      F      31.  *   136.     148.     431.  
+PAGETOTL                                   F      65.  *   431.     432.     442.     572.  
+PAGETOTS                                   X     428.  *   445.     573.  
+PBYPASS                                    X     460.  *   413.     453.  
+PERIOD                                     D      36.  *   138.     210.     231.     389.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*
+PRINTCHK                                   X     437.  *   403.     407.  
+PRNTALL                                    X     267.  *   261.  
+
+
+
+PAGE    7      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+PRTIT                                      X     604.  *   601.  
+PRTTODAY                                   D      13.  *   107.     148.  
+PYR                                        D      56.  *   117.     118.     151.  
+RDXX                                       X     399.  *   363.     384.     390.  
+READPAID                                   X     321.  *   251.     253.     254.     282.     396.     420.     475.  
+                                                     *   497.  
+REPLY                                      D      27.  *    30. H    88.     224.     229.     231.     232.     234.  
+                                                     *   297.     298.     299.     301.     535.     536.     537.     539.  
+                                                     *   553.  
+RESETDSP                                   X     551.  *
+RESETRTN                                   X     563.  *   560.  
+RESULT                                     F      11. G*    16. H    22. H
+ROLLNAME                                   D      63.  *
+RUNTOTS                                    F      30.  *   528.     576.     605.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SAVEACCT                                   D      48.  *   339.     439.     571.  
+SAVECHK                                    D      47.  *   340.     399.     437.     569.  
+SAVEDESC                                   D      51.  *   342.     438.     570.  
+SAVEDTPD                                   D      50.  *   343.     438.     570.  
+SAVEGLCD                                   D      49.  *   341.     405.     439.     571.  
+SAVENAME                                   D      52.  *   347.     439.     571.  
+SAVERTN                                    X     339.  *   336.     452.  
+SCANMON                                    X      29. Y*    26. Y
+SECURITY                                   F       9. B*    25. Y    36. Y    43. Y
+SEP                                        F      13. F*    33. Y
+SET1900                                    X      54. Y*    20. Y
+SETY2K                                     X      50. Y*    21. Y
+SRCHCODE                                   D     170. E*   112.       7. I   461.       7. S   478.       7. V   485.  
+                                                     *     7. W   584.       7. Z
+SRCHINDX                                   F     171. E*   113.     121.     122.       7. I    17. I    26. I   129.  
+                                                     *   460.       7. S   466.       6. T    15. T    24. T     9. U    18. U
+                                                     *   479.       7. V     7. W    17. W    26. W     9. X    18. X   583.  
+                                                     *     7. Z   588.     589.     591.     592.       6.AA    15.AA    24.AA
+                                                     *   609.  
+STATE                                      D      18. D*     2. J     2. K     2. M     2. N     2. Q     2. R
+SUMMARY                                    X     213.  *   220.  
+TACCN                                      D      14. C*     5. L     5. O     5. P   339.     345.     421.  
+TAKEYEAR                                   X     209.  *   197.  
+TAMT                                       F      21. C*   114.       6. L     6. O     6. P   412.     450.       5. U
+                                                     *     6. U     5. X     6. X
+TAXC                                       D      20. D*     3. J     3. K     3. M     3. N     3. Q     3. R
+TCNT                                       F      19. C*     5. L     5. O     5. P
+TDAMT1                                     F     113. E*    26. I    15. T    18. U    26. W    18. X    15.AA
+TDAMT10                                    F     122. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT11                                    F     123. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT12                                    F     124. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT13                                    F     125. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT14                                    F     126. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT15                                    F     127. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAMT16                                    F     128. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT17                                    F     129. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+
+
+
+PAGE    8      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+TDAMT18                                    F     130. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT19                                    F     131. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT2                                     F     114. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT20                                    F     132. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT21                                    F     133. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT22                                    F     134. E*    29. I    18. T    21. U    29. W    21. X    18.AA
+TDAMT23                                    F     135. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT24                                    F     136. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT25                                    F     137. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT26                                    F     138. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT27                                    F     139. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT28                                    F     140. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT29                                    F     141. E*    30. I    19. T    22. U    30. W    22. X    19.AA
+TDAMT3                                     F     115. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT30                                    F     142. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT31                                    F     143. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT32                                    F     144. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT33                                    F     145. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT34                                    F     146. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT35                                    F     147. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT36                                    F     148. E*    31. I    20. T    23. U    31. W    23. X    20.AA
+TDAMT37                                    F     149. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT38                                    F     150. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT39                                    F     151. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT4                                     F     116. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT40                                    F     152. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT41                                    F     153. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT42                                    F     154. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT43                                    F     155. E*    32. I    21. T    24. U    32. W    24. X    21.AA
+TDAMT44                                    F     156. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT45                                    F     157. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT46                                    F     158. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT47                                    F     159. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT48                                    F     160. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT49                                    F     161. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT5                                     F     117. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT50                                    F     162. E*    33. I    22. T    25. U    33. W    25. X    22.AA
+TDAMT6                                     F     118. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT7                                     F     119. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT8                                     F     120. E*    27. I    16. T    19. U    27. W    19. X    16.AA
+TDAMT9                                     F     121. E*    28. I    17. T    20. U    28. W    20. X    17.AA
+TDAY                                       D      17. C*   167.       5. L     5. O     5. P    41. Y
+TDCODE                                     D      26. C*   109.       7. L     7. O     7. P   341.     461.     485.  
+                                                     *   597.     602.     604.  
+TDESC                                      D      20. C*     6. L     6. O     6. P   342.  
+TDINDX1                                    F     165. E*   588.     592.  
+TDINDX2                                    F     166. E*
+TDINDX3                                    F     167. E*
+TDINDX4                                    F     168. E*
+TDISA                                      F      23. C*     6. L     6. O     6. P
+TELEFONE                                   D      37. D*
+TESTDATE                                   F      25. F*   174.     395.      16. Y    47. Y
+TESTIT                                     X      22. H*    16. H
+
+
+
+PAGE    9      APDISBJ2.PLS IDE                                                                               03-22-04 14:49:57
+                                         
+
+TESTMON                                    D      41.  *   367.     368.  
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TESTYR                                     F      59.  *   374.     375.  
+TINVNO                                     D      18. C*     5. L     5. O     5. P
+TITLTEXT                                   D       9. G*    75.      15. H
+TLDDAY                                     D      22. C*     6. L     6. O     6. P
+TMON                                       D      16. C*   163.     164.       5. L     5. O     5. P   417.      29. Y
+TODAY                                      D       8. B*    85.      87.      92.      93.      94.      95.      96.  
+                                                     *    97.     107.     116.     117.     119.     163.     166.     167.  
+                                                     *   169.     170.     171.  
+TOTDUE                                     F      29. D*     4. J     4. K     4. M     4. N     4. Q     4. R
+TPAIDDT                                    D      25. C*     7. L     7. O     7. P   343.     367.     371.     372.  
+                                                     *   373.  
+TRANNKEY                                   D      54.  *   245.     246.     247.     248.     249.     252.  
+TRNKEY                                     D      11. C*   275.     276.     277.     278.       5. L   313.     314.  
+                                                     *   315.     316.       5. O
+TRNKEY2                                    D      12. C*
+TYEAR                                      D      15. C*   170.       5. L     5. O     5. P    18. Y
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDBRK                                    X     501.  *
+VENDIN                                     D      25.  *   223.     273.     285.     289.     307.     516.  
+VENDNUMB                                   D      15. B*
+VENDSET                                    X     306.  *   532.  
+VENDTOT                                    F      29.  *   412.     438.     442.     450.     513.     516.     528.  
+                                                     *   529.     545.     551.     570.     572.  
+VNDBRK                                     X     531.  *   514.  
+VNDPRT                                     X     516.  *   509.  
+WHO                                        X     223.  *   216.     218.     238.     302.     546.     549.  
+WHO1                                       X     240.  *   211.     233.     235.  
+WHO1A                                      X     259.  *   265.  
+WHO2                                       X     284.  *   263.  
+WHOM                                       X     543.  *   538.  
+WHORPLY                                    D      33.  *   259.     260.     262.     531.  
+WORKFLD                                    F      20. F*    15. Y    24. Y    35. Y    42. Y    47. Y    50. Y    51. Y
+                                                     *    54. Y    55. Y
+YEARN                                      F      23. F*    18. Y    19. Y    51. Y    55. Y
+YRCHKN                                     F      58.  *   207.     375.  
+YRCHKX                                     D      57.  *   206.     207.     372.     374.  
+YYY                                        D      45.  *    96.     101.     103.  
+ZIP                                        D      19. D*     2. J     2. K     2. M     2. N     2. Q     2. R
+

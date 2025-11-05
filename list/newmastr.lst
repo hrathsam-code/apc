@@ -1,0 +1,24 @@
+
+
+
+PAGE    1      newmastr                                                                                       02-11-19 11:35:54
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP newmastr -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    3.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.txt
+   14.    INCLUDE  C: logdata.txt
+  160.                                         BEEP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  203.                                         CHAIN     "POENTRY"
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\newmastr.plc                                                                                                                                                                                                                                   
+       324 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:35:54 11:35:54
+  00001330 DATA;  0000020E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

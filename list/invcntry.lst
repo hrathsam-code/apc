@@ -1,0 +1,27 @@
+
+
+
+PAGE    1      invcntry                                                                                       02-11-19 11:35:46
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP invcntry -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   12.    INCLUDE  A: common.txt
+   14.    INCLUDE  B: rcvbles.txt
+   35.    INCLUDE  C: custmast.txt
+   37.    INCLUDE  D: contfile.txt
+   39.    INCLUDE  E: balfwdfl.txt
+  520.    INCLUDE  F: custio.txt
+  522.    INCLUDE  G: rcvblsio.txt
+  524.    INCLUDE  H: contrlio.txt
+   57. H                                       RETURN 
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  526.    INCLUDE  I: balfwdio.txt
+
+   Output: c:\apc\plc\invcntry.plc                                                                                                                                                                                                                                   
+       968 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:46 11:35:46
+  0000283C DATA;  00000D40  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

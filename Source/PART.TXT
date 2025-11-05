@@ -1,0 +1,15 @@
+.
+................................................................
+. PART/TXT INCLUDE MODULE
+. 
+PARTNO   DIM       7
+PART3    DIM       3
+PART4    DIM       4
+PSIZE    DIM       15
+PDESC    DIM       15
+FRGTRATE FORM      2.2
+KEGSORD  FORM      7
+PCSORD   FORM      7
+USAGINDX FORM      1
+LINEPRC  FORM      4.2
+. ......................

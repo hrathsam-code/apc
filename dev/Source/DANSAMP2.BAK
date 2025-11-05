@@ -1,0 +1,55 @@
+DANF                PLFORM            DANFORM.PLF
+Text1               dim               1000
+sapi                automation
+SapiSpeech          automation
+NewSapi             automation
+MyGrammar           automation
+AudioInputs         automation
+
+Form4               form               8
+Dim100              dim                100
+
+                    create             SapiSpeech,Class="SAPI.SpInprocRecognizer"
+                    SapiSpeech.GetAudioInputs giving AudioInputs
+...                    AudioInputs.
+                    SapiSpeech.CreateRecoContext giving NewSapi
+                    getProp       NewSapi,*EventInterests=Form4
+
+
+
+                    NewSapi.CreateGrammar giving MyGrammar
+
+                    Eventreg           NewSapi,2,SpeechSpoken
+                    Eventreg           NewSapi,4,SpeechSpoken
+                    Eventreg           NewSapi,8,SpeechSpoken
+                    Eventreg           NewSapi,16,SpeechSpoken
+                    Eventreg           NewSapi,22,SpeechSpoken
+
+.                    create             SapiSpeech,Class="SpInProcRecoContext"
+
+.                    getprop            SapiSpeech,*IsUiSupported=form4
+.                    SapiSpeech.DisplayUI
+
+.                    create            sapi,class="Sapi.SpVoice"
+                    FORMLOAD          DANF
+                    LOOP
+                      WAITEVENT
+                    REPEAT
+                    STOP
+SPEAKIT             getitem           Etext1,0,text1
+                    sapi.Speak        using Text1
+                    RETURN
+dispui              sapi.DispplayUI
+                    RETURN
+.
+;==========================================================================================================
+SpeechSpoken
+                    debug
+                    return
+;==========================================================================================================
+DataLine            dim                255
+ERROR1
+                    Getinfo            Exception,DataLine
+
+
+.Happy Birthday to you, Happy Birthday to you, Happy Birthday dear Dee, Happy Birthday to you

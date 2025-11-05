@@ -1,0 +1,199 @@
+.  PRINT LABELS FROM ACCOUNT MASTER FILE
+. 
+. WRITTEN BY R BACHARACH,  MICRO SYSTEMS CONSULTANTS
+.                          41 TEELE DRIVE
+.                          CORAM, NEW YORK 11727
+.                          (516) 698-5577
+         INCLUDE   COMMON
+. 
+ACCOUNTS IFILE     KEYL=4,UNCOMPRESSED
+NAME     INIT      "ACCOUNTS.ISI"
+. 
+REPLY    DIM       1
+. 
+         INCLUDE   CUSTMAST
+. 
+. ........WORK AREA FOR SECOND ADDRESS
+. 
+NAME2    DIM       30
+ADDR2    DIM       25
+ADDR22   DIM       25
+CITY2    DIM       20
+STATE2   DIM        2
+ZIP2     FORM       5
+KEY2     DIM        4
+. 
+. 
+KEYCNT   FORM       "0000"
+RECCNT   FORM       "0000"
+. 
+. 
+NUMKEY   FORM      4
+READFLAG DIM       1
+ACCTFLAG DIM       1
+TWOUP    DIM       1
+ALLACCT  DIM       1
+P2FLAG   DIM       1
+. 
+. 
+TIME     INIT      "HH/MM/SS"
++............................................................
+.
+. 
+	INCLUDE		CALLERR1
+
+        MOVE            "CUSTOMER LABEL PRINT" TO TITLTEXT
+
+        INCLUDE         CALLERR2
+
+
+         CLOCK     TIME TO TIME
+.
+. FILE OPENING SEQUENCE
+         DISPLAY   *ES,*P01:12,"PRINT CUSTOMER LABELS":
+                   *P01:14,"NOTE..THIS PROGRAM USES 2-UP PIN-FED CONTINUOUS ":
+                           "LABELS":
+                   *W,*W,*W
+         DISPLAY *ES,*P01:24,"PLEASE FOLLOW THESE INSTRUCTIONS...CAREFULLY":
+                    *C,*R," LIFT THE PRINTER COVER":
+                    *C,*R," PULL THE BLUE LEVER FORWARD":
+                   *C,*R," OPEN THE PAPER FEEDER COVERS":
+                   *C,*R," DROP THE CURRENT FORM OUT OF THE PRINTER":
+                   *C,*R," LOAD THE LABELS ON THE PRINTER":
+                   *C,*R," SLIDE THE RIGHT FEEDER TOWARDS THE LEFT":
+                   *C,*R," FEED THE LABELS UP INTO THE PRINTER":
+                   *C,*R," CLOSE THE PAPER FEEDER COVERS"
+         KEYIN     *C,*R,"......HIT ENTER FOR YOUR ":
+                   "NEXT INSTRUCTIONS",REPLY
+         KEYIN     *ES,*P01:24,"OKAY NOW...... WE`RE ALMOST THERE!":
+                   *C,*R,"WE WILL NOW POSITION THE LABELS.":
+                 *C,*R,"AND ALIGN LEFT EDGE 5 LINES TO THE RIGHT OF MINUS 10":
+                   *C,*R," LOCK THE PAPER FEEDERS":
+                   *C,*R," PUSH THE BLUE LEVER TOWARDS THE REAR":
+                   *C,*R," RESET THE FORMS THICKNESS LEVER TO SETTING 3":
+                 *C,*R,"NOW PUSH THE ROUND KNOB ON THE PAPER FEEDER SHAFT IN":
+                 *C,*R,"AND ROTATE IT CLOCKWISE UNTIL THE PERFORATION IS JUST":
+                   *C,*R,"AT THE TOP OF THE PRINT HEAD":
+                *C,*R," CLOSE THE PRINTER COVER AND HIT THE ENTER KEY",REPLY
+         KEYIN     *ES,*P24:12,"HIT THE ENTER KEY TO PROCEED!",REPLY
+PROCEED  TRAPCLR   IO
+. 
+         TRAP      NOCUST IF IO
+         OPEN      ACCOUNTS,NAME
+.
+         GOTO      STARTIT
+NOCUST   BEEP
+         DISPLAY   *P01:12,*EL,"DISK NOT MOUNTED - ":
+                               "JOB ABORTING",*W
+         CHAIN     "ACCTMNU1"
+. 
+STARTIT  KEYIN     *P01:12,*EF,*P01:12,"PRINT (1) or (2) LABELS PER CUSTOMER":
+                   " ? ",TWOUP
+         RESET     TWOUP
+         GOTO      STARTIT IF EOS
+         CMATCH    "2" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         CMATCH    "1" TO TWOUP
+         GOTO      ACCTPT IF EQUAL
+         BEEP
+         GOTO      STARTIT
+ACCTPT   KEYIN     *P01:12,*EL,"PRINT ACCOUNT NUMBER ON THE LABEL ? ":
+                               "Y or N ",ACCTFLAG
+         RESET     ACCTFLAG
+         GOTO      ACCTPT IF EOS
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         CMATCH    "N" TO ACCTFLAG
+         GOTO      PRINTALL IF EQUAL
+         BEEP
+         GOTO      ACCTPT
+PRINTALL GOTO      NXT1
+         KEYIN     *P01:12,*EL,"PRINT ALL THE ACCOUNTS (within company) ",REPLY
+         RESET     REPLY
+         GOTO      PRINTALL IF EOS
+         CMATCH    "Y" TO REPLY
+         GOTO      NXT1 IF EQUAL
+         CMATCH    "N" TO REPLY
+         GOTO      PKEY IF EQUAL
+         BEEP
+         GOTO      PRINTALL
+PKEY     KEYIN     *P01:12,*EL,"HOW MANY  (1 TO 9999) ",KEYCNT
+NXT1     TRAPCLR   PARITY            (NOP)
+. 
+..SETRANGE READ      ACCOUNTS,CUSTKEY;CUSTKEY      SET FILE AT APPROPRIATE PT
+.......        PRINT     *C,*L,*L,*L,*L
+*............................................................
+. READ A RECORD FROM THE FILE JUST PROC'D
+. AT START: READ RECORD FROM EACH FILE
+.
+READ     READKS    ACCOUNTS;CUSTKEY,CUSTSTTS,CUSTNAME,CUSTADDR:
+                             CUSTCITY,CUSTSTAT,CUSTZIP
+*............................................................
+. TEST FOR END OF FILE
+         GOTO      EOJSET IF OVER
+. 
+.   BYPASS THE DELETED CUSTOMERS
+. 
+         CMATCH    "D" TO  CUSTSTTS
+         GOTO      READ IF  EQUAL
+. 
+OKAY     MOVE      "X" TO READFLAG           INDICATE FOR EOJSET
+         ADD       "1" TO RECCNT
+         COMPARE   "0"    TO KEYCNT
+         GOTO      MATCHX IF EQUAL
+         COMPARE   RECCNT TO KEYCNT
+         GOTO      EOJSET IF  LESS
+MATCHX   CMATCH    "X"  TO P2FLAG
+         GOTO      PRINTEM IF EQUAL
+*............................................................
+         MOVE      CUSTNAME TO NAME2
+         MOVE      CUSTADDR TO ADDR2
+         MOVE      CUSTCITY TO CITY2
+         MOVE      CUSTSTAT TO STATE2
+         MOVE      CUSTZIP  TO ZIP2
+         MOVE      CUSTKEY  TO KEY2
+. 
+. DETERMINE IF PRINTING 2-UP OR 2 CUSTOMERS PER LINE
+. 
+         CMATCH    "2" TO TWOUP
+         GOTO      PRINTEM IF EQUAL
+         MOVE      "X" TO P2FLAG
+         GOTO      READ
+. 
+. 
+PRINTEM  PRINT     *1,CUSTNAME,*38,NAME2
+         PRINT     *1,CUSTADDR,*38,ADDR2
+.
+. IN HERE ADD THE LOGIC TO PRINT THE SECOND LINE OF THE ADDRESS
+.
+..........................................        PRINT     *1,CUSTADR2,*38,ADD
+.................................................................
+         PRINT     *1,CUSTCITY,*22,CUSTSTAT,*25,*ZF,CUSTZIP:
+                   *38,CITY2,*59,STATE2,*62,*ZF,ZIP2
+         CMATCH    "Y" TO ACCTFLAG
+         GOTO      SPACE1 IF NOT EQUAL
+         PRINT     *1,"(",CUSTKEY,")",*38,"(",KEY2,")"
+.................
+         GOTO      SPACEOUT
+SPACE1   PRINT     *1," "
+................
+SPACEOUT PRINT     *1,"ATTENTION: PURCHASING",*38,"ATTENTION: PURCHASING"
+         PRINT     " "
+         GOTO      TESTS
+TESTS    MOVE      " " TO P2FLAG
+         MOVE      " " TO READFLAG
+         CMATCH    "Q" TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         GOTO      READ
+. 
+EOJSET   CMATCH    " " TO READFLAG
+         GOTO      EOJRTN IF EQUAL
+         MOVE      "Q"    TO READFLAG
+         GOTO      PRINTEM
+EOJRTN   BEEP
+         DISPLAY   *ES,*P01:12,"TALK ABOUT A TYPING SAVINGS!",*W,*W
+         BEEP
+         RELEASE
+         CHAIN     "ACCTMNU1"
+.
+*............................................................

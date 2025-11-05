@@ -1,0 +1,341 @@
+
+
+
+PAGE    1      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:31
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "APCASHRQ.PLS","F:\PLC\APCASHRQ.PLC",,c:\windows\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    4.    INCLUDE  A: common.pls
+    6.    INCLUDE  B: apmastfd.pls
+    8.    INCLUDE  C: aptranfd.pls
+   53.    INCLUDE  D: apcalndr.pls
+  134.    INCLUDE  E: apmasthr.pls
+  153.    INCLUDE  F: apmastks.pls
+  165.    INCLUDE  G: apmastup.pls
+  172.    INCLUDE  H: apmasthr.pls
+  185.    INCLUDE  I: aptranrd.pls
+  195.    INCLUDE  J: aptranks.pls
+  209.    INCLUDE  K: apmastrd.pls
+  220.    INCLUDE  L: apmastrd.pls
+  250.    INCLUDE  M: apmastup.pls
+  320.    INCLUDE  N: apdates.pls
+  410.    INCLUDE  O: apmastvk.pls
+  437.    INCLUDE  P: apmasthr.pls
+  448.    INCLUDE  Q: apmasthu.pls
+  454.    INCLUDE  R: getdate.pls
+
+   Output: f:\plc\apcashrq.plc                                                                                                                                                                                                                                       
+       813 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 14:49:31 14:49:32
+  00001FA8 DATA;  00000AD4  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+"                                          D      96.  *
+"                                          D     374.  *
+"                                          D     375.  *   163.     203.     215.      24. R    25. R    40. R    67. R
+" 0                                        D      84.  *    85.  
+"** LIST ALL VENDORS **                    D     109.  *
+"/                                         D     379.  *   381.  
+"000000                                    D     132.  *   171.     436.  
+"0000000000000000000                       D     184.  *
+#                                          D      28. R*
+"1                                         D     248.  *
+"A P C   C O M P O N E N T S               D     143.  *
+"APMASTER.ISI                              D     130.  *
+"APMENU1                                   D     452.  *
+"APTRANFL.ISI                              D     129.  *
+"E                                         D      33. R*    36. R    39. R    50. R    53. R    56. R    59. R
+"X                                         D     123.  *   169.     197.     213.     252.     257.     274.      74. R
+0                                          F     156.  *   157.     158.     159.     160.     161.     162.     212.  
+                                                     *   228.     260.     261.     263.     264.     266.     267.      13. N
+                                                     *    14. N    15. N    16. N    30. N   332.     335.     344.     348.  
+                                                     *   350.     352.     354.     356.     393.     394.  
+1                                          F     324.  *    48. R    54. R
+13                                         F      51. R*
+1900                                       F      54. N*
+2                                          F     111.  *
+2000                                       F      50. N*
+3                                          F      97.  *   115.     327.  
+30                                         F     311.  *
+32                                         F      57. R*
+365                                        F      24. N*
+40                                         F     305.  *
+50                                         F     299.  *
+56                                         F     359.  *
+6                                          F     373.  *
+60                                         F     293.  *
+9                                          F      25. N*    36. N    43. N
+90                                         F     287.  *
+99                                         F      19. N*
+A0A                                        X     132.  *
+A0A1                                       X     142.  *   136.  
+A0B                                        X     151.  *   167.  
+A0C                                        X     169.  *   155.  
+A0D                                        X     192.  *   186.  
+A1                                         X     102.  *    95.     121.  
+A1A                                        X     203.  *   196.  
+A1B                                        X     213.  *   199.  
+A1B1                                       X     219.  *   214.     216.     225.  
+A1B1A                                      X     228.  *   221.  
+A2                                         X     123.  *   120.  
+A3                                         X     322.  *   193.     258.     271.  
+A4                                         X     359.  *   325.     346.     349.     351.     353.     355.  
+A5                                         X     374.  *   360.  
+A5A                                        X     384.  *   376.  
+ACCKEY                                     D       9. B*   132.       2. E   171.       2. H   207.       2. K   219.  
+
+
+
+PAGE    3      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+                                                     *     2. L   223.       6. O   436.       2. P
+ACCNO                                      D      13. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *   384.       6. O     2. P     2. Q
+ACCST                                      D      21. B*     3. F   163.       3. G     3. K     3. L   248.       3. M
+ACCTNUMB                                   D      14. A*
+ADD1                                       D      15. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *     2. P     2. Q
+ADD2                                       D      16. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *     2. P     2. Q
+ADJUST                                     F      50.  *
+APADJUST                                   f      48.  *
+APCONTRL                                   F      43. B*     3. E     3. H     3. P   445.     446.       3. Q
+APMASTER                                   i      10.  *   130.       2. E     2. F     2. G     2. H     2. K     2. L
+                                                     *     2. M     2. P     2. Q   450.  
+APMASTVK                                   X       6. O*   142.  
+APOVRFLG                                   D      10. B*
+APPCODE                                    D      31. A*
+APPSECUR                                   F      32. A*
+APR                                        F       8. D*    32. N
+APTRANFL                                   i      12.  *   129.       2. I     2. J
+AUG                                        F      12. D*    33. N
+BBPASS                                     X      41. N*    37. N
+BKUPFLG                                    D      42.  *   123.     169.      72. R
+BRCH                                       X     120.  *   116.  
+CALCDATE                                   X      12. N*   181.     281.  
+CALINDX                                    F      18. D*    14. N    29. N    32. N
+CALSET                                     F      19. D*    13. N    30. N    32. N    35. N
+CHECKEOJ                                   X     404.  *   333.     345.     357.  
+CHKTWO                                     X     348.  *   328.  
+CITY                                       D      17. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *     2. P     2. Q
+CLEARFLD                                   X     260.  *   256.  
+CNAME                                      D      32.  *   143.  
+CONT                                       D      36. B*     5. F     5. G     5. K     5. L     5. M
+CRDRAT                                     D      22. B*     3. F     3. G     3. K     3. L     3. M
+CURR                                       F      26. B*     4. E     4. F   160.       4. G     4. H     4. K     4. L
+                                                     *   247.       4. M   343.     384.     397.       4. P     4. Q
+CURRDATE                                   F      21. D*   182.     282.  
+DATE6                                      D      10. A*
+DATEDESC                                   D      34.  *    26. R
+DATEFLG                                    D      27. D*
+DATERROR                                   D      35.  *    24. R    33. R    36. R    39. R    40. R    50. R    53. R
+                                                     *    56. R    59. R    67. R
+DATFLG                                     D      43.  *    25. R    74. R
+DAY                                        D      27.  *   175.     179.  
+DAYN                                       F      22. D*    41. N    42. N
+DD                                         D      37.  *    79.     126.     175.      30. R    34. R    46. R
+DEC                                        F      16. D*    33. N
+DIVNO                                      D      35. B*     5. E     5. F     5. G     5. H     5. K     5. L     5. M
+                                                     *     5. P     5. Q
+DTRTRN                                     X      47. N*    44. N
+ENVS                                       D      11. A*
+EOJ                                        X     413.  *   405.  
+
+
+
+PAGE    4      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+EOJ1                                       X     450.  *
+EOJFLAG                                    D      72.  *   257.     404.  
+ERRORSW1                                   D      21. A*
+ERRORSW2                                   D      22. A*
+ERRORSW3                                   D      23. A*
+ERRORSW4                                   D      24. A*
+EXT                                        D      34. B*     5. E     5. F     5. G     5. H     5. K     5. L     5. M
+                                                     *     5. P     5. Q
+FD                                         F      40.  *    46. R    54. R    57. R
+FEB                                        F       6. D*    32. N
+FIRSTIME                                   D      17. A*
+FM                                         F      39.  *    45. R    48. R    51. R
+FROMPGM                                    D      16. A*   140.     190.  
+FTFLG                                      D      57.  *   203.     215.     274.  
+FUT                                        D      38. B*     5. F     5. G     5. K     5. L     5. M
+FY                                         F      41.  *    47. R
+GD1                                        X      34. R*    32. R
+GD10                                       X      72. R*    29. R
+GD2                                        X      37. R*    35. R
+GD3                                        X      40. R*    38. R
+GD3A                                       X      45. R*    41. R
+GD4                                        X      51. R*    49. R
+GD5                                        X      54. R*    52. R
+GD6                                        X      57. R*    55. R
+GD7                                        X      61. R*    58. R
+GD9                                        X      67. R*
+GETDATE                                    X      24. R*    44. R    71. R    73. R
+GETYEAR                                    X      18. N*
+INVNUMB                                    D      13. A*
+IOERFILE                                   D      28. A*
+IOTEST                                     D      26. A*
+IOTYPE                                     D      27. A*
+ISITA3                                     X     115.  *   112.  
+JAN                                        F       5. D*    32. N
+JUL                                        F      11. D*    33. N
+JUN                                        F      10. D*    32. N
+LINES                                      F      20.  *   359.     373.     387.  
+LPAGE                                      F      44. B*     5. E     5. H     5. P     5. Q
+LPAT                                       F      33. B*     5. E     5. F     5. G     5. H     5. K     5. L     5. M
+                                                     *     5. P     5. Q
+MAR                                        F       7. D*    32. N
+MAY                                        F       9. D*    32. N
+MDAY                                       D      31. B*     4. E     4. F     4. G     4. H     4. K     4. L     4. M
+                                                     *   380.       4. P     4. Q
+MM                                         D      36.  *    76.      85.     125.     174.      27. R    28. R    31. R
+                                                     *    45. R
+MMON                                       D      30. B*     4. E     4. F     4. G     4. H     4. K     4. L     4. M
+                                                     *   375.     378.       4. P     4. Q
+MON                                        D      26.  *   174.     178.  
+MTDC                                       F      28. B*     4. E     4. F   162.       4. G     4. H     4. K     4. L
+                                                     *     4. M     4. P     4. Q
+MTDD                                       F      27. B*     4. E     4. F   161.       4. G     4. H     4. K     4. L
+                                                     *     4. M     4. P     4. Q
+
+
+
+PAGE    5      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+MULTWORK                                   X      23. N*    52. N    56. N
+MYEAR                                      D      32. B*     4. E     4. F     4. G     4. H     4. K     4. L     4. M
+                                                     *   382.       4. P     4. Q
+NAME                                       D      14. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *   384.       2. P     2. Q
+NOV                                        F      15. D*    33. N
+OCT                                        F      14. D*    33. N
+OPTION                                     F      30.  *    97.     107.     111.     115.     120.     324.     327.  
+OVFLG                                      D      55.  *   197.     213.     252.  
+OVR30                                      F      25. B*     3. E     3. F   159.       3. G     3. H     3. K     3. L
+                                                     *   239.     240.     242.     243.       3. M   342.     356.     396.  
+                                                     *     3. P     3. Q
+OVR40                                      F      70.  *   245.     340.     354.     384.     391.     393.  
+OVR50                                      F      71.  *   244.     339.     352.     385.     392.     394.  
+OVR60                                      F      24. B*     3. E     3. F   158.       3. G     3. H     3. K     3. L
+                                                     *   238.       3. M   337.     350.     385.     389.       3. P     3. Q
+OVR90                                      F      23. B*     3. F   157.       3. G     3. K     3. L   237.       3. M
+                                                     *   336.     348.     385.     388.  
+PAGE                                       F      21.  *   361.     365.  
+PONUMBS                                    D      12. A*
+PORTN                                      D       7. A*
+POVR30                                     F      69.  *   240.     384.  
+PRTDATE                                    D      45.  *   374.     377.     378.     379.     380.     381.     382.  
+                                                     *   383.  
+PRTDAY                                     D      65.  *    78.     364.  
+PRTMON                                     D      64.  *    75.      84.     364.  
+PRTYR                                      D      66.  *    81.     364.  
+REC0                                       F      49.  *
+REPLY                                      D      44.  *    12. O
+REPTDESC                                   D      47.  *   109.     113.     118.     363.  
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+S1                                         X     194.  *   291.     297.     303.     309.     315.     318.  
+S2                                         X     274.  *   204.     206.     407.  
+SCANMON                                    X      29. N*    26. N
+SECURITY                                   F       9. A*    25. N    36. N    43. N
+SEP                                        F      13. D*    33. N
+SET1900                                    X      54. N*    20. N
+SETOPTS                                    X     109.  *    98.  
+SETY2K                                     X      50. N*    21. N
+STATE                                      D      18. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *     2. P     2. Q
+SVACC                                      D      51.  *   205.     207.     219.     275.  
+T30                                        F      58.  *   235.     239.     266.     314.  
+T40                                        F      59.  *   233.     243.     245.     264.     308.  
+T50                                        F      60.  *   232.     242.     244.     263.     302.  
+T60                                        F      61.  *   230.     238.     261.     296.  
+T90                                        F      62.  *   229.     237.     260.     290.  
+TACCN                                      D      12. C*     2. I     5. I     2. J   205.     275.  
+TAMT                                       F      19. C*     3. I     3. J   290.     296.     302.     308.     314.  
+                                                     *   317.  
+TAXC                                       D      20. B*     3. F     3. G     3. K     3. L     3. M
+
+
+
+PAGE    6      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+TCNT                                       F      17. C*     2. I    11. I     2. J
+TCURR                                      F      63.  *   236.     247.     267.     317.  
+TDAY                                       D      15. C*   179.       2. I     9. I     2. J    41. N
+TDCODE                                     D      22. C*     3. I     3. J
+TDESC                                      D      18. C*     3. I     3. J
+TDISA                                      F      21. C*     3. I     3. J
+TDUE                                       F      31.  *   398.     429.     445.  
+TELEFONE                                   D      37. B*
+TEST30                                     X     311.  *   306.  
+TEST40                                     X     305.  *   300.  
+TEST50                                     X     299.  *   294.  
+TEST60                                     X     293.  *   288.  
+TESTAMNT                                   F      46.  *   335.     336.     337.     339.     340.     342.     343.  
+                                                     *   344.  
+TESTDATE                                   F      25. D*   182.     283.      16. N    47. N
+TESTONE                                    D      18. A*    94.      96.  
+TESTTHRE                                   D      20. A*
+TESTTWO                                    D      19. A*
+TINVNO                                     D      16. C*     2. I    10. I     2. J
+TLDDAY                                     D      20. C*     3. I     3. J
+TMON                                       D      14. C*   178.       2. I     8. I     2. J    29. N
+TODAY                                      D       8. A*    74.      75.      76.      77.      78.      79.      80.  
+                                                     *    81.      82.      83.  
+TODDAY                                     D      23.  *   126.  
+TODMON                                     D      22.  *   125.  
+TODYEAR                                    D      24.  *   127.  
+TOT                                        F      67.  *   212.  
+TOT30                                      F      18.  *   396.     425.     426.     428.     431.     432.  
+TOT40                                      F      17.  *   391.     425.     428.     431.  
+TOT50                                      F      16.  *   392.     426.     428.     432.  
+TOT60                                      F      15.  *   389.     428.  
+TOT90                                      F      14.  *   388.     429.  
+TOTCURR                                    F      19.  *   397.     428.  
+TOTDUE                                     F      29. B*     4. E     4. F   156.       4. G     4. H     4. K     4. L
+                                                     *   228.     229.     230.     232.     233.     235.     236.       4. M
+                                                     *   332.     385.     398.       4. P   446.       4. Q
+TOTFLG                                     D      56.  *
+TRNKEY                                     D       9. C*   184.       2. I   192.  
+TRNKEY2                                    D      10. C*     5. I     6. I     7. I     8. I     9. I    10. I    11. I
+                                                     *    12. I   192.  
+TYEAR                                      D      13. C*   180.       2. I     7. I     2. J    18. N
+UP30                                       X     314.  *
+UP40                                       X     308.  *
+UP50                                       X     302.  *
+UP60                                       X     296.  *
+UP90                                       X     290.  *
+UPCURR                                     X     317.  *   312.  
+USERCODE                                   D      29. A*
+USERLOCN                                   D      25. A*
+USERNAME                                   D      30. A*
+VENDNUMB                                   D      15. A*
+WORKFLD                                    F      20. D*   282.     283.     287.     293.     299.     305.     311.  
+                                                     *    15. N    24. N    35. N    42. N    47. N    50. N    51. N    54. N
+
+
+
+PAGE    7      APCASHRQ.PLS IDE                                                                               03-22-04 14:49:32
+                                         
+
+                                                     *    55. N
+XX1                                        X     184.  *
+XX2                                        X     287.  *
+YEAR                                       D      28.  *   176.     180.  
+YEARN                                      F      23. D*    18. N    19. N    51. N    55. N
+YY                                         D      38.  *    82.     127.     176.      30. R    37. R    47. R
+ZIP                                        D      19. B*     2. E     2. F     2. G     2. H     2. K     2. L     2. M
+                                                     *     2. P     2. Q
+

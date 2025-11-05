@@ -1,0 +1,75 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    State.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    07-25-2019 At 12:52                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00101   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;
+                     %IFNDEF $StateVAR
+$StateVAR                        EQUATE         1
+;
+;
+;         Field Definitions
+;=============================================================================;
+;
+;
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+State                            RECORD
+Code                             Dim                2                   1 - 2        //1 - 2       State Abbreviation
+Name                             Dim                25                  3 - 27       //3 - 27      Actual State Name
+                                 RECORDEND
+;
+;======================================================================================;
+TempState                           record          like   State
+OrigState                           record          like   State
+SaveState                           record          like   State
+;======================================================================================;
+;
+; File Keys and File Labels
+; --------------------------------------------------
+StateTXTNM                          INIT         "States"
+StateISI1NM                         INIT               "State.ISI"
+StateI1DEF                           init            "-n,z,y,1-2"
+.
+. By Code
+. 1-2
+.
+StateKY                       DIM                 2
+;=============================================================================;
+;
+StateFLST                         FILELIST
+StateFL                             IFILE              name="State.ISI",FIX=27,NODUP,NOPATH
+                                    FILELISTEND
+
+StateFileSize       CONST      "27"
+
+StateProg           INIT       "State Program"
+StateDesc           INIT       "State Maintenance"
+StateTITLE          INIT       "State Record"
+StateHelp           INIT       "State.HLP"
+
+
+
+
+          %ENDIF          //End of FD Include File
+
+
+          %IFNDEF $StateVARIO
+            INCLUDE State.IO
+          %ENDIF          //End of IO Include File

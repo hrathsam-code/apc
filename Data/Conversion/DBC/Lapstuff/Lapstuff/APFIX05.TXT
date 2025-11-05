@@ -1,0 +1,110 @@
+. .
+. APDISBJ2 MODULE - A/P DISBURSEMENTS JOURNAL
+.          THIS VERSION WRITTEN 5/30/84 PRINTS THE DATA IN CHECK NUMBER
+.          SEQUENCE RATHER THAN IN VENDOR WITHIN DATE SEQUENCE AS IN 
+.          ORIGINAL - APDISBJR
+. 
+         INCLUDE   COMMON
+. 
+         INCLUDE   APPAIDFD
+. 
+         INCLUDE   APMASTFD
+. 
+APDISTFL IFILE     KEYL=6,UNCOMPRESSED
+. 
+APPAIDFL IFILE     KEYL=29,UNCOMPRESSED
+APPAIDNM INIT      "PAIDBYCK/ISAM"
+. 
+APMASTER IFILE     KEYL=6,UNCOMPRESSED
+APMASTNM INIT      "APMASTER/ISAM"
+. 
+VENDIN   DIM       6
+DROW     FORM      "03"
+REPLY    DIM       1
+VENDTOT  FORM      "       0.00"                                              
+RUNTOTS  FORM      "000000000.00"
+PAGES    FORM      "0000"
+LINES    FORM      "00"
+WHORPLY  DIM       1
+ASTER    INIT      "---------------------------------------------"
+LISTTYPE DIM       1
+PERIOD   DIM       1
+LISTNAME DIM       25
+IPMONTH  INIT      "05"
+MONTHN   FORM      2
+TESTMON  DIM       2
+. 
+SAVECHK  DIM       6
+SAVEACCT DIM       6
+SAVEGLCD DIM       6
+SAVEDTPD DIM       8
+SAVEDESC DIM       20
+SAVENAME DIM       25
+HOWTO    DIM       1
+TRANNKEY DIM       29
+DESC2    DIM       20
+PYR      DIM       2
+RECSCHGD FORM      4
+.
+ROLLNAME INIT      "ROLLFILE/SYST:W"
+. 
+PAGETOTL FORM      8.2
+CKNUMBZ  DIM       6
+. 
+         DISPLAY   *ES,"FIX MONTH 05 FOR A/P HISTORY"
+. 
+. 
+OPENFILZ OPEN      APPAIDFL,APPAIDNM                                          
+         OPEN      APMASTER,APMASTNM
+         OPEN      APDISTFL,"APDISTFL/ISAM"
+. 
+. 
+READLP   INCLUDE   APPAIDKS
+. 
+         GOTO      EOJ IF OVER
+. 
+.................................................
+         CMATCH    "1" TO FIRSTIME
+         GOTO      NOTFIRST IF NOT EQUAL
+. 
+         MOVE      " " TO FIRSTIME
+         CALL      SAVERTN
+         GOTO      NOTFIRST
+. 
+SAVERTN  MOVE      TACCN     TO  SAVEACCT
+         MOVE      CKNUMBER  TO  SAVECHK
+         MOVE      TDCODE    TO  SAVEGLCD
+         MOVE      TDESC     TO  SAVEDESC
+         MOVE      TPAIDDT   TO  SAVEDTPD
+         RETURN
+. 
+. 
+. TEST FOR TAKEYEAR 
+. 
+NOTFIRST MOVE      TPAIDDT TO TESTMON
+         MATCH     IPMONTH TO TESTMON
+         GOTO      READLP IF NOT EQUAL
+.
+         RESET     TPAIDDT TO 1
+         CMOVE     " " TO TPAIDDT
+         RESET     TPAIDDT TO 8
+         LENSET    TPAIDDT
+         RESET     TPAIDDT TO 1
+.
+         ADD       "1" TO RECSCHGD
+         ADD       TAMT TO RUNTOTS
+.
+         MOVE      CKNUMBER TO CKNUMBZ
+         INCLUDE   APPAIDUD
+.
+         GOTO      READLP
+.
+. ........................................
+EOJ      DISPLAY   *P1:10,"TOTAL RECORDS CHANGED = ",RECSCHGD:
+                   *P1:12,"DOLLAR VALUE OR RECS  = ",RUNTOTS
+         BEEP
+.
+         KEYIN     *P1:15,"PRESS ENTER WHEN DONE "
+.
+         ROLLOUT   "CHAIN APINDX/CHN",ROLLNAME
+. 

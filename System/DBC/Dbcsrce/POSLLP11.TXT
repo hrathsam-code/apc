@@ -1,0 +1,74 @@
+.
+. 
+. POSLLP11/TEXT .......ROUTINE FOR MSALLHS/TEXT, MSALLSL, AND MSALLPR/TEXT PGMS
+....................  READS DATA FILES FOR CALENDAR YEAR 1986
+. 
+POSLLP1  CLEAR     MSPOKEY
+         APPEND    MSPARTNO  TO  MSPOKEY
+         APPEND    "         "   TO  MSPOKEY
+         RESET     MSPOKEY
+         READ      MSPUR86,MSPOKEY;MSPOPART
+. 
+POLP2    CALL      PO86RDKS
+         CMATCH    "H",IOSW
+         GOTO      SLL2 IF NOT EQUAL  (IE END OF FILE)
+         MATCH     MSPOPART TO MSPARTNO
+         GOTO      SLL2 IF NOT EQUAL
+.
+. 2/5/86 BYPASS RECORD IF MSPOTYPE = "*"
+.
+. 
+         CMATCH    "*" TO MSPOTYPE
+         GOTO      POLP2 IF EQUAL
+......................
+         MOVE      MSPOQTY  TO  DISPQTY
+. 
+. 
+         DISPLAY   *P1:NROW,*HON,"*",MSPOTYPE,*P5:NROW,MSPONUMB:
+                   *P25:NROW,MSPOUOP,*P29:NROW,DISPQTY:
+                   *P37:NROW,MSPOPRC,*P47:NROW,MSPODATE:
+                   *P54:NROW,MSPOVEND,*P61:NROW,MSPOVNAM,*HOFF
+. 
+         ADD       "1"  TO  NROW
+         COMPARE   "20" TO  NROW
+         CALL      STOPDISP IF EQUAL
+.
+         MATCH     "S",STOPSW
+         GOTO      PARTIN IF EQUAL
+.
+         GOTO      POLP2
+. 
+SLL2     GOTO      POSLRT2
+         APPEND    MSPARTNO  TO  MSSALEKY
+         APPEND    "         "   TO  MSSALEKY
+         RESET     MSSALEKY
+         READ      MSSAL86,MSSALEKY;MSSLPART
+. 
+SLLOOP22 CALL      SL86RDKS
+         CMATCH    "H",IOSW
+         GOTO      POSLRT2  IF  NOT  EQUAL  (IE END OF FILE)
+         MATCH     MSSLPART  TO  MSPARTNO
+         GOTO      POSLRT2  IF  NOT  EQUAL
+. 
+. 2/5/86 BYPASS RECORD IF MSSLTYPE = "*:
+.
+         CMATCH    "*" TO MSSLTYPE 
+         GOTO      SLLOOP22 IF EQUAL
+............
+         MOVE      MSSLQTY  TO  DISPQTY
+. 
+         DISPLAY   *P2:NROW,MSSLTYPE,*P5:NROW,MSSLNUMB:
+                   *P25:NROW,MSSLUOP,*P29:NROW,DISPQTY:
+                   *P37:NROW,MSSLPRC,*P47:NROW,MSSLDATE:
+                   *P54:NROW,MSSLCUST,*P61:NROW,MSSLCNAM
+. 
+         ADD       "1"  TO  NROW
+         COMPARE   "20" TO  NROW
+         CALL      STOPDISP IF EQUAL
+.
+         MATCH     "S",STOPSW
+         GOTO      PARTIN IF EQUAL
+         GOTO      SLLOOP22
+. 
+POSLRT2   RETURN
+. 

@@ -1,0 +1,24 @@
+
+
+
+PAGE    1      apdisacc                                                                                       02-11-19 11:35:25
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apdisacc -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.pls
+   10.    INCLUDE  C: apmastfd.pls
+   15.    INCLUDE  D: callerr1.inc
+   12. D                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   19.    INCLUDE  E: callerr2.inc
+   46.    INCLUDE  F: apmastrd.pls
+
+   Output: c:\apc\plc\apdisacc.plc                                                                                                                                                                                                                                   
+       222 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:25 11:35:25
+  0000144C DATA;  0000010C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,49 @@
+
+
+
+PAGE    1      apmanhst                                                                                       02-11-19 11:35:29
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apmanhst -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    4.    INCLUDE  A: mscbrag.txt
+    5.    INCLUDE  B: common.pls
+    6.    INCLUDE  C: apmastfd.pls
+    7.    INCLUDE  D: appaidfd.pls
+  143.    INCLUDE  E: callerr1.inc
+   12. E                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+  147.    INCLUDE  F: callerr2.inc
+  194.    INCLUDE  G: apmasthr.pls
+  217.    INCLUDE  H: apmastrd.pls
+  343.                                         CMATCH    "?",DAMT
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  358.                                         MOVE      "LAST DISCT DAY" TO DATEDESC
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  409.                                         MOVE      "       ",AMTDISA
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  418.      000006D0                           ADD       FRG,TFRG
+                                                  *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  460.                                         KEYIN     *P72:DROW,*+,*DE,PDMTH,"/",*+,*DE,PDDAY,"/",*-,*DE,PDYR
+                                                    *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  601.    INCLUDE  I: apmastup.pls
+  659.                                         CMATCH    "0",IDEB
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  699.    INCLUDE  J: apmasthr.pls
+  705.    INCLUDE  K: apmasthu.pls
+  731.    INCLUDE  L: getdate.pls
+  732.    INCLUDE  M: apmastvk.pls
+
+   Output: c:\apc\plc\apmanhst.plc                                                                                                                                                                                                                                   
+      1030 LINES;      0 ERRORS;      7 WARNINGS; Start/Stop: 11:35:29 11:35:30
+  00002E00 DATA;  00000F8A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

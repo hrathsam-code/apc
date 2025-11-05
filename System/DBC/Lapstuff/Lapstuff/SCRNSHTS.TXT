@@ -1,0 +1,43 @@
+LINES    FORM      "24"
+PLINESN  FORM      2
+PLINESX  DIM       2
+LIMIT    FORM      2
+COUNT    FORM      2
+FIRSTSW  INIT      "1"
+K        INIT      "........./........./........./........./"
+         DISPLAY   *P01:01,"PRINT DISPLAY WORK SHEETS"
+. 
+HOWMANY  KEYIN     *P01:03,"ENTER NUMBER OF SHEETS DESIRED ",LIMIT
+         ADD       "1" TO LIMIT
+         MOVE      "0" TO COUNT
+         MOVE      "0" TO PLINESN
+         MOVE      "24" TO LINES
+. 
+PRNTLOOP ADD       "1"   TO  LINES
+         COMPARE   "24"  TO  LINES
+         CALL      HDR   IF  NOT  LESS
+. 
+. 
+XXX      ADD       "1"   TO  PLINESN
+         MOVE      PLINESN   TO  PLINESX
+         REPLACE   " 0"      IN  PLINESX
+         PRINT     *1,PLINESX,K,K
+         GOTO      PRNTLOOP
+. 
+HDR      CMATCH    "1" TO FIRSTSW
+         GOTO      PRINTHD IF EQUAL
+         ADD       "1"   TO  COUNT
+         COMPARE   COUNT TO  LIMIT
+         GOTO      PRINTHD   IF EQUAL
+         GOTO      PRINTHD   IF NOT LESS
+         BEEP
+         DISPLAY   *P01:05,"SUCCESSFUL END OF PRINT"
+         STOP
+. 
+PRINTHD  PRINT     *F,*20,"MICRO SYSTEMS CONSULTANTS - SCREEN WORK SHEETS"
+         PRINT     " "
+         MOVE      "0" TO LINES
+         MOVE      "0" TO PLINESN
+         MOVE      "X" TO FIRSTSW
+RTRN     RETURN
+. 

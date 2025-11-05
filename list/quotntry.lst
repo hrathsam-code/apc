@@ -1,0 +1,28 @@
+
+
+
+PAGE    1      quotntry.pls                                                                                   02-11-19 15:47:37
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP quotntry.pls 
+
+    4.    INCLUDE  A: common.txt
+   54.    INCLUDE  B: part.txt
+   58.    INCLUDE  C: contfile.txt
+   63.    INCLUDE  D: splopnfd.txt
+   14. D                              DBOX     DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   98.    INCLUDE  E: custmast.txt
+  113.    INCLUDE  F: rcvbles.txt
+ 1035.    INCLUDE  G: splopnpr.txt
+ 1037.    INCLUDE  H: qupdsq.txt
+ 1092.                                         STOP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+
+   Output: c:\apc\plc\quotntry.plc                                                                                                                                                                                                                                   
+      1561 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 15:47:37 15:47:38
+  00003FB0 DATA;  000013F8  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

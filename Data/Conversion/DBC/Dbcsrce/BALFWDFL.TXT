@@ -1,0 +1,23 @@
+..................................................................
+. A/R BALANCE FORWARD CONTROL FILE - MODULE  "BALFWDFL/TXT
+. 
+. FILE IS ONE RECORD (DAM FILE) CONSISTING OF CURRENT ENDING
+. RECEIVABLES BALANCE FOR BOTH COMPANIES AS OF LAST END-OF-DAY 
+..................................................................
+. 
+ARDATE   DIM       8         DATE OF LAST END-OF-DAY RUN
+LBALFWD  FORM      8.2         CORPORATE RECEIVABLES BAL. FWD.
+RBALFWD  FORM      8.2
+LBALCRED FORM      7.2          DAILY CREDITS PROCESSED (POS SIGNED)
+RBALCRED FORM      7.2
+. 
+. WORK FIELDS
+. 
+BALFWD   IFILE     KEYL=3,UNCOMPRESSED
+BALFNAME INIT      "C:\DBC\BALFWD.ISI"
+. 
+BALREC0  FORM      "00"
+BALFUNCT DIM       5
+BALFKEY  DIM       3
+. 
+......................................................................

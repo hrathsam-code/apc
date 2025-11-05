@@ -1,0 +1,438 @@
+. DATASHARE ANSWER PROGRAM
+.
+. NOTE:  THE PORT NUMBER INCLUSION FILE IS NAMED "PORTN/TXX" TO
+.        DEMONSTRATE THAT EXTENSIONS OTHER THAN "/TXT" MAY BE
+.        USED FOR INCLUSION FILES.
+. 
+PORTN    DIM       30    (NOTE PREVIOUSLY 40)
+TODAY    INIT      "mm/dd/yy"          DATE PASSED IN COMMON
+*................................................................
+SECURITY FORM      1                   SEE DESCRIPTION BELOW
+.
+. THIS VARIABLE IS USED TO INDICATE THE SECURITY RATING FOR WHICH
+. THE USER IS AUTHORIZED.  IT IS INITIALIZED FROM THE FILE OF
+. AUTHORIZED USERS.  A PROGRAM CAN REQUIRE THAT THE USER HAVE THE
+. SECURITY CLEARANCE NECESSARY TO USE THAT PROGRAM.  ZERO IS THE
+. LOWEST RATING AND NINE IS THE HIGHEST RATING.
+* EXAMPLE:
+. SAY THAT THE USE OF PROGRAM "ROLLOUT" IS TO BE RESTRICTED TO
+. ONLY A FEW USERS.  THOSE USERS WHO WILL BE ALLOWED TO USE
+. "ROLLOUT" WILL BE GIVEN A SECURITY RATING OF 7.  ALL OTHER
+. USERS WILL BE GIVEN LOWER SECURITY RATINGS.  PROGRAM "ROLLOUT"
+. IS THEN WRITTEN SO THAT IT WILL "ROLLOUT" ONLY WHEN THE USERS
+. RATING IS 7.  IF THE USER ATTEMPTING TO USE "ROLLOUT" HAS ANY
+. RATING LESS THAN 7, THEN A STOP INSTRUCTION IS EXECUTED.
+. 
+* SOME SUGGESTED SECURITY LEVELS ARE AS FOLLOWS:
+. 
+.     SECURITY   USED BY:
+.        0 ..... DISCONTINUED SERVICE
+.        1-3 ... DATA ENTRY OPERATORS
+.        4-6 ... DATA ENTRY SUPERVISORS
+.        7 ..... PROGRAMMER
+.        8 ..... PROJECT MANAGER
+.        9 ..... SYSTEMS PROGRAMMER
+*................................................................
+DATE6    DIM       6
+DPORT    DIM       12
+. SCRATCH VARIABLES
+.
+CWK2     DIM       2
+CWK3     DIM       3
+NWK2     FORM      2
+NWK9     FORM      9
+MM       DIM       2
+DD       DIM       2
+YY       DIM       2
+*................................................................
+USERS    IFILE     KEYL=9
+USERID   DIM       9                   KEY USED WITH FILE "USERS"
+*................................................................
+ROLCHAIN FILE                          ROLLOUT CHAIN FILE
+SEQ      FORM      "-1"
+*................................................................
+. OUTPUT PARAMETERS OF SUBROUTINE "GETDATE"
+.                                      TIME IN 24-HR. FORMAT
+TIME     INIT      "hh:mm:ss"          hours:minutes:seconds
+DAY      FORM      2
+MONTH    FORM      2                   mm/dd/yy
+YEAR     FORM      2
+*
+JDAY     FORM      3                   JULIAN DATE
+CDAY     DIM       3                   DAY (CHARACTER STRING)
+CYEAR    DIM       2                   YEAR (CHARACTER STRING)
+*
+NFEB     FORM      "28"                # OF DAYS IN FEBRUARY
+N30      FORM      "30"                USED FOR 30-DAY MONTHS
+N31      FORM      "31"                USED FOR 31-DAY MONTHS
+*................................................................
+NAME     DIM       20                  USER'S NAME FROM LOG FILE
+. 
+ROLLNAME INIT      "ROLLFILE/SYST:W"
++................................................................
+. MAINLINE
+.
+.
+*................................................................
+. SET THE TRAPS SO THAT IF ANYTHING GOES WRONG THE USER STILL
+. CANNOT LOG ON WITHOUT AUTHORIZATION
+. 
+.
+         TRAP      NOUSER IF IO
+         OPEN      USERS,"USERS"
+.
+START    TRAP      BADANS IF IO
+         TRAP      BADANS IF CFAIL
+         TRAP      BADANS IF FORMAT
+         TRAP      BADANS IF RANGE
+         TRAP      BADANS IF PARITY
+..................................
+. 9/84 FOR RMS VERSION - R, BACHARACH 
+.
+         CLOCK     PORT TO PORTN
+         CLOCK     TIME TO TIME
+         CLOCK     YEAR TO CYEAR
+         CLOCK     DAY TO CDAY
+         CLOCK     DATE TO TODAY
+.
+         RESET     PORTN TO 2
+         MOVE      PORTN TO DPORT
+         RESET     PORTN TO 1 
+         BEEP
+*................................................................
+.
+DSTART   DISPLAY   *ES,*HON,*P15:4,"D A T A S H A R E   S Y S T E M ":
+                   "  O N - L I N E":
+                   *HOFF:
+                   *P30:6,"You are on port ## ",DPORT
+.
+         CALL      GETDATE
+.
+         DISPLAY   *P31:8,"Today is ",TODAY
+.
+. LOG THE USER OFF THE SYSTEM.
+.
+. THIS FUNCTION IS PUT AT THIS POINT IN THE ANSWER PROGRAM SO
+. THAT ANYONE WHO TURNS OFF THE PORT (INSTEAD OF USING A NORMAL
+. LOG-OFF) WILL STILL GET LOGGED-OFF.  NOTE THAT; WHEN THE PORT
+. IS TURNED OFF, THE ANSWER PROGRAM WILL CONTINUE EXECUTING UNTIL
+. THE FIRST CONSOLE, KEYIN OR DISPLAY STATEMENT IS REACHED.
+.
+*................................................................
+. GET THE DATE AND TIME.
+.
+. OPEN THE FILE OF AUTHORIZED USERS
+. 
+. NOTE:  THE NAME OF THE INDEX FILE NEED NOT BE THE SAME AS THE
+.        NAME OF THE TEXT FILE WHICH IS INDEXED.  (FOR INSTANCE;
+.        "USERS/ISI" COULD BE CREATED FROM A TEXT FILE NAMED
+.        "USERS/DSP".)  THIS PROVIDES ADDITIONAL SYSTEM SECURITY,
+.        SINCE "USERS/DSP" CANNOT BE ACCESSED BY DATABUS PROGRAMS
+. 
+         GOTO      IDENT
+*................................................................
+. FILE CONTAINING AUTHORIZATIONS IS MISSING
+.
+NOUSER   DISPLAY   *ES:
+                   *P20:4,"You cannot log-on, the file contain-":
+                   *P20:5,"ing the list of authorized users is":
+                   *P20:6,"missing!  To use the system, you":
+                   *P20:7,"must use the DOS INDEX utility to":
+                   *P20:8,"create the file, #"USERS/ISI#"."
+HANG     GOTO      HANG
+*................................................................
+. LOG THE USER ONTO THE SYSTEM
+.
+LOGON    DISPLAY   *ES,*HON,*P15:4,"D A T A S H A R E   S Y S T E M ":
+                              "  O N - L I N E":
+                   *HOFF:
+                   *P30:6,"You are on port ##",PORTN
+. 
+. 3/13/82 NOW ENABLE THE FUNCTION KEYS F1 THRU F5 FOR PORTS
+.         2 AND ABOVE IN CASE 8200 TERMINALS ARE BEING USED!
+. 
+. THIS SOURCE CODE MODIFICATION CAME FROM SYSTEME CORPORATION LITERATURE
+. 
+. 
+..       COMPARE   "4" TO PORTN
+..       GOTO      BYPASSIT  IF NOT EQUAL
+..       DISPLAY   *+,LINE1;
+..       DISPLAY   *+,LINE2;
+. 
+. .......................................................................
+*................................................................
+. DISPLAY THE DATE AND TIME
+.
+BYPASSIT CALL      GETDATE
+         DISPLAY   *P31:8,"Today is ",TODAY
+*................................................................
+. CHECK TO SEE IF THE USER IS AUTHORIZED
+. 
+. NOTE:  FOR ADDITIONAL SECURITY, ECHO OFF IS USED WHILE ENTERING
+.        THE IDENTIFICATION NUMBER.  THIS PREVENTS THE ID FROM
+.        BEING DISPLAYED AT THE PORT.
+. 
+.        THE IDENTIFICATION NUMBER BEING REQUESTED IS THE USERS
+.        SOCIAL SECURITY NUMBER.  OTHER IDENTIFICATION TECHNIQUES
+.        MAY BE USED.
+.
+IDENT    TRAP      BADANS IF IO
+         KEYIN     *P1:12,"What is your identification number? ":
+                   *EL,*EOFF,*+,NWK9
+         COMPARE   "001000000" TO NWK9       MAKE SURE HE ENTERS
+         GOTO      BADID IF LESS             ALL 9 DIGITS
+         MOVE      NWK9 TO USERID
+         GOTO      READID
+*................................................................
+. UN-AUTHORIZED USER
+.
+. NOTE:  THE PROGRAMMER CAN SET THE PENALTY FOR ENTERING A BAD
+.        ID BY ADJUSTING THE NUMBER OF *W'S USED
+. 
+BADID    BEEP
+         DISPLAY   *P50:12,*EL,"You are not an authorized user!":
+                   *W,*W,*W,*W,*W
+         BEEP
+         TRAP      BADANS IF IO
+         GOTO      START
+*................................................................
+. SEE IF THE USER IS AUTHORIZED
+.
+READID   READ      USERS,USERID;USERID,NAME,SECURITY
+         GOTO      BADID IF OVER            CAN'T FIND HIS NUMBER
+         DISPLAY   *P50:12,*EL,"Thank you",*W,*W,*P1:12,*EL
+         TRAP      BADANS IF IO
+         DISPLAY   *P20:10,"Hello, ",NAME:
+                   *P20:11,"You are logged on at ",TIME,".":
+                   *W,*W,*W
+. 
+*................................................................
+. IF USER HAS HIGH ENOUGH SECURITY CLEARANCE, CHECK TO SEE IF
+. LOG FILE NEEDS CLEANING
+. 
+         COMPARE   "4" TO SECURITY
+         STOP       IF LESS             "CHAIN to MASTER"
+.
+.
+         CHAIN     "MASTER"
+*................................................................
+. LOOK AT THE NUMBER OF LOG ENTRIES
+. IF MORE THAN 500, TELL THE USER HE NEEDS TO REORGANIZE
+. 
+         COMPARE   "500" TO LOGRN
+         STOP      IF LESS             "CHAIN to MASTER"
+*................................................................
+. FIND OUT IF THE USER WANTS TO RE-ORGANIZE THE LOG FILE
+. 
+         KEYIN     *ES:
+                   *P20:4,"The log file is now using more than":
+                   *P20:5,"five hundred disk sectors.  It needs":
+                   *P20:6,"to be re-organized to free this":
+                   *P20:7,"space.":
+                   *P1:12,"Do you want to re-organize the log ":
+                   "file? (Y/N) ",CWK3
+         CMATCH    "Y" TO CWK3
+         STOP      IF NOT EQUAL        "CHAIN to MASTER"
+*................................................................
+. RE-ORGANIZE THE LOG FILE
+. CHAIN FILE NEEDS TO BE WRITTEN SO OPEN CHAIN FILE
+. 
+         DISPLAY   *ES,"Writing CHAIN file."
+         TRAP      NOCHAIN IF IO
+         PREPARE   ROLCHAIN,"ROLCHAIN"
+         TRAP      BADANS IF IO
+         GOTO      WRITECHN
+*................................................................
+. CHAIN FILE COULD NOT BE CREATED
+. 
+NOCHAIN  DISPLAY   *ES:
+                   *P20:4,"CHAIN file could not be written!":
+                   *P20:5,"Re-organization discontinued.":
+                   *W,*W
+           STOP                          "CHAIN to MASTER"
+*................................................................
+. WRITE THE CHAIN FILE
+. 
+WRITECHN WRITE     ROLCHAIN,SEQ;". RE-ORGANIZE SYSTEM LOG FILE"
+         WRITE     ROLCHAIN,SEQ;"."
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"//* TAP THE DISPLAY KEY TO ":
+                                "START RE-ORGANIZATION"
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"//. SAVE THE LOG FILE"
+         WRITE     ROLCHAIN,SEQ;"//."
+*
+         WRITE     ROLCHAIN,SEQ;". Either of the following ":
+                                "techniques may by used:"
+         WRITE     ROLCHAIN,SEQ;"."
+         WRITE     ROLCHAIN,SEQ;". SAPP MASTERLG,LOGFILE,":
+                                "MASTERLG"
+         WRITE     ROLCHAIN,SEQ;".      or"
+         WRITE     ROLCHAIN,SEQ;". LIST LOGFILE;L"
+         WRITE     ROLCHAIN,SEQ;". LISTING OF MASTER LOG FILE"
+*
+         WRITE     ROLCHAIN,SEQ;"LIST LOGFILE;L"
+         WRITE     ROLCHAIN,SEQ;"LISTING OF MASTER LOG FILE"
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"//. RE-CREATE THE LOG FILE"
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"BUILD LOGFILE;!"
+         WRITE     ROLCHAIN,SEQ;"*000":
+                                   "  PORT":
+                                   "  LOG TYPE":
+                                   "     DATE":
+                                   "      TIME":
+                                   "   OTHER INFORMATION"
+         WRITE     ROLCHAIN,SEQ;"*rec":
+                                   "   ()":
+                                   "  (        )":
+                                   "  (      )":
+                                   "  (      )":
+                                   "  ( . . ."
+         WRITE     ROLCHAIN,SEQ;"!"
+*
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"//. RETURN TO DATASHARE"
+         WRITE     ROLCHAIN,SEQ;"//."
+         WRITE     ROLCHAIN,SEQ;"DATABUS ROLLFILE/SYST;ROLLBACK"
+         WEOF      ROLCHAIN,SEQ
+*................................................................
+. ROLLOUT TO THE CHAIN FILE
+. CHAIN TO THE MASTER MENU
+. 
+         DISPLAY   *ES,"Re-organization in progress."
+         TRAP      NOCHAIN IF CFAIL
+....     ROLLOUT   "CHAIN ROLCHAIN"
+         ROLLOUT   "CHAIN ROLCHAIN/TEXT:W",ROLLNAME
+         TRAP      BADANS IF CFAIL
+         MOVE      "ROLL RET" TO LOGTYPE
+         CLEAR     LOGINFO
+         STOP                          "CHAIN to MASTER"
+*................................................................
+. SUBROUTINE TO GET THE TIME, DAY AND YEAR
+.
+. ON EXIT VARIABLE:  TIME = "hr:mn:sc"
+.                    DAY = "dd"
+.                    MONTH = "mm"
+.                    YEAR = "yy"
+.                    TODAY = "mm/dd/yy"
+.
+GETDATE  CLOCK     YEAR TO CYEAR       GET THE YEAR
+         CLOCK     DAY TO CDAY         GET THE DAY
+         CLOCK     TIME TO TIME        GET THE TIME
+*................................................................
+. PERFORM BOUNDARY CONDITION CHECKS IF DESIRED
+. 
+.        CLOCK     DAY TO CWK3            IF TIME TAKEN BEFORE
+.        MATCH     CDAY TO CWK3           MIDNIGHT AND DAY TAKEN
+.        GOTO      GETDATE IF NOT EQUAL   AFTER MIDNIGHT, REPEAT
+*
+.        CLOCK     YEAR TO CWK2           IF DAY TAKEN BEFORE
+.        MATCH     CYEAR TO CWK2          NEW YEARS & YEAR TAKEN
+.        GOTO      GETDATE IF NOT EQUAL   AFTER NEW YEARS, REPEAT
+*................................................................
+         MOVE      CDAY TO JDAY
+         MOVE      "0" TO MONTH        INITIALIZE
+         MOVE      CYEAR TO YEAR
+*
+         COMPARE   "1" TO JDAY         SYSTEM INITIALIZED
+         GOTO      NODATE IF LESS      WITHOUT DATE!
+*................................................................
+. PERFORM YEAR-CHECK IF DESIRED
+.
+.        COMPARE   "70" TO YEAR
+.        GOTO      NODATE IF LESS
+.        COMPARE   "80" TO YEAR
+.        GOTO      NODATE IF NOT LESS
+*................................................................
+. MAKE SURE FEBRUARY IS HANDLED PROPERLY ON LEAP YEARS
+.
+         MOVE      YEAR TO NWK2
+         DIVIDE    "4" INTO NWK2
+         MULTIPLY  "4" INTO NWK2
+         COMPARE   YEAR TO NWK2           IS IT A LEAP YEAR?
+         GOTO      MDLOOP IF NOT EQUAL    NO, LEAVE NFEB = 28.
+         MOVE      "29" TO NFEB           YES, SET NFEB = 29.
+*................................................................
+. COMPUTE THE MONTH
+.
+MDLOOP   ADD       "1" TO MONTH
+         LOAD      NWK2 FROM MONTH OF N31,NFEB,N31:   JAN/FEB/MAR
+                                      N30,N31,N30:    APR/MAY/JUN
+                                      N31,N31,N30:    JUL/AUG/SEP
+                                      N31,N30,N31     OCT/NOV/DEC
+         SUBTRACT  NWK2 FROM JDAY
+         GOTO      MDL1 IF EQUAL       SUBTRACT DAYS OF THE MONTH
+         GOTO      MDLOOP IF NOT LESS  UNTIL MONTH FOUND
+*
+MDL1     ADD       NWK2 TO JDAY        UNBIAS FROM LAST SUBTRACT
+         MOVE      JDAY TO DAY         TO GET DAY OF THE MONTH
+*................................................................
+. PUT THE DATE INTO mm/dd/yy FORMAT
+.
+MDL2     CLEAR     TODAY
+         APPEND    MONTH TO TODAY
+         APPEND    "/" TO TODAY
+         MOVE      DAY TO CWK2
+         CMATCH    " " TO CWK2         IS THERE A LEADING BLANK?
+         GOTO      MDL3 IF NOT EQUAL   NO, CONTINUE
+         CMOVE     "0" TO CWK2         YES, REPLACE IT WITH 0
+MDL3     APPEND    CWK2 TO TODAY
+         APPEND    "/" TO TODAY
+         MOVE      YEAR TO CWK2
+         CMATCH    " " TO CWK2         IS THERE A LEADING BLANK?
+         GOTO      MDL4 IF NOT EQUAL   NO, CONTINUE
+         CMOVE     "0" TO CWK2         YES, REPLACE IT WITH 0
+MDL4     APPEND    CWK2 TO TODAY
+         RESET     TODAY
+         CLEAR     DATE6
+         MOVE      MONTH TO MM
+         MOVE      DAY   TO DD
+         MOVE      YEAR  TO YY
+         MOVE      MM    TO DATE6
+         APPEND    DD    TO DATE6
+         APPEND    YY    TO DATE6
+         RESET     DATE6 TO 6
+         LENSET    DATE6
+         RESET     DATE6 TO 1
+         RETURN
+. 
+. 
+*................................................................
+. DATE IMPROPER OR NOT INITIALIZED
+.
+NODATE   BEEP
+         KEYIN     *P1:8,*EF,"What is the current month? ",MONTH:
+                   *N,"What is the current day? ",DAY:
+                   *N,"What is the current year? ",YEAR
+*................................................................
+. CHECK FOR INVALID DAY ENTERED
+. 
+         COMPARE   "1" TO DAY
+         GOTO      NODATE IF LESS
+         COMPARE   "32" TO DAY
+         GOTO      NODATE IF NOT LESS
+*................................................................
+. CHECK FOR INVALID MONTH ENTERED
+. 
+         COMPARE   "1" TO MONTH
+         GOTO      NODATE IF LESS
+         COMPARE   "13" TO MONTH
+         GOTO      NODATE IF NOT LESS
+*................................................................
+. CHECK FOR INVALID YEAR IF DESIRED
+. 
+.        COMPARE   "70" TO YEAR
+.        GOTO      NODATE IF LESS
+.        COMPARE   "80" TO YEAR
+.        GOTO      NODATE IF NOT LESS
+         DISPLAY   *P1:12,"Thank you",*W,*W,*P1:8,*EF
+         GOTO      MDL2
+*................................................................
+. A TRAP HAS OCCURED WHILE IN THE ANSWER PROGRAM.  DO NOT ALLOW
+. A CHAIN TO THE MASTER PROGRAM
+. 
+BADANS   DISPLAY   *P58:1,*EL,"  Unrecoverable system":
+                   *P58:2,*EL,"  error!  Consult your":
+                   *P58:3,*EL,"  programmer."
+         GOTO      HANG

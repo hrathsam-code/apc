@@ -1,0 +1,196 @@
+.  ACCOUNT MASTER LISTING  -  ACCOUNT NUMBER ORDER
+. 
+	 INCLUDE   MSCBRAG
+. 
+	 INCLUDE   COMMON
+. 
+NAME	 INIT	   "C:\DBC\ACCTSTAT.ISI"
+CUSTFILE IFILE	   KEYL=6,UNCOMPRESSED
+REPLY	 DIM	   1
+SWMR	 FORM	   "0"	       '1'=MATCHING RECORD
+SW1P	 FORM	   "1"	       '1'=FIRST CYCLE
+LINECT	 FORM	   3	       LINE COUNTER
+PAGE	 FORM	   3	       PAGE NUMBER
+RID01	 FORM	   "0"	       RECORD TYPE 01
+LR	 FORM	   "0"	       '1'=LAST	RECORD PENDING
+LRTOT	 FORM	   5	      GRAND TOTAL
+INREC1	 DIM	   127	   INPUT WORK AREA
+*............................................................
+	 INCLUDE   CUSTMAST
+.
+DUMMFLD	 DIM	   35
+PCUSTZIP DIM	   5
+.
+NWFLD1	 DIM	    1	      5	-  5   ACCOUNT STATUS CODE	  1.0
+COMP	 DIM	   3	      INPUT COMPANY TO BE PRINTED
+. 
+REPTITL	 INIT	   "AMERICAN PRECISION CORPORATION"
+COMPVAR	 DIM	   27
+. 
+TIME	 INIT	   "hh/mm/s"
+SAVESTAT DIM	   2
+STATACCT FORM	   5
+.
+DASHLINE INIT	   "---------------------------------------------"
+FIRST	 INIT	   "1"
+READKY	 INIT	   "AL	  "
+.
+PMM	 DIM	   2
+PDD	 DIM	   2
+PYY	 DIM	   2
+SMM	 DIM	   2
+SDD	 DIM	   2
+SYY	 DIM	   2
+. 
++............................................................
+. MAINLINE FOLLOWS
+.
+	 CLOCK	   TIME	TO TIME
+. 
+. FILE OPENING SEQUENCE
+	 TRAP	   NOFILE    IF	IO
+	 OPEN	   CUSTFILE,NAME
+	 MOVE	   "APP"  TO  COMP
+MOVREP	 MOVE	   REPTITL TO COMPVAR
+CONT1	 TRAPCLR   PARITY	 (NOP)
+	 CALL	   HEADER
+.
+	 MOVE	   " " TO REPLY
+	 TRAPCLR   IO
+	 TRAP	   READ	IF IO
+	 READ	   CUSTFILE,READKY;DUMMFLD
+	 GOTO	   READ
+	 GOTO	   READ	IF OVER
+. 
+NOFILE	 BEEP
+	 DISPLAY   *ES,"ACCOUNT	FILE IS	NOT ON-LINE - JOB ABORTING",*W,*W
+	 BEEP
+	 CHAIN	   "ACCTMNU1"
+*............................................................
+. READ A RECORD	FROM THE FILE JUST PROC'D
+. AT START: READ RECORD	FROM EACH FILE
+.
+READ	  INCLUDE   CUSTRDKS
+.
+	 GOTO	   EOJ IF OVER
+.
+	 CMATCH	   "1",FIRST
+	 GOTO	   CHKSTAT IF NOT EQUAL
+	 MOVE	   CUSTSTAT TO SAVESTAT
+	 MOVE	   " "	    TO FIRST
+.
+*............................................................
+. TEST FOR END OF FILE
+. IF END OF FILE: TURN ON LR AND L1-L9
+.
+CHKSTAT	 MATCH	   CUSTSTAT TO SAVESTAT
+	 CALL	   BRKSTAT  IF NOT EQUAL
+.
+DETCALC	 ADD	   "1" TO LRTOT
+*............................................................
+. HEADING AND DETAIL OUTPUT
+.
+DETOUT	 COMPARE   "50"	TO LINECT
+	 CALL	   HEADER IF NOT LESS
+.
+	 MOVE	   CUSTZIP TO PCUSTZIP
+	 REP	   " 0"	IN PCUSTZIP
+.
+	 MOVE	   LSTSALDT TO SMM
+	 RESET	   LSTSALDT TO 3
+	 MOVE	   LSTSALDT TO SDD
+	 RESET	   LSTSALDT TO 5
+	 MOVE	   LSTSALDT TO SYY
+	 RESET	   LSTSALDT TO 1
+.
+	 MOVE	   LSTPAYDT TO PMM
+	 RESET	   LSTPAYDT TO 3
+	 MOVE	   LSTPAYDT TO PDD
+	 RESET	   LSTPAYDT TO 5
+	 MOVE	   LSTPAYDT TO PYY
+	 RESET	   LSTPAYDT TO 1
+.
+	 REP	   " 0"	IN SMM
+	 REP	   " 0"	IN PMM
+.
+.
+*............................................................
+	 PRINT	     *1,CUSTKEY:   ACCOUNT NUMBER	      4.0
+		     *8,CUSTNAME:
+		    *45,CUSTADDR:
+		    *73,CUSTCITY:
+		    *98,CUSTSTAT:
+		    *104,PCUSTZIP
+......			 *114,SMM,"/",SDD,"/",SYY:
+......			 *124,PMM,"/",PDD,"/",PYY
+.
+	 ADD	   "1" TO LINECT
+	 ADD	   "1" TO STATACCT
+	 MOVE	   CUSTSTAT TO SAVESTAT
+*............................................................
+. TURN OFF R.I.D. & ALL	L-INDICATORS
+.
+TURNOFF	 MOVE	   "0" TO SW1P
+	 MOVE	   "0" TO RID01
+*............................................................
+. GO READ ANOTHER RECORD
+.
+	 GOTO	   READ
+. 
+*............................................................
+. PAGE HEADING ROUTINE
+.
+HEADER	 ADD	   "1" TO PAGE
+	 PRINT	   *F,*C,*L,*L:
+		   *38,"ACCOUNT	FILE MASTER LISTING":
+		       "  (NUMERICALLY WITHIN STATE)":
+		   *100,"PAGE ",PAGE:
+		   *117,"AS OF ",TODAY
+	 PRINT	   *51,COMPVAR,*C,*L,*L
+	 MOVE	   "0" TO LINECT
+	 PRINT	   *1,"ACCT.":
+		   *10,"NAME":
+		   *45,"ADDRESS":
+		   *73,"CITY":
+		   *98,"ST":
+		   *105,"ZIP"
+......			*116,"LAST":
+......			*126,"LAST"
+	 PRINT	   *2,"NO.",*105,"CODE":
+		   *C,*L
+.......			 *116,"SALE",*124,"PAYMENT":
+.
+	 RETURN
+.
+BRKSTAT	 COMPARE   "48",LINECT
+	 CALL	   HEADER IF NOT LESS
+	 PRINT	   *C,*L,DASHLINE,DASHLINE,DASHLINE
+	 PRINT	   *1,"TOTAL ACCOUNTS FOR STATE	OF ",SAVESTAT:
+		      "	= ",STATACCT
+	 PRINT	   *1,DASHLINE,DASHLINE,DASHLINE
+	 PRINT	   *1,"	"
+	 MOVE	   "00000" TO STATACCT
+	 MOVE	   CUSTSTAT TO SAVESTAT
+	 ADD	   "6" TO LINECT
+	 RETURN
+.
+*............................................................
+. TOTAL	OUTPUT
+.
+TOTOUT	 TRAPCLR   PARITY  (NOP)
+	 CALL	   BRKSTAT
+	 COMPARE   "1" TO LR
+	 RETURN	   IF NOT EQUAL
+	 PRINT	  *C,*L,*L,*20,"TOTAL CUSTOMERS	ON FILE	 ",LRTOT,*C,*L
+	 ADD	   "2" TO LINECT
+	 RETURN
+*............................................................
+. END OF JOB
+.
+EOJ	 CALL	   TOTOUT
+	 PRINT	   *F
+	 CLOSE	   CUSTFILE
+	 RELEASE
+	 CHAIN	   "ACCTMNU1"
+. 
+. 

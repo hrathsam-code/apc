@@ -1,0 +1,89 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    CustomerPartDiscounts.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    03-12-2019 At 12:22                                            ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;                                                                             ;
+;              00179   05-21-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF $CustomerPartDiscountsVAR
+$CustomerPartDiscountsVAR        EQUATE         1
+;
+;
+;         Field Definitions                              
+;=============================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+.--------------------------------------------------------------------------------------------------------------
+CustomerPartDiscounts            RECORD
+CustomerID                       Like             Cust.CustomerID    //                                        
+PartNumber                       Like             Parts.PartNumber    //                                        
+DiscountType                     Form               2                  27 - 28       //1=Percenage,2=Amount
+Amount                           Form               6.4                29 - 39
+StartDate                        Dim                8                  40 - 47
+EndDate                          Dim                8                  48 - 55
+Inactive                         Form               1                  56 - 56
+SeqNo                            Like             Sequence.SeqNo    //                                        
+                                 RECORDEND
+;
+;======================================================================================;
+TempCustomerPartDiscounts           record          like   CustomerPartDiscounts           
+OrigCustomerPartDiscounts           record          like   CustomerPartDiscounts           
+SaveCustomerPartDiscounts           record          like   CustomerPartDiscounts           
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+CustomerPartDiscountsTXTNM                          INIT         "CustomerPartDiscounts"
+CustomerPartDiscountsISI1NM                         INIT               "CustomerPartDiscounts.ISI"
+CustomerPartDiscountsISI2NM                         INIT               "CustomerPartDiscounts2.ISI"
+CustomerPartDiscountsI1DEF                           init            "-n,z,y,1-10,11-26"
+CustomerPartDiscountsI2DEF                           init            "-n,z,y,57-65"
+.
+. By CustomerID, PartNumber
+. 1-10, 11-26
+.
+CustomerPartDiscountsKY          DIM                26
+.
+. By SeqNo
+. 57-65
+.
+CustomerPartDiscountsKY2         DIM                 9
+;=============================================================================;
+;
+CustomerPartDiscountsFLST                         FILELIST
+CustomerPartDiscountsFL             IFILE              name="CustomerPartDiscounts.ISI",FIX=65,NODUP,NOPATH
+CustomerPartDiscountsFL2            IFILE              name="CustomerPartDiscounts2.ISI",FIX=65,NODUP,NOPATH
+                                    FILELISTEND
+ 
+CustomerPartDiscountsFileSize       CONST      "65"
+ 
+CustomerPartDiscountsProg           INIT       "CustomerPartDiscounts Program"
+CustomerPartDiscountsDesc           INIT       "CustomerPartDiscounts Maintenance"
+CustomerPartDiscountsTITLE          INIT       "CustomerPartDiscounts Record"
+CustomerPartDiscountsHelp           INIT       "CustomerPartDiscounts.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $CustomerPartDiscountsVARIO
+            INCLUDE CustomerPartDiscounts.IO 
+          %ENDIF          //End of IO Include File

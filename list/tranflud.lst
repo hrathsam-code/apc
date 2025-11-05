@@ -1,0 +1,19 @@
+
+
+
+PAGE    1      tranflud                                                                                       02-11-19 12:06:55
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP tranflud 
+
+    6.    INCLUDE  A: ncommon.txt
+    8.    INCLUDE  B: aptranfd.txt
+   13.    INCLUDE  C: apmastfd.txt
+   87.    INCLUDE  D: apmastrd.txt
+  113.    INCLUDE  E: aptranrd.txt
+
+   Output: c:\apc\plc\tranflud.plc                                                                                                                                                                                                                                   
+       333 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 12:06:55 12:06:55
+  00001844 DATA;  00000398  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,22 @@
+
+
+
+PAGE    1      acctslct                                                                                       02-11-19 11:35:19
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP acctslct -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    3.    INCLUDE  A: common.pls
+   10.    INCLUDE  B: custmast.pls
+   39.    INCLUDE  C: callerr1.inc
+   12. C                              D        DIALOG 
+                                                     *WARNING*
+Warning: Obsolete data type!
+   43.    INCLUDE  D: callerr2.inc
+
+   Output: c:\apc\plc\acctslct.plc                                                                                                                                                                                                                                   
+       301 LINES;      0 ERRORS;      1 WARNINGS; Start/Stop: 11:35:19 11:35:19
+  000014EC DATA;  0000029A  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

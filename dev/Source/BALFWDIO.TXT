@@ -1,0 +1,48 @@
+.............................................................
+. CORPORATE A/R BALANCE FORWARD FILE I/O ROUTINES        
+.     MODULE NAME  -  BALFWDIO/TXT
+. 
+. REQUIRES MODULE NAME   BALFWDFL/TXT FOR COMPILE
+. 
+.............................................................
+. 
+OPENBALF TRAPCLR   IO
+         TRAP      NOBALFWD  IF  IO
+         OPEN      BALFWD,BALFNAME
+         MOVE      "H"  TO  IOSW
+. 
+BALFRTRN RETURN
+. 
+BALFDISP BEEP
+         DISPLAY   *P01:23,*EL,"ERROR ON ",BALFUNCT," OF ",BALFNAME:
+                           " JOB ABORTING! ",*W4
+         CHAIN     "APPMENU1"
+. 
+GTBALFWD TRAPCLR   IO
+         MOVE      "M" TO IOSW
+         TRAP      NGGTBALF  IF  IO
+         MOVE      "APP"  TO  BALFKEY
+         READ      BALFWD,BALFKEY;BALFKEY,ARDATE,LBALFWD,RBALFWD:
+                                  LBALCRED,RBALCRED
+         MOVE      "H"  TO  IOSW
+         GOTO      BALFRTRN
+. 
+PTBALFWD TRAPCLR   IO
+         MOVE      "M" TO IOSW
+         TRAP      NGPTBALF  IF  IO
+         MOVE      TODAY  TO  ARDATE
+         UPDATE    BALFWD;BALFKEY,ARDATE,LBALFWD,RBALFWD:
+                                  LBALCRED,RBALCRED
+         MOVE      "H"  TO  IOSW
+         GOTO      BALFRTRN
+. 
+NOBALFWD MOVE      "OPEN"  TO  BALFUNCT
+         GOTO      BALFDISP
+. 
+NGGTBALF MOVE      "READ"  TO  BALFUNCT
+         GOTO      BALFDISP
+. 
+NGPTBALF MOVE      "WRITE" TO  BALFUNCT
+         GOTO      BALFDISP
+. 
+....................................................................

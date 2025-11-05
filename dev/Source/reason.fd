@@ -1,0 +1,84 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+..
+..
+. Program Created On : 01/24/03 At 9:10:am
+..
+           %IFNDEF   $ReasonVAR
+$ReasonVAR  EQUATE            1
+..
+..
+. Field Definitions
+. -----------------
+..
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+
+ReasonREC       RECORD
+Code          DIM               4        1 - 4
+Description   DIM               30       5 - 34
+Active        FORM              1
+              RECORDEND
+..
+..
+. File Keys and File Labels
+. -------------------------
+..
+ReasonK1SIZE CONST            "4"                                 (Length of the Key variable 1)
+..
+. By Reasonission Code
+..
+ReasonI1DEF  INIT             "-N,1-4"                .Index Size of Key 1
+..
+ReasonFSIZE  CONST            "50"                                (Length of each Record)
+ReasonFileSIZE  CONST            "50"                                (Length of each Record)
+
+ReasonKY    DIM               ReasonK1SIZE                          (The Actual 'Key' variable)
+
+ReasonPROG  INIT              "Reason Code"
+ReasonTITLE INIT              "Reason Code Record"             (Description used later for headers, etc)
+ReasonHELP  INIT              "Reason.HLP"              (Name of the Help file for later purposes)
+
+ReasonTXTNM  INIT             "$APDATA\","REASNFL.TXT"             .Actual Text Filename  (i.e. CUSTFL.TXT)
+ReasonISI1NM INIT             "$APDATA\","REASNFL.ISI"             .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+ReasonFLST  FILELIST
+           %IFDEF            ReasonKY
+ReasonFL    IFILE             Name=ReasonISI1NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY2
+ReasonFL2   IFILE             Name=ReasonISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY3
+ReasonFL3   IFILE             Name=ReasonISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY4
+ReasonFL4   IFILE             Name=ReasonISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY5
+ReasonFL5   IFILE             Name=ReasonISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY6
+ReasonFL6   IFILE             Name=ReasonISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY7
+ReasonFL7   IFILE             Name=ReasonISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY8
+ReasonFL8   IFILE             Name=ReasonISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ReasonKY9
+ReasonFL9   IFILE             Name=ReasonISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+
+         goto              #End
+         %ENDIF
+
+         %IFNDEF           $ReasonIO
+           INCLUDE           Reason.IO
+         %ENDIF
+#end

@@ -1,0 +1,87 @@
+......................................................................
+.    Chiron Software & Services, Inc.
+.    4 Norfolk Lane
+.    Bethpage, Ny  11714
+.    (516) 935-0196
+.
+.
+. Program Created On : 02/15/02 At 3:00:am
+.
+           %IFNDEF   $ARTRMVAR
+$ARTRMVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field     Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+ARTRM   RECORD
+Code       DIM               8          1 - 8
+Desc       DIM               15         9 - 23
+NetDays    form              3         24 - 26
+DiscDays   form              3         27 - 29
+DiscPerc   FORM              2.2       30 - 34
+DiscAmt    FORM              7.2       35 - 44
+DiscType   DIM               1         45 - 45
+           RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+ARTRMK1SIZE CONST            "8"                      (Length of the Key variable)
+.
+. By Code
+.
+ARTRMI1DEF  INIT             "1-8"                    (Index definitions for Key 1)
+.
+ARTRMFSize  CONST            "45"                     (Length of each Record)
+
+ARTRMKY    DIM               ARTRMK1SIZE              (The Actual 'Key' variable)
+
+ARTRMPROG  INIT              "A/P Term Master"
+ARTRMTITLE INIT              "A/P Term Code"          (Description used later for headers, etc)
+ARTRMHELP  INIT              "ARTRM.HLP"              (Name of the Help file for later purposes)
+
+.ARTRMTXTNM  INIT             "$DataDir\","ARTRMFL.TXT"    .Actual Text Filename  (i.e. CUSTFL.TXT)
+.ARTRMISI1NM INIT             "$DataDir\","ARTRMFL.ISI"    .Actual ISI Filename   (i.e. CUSTFL.ISI)
+ARTRMTXTNM  INIT             "ARTRMFL.TXT"                .Actual Text Filename  (i.e. CUSTFL.TXT)
+ARTRMISI1NM INIT             "ARTRMFL.ISI"                .Actual ISI Filename   (i.e. CUSTFL.ISI)
+
+ARTRMFLST  FILELIST
+           %IFDEF            ARTRMKY
+ARTRMFL    IFILE             Name=ARTRMISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY2
+ARTRMFL2   IFILE             Name=ARTRMISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY3
+ARTRMFL3   IFILE             Name=ARTRMISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY4
+ARTRMFL4   IFILE             Name=ARTRMISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY5
+ARTRMFL5   IFILE             Name=ARTRMISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY6
+ARTRMFL6   IFILE             Name=ARTRMISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY7
+ARTRMFL7   IFILE             Name=ARTRMISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY8
+ARTRMFL8   IFILE             Name=ARTRMISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARTRMKY9
+ARTRMFL9   IFILE             Name=ARTRMISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $ARTRMIO
+           INCLUDE           ARTRM.IO
+         %ENDIF
+#end

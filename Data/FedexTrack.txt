@@ -1,0 +1,42 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://fedex.com/ws/track/v18">
+   <SOAP-ENV:Body>
+      <TrackRequest>
+         <WebAuthenticationDetail>
+            <ParentCredential>
+               <Key>orYgHNFt52Kz7xgd</Key>
+               <Password>oQUX2Ur6I83pzXnU31TrOV9kA</Password>
+            </ParentCredential>
+            <UserCredential>
+               <Key>orYgHNFt52Kz7xgd</Key>
+               <Password>oQUX2Ur6I83pzXnU31TrOV9kA</Password>
+            </UserCredential>
+         </WebAuthenticationDetail>
+         <ClientDetail>
+            <AccountNumber>697696555</AccountNumber>
+            <MeterNumber>250371034</MeterNumber>
+         </ClientDetail>
+         <TransactionDetail>
+            <CustomerTransactionId>TC09_IVR_TRACKBYNUMBER</CustomerTransactionId>
+         </TransactionDetail>
+         <Version>
+            <ServiceId>trck</ServiceId>
+            <Major>18</Major>
+            <Intermediate>0</Intermediate>
+            <Minor>0</Minor>
+         </Version>
+          <SelectionDetails>
+            <CarrierCode>FDXE</CarrierCode>
+            <PackageIdentifier>
+               <Type>TRACKING_NUMBER_OR_DOORTAG</Type>
+               <Value>776124403942</Value>
+	    </PackageIdentifier>
+            <ShipmentAccountNumber/>
+            <SecureSpodAccount/>
+            <Destination>
+               <GeographicCoordinates>rates evertitque aequora</GeographicCoordinates>
+            </Destination>
+          </SelectionDetails>
+	  <ProcessingOptions>INCLUDE_DETAILED_SCANS</ProcessingOptions>
+      </TrackRequest>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

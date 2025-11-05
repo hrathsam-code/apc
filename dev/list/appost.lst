@@ -1,0 +1,48 @@
+
+
+
+PAGE    1      appost                                                                                         02-11-19 11:35:34
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP appost -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    1.    INCLUDE  A: common.txt
+    2.    INCLUDE  B: apmastfd.txt
+    3.    INCLUDE  C: aptranfd.txt
+  183.    INCLUDE  D: apmasthr.txt
+  204.    INCLUDE  E: apmasthu.txt
+  243.    INCLUDE  F: apmastrd.txt
+  345.                                         CMATCH    "?",DAMT
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  360.                                         MOVE      "LAST DISCT DAY" TO DATEDESC
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  401.                                         MOVE      "       ",AMTDISA
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  410.      00000698                           ADD       FRG,TFRG
+                                                  *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  483.    INCLUDE  G: aptranrt.txt
+  504.    INCLUDE  H: apmastup.txt
+  583.                                         CMATCH    "0",IDEB
+                                                     *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  655.    INCLUDE  I: apmasthr.txt
+  663.    INCLUDE  J: apmasthu.txt
+  665.                                         MOVE      "033401",DCODE
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  700.                                         BEEP 
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  735.    INCLUDE  K: getdate.txt
+  736.    INCLUDE  L: apmastvk.txt
+
+   Output: c:\apc\plc\appost.plc                                                                                                                                                                                                                                     
+       972 LINES;      0 ERRORS;      7 WARNINGS; Start/Stop: 11:35:34 11:35:34
+  000031C8 DATA;  00000F3C  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

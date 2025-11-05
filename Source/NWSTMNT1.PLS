@@ -1,0 +1,495 @@
+.......................................................................
+. NWSTMNT1.DBS - PRINT STATEMENTS USING UARCO DATAMAILER              .
+. MODIFIED 5-29-2002 FOR NEW MAILERS
+. ACCESSES "ARFILE/ISAM:BILLING"  KEY SEQUENTIALLY
+. PRODUCING STATEMENTS FOR ALL ACCOUNTS HAVING OPEN INVOICES/CREDITS
+. 
+. NOTE THAT ARFILEXX/ISI CONSISTS OF THE INVOICE HEADER RECORDS
+. MODIFIED FOR RECEIVABLES PURPOSES AND INDEXED IN THE FOLLOWING MANNER
+. 
+. KEY COMPONENTS:
+.                 MAJOR  IS  ACCOUNT  (INVCUST)  POSITIONS 9 - 12
+.                 MINOR  IS  INVC NO. (INVKEY)   POSITIONS 1 - 5
+. 
+.......................................................................
+. 
+. WRITTEN  12/15/90 BY  R. BACHARACH
+.                       MICRO SYSTEMS CONSULTANTS
+.
+. MODIFIED  5/28/2002 FOR DIFFERENT DATAMAILER FORMAT
+.......................................................................
+. 
+         INCLUDE   COMMON.TXT
+.
+PGTOTL   FORM      5.2
+.
+. 
+         INCLUDE   RCVBLES.TXT
+.
+COLSW    INIT      " "
+.
+EOJSW    INIT      " "
+. 
+ARFILES  IFILE     KEYL=10,UNCOMPRESSED
+ARFILEXX INIT      "ARFILEXX.ISI"
+. 
+         INCLUDE   DATETBLZ.TXT
+. 
+CUSTFILE IFILE     KEYL=4,UNCOMPRESSED
+CSTNAME  INIT      "ACCOUNTS.ISI"
+. 
+. 
+         INCLUDE   CUSTMAST.TXT
+. 
+CURRACCT DIM       4
+FIRSTSW  INIT      "1"
+PAGEZ    FORM      3
+LINEZ    FORM      2
+REPLY    DIM       1
+COMPANY  DIM       1
+IOSW     DIM       1
+STARTKEY DIM       8
+NUMCUST  FORM      4
+PDTOTL   FORM      6.2
+CREDTOTL FORM      6.2
+. 
+ASTER45  INIT      "*********************************************"
+. 
+PTYPE    DIM       7
+WKSUB    FORM      6.2
+WKPRINT  FORM      6.2
+NETBAL   FORM      6.2
+UPFLAG   INIT      "N"
+ZEROS    INIT      "000000.00"
+.
+CUSTCNT  FORM      "00000"
+PRINTZIP DIM       5
+.
+DISPCNTR FORM      5
+
+DISPCTRL FORM      1
+.
+ARXXKEY  DIM       10
+ACCTIN   DIM       4
+. 
+INITIATE MOVE      "0",PAGEZ
+         MOVE      "0",LINEZ
+         MOVE      " ",REPLY
+. 
+         CALL      OPENCUST
+         OPEN      ARFILES,ARFILEXX
+         CALL      CALCCRNT
+. 
+         DISPLAY   *ES,*P01:01,*HON,"PRINT STATEMENTS USING UARCO ":
+                                    "DATA MAILERS! ",*HOFF
+.
+TALK     BEEP
+.
+         DISPLAY   *P1:03,"POSITION VERTICAL PERF AT ":
+                          "ZERO (POS 1 TO RIGHT)":
+                   *P1:05,"POSITION  T O P  OF THE PRINT HEAD ":
+                          "AT HORIZONTAL PERF "
+.
+         BEEP
+         KEYIN     *P1:08,*HON,"WARNING! THIS PRINTER PRINTS ":
+                   "6 LINES/INCH (PRESS ENTER TO GO!) ",REPLY:
+                   *HOFF
+.
+         MOVE      " ",REPLY
+         MOVE      "A",COMPANY
+         GOTO      RDLOOP
+. 
+OKAY1    MOVE      " "  TO  REPLY
+         KEYIN     *P01:10,*EL,*P01:11,*EL,*P01:10,"IS THIS AN END-OF":
+                   "-MONTH RUN ?  (Y/N) ",REPLY
+. 
+         MOVE      REPLY  TO  EOMSW
+. 
+         CMATCH    "Y",REPLY
+         GOTO      WARN  IF  EQUAL
+         CMATCH    "N",REPLY
+         GOTO      WARN  IF  EQUAL
+         BEEP
+         GOTO      OKAY1
+. 
+. SET START KEY IF REQUIRED FOR REPUBLIC !
+. 
+WARN     BEEP
+         MOVE      REPLY  TO  EOMSW
+         DISPLAY   *P01:15,"N O T E....THE   S T A T E M E N T   PRINT ":
+                           "PROGRAM":
+                   *P01:16,"           WILL UPDATE THE CUSTOMER MASTER ":
+                           "FILE":
+                   *P01:17,"           WITH AGED RECEIVABLES":
+                   *P01:19,"D O   N O T   A B O R T   T H I S   P R O G ":
+                           "R A M !"
+. 
+STARTIT  COMPARE   "9",SECURITY
+         GOTO      RDLOOP IF NOT EQUAL
+.
+         KEYIN     *P1:22,*EL,"ENTER ACCOUNT FOR PUSH-START ",*DE,ACCTIN
+         CLEAR     ARXXKEY
+         APPEND    ACCTIN   TO ARXXKEY
+         APPEND    "I00000" TO ARXXKEY
+         RESET     ARXXKEY  TO 1
+         READ      ARFILES,ARXXKEY;INVKEY,INVTYPE   (REC-NOT-FND)
+.
+RDLOOP   TRAPCLR   IO
+         TRAP      RCVIOERR IF IO
+         READKS    ARFILES;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                           INVDATE,INVTOTL,IPMNTS:
+                           IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                           ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                           IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                           IDOLSLFT,IPRGDTE
+.
+         GOTO      EOJ IF OVER
+. 
+.  BYPASS ITEMS WHICH ARE  P A I D  (INVSTAT = X)
+.                          V O I D  (INVSTAT = V)
+.                     OR WRITE-OFF  (INVSTAT = W)
+. 
+         CMATCH    "X",INVSTAT
+         GOTO      RDLOOP  IF  EQUAL
+         CMATCH    "V",INVSTAT
+         GOTO      RDLOOP  IF  EQUAL
+         CMATCH    "W",INVSTAT
+         GOTO      RDLOOP  IF  EQUAL
+...................................................
+. 
+         CMATCH    "1",FIRSTSW
+         CALL      FIRSTONE IF EQUAL
+. 
+C1       MATCH     INVCUST,CURRACCT
+         CALL      ACCTBRK  IF  NOT  EQUAL    (PRINT TRAILER/THEN NEW HEADER)
+. 
+         MOVE      INVDATE  TO  WKDATE6       (SET UP TO AGE THE ITEM)
+         CALL      CALCTOTL    (DETERMINE AMOUNT OUTSTANDING AND ITEM TYPE)
+. 
+C2       CMATCH    "C",INVTYPE
+         CALL      AGEIT  IF  NOT  EQUAL    (DON`T AGE ANY CREDITS!)
+. 
+         CALL      PRINTDTL
+. 
+C3       GOTO      RDLOOP
+. 
+. 
+CALCTOTL MOVE      INVTOTL  TO  WKPRINT
+         MOVE      "INVOICE"  TO  PTYPE
+. 
+         CMATCH    "C",INVTYPE             (IS IT A CREDIT ?)
+         GOTO      CLCDEBIT   IF  NOT  EQUAL
+. 
+. FALLTHRU   M U S T   BE A   C R E D I T!
+. 
+         MOVE      "CREDIT "    TO   PTYPE
+         MULT      "-1"  BY  WKPRINT         (YES...REVERSE THE AMOUNT)
+         ADD       WKPRINT  TO  CREDTOTL
+. 
+. FOR CREDITS---SET UP THE PRINT NOW!
+. 
+.     CREDITS ARE   N O T   AGED!
+. 
+. 
+         MOVE      WKPRINT  TO  WKAMT
+. .....................................
+. 
+. ADDED 9/26/81     (JUST NEEDED FOR CREDITS)..................................
+. 
+         MOVE      WKDATE6  TO  CCMON
+         RESET     WKDATE6  TO  3
+         MOVE      WKDATE6  TO  CCDAY
+         RESET     WKDATE6  TO  5
+         MOVE      WKDATE6  TO  CCYR
+         RESET     WKDATE6  TO  1
+.....................................................................
+. 
+         MOVE      "0"  TO  WKSUB
+         RETURN
+. .................
+CLCDEBIT MOVE      WKPRINT  TO  WKSUB
+         SUB       IDOLSLFT FROM WKSUB
+         MOVE      IDOLSLFT TO WKAMT      (SET UP DEBIT PRINT NOW)
+         RETURN
+. 
+PRINTDTL CMATCH    "Y",UPFLAG
+         GOTO      UNIVRTRN  IF  EQUAL  (BYPASS PRINT/UPDATE ACCOUNT ONLY)
+.
+         CMATCH    "3",COLSW
+         GOTO      CHKBLK IF NOT EQUAL
+         PRINT     " ",*FLUSH
+         ADD       "1" TO LINEZ
+.
+         COMPARE   "19",LINEZ
+         CALL      OVERFLOW  IF  NOT  LESS
+.
+         MOVE      " " TO COLSW
+.
+CHKBLK   CMATCH    " ",COLSW
+         GOTO      CHKC2 IF NOT EQUAL
+         PRINT     *8,INVKEY," ",INVDATE," ",IDOLSLFT,*FLUSH;
+         MOVE      "1" TO COLSW
+         RETURN
+.
+CHKC2    CMATCH    "1",COLSW
+         GOTO      PRNTCL3 IF NOT EQUAL
+         PRINT     *34,INVKEY," ",INVDATE," ",IDOLSLFT,*FLUSH;
+         MOVE      "2" TO COLSW
+.
+UNIVRTRN RETURN
+. 
+PRNTCL3  PRINT     *60,INVKEY," ",INVDATE," ",IDOLSLFT;
+         MOVE      "3"  TO COLSW
+.
+         RETURN
+.
+OVERFLOW 
+         PRINT     *1," "
+         MOVE      AMT130P TO PGTOTL
+         ADD       AMT3160P TO PGTOTL
+         ADD       AMT6190P TO PGTOTL
+         ADD       AMTOV90P TO PGTOTL
+         ADD       AMTCURNT TO PGTOTL
+.
+         SUBTRACT  IDOLSLFT FROM  PGTOTL
+.
+         PRINT     *10,"** PAGE ",PAGEZ," TOTAL ",PGTOTL
+.
+         MOVE      IDOLSLFT  TO  PGTOTL
+.
+         ADD       "2"  TO  LINEZ
+         CALL      ACCTPRNT
+         CALL      HDR
+         RETURN
+.
+FIRSTONE MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+         MOVE      INVCUST  TO  CURRACCT
+         CALL      HDR
+         MOVE      " ",FIRSTSW
+         RETURN
+. 
+HDR      CMATCH    "Y",UPFLAG
+         GOTO      UNIVRTRN  IF  EQUAL  (BYPASS PRINT/UPDATE ACCOUNT ONLY)
+. 
+         ADD       "1"  TO  PAGEZ
+. 
+LIBHEAD  PRINT     *1," "
+         PRINT     *1," "           (ADDED 12/20/90 R.B.)
+         PRINT     *10," APC COMPONENTS INC.  "
+         PRINT     *10," 75 TOLEDO ST / PO BOX 255 "
+         PRINT     *10," FARMINGDALE, NY 11735  "
+         PRINT     *10," (631) 249-4079"
+         PRINT     *1," "
+         PRINT     *1," "
+         PRINT     *30,"** STATEMENT AS OF ",TODAY," **"
+         PRINT     *8,"INVC   DATE    AMOUNT":
+                   *34,"INVC   DATE    AMOUNT":
+                   *60,"INVC   DATE    AMOUNT"
+         MOVE      "10" TO LINEZ
+         RETURN
+. 
+. 
+ACCTPRNT CMATCH    "Y",UPFLAG
+         GOTO      UNIVRTRN  IF  EQUAL (BYPASS PRINT/UPDATE ACCOUNT ONLY)
+. 
+...............................................................
+. ADD 2 SPACE LINES TO COMPENSATE FOR REDUCING BODY - 12/20/90
+...............................................................
+A1	COMPARE    "24"  TO  LINEZ        (WAS 23.. CHANGED 5-29-2002)
+	GOTO       A2    IF  NOT  LESS
+        PRINT      *1," "
+        ADD        "1"   TO  LINEZ
+        GOTO       A1
+...............................................................
+.
+A2       MOVE      CUSTZIP  TO  PRINTZIP
+         REPLACE   " 0"  IN  PRINTZIP
+        
+         PRINT     *42,"ACCT.",*52,CUSTNAME
+         PRINT     *42,CUSTKEY,*52,CUSTADDR
+         PRINT     *52,CUSTCITY," ",CUSTSTAT," ",PRINTZIP
+         PRINT     *52,"ACCOUNTS PAYABLE"
+         ADD       "4" TO LINEZ
+.
+ACCTSPC  PRINT     " " 
+         ADD       "1" TO LINEZ
+         COMPARE   "33" TO LINEZ
+         GOTO      ACCTSPC IF LESS
+         MOVE      "00" TO LINEZ
+         MOVE      "1"  TO PAGEZ
+         RETURN
+. 
+ACCTBRK  MOVE      AMT130P   TO  PDTOTL
+         ADD       AMT3160P  TO  PDTOTL
+         ADD       AMT6190P  TO  PDTOTL
+         ADD       AMTOV90P  TO  PDTOTL
+         MOVE      AMTCURNT  TO  NETBAL
+         ADD       PDTOTL    TO  NETBAL
+         ADD       "1" TO CUSTCNT
+. 
+         MOVE      " " TO  COLSW
+         PRINT     " ",*FLUSH
+         ADD       "1" TO LINEZ
+. ...................................................................
+. NOTE THAT CREDTOTL IS ALREADY NEGATIVE...HENCE ADD VICE SUBTRACT
+. ...................................................................
+         ADD       CREDTOTL  TO  NETBAL
+. ...................................................................
+. 
+. NOW DETERMINE IF THIS IS A PRINT JOB OR ACCOUNT UPDATE ONLY
+. 
+         CMATCH    "Y",UPFLAG
+         GOTO      CUSTUPDT  IF  EQUAL  (BYPASS PRINT/UPDATE ACCOUNT ONLY)
+. 
+LOOPSPC  PRINT     *1," "
+         ADD       "1"  TO LINEZ
+         COMPARE   "16" TO LINEZ
+         GOTO      LOOPSPC IF LESS
+         CALL      PRTX
+         PRINT     *10,"CURRENT",*22,"PAST DUE",*34,"TOTAL DUE"
+         PRINT     *10,AMTCURNT,*22,PDTOTL,*34,NETBAL
+         PRINT     *1," "
+.
+         ADD       "3" TO LINEZ
+.
+         CALL      ACCTPRNT
+.
+         CALL      ZEROEM
+.
+         MATCH     "X",EOJSW
+         GOTO      LPRTRN IF EQUAL
+.
+         MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+.
+         MOVE      CUSTKEY  TO  CURRACCT
+         CALL      HDR
+.
+LPRTRN   RETURN
+.
+.
+PRTX     PRINT     *10,"PLEASE NOTE;  OUR TERMS ARE 2% 15 NET 30":
+                       "  IF PAST DUE  REMIT ASAP!"
+         PRINT     *1," ",*FLUSH
+         ADD       "2" TO LINEZ
+         RETURN
+. 
+. NOW UPDATE THE CUSTOMER MASTER FILE WITH THE RECEIVABLES
+. 
+CUSTUPDT MOVE      AMTCURNT    TO    CURNTDUE
+         MOVE      AMT130P     TO    PD01TO30
+         MOVE      AMT3160P    TO    PD31TO60
+         MOVE      AMT6190P    TO    PD61TO90
+         MOVE      AMTOV90P    TO    PDOVR90
+. 
+. IF IT IS END-OF-MONTH OR END-OF-YEAR, THEN ZERO OUT THE MTDCASH
+. AND MTDCRED FIELDS FOR RECYCLING FOR NEW MONTH
+. 
+         CMATCH    "Y"  TO  EOMSW
+         GOTO      CALLPUT  IF  NOT  EQUAL
+         MOVE      "0"         TO    MTDCASH
+         MOVE      "0"         TO    MTDCRED
+. 
+CALLPUT  MOVE      "*"         TO    CUSTSTTS
+....         CALL      PUTCUST
+....         CMATCH    "H",IOSW
+....         GOTO      NOCUSTO  IF  NOT  EQUAL
+. 
+. FALLTHRU MEANS SUCCESSFULL UPDATE OF CUSTOMER
+. 
+ZEROEM   MOVE      "0"  TO  PDTOTL
+         MOVE      "0"  TO  NETBAL
+         MOVE      "0"  TO  CREDTOTL
+         MOVE      "0"  TO  AMTCURNT
+         MOVE      "0"  TO  AMT130P
+         MOVE      "0"  TO  AMT3160P
+         MOVE      "0"  TO  AMT6190P
+         MOVE      "0"  TO  AMTOV90P
+         MOVE      "0"  TO  LINEZ
+         MOVE      "0"  TO  PAGEZ
+. 
+. NOW CALL HDR FOR THE NEW ACCOUNT
+. 
+         MOVE      INVCUST  TO  CUSTKEY
+         CALL      GETCUST
+         MOVE      CUSTKEY  TO  CURRACCT
+         RETURN
+. 
+         INCLUDE   CUSTIO.TXT
+. 
+         INCLUDE   GTCUSTKS.TXT
+. 
+         INCLUDE   RCVBLSIO.TXT
+. 
+         INCLUDE   STDTCLC1.TXT
+. 
+EOJ      MOVE      "X" TO EOJSW
+         CALL      ACCTBRK
+         BEEP
+.
+         GOTO      ENDIT
+.
+         DISPLAY   *ES,*P01:04,"UPDATING THE  C U S T O M E R  M A S T E R":
+                               "  FILE"
+         BEEP
+. 
+SETLIB   MOVE      "      "  TO  CUSTKEY
+PUSHIT   CALL      GETCUST              (AUTO NOT FOUND)
+         MOVE      "0"     TO  CUSTCNT
+. 
+CUSTLOOP CALL      GTCUSTKS
+. 
+         GOTO      ENDIT  IF  OVER    (DONT LOOP FOREVER!)
+.
+         ADD       "1" TO DISPCTRL
+         ADD       "1" TO DISPCNTR
+         COMPARE   "0" TO DISPCTRL
+         GOTO      CST1   IF NOT EQUAL
+         DISPLAY   *P1:12,*HON,"UPDATING RECORD NUMBER ",DISPCNTR,*HOFF
+.
+. 
+CST1     CMATCH    "*",CUSTSTTS
+         GOTO      CHKEOM IF NOT EQUAL
+. 
+. FALLTHRU MEANS THAT WE UPDATED THE CUSTREC WITH AGEING
+. SO CHANGE THE CODE TO "A" FOR ACTIVE AND GO TO WRITE RECORD
+. 
+         MOVE      "A"  TO  CUSTSTTS
+         CALL      PUTCUST
+         ADD       "1"  TO  CUSTCNT
+         GOTO      CUSTLOOP
+. 
+CHKEOM   CMATCH    "Y",EOMSW
+         GOTO      CUSTLOOP  IF  NOT  EQUAL
+. 
+. FALLTHRU MEANS END-OF-MONTH  A N D  NO OPEN RECEIVABLES SO
+.   SO ZERO OUT EVERYTHING AND PUT THE RECORD BACK!
+. 
+.  U N L E S S  THE ACCOUNT IS A DELETED ACCOUNT !  T H E N DONT TOUCH HIM!
+. 
+         CMATCH    "D"  TO  CUSTSTTS
+         GOTO      CUSTLOOP   IF  EQUAL
+         MOVE      "A"  TO  CUSTSTTS
+. 
+ZAPPEM   MOVE      "0"  TO  CURNTDUE
+         MOVE      "0"  TO  PD01TO30
+         MOVE      "0"  TO  PD31TO60
+         MOVE      "0"  TO  PD61TO90
+         MOVE      "0"  TO  PDOVR90
+         MOVE      "0"  TO  MTDCASH
+         MOVE      "0"  TO  MTDCRED
+         CALL      PUTCUST
+         ADD       "1"  TO  CUSTCNT
+         GOTO      CUSTLOOP
+. 
+ENDIT    DISPLAY   *ES,*P01:04,"END OF STATEMENT PRINT"
+         BEEP
+         DISPLAY       *P01:06,CUSTCNT," ACCOUNTS UPDATED WITH AGEING DATA":
+                       *W3
+         RELEASE
+.
+         CHAIN     "ARMENU1 "
+. 
+INVCRTRN RETURN
+. 

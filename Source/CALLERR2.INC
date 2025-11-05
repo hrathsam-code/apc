@@ -1,0 +1,39 @@
+.
+.  CALLERR2  ERROR RETURN MODULE:  PLACE AT BEGINNING OF ALL PROGRAMS
+.
+.  3-10-2004 R. BACHARACH
+.
+.  BEGIN BY LOADING A PROGRAM TITLE INTO DIM FIELD "TITLTEXT"
+.
++........................................................................
+.
+.     (  MOVE      SOMENAME  TO  TITLTEXT  )
+.
+
+         SETMODE   *LTGRAY=ON,*3D=ON
+..HR 2019.11.18         CREATE    D,DDATA
+..HR 2019.11.18         DISPLAY   *BGCOLOR=*YELLOW,*ES,*BLUE:
+..HR 2019.11.18                   *HON,*P05:01,TITLTEXT,*HOFF,*BLACK
+..HR 2019.11.18         ACTIVATE  D,TESTIT,RESULT
+..HR 2019.11.18         LOOP
+..HR 2019.11.18         WAITEVENT
+..HR 2019.11.18         REPEAT
+..HR 2019.11.18         STOP
+
+         alert     plain,"ARE YOU SURE YOU WISH TO RUN THIS PROGRAM?  IF YOU SHOULD NOT BE IN THIS PROGRAM, CLICK NO",RESULTS,"ARE YOU SURE?"
+
+.
+..HR 2019.11.18 TESTIT   BRANCH    RESULT OF NULL,MAINLINE,INDXIT
+TESTIT   BRANCH    RESULT MAINLINE,INDXIT,INDXIT
+.
+NULL     RETURN
+.
+INDXIT   DISPLAY   *ES,*BLUE
+         BEEP
+         CHAIN     FROMPGM
+.
+MAINLINE MOVE      " ",REPLY
+..HR 2019.11.18         DEACTIVATE D
+         DISPLAY   *BLUE
+.
+.......................................................................

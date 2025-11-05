@@ -1,0 +1,131 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    ShipTo                                                   ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    01/09/2019 at 12:50pm                                             ;
+;                                                                             ;
+;  purpose:                                                                   ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   01/09/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+           %IFNDEF    $ShipTo
+$ShipTo             EQUATE            0
+
+ShipTo              RECORD
+CustomerID          DIM                6            1 - 6
+SeqNo               form               4            7 - 10
+LookupName          DIM                30          11 - 40
+Name                DIM                30          41 - 70
+Addr1               DIM                30          71 - 100
+Addr2               DIM                30         101 - 130
+Addr3               DIM                30         131 - 160
+City                DIM                30         161 - 190
+St                  DIM                2          191 - 192
+Zip                 DIM                10         193 - 202
+Country             DIM                3          639 - 641
+Telephone           DIM                10         205 - 214
+Fax                 DIM                10         215 - 224
+Memo                DIM                50         225 - 274
+ContactName         dim                50
+Created             DIM                8          515 - 522         .//Date Field
+Rec_Added           DIM                8          523 - 530
+Rec_Change          DIM                8          531 - 538
+Rec_User            DIM                10         539 - 548
+Active              FORM               1          549 - 549
+                    RECORDEND
+
+.
+. File Keys and File Labels
+. -------------------------
+.
+ShipToK1SIZE CONST            "10"                                   .Index Size of Key 1
+.
+. By Entity, Seq Major, Seq Minor
+.
+ShipToI1DEF  INIT             "1-10"                      .Index definitions for Key 1
+.
+ShipToFSIZE  CONST            "641"                                   .Length of Text Record
+
+ShipToKY    DIM               ShipToK1SIZE
+
+.ShipToomerTitle INIT              "ShipToomer Master Record"
+ShipToHelp  INIT              "ShipToER.HLP"
+
+ShipToTXTNM  INIT        "ShipToFL.TXT"         .Actual Text Filename
+ShipToISI1NM INIT        "ShipToFL.ISI"         .Actual ISI Filename
+
+ShipToFLST  FILELIST
+           %IFDEF            ShipToKY
+ShipToFL    IFILE             Name=ShipToISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo2KY
+ShipTo2FL   IFILE             Name=ShipToISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo3KY
+ShipTo3FL   IFILE             Name=ShipToISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo4KY
+ShipTo4FL   IFILE             Name=ShipToISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ShipTo5KY
+
+ShipTo5FL   IFILE             Name=ShipToISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ShipTo6KY
+
+ShipTo6FL   IFILE             Name=ShipToISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ShipTo7KY
+
+ShipTo7FL   IFILE             Name=ShipToISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ShipTo8KY
+
+ShipTo8FL   IFILE             Name=ShipToISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo9KY
+ShipTo9FL   IFILE             Name=ShipToISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+;=============================================================================
+ShipToFLSTSC FILELIST
+           %IFDEF            ShipToKY
+ShipToFLSC  IFILE             Name=ShipToISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo2KY
+ShipTo2FLSC IFILE             Name=ShipToISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ShipTo3KY
+ShipTo3FLSC IFILE             Name=ShipToISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+          FILELISTEND
+         %ENDIF
+;=============================================================================
+         goto              #End
+         %IFNDEF           $ShipToIO
+           INCLUDE           ShipTo.IO
+         %ENDIF
+#end
+
+
+
+
+
+

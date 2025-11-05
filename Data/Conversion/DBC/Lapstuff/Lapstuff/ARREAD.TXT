@@ -1,0 +1,11 @@
+. 
+ARREAD   TRAPCLR   IO
+         TRAP      RCVNTFD IF IO
+         READ      RCVBFILE,STARTKEY;INVKEY,INVTYPE,INVCOMP,INVSTAT,INVCUST:
+                                   INVDATE,INVTOTL,IPMNTS:
+                                   IAMTPD1,IAMTPD2,IAMTPD3,IAMTPD4,IAMTPD5:
+                                   ICHK1,ICHK2,ICHK3,ICHK4,ICHK5:
+                                   IDTPD1,IDTPD2,IDTPD3,IDTPD4,IDTPD5:
+                                   IDOLSLFT,IPRGDTE
+. 
+. 

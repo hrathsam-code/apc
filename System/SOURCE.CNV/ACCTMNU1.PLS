@@ -1,0 +1,130 @@
+. ACCTMNU1 - ACCOUNT MAINTENANCE FUNCTIONS
+.
+.  WRITTEN BY R	BACHARACH
+.
+	 INCLUDE   MSCBRAG.TXT
+.
+	 INCLUDE   COMMON.TXT
+.
+INDEX	 FORM	   2		       USER SELECTION VARIABLE
+.
+TIME	 INIT	   "hh:mm:ss"	       hours:minutes:seconds
+.
+ROLLNAME INIT	   "ROLLFILE.CST"
+.
++................................................................
+. MAINLINE
+.
+*................................................................
+. THIS MENU REQUIRES A SECURITY	CLEARANCE OF AT	LEAST 1
+.
+*................................................................
+. DISPLAY THE MENU
+.
+START	 DISPLAY   *ES:
+		   *HON:
+		   "CUSTOMER FILE MAINTENANCE FUNCTIONS":
+		   *HOFF:
+		   *P51:1,"Today is ",TODAY:
+		   *P01:03,"( 1) ":
+		   "CREATE/ADD RECORDS TO CUSTOMER FILE":
+		   *P01:04,"( 2) ":
+		   "MODIFY CUSTOMER FILE RECORDS":
+		   *P01:05,"( 3) ":
+		   "PRINT CUSTOMER LIST	IN NUMERICAL ORDER":
+		   *P01:06,"( 4) ":
+		   "PRINT CUSTOMER LIST	IN ALPHABETICAL	ORDER":
+		   *P01:07,"( 5) ":
+		   "PRINT CUSTOMER LABELS":
+		   *P01:08,"( 6) ":
+		   "PRINT CUSTOMER LABELS BY STATE":
+		   *P01:09,"( 7) ":
+		   "BACKUP AND REINDEX THE CUSTOMER MASTER FILE":
+		   *P01:10,"( 8) ":
+		   "PRINT CUSTOMER LIST	IN STATE SEQUENCE":
+		   *P01:11,"( 9) ":
+                   "PRINT CUSTOMERS BY SELECTED STATE":
+                   *P01:12,"(10) ":
+		   "SELECT NEW PROCESSING SYSTEM":
+		   *EL
+*................................................................
+. GET THE PROGRAM'S INDEX
+.
+GETINDEX MOVE      "ACCTMNU1"  TO  FROMPGM
+
+	 KEYIN     *P1:14,*EL,"Selection by number":
+                   *P25:14,"__",*P25:14,INDEX
+.
+         COMPARE   "10" TO INDEX
+	 GOTO	   APPMENU1 IF EQUAL
+.
+	 COMPARE   "1" TO INDEX
+	 GOTO	   GETINDEX IF LESS
+         COMPARE   "11" TO INDEX
+	 GOTO	   GETINDEX IF NOT LESS
+*................................................................
+. BRANCH TO THE	ROUTINE	INDICATED BY THE INDEX
+.
+	 TRAP	   BADCHAIN IF CFAIL
+	 CLOCK	   TIME	TO TIME
+	 BRANCH	   INDEX OF ACCTDEIS:  INITIAL ACCOUNT FILE DATA EN
+			    ACCTDAUD:  MODIFY CUSTOMER RECORDS
+			    ACCTPTIS:  PRINT ACCOUNT FILE (NUMBER ORDER)
+			    ACCTSNAM:  PRINT ACCOUNT FILE (ALPHA ORDER)
+			    LABEL:  PRINT CUSTOMER LABELS
+			    LABLSTAT:  PRINT LABELS BY STATE
+			    CUSTINDX:  BACKUP AND REINDEX THE CUST MAST	
+			    CUSTSTAT:  PRINT CUSTOMER LIST IN STATE SEQ
+                            ACCTSLCT:  PRINT CUSTOMERS BY SELECTED STATE
+			    APPMENU1   SELECT NEW PROCESSING SYST
+	 GOTO	   GETINDEX
+*................................................................
+. PROGRAM DOES NOT EXIST.
+.
+BADCHAIN RETURN
+*................................................................
+. CREATE/ADD RECORDS TO	CUSTOMER FILE
+. 
+ACCTDEIS CHAIN	   "ACCTDEIS"
+	 GOTO	   GETINDEX
+.................................................................
+. UPDATE  ACCOUNT FILE RANDOMLY
+.
+ACCTDAUD CHAIN	   "ACCTDAUD"
+	 GOTO	   GETINDEX
+. 
+*................................................................
+.
+ACCTPTIS CHAIN	   "ACCTPTIS"
+	 GOTO	   GETINDEX
+. 
+ACCTSNAM CHAIN	   "ACCTSNAM"
+	 GOTO	   GETINDEX
+. 
+LABEL	 CHAIN	   "LABELPT"
+	 GOTO	   GETINDEX
+.
+ACCTSLCT CHAIN     "ACCTSLCT"
+         GOTO      GETINDEX
+.
+LABLSTAT CHAIN	   "LABLSTAT"
+	 GOTO	   GETINDEX
+.
+CUSTINDX ROLLOUT   "CHAIN CUSTINDX.CHN"
+	 GOTO	   START
+.
+CUSTSTAT CHAIN	   "ACCTSTAT"
+	 GOTO	   GETINDEX
+.
+. 
+YOUCANT	 BEEP
+	 DISPLAY   *P01:23,*EL,"ONLY THE CONSOLE MAY REQUEST REPORTS":
+			       *W2
+	 DISPLAY   *P01:23,*EL
+	 GOTO	   GETINDEX
+. ............................................
+. SELECT NEW PROCESSING	SYSTEM
+.
+APPMENU1 CHAIN	   "NEWMASTR"
+	 GOTO	   GETINDEX
+. 

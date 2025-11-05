@@ -1,0 +1,87 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;     PROGRAM: TaxCodeDetails.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    04-17-2020 At 21:00                                            ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;         00101   04-17-2020   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF         $TaxCodeDetailsVAR
+$TaxCodeDetailsVAR               EQUATE         1
+;
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+TaxCodeDetails                   RECORD
+TaxtypeSeq                       Form               9                   1 - 9
+TaxPercent                       Form               3.5                10 - 18       //Tax Percentage for Each Tax Type
+TaxCodeSeq                       Form               9                  19 - 27
+Order                            Form               2                  28 - 29
+                                 RECORDEND
+;
+;======================================================================================;
+TempTaxCodeDetails                  record          like   TaxCodeDetails                  
+OrigTaxCodeDetails                  record          like   TaxCodeDetails                  
+SaveTaxCodeDetails                  record          like   TaxCodeDetails                  
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+TaxCodeDetailsTXTNM                          INIT         "TaxCodeDetails"
+TaxCodeDetailsISI1NM                         INIT               "TaxCodeDetails.ISI"
+TaxCodeDetailsISI2NM                         INIT               "TaxCodeDetails2.ISI"
+TaxCodeDetailsI1DEF                           init            "-n,z,y,19-27,28-29"
+TaxCodeDetailsI2DEF                           init            "-n,z,y,19-27,1-9,28-29"
+;
+; By TaxCodeSeq, Order
+; 19-27, 28-29
+;
+TaxCodeDetailsKY                 DIM                11
+;
+; By TaxCodeSeq, TaxtypeSeq, Order
+; 19-27, 1-9, 28-29
+;
+TaxCodeDetailsKY2                DIM                20
+;=============================================================================;
+;
+TaxCodeDetailsFLST                         FILELIST
+TaxCodeDetailsFL                    IFILE              name="TaxCodeDetails.ISI",FIX=100,NODUP,NOPATH
+TaxCodeDetailsFL2                   IFILE              name="TaxCodeDetails2.ISI",FIX=100,NODUP,NOPATH
+                                    FILELISTEND
+ 
+TaxCodeDetailsFileSize       CONST      "100"
+ 
+TaxCodeDetailsProg           INIT       "TaxCodeDetails Program"
+TaxCodeDetailsDesc           INIT       "TaxCodeDetails Maintenance"
+TaxCodeDetailsTITLE          INIT       "TaxCodeDetails Record"
+TaxCodeDetailsHelp           INIT       "TaxCodeDetails.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $TaxCodeDetailsVARIO
+            INCLUDE TaxCodeDetails.IO 
+          %ENDIF          //End of IO Include File

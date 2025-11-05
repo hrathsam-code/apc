@@ -1,0 +1,857 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    APEntry.PLS                                                    ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    06/01/2005 AT 11:30AM                                          ;
+;                                                                             ;
+;  PURPOSE:    A/P Invoice Posting Program                                    ;
+;                                                                             ;
+; REVISION:    VER     DATE       INIT     DETAILS                            ;
+;                                                                             ;
+;              1.0   06/01/2005   HOR     INITIAL VERSION                     ;
+;              1.4   08/16/2005   HOR     Changed Tabbing option to PO Field  ;
+;              1.5   09/17/2005   HOR     Added NV to valid Entities          ;
+;              1.6   07/29/2014   HOR     Modified to use APCTRL Period/Year  ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+         INCLUDE   NCOMMON.TXT
+         INCLUDE   WORKVAR.INC
+.
+         GOTO                 #s
+
+EntryProgramType   EQUATE            0                            //Invoice Entry
+
+                   INCLUDE           Sequence.FD
+                   INCLUDE           PrintRtn.inc
+#s
+                   INCLUDE           CMPNY.FD         //HR 6/21/2003
+                   INCLUDE           ARTRM.FD
+                   INCLUDE           Cntry.FD
+                   INCLUDE           Sequence.FD
+                   include             Default.FD
+
+                   INCLUDE           APDist.FD
+                   INCLUDE           Vendor.FD
+                   INCLUDE           APTrn.FD
+                   INCLUDE           GLMast.FD
+                   INCLUDE           APDet.FD
+                   INCLUDE           VHST.FD
+
+
+.=============================================================================
+TestGLCode    DIM               8
+TestGLEntity  DIM               8
+TempAmt             form               10.2
+SaveSeqMajor        like               APTrn.SeqMajor
+
+TestInvoice         like               APTRN.Invoice
+GrossAmount   FORM              7.2
+NetAmount     FORM              7.2
+NonDiscAmount FORM              5.2
+
+LightGray     COLOR
+Row           FORM              6
+LightGrayRGB  FORM              8
+
+EditTop       FORM              4
+EditBottom    FORM              4
+EditLeft      FORM              4
+EditRight     FORM              4
+X             FORM              3
+DIM10         DIM               10
+SubItemHit    FORM              2
+RowHit        FORM              6
+InvoiceDate   DIM               8
+DIM16         DIM               16
+result13      FORM              12
+GLCounter     FORM              3
+
+AgingDays     FORM              10
+NewAgingDays  FORM              10
+DiscountDays  FORM              10
+NewDiscountDays FORM            10
+DiscountPercent FORM            2.2
+dim1          DIM               1
+
+EGLAccount    EDITTEXT          (18)
+EGLEntity     EDITTEXT          (18)
+EGLAmount     EDITNUMBER        (18)
+GLTotals      FORM              8.2
+GLValue       FORM              8.2
+
+#MenuObj      Automation
+#MenuItem     DIM               25
+
+
+EditColl      COLLECTION
+UpdateColl    COLLECTION
+NewColl       COLLECTION
+.
+
+APForm              PLFORM             APEntry.PLF
+DataMenu            plform             DataMenu.PLF
+
+
+         LISTINS                EditColl,EMemo:
+                                         STTerms:
+                                         STName,STAddress1,STAddress2,STAddress3:
+                                         STCity,STState,STZip,STCountry,STCountryName:
+                                         EReceiptNo,EDiscAmt,EAmount,ENonDiscAmt:
+                                         EGLAccount,EGLEntity,EGLAmount:
+                                         EInvoice,EPO                        //Removed EVendor,     //HR 2019.4.11
+
+         LISTINS                NewColl,EPO:
+                                        EVendor:
+                                        EMemo:
+                                        EReceiptNo,EDiscAmt,EAmount,ENonDiscAmt:
+                                        EAmount,ENonDiscAmt,EDiscAmt:
+                                        DTDueDate,DTInvoiceDate,DTDiscDate:
+                                        EGLAccount,EGLEntity,EGLAmount:
+                                        EInvoice,EVendor,EPO
+
+
+                    LISTINS                UpdateColl,STName,STAddress1,STAddress2,STAddress3:
+                                                      STCity,STState,STZip,STCountry,STCountryName
+
+                    CREATE                 LightGray=*LTGRAY
+                    GETITEM                LightGray,0,LightGrayRGB
+
+                    CALL              OpenAPTRN
+                    CALL              OpenCMPNY
+                    CALL              OpenVendor
+                    CALL              OpenVendorGL
+                    CALL              OpenARTrm
+                    CALL              OpenAPDist
+                    CALL              OpenCntry
+                    CALL              OpenVHST
+                    CALL              OpenGLMast
+                    CALL              OpenAPDet
+
+                    CALL              OpenSequence
+.              WINHIDE                      //HR 3/2/2005
+
+                    FORMLOAD          APForm
+                    formload                 DataMenu,WMain
+
+                   move                "2101",Default.APAcct
+                    CALL              SetupLVColumns
+                    CALL              MainReset
+                    CALL              CalculateNextPeriod
+
+                    SETFOCUS          EVendor
+
+                    LOOP
+                      WAITEVENT
+                    REPEAT
+.=============================================================================
+MainValid
+;=============================================================================
+. Invoice Entry routines
+.
+              CANFIND           EVendor,Vendor,AccountNumber
+              CALL              SetMain
+              RETURN
+;==========================================================================================================
+VerifyInvoice
+...                    debug
+                    getprop            EInvoice,text=TestInvoice
+                    packkey            APTrnKY from $Entity,Vendor.AccountNumber,TestInvoice
+                    call               RDAPTrn
+                    if                 (ReturnFl = 0 and APTrn.Balance = APTrn.OrigAmt and APTrn.ClosedFlag = "O")
+                      beep
+                      alert              plain,"Do you wish to Delete this Invoice?",result,"WARNING: DELETE INVOICE?"
+                      if                 (result = 1)
+                        call               DeleteInvoice
+                        beep
+                        alert              note,"Invoice has been deleted",result,"INVOICE DELETED"
+                        return
+                      endif
+                    endif
+
+                    if                 (ReturnFl = 0)               //We've got a duplicate
+                      beep
+                      alert              plain,"This is a duplicate Invoice.  Do you wish to enter a duplicate Invoice?",result,"WARNING: DUPLICATE INVOICE"
+                      if                 (result != 1)
+                        setprop            EInvoice,text=""
+                        setfocus           EInvoice
+                        return
+                      endif
+                    endif
+                    return
+;==========================================================================================================
+DeleteInvoice
+;
+; Add the Reverse APTrn record by adding a NEW APTRN Record in the negative.
+; Also, Update the Balance to 0
+; Find all the AP Distribution Record and reverse the Credits and Debits
+; Update the New record Balance to 0
+; Set the Delete Flag for both records to 1
+;
+                    trap               TransactionError if IO
+                    transaction        Start,APTRNFLST,APDistFLST,VHSTFLST,SequenceFLST,APDETFLST
+;
+; Update the old record to a balance of zero
+;
+                    call               RDAPTrnLK
+                    move               "0",APTrn.Balance
+                    set                APTrn.DeletedFlag
+                    move               "C",APTRN.ClosedFlag
+                    move               APTrn.SeqMajor,SaveSeqMajor
+                    call               UPDAPTrn
+;
+; Now write out the opposite transaction into the APTRN records
+;
+                    GetNextSeq         Pay
+                    MOVE               Sequence.SeqNo,APTRN.SeqMajor
+                    move               Sequence.SeqNo,APTRN.Voucher
+                    multiply           "-1",APTrn.OrigAmt
+                    clock              TimeStamp,APTrn.EntryDate
+                    clock              TimeStamp,APTrn.TransDate
+                    call               WRTAPTrn
+;
+; Write the AP Detail
+;
+                    call               WriteAPDetails
+;
+; Update the Vendor History
+;
+                    call               WriteVendorHistory
+;
+; Let's reverse the AP Distribution Records first
+;
+                    debug
+                    packkey            APDistKY3 from $Entity,SaveSeqMajor
+                    call               RDAPDist3
+                    loop
+                      call               KSAPDist3
+                    until              (ReturnFl = 1 or APDist.SeqMajor != SaveSeqMajor)
+                      readkey            APDistFL3,APDistKY3
+                      move               APDist.DebitAmount,TempAmt
+                      move               APDist.CreditAmount,APDist.DebitAmount
+                      move               TempAmt,APDist.CreditAmount
+                      move               APTrn.EntryDate,APDist.TransDate
+                      move               APTrn.SeqMajor,APDist.SeqMajor
+                      unpack             APDist.TransDate into APDist.Year,APDist.Month
+                      move               APTrn.Voucher,APDist.Voucher
+                      move               "0",APDist.PostedToGL
+                      call               WRTAPDist
+                      call               RDAPDist3                   //Positional Read
+                    repeat
+                    transaction        commit
+                    clear              APTRN
+                    call               MainReset
+                    return
+.=============================================================================
+SetMain
+              %IF       EntryProgramType = 1                            //Credit Memo Entry
+                MOVE              APTRN.AccountNumber,VendorKY
+              %ELSEIF              EntryProgramType = 2                 //Debit Memo Entry
+                SETPROP           WMain,Title="Debit Memo Entry Program"
+.                SETITEM           SDocument,0,"Invoice No."
+              %ELSEIF              EntryProgramType = 0                 //Invoice Entry
+              %ENDIF
+
+              CALL              RDVendor
+              IF                (ReturnFL = 1)
+                ALERT             note,"Vendor does not exist in Vendor Master",result,"Invalid Vendor"
+                SETFOCUS          EVendor
+                RETURN
+              ENDIF
+.
+. Retrieve the Terms for late ure
+.
+              MOVE              Vendor.TermCode,ARTRMKY
+              CALL              RDARTRM
+              IF                (ReturnFl = 1)
+                MOVE              "30",AgingDays
+                MOVE              "0",DiscountDays
+                MOVE              "0",DiscountPercent
+              ELSE                                                     //We got a winner!!!!
+                MOVE              ARTRM.DiscDays,DiscountDays
+                MOVE              ARTRM.NetDays,AgingDays
+                MOVE              ARTRM.DiscPerc,DiscountPercent
+              ENDIF
+
+              CALL              LoadGLDetails
+
+              setprop                  STName,text=Vendor.Name
+              setprop                  STAddress1,text=Vendor.Address1
+              setprop                  STAddress2,text=Vendor.Address2
+              setprop                  STAddress3,text=Vendor.Address3
+              setprop                  STCity,text=Vendor.City
+              setprop                  STZip,text=Vendor.Zip
+              setprop                  STState,text=Vendor.State
+              setprop                  STCountry,text=Vendor.Country
+              setprop                  CB1099,value=Vendor.Form1099
+
+              CLOCK             TimeStamp,Date8
+
+              MOVE              Vendor.TermCode,ARTRMKY
+              CALL              RDARTRM
+              if                (ReturnFl = 1)
+                move              "Net 30",ARTRM.Desc
+              endif
+              setprop                  STTerms,text=ARTRM.Desc
+
+              %IF       EntryProgramType = 0                            //Invoice Entry
+              CLOCK             Date,Date8
+              UNPACK            Date8,MM,Dim1,DD,Dim1,YY
+
+              %ENDIF
+
+              MOVE              Row,RowSelected
+
+              SETPROP           DTInvoiceDate,Enabled=1
+              setprop                  EVendor,static=1,BGColor=$BtnFace
+
+.              SETPROP           UpdateColl,BGCOLOR=$Window
+.              SETPROP           UpdateColl,ReadOnly=0
+              RETURN
+.=============================================================================
+MainClose
+              chain                    FromPgm
+              stop
+.=============================================================================
+MainInit
+              RETURN
+.=============================================================================
+OnClickChangeAmounts
+              RETURN
+.=============================================================================
+MainReset
+              SETITEM           EditColl,0,""
+              setprop           EGLTotals,value=0
+              SETPROP           NewColl,BGCOLOR=$Window,ReadOnly=0,static=0
+              SETPROP           DTInvoiceDate,Enabled=1
+              SETPROP           DTDueDate,Enabled=1
+              SETPROP           DTDiscDate,Enabled=1
+              SETITEM           CBHoldRelease,0,0
+
+              SETPROP           DTInvoiceDate,Enabled=0
+
+              SETFOCUS          EVendor
+..HR 2019.4.11              CLOCK                TimeStamp,TODAY8
+..HR 2019.4.11              SETPROP              DTInvoiceDate,text=TODAY8
+
+              setprop                  BAccept,enabled=1
+              setprop                  BCancel,enabled=1
+
+              RETURN
+.=============================================================================
+MaintMenuOption
+           CALL                 GetMenuName
+            RETURN
+.=============================================================================
+OnClickAcceptEntries
+              setprop                  BAccept,enabled=0
+              setprop                  BCancel,enabled=0
+
+              %IF       EntryProgramType = 1         //Credit Memo Entry
+              %ELSEIF              EntryProgramType = 2         //Debit Memo Entry
+              %ELSEIF              EntryProgramType = 0         //Invoice Entry
+              %ENDIF
+
+              MOVE      Vendor.AccountNumber to VendorKY
+              CALL      RDVendor
+
+              %IF       EntryProgramType = 1         //Credit Memo Entry
+              %ELSEIF              EntryProgramType = 2         //Debit Memo Entry
+              %ELSEIF              EntryProgramType = 0         //Invoice Entry
+              %ENDIF
+
+              %IF       EntryProgramType = 1         //Credit Memo Entry
+              %ELSEIF              EntryProgramType = 2         //Debit Memo Entry
+              %ELSEIF              EntryProgramType = 0         //Invoice Entry
+              %ENDIF
+.
+. Write out the Accounts Payable information write here along with the AP
+. Distribution records.
+.
+              GETPROP           EAmount,value=APTRN.OrigAmt
+              CALL              CheckGLTotals
+              if                (ValidFlag != 0)
+                setprop                  BAccept,enabled=1
+                setprop                  BCancel,enabled=1
+                RETURN
+              endif
+
+
+              IF                (GLTotals != APTRN.OrigAmt)     //Distribution doesn't match Invoice Amt
+                PACK              AlertString FROM "G/L Distribution Amounts do not match the actual Invoice Amount.":
+                                  AlertReturn,"Please check your amounts before continuing"
+                ALERT             note,AlertString,result,"Invalid Totals"
+                setprop                  BAccept,enabled=1
+                setprop                  BCancel,enabled=1
+                RETURN
+              ENDIF
+.
+. Logic added to verify the On hold status
+.
+              getprop           CBHoldRelease,value=APTRN.HoldFlag
+              IF                (APTRN.HoldFlag = 1)               //HR 4/7/2008
+                ALERT             plain,"Are you sure you wish to put this Invoice on Hold?",result,"Are you sure?"
+
+                if                       (result != 1)
+                  setprop                  BAccept,enabled=1
+                  setprop                  BCancel,enabled=1
+                  return
+                endif
+              ENDIF
+
+              IF                (APTRN.OrigAmt = 0)                 //HR 4/7/2008
+                ALERT             note,"There is no Invoice amount that has been entered!",result,"Zero Invoice Amt."
+                setprop                  BAccept,enabled=1
+                setprop                  BCancel,enabled=1
+                setfocus               EAmount
+                RETURN
+              ENDIF
+
+              MOVE              $Entity,APTRN.Entity
+              MOVE              $Entity,APTRN.Entity
+              GETPROP           EVendor,Text=APTRN.Vendor
+              MOVE              "O",APTRN.ClosedFlag
+              getprop                  EInvoice,text=APTRN.Invoice
+              chop                     APTRN.Invoice,APTRN.Invoice           //Added logic 3.21.2019
+              if                       (APTRN.Invoice = "")
+                alert                    stop,"An Invoice Number must be entered before continuing.",result,"ERROR: NO INVOICE ENTERED"
+                setprop                  BAccept,enabled=1
+                setprop                  BCancel,enabled=1
+                setfocus                 EInvoice
+                return
+              endif
+
+              CLOCK             TimeStamp,APTRN.EntryDate
+              GETPROP           EDiscAmt,Value=APTRN.DiscAmt
+              GETPROP           ENonDiscAmt,Value=APTRN.NonDiscAmt
+
+              getprop           CB1099,value=APTRN.Form1099
+              getprop           EMemo,text=APTrn.Memo
+              getprop           EReceiptNo,text=APTRN.Receipt
+              getprop           EVendor,text=APTRN.FromVendor
+              getprop           EPO,text=APTRN.PO
+
+              MOVE              "0",APTRN.Release
+
+              getprop           DTInvoiceDate,text=APTrn.TransDate
+
+              getprop           DTDiscDate,text=APTrn.DiscDate
+              getprop           DTDueDate,text=APTrn.DueDate
+              getprop           DTReceiptDate,text=APTrn.ReceiptDate
+
+
+              MOVE              "    ",APTRN.ReceiptDate
+              MOVE              ARTRM.DiscPerc,APTRN.DiscPct
+
+              MOVE              APTRN.OrigAmt,APTRN.Balance
+
+              MOVE              "    ",APTRN.APAccount
+
+              trap               TransactionError if IO
+              transaction        Start,APTRNFLST,APDistFLST,VHSTFLST,SequenceFLST,APDETFLST
+              GetNextSeq        Pay
+
+              MOVE              Sequence.SeqNo,APTRN.SeqMajor
+              MOVE              Sequence.SeqNo,APTRN.Voucher
+              CALL              WrtAPTRN
+              CALL              WriteAPDetails
+              CALL              WriteVendorHistory
+              CALL              WriteGLDetails
+              transaction       commit
+              trapclr           io
+
+              CALL               MainReset
+              RETURN
+;==========================================================================================================
+TransactionError
+                    transaction        rollback
+                    beep
+                    alert              stop,"An Error has occured while saving this transaction",result,"TRANSACTION ERROR"
+                    return
+;=============================================================================
+WriteAPDetails
+              MOVE              APTRN.Entity,APDetail.Entity
+              MOVE              APTRN.SubEntity,APDetail.SubEntity
+              MOVE              APTRN.Vendor,APDetail.Vendor
+              MOVE              "0",APDetail.TransCode
+              MOVE              APTRN.SeqMajor,APDetail.SeqMajor
+              MOVE              "1",APDetail.SeqMinor
+              MOVE              APTRN.TransDate,APDetail.TransDate
+              MOVE              APTRN.EntryDate,APDetail.PostDate
+;
+; Begin using the Period rather than the Date that it was entered into the system!!!!!   7.28.2014
+; 3 situations...
+;
+; Invoice Month = current (7.14.2014 belongs in Period 7)
+; Invoice Month < current (6.14.2014 belongs in Period APCTRL.Period)
+; Invoice Month > current (8.14.2014) belongs in current APCTRL Period)
+;
+              UNPACK            APTRN.TransDate,YYYY,MMF,DD                       //Actual Invoice Date //
+...              IF                (MMF <= APCTLREC.Period)
+.                MOVE              (APCTLREC.Period),APDetail.Month
+.                MOVE              APCTLREC.Year,APDetail.Year
+                    move               mmf,APDetail.Month
+                    move               yyyyf,APDetail.Year
+....              ELSE
+....                MOVE              NextPeriod,APDetail.Month
+....                MOVE              NextYear,APDetail.Year
+....              ENDIF
+
+;
+..HR 7.29.01              UNPACK            APTRN.EntryDate,YYYY,MM,DD
+..HR 7.29.01              MOVE              YYYY,APDetail.Year
+..HR 7.29.01              MOVE              MM,APDetail.Month
+              MOVE              APTRN.Invoice,APDetail.ReferenceNo
+              MOVE              "    ",APDetail.APAccount
+              MOVE              APTRN.OrigAmt,APDetail.Amount
+              CALL              WrtAPDET
+              RETURN
+;=============================================================================
+WriteVendorHistory
+              UNPACK            APTRN.EntryDate,CC,YY,MM,DD
+              MOVE              MM,MMF
+
+              PACKKEY           VHSTKY FROM APTRN.Entity,APTRN.Vendor,CC,YY
+              CALL              RDVHST                                //Read the Vendor History record
+              IF                (ReturnFL = 1)                        //Vendor History record not found, add it!!!
+                CLEAR             VendorHistory
+                MOVE              APTRN.Entity,VendorHistory.Entity
+                MOVE              APTRN.Vendor,VendorHistory.Vendor
+                PACKKEY           VendorHistory.Year FROM CC,YY
+                MOVE              APTRN.OrigAmt,VendorHistory.PurchAmt(MMF)
+                MOVE              APTRN.OrigAmt,VendorHistory.PurchAmt(13)
+                MOVE              APTRN.Invoice,VendorHistory.LastInvoice
+                MOVE              APTRN.TransDate,VendorHistory.LastInvDate
+                ADD               "1",VendorHistory.PurchTotal(MMF)
+                ADD               "1",VendorHistory.PurchTotal(13)
+                CALL              WrtVHST
+              ELSE
+                ADD               APTRN.OrigAmt,VendorHistory.PurchAmt(MMF)
+                ADD               APTRN.OrigAmt,VendorHistory.PurchAmt(13)
+                MOVE              APTRN.Invoice,VendorHistory.LastInvoice
+                MOVE              APTRN.TransDate,VendorHistory.LastInvDate
+                ADD               "1",VendorHistory.PurchTotal(MMF)
+                ADD               "1",VendorHistory.PurchTotal(13)
+                CALL              UpdVHST
+              ENDIF
+              RETURN
+.=============================================================================
+SetupLVColumns
+              MOVE              "42",EditTop
+              MOVE              "460",EditLeft
+              FOR               X FROM "1" TO "18" USING "1"
+
+                CALC              EditBottom = (EditTop + ((X-1) * 15)+ 16)
+                CALC              EditRight = EditLeft + 80
+
+                CREATE            WMain;EGLAccount(X)=(EditTop + ((X-1) * 15)):(EditTop + ((X-1) * 15)+ 16):460:(460 + 80):
+                                  MaxChars=8,Style=2,ZORDER=1000,visible=1,Border=1,SelectAll=1,ObjectID=X
+
+                CREATE            WMain;EGLEntity(X)=(EditTop + ((X-1) * 15)):(EditTop + ((X-1) * 15)+ 16):540:(540 + 80):
+                                  MaxChars=8,Style=2,ZORDER=1000,visible=1,Border=1,SelectAll=1,ObjectID=X
+                CREATE            WMain;EGLAmount(X)=(EditTop + ((X-1) * 15)):(EditTop + ((X-1) * 15)+ 16):620:(620 + 64):
+                                  DecimalDigits=2,IntegerDigits=6,Style=2,ZORDER=1000,visible=1,Border=1,Alignment=3:
+                                  SelectAll=1,ObjectID=X,AllowMinus=1
+
+                ACTIVATE          EGLAccount(X)
+                ACTIVATE          EGLEntity(X)
+                ACTIVATE          EGLAmount(X)
+              REPEAT
+              EVENTREG          EGLAmount,3,UpdateGLTotals
+              EVENTREG          EGLAccount,10,CheckGLAccountKeyPress,ObjectID=RowSelected
+
+              RETURN
+;=============================================================================
+CheckGLAccountKeyPress
+              F2SEARCH          EGLAccount(RowSelected),GLMast
+              DISPLAY           "Object = ",RowSelected
+              RETURN
+
+;=============================================================================
+CheckGLTotals
+              MOVE              "0",GLTotals
+              MOVE              "1",ValidFlag
+              FOR               X FROM "1" TO "18" USING "1"
+                GETPROP           EGLAmount(X),Value=GLValue
+                IF              (GLValue != 0)             //We have a GL Amount...Let's verify the GL Code & Entity
+                  GETPROP           EGLAccount(X),Text=TestGLCode
+                  CANFIND           EGLAccount(X),GLMast
+.                  GETPROP           EGLEntity(X),Text=TestGLEntity
+.                  IF                (TestGLEntity != "1" and TestGLEntity != "2" and TestGLEntity != "3")  //HR 9/17/2005 Added NV
+.                    PACK              AlertString FROM "Invalid Entity. Please re-enter proper entity before posting this ":
+.                                      "transaction"
+.                    ALERT             stop,AlertString,result,"Error in Posting"
+.                    SETFOCUS          EGLEntity(X)
+.                    RETURN
+..                  ENDIF
+                ENDIF
+                CALC              GLTotals = GLTotals + GLValue
+              REPEAT
+              SETPROP           EGLTotals,Value=GLTotals
+              MOVE              "0",ValidFlag
+              RETURN
+;=============================================================================
+WriteGLDetails
+;
+; Write the Accounts Payable Transaction First
+;
+                MOVE              APTRN.Entity,APDist.Entity
+                MOVE              APTRN.SubEntity,APDist.SubEntity
+                MOVE              APTRN.Vendor,APDist.Vendor
+                MOVE              APTRN.EntryDate,APDist.TransDate
+                MOVE              APTRN.SeqMajor,APDist.SeqMajor
+                MOVE              APTRN.Voucher,APDist.Voucher
+                move              Default.APAcct,APDist.GLCode                  //Default A/P GL Code
+                UNPACK            APDist.TransDate into APDist.Year,APDist.Month
+
+                MOVE              "0",APDist.PostedToGL
+                MOVE              "1",APDist.TransCode                 //AP Invoice
+                MOVE              "0",APDist.CheckNo
+                move              "1",APDist.SeqMinor
+
+                IF                (APTRN.OrigAmt > 0)                  //Credit Transaction
+                  move              APTRN.OrigAmt,APDist.CreditAmount
+                  MOVE              "0",APDist.DebitAmount
+                ELSE                                                   //Debit Transaction
+                  multiply          "-1",APTRN.OrigAmt,APDist.DebitAmount
+                  MOVE              "0",APDist.CreditAmount
+                ENDIF
+                call                   WRTAPDist
+
+...              MOVE              "0",APDist.SeqMinor
+              FOR               X FROM "1" TO "18" USING "1"
+                GETPROP           EGLAmount(X),Value=GLValue
+                CONTINUE          IF (GLValue = 0)
+
+                MOVE              APTRN.Entity,APDist.Entity
+                MOVE              APTRN.SubEntity,APDist.SubEntity
+                MOVE              APTRN.Vendor,APDist.Vendor
+                MOVE              APTRN.EntryDate,APDist.TransDate
+                MOVE              APTRN.SeqMajor,APDist.SeqMajor
+                MOVE              APTRN.Voucher,APDist.Voucher
+                MOVE              "0",APDist.PostedToGL
+                MOVE              "1",APDist.TransCode                 //AP Invoice
+                MOVE              "0",APDist.CheckNo
+                UNPACK            APDist.TransDate,APDist.Year,APDist.Month
+..HR 7.29.14                MOVE              MM,APDist.Month
+..                MOVE              APDetail.Month,APDist.Month         //HR 7.29.14
+..HR 7.29.14                PACKKEY           APDist.Year FROM CC,YY
+...                MOVE              APDetail.Year,APDist.Year           //HR 7.29.14
+
+                GEtprop           EGLAccount(X),text=APDist.GLCode
+                move              $Entity,APDist.SubEntity                 //HR 2019.2.26
+                CHOP              APTRN.Invoice,APTRN.Invoice
+                PACK              APDist.Description FROM "Invoice : ",APTRN.Invoice," for Vendor : ",APTRN.Vendor
+
+                IF                (GLValue < 0)                        //Credit Transaction
+                  subtract          GLValue,APDist.CreditAmount
+                  MOVE              "0",APDist.DebitAmount
+                ELSE                                                   //Debit Transaction
+                  MOVE              GLValue,APDist.DebitAmount
+                  MOVE              "0",APDist.CreditAmount
+                ENDIF
+              ADD               "1",APDist.SeqMinor
+              CALL              WrtAPDist
+              REPEAT
+              RETURN
+;=============================================================================
+UpdateGLTotals
+              MOVE              "0",GLTotals
+              FOR               X FROM "1" TO "18" USING "1"
+                GETPROP           EGLAmount(X),Value=GLValue
+                CALC              GLTotals = GLTotals + GLValue
+              REPEAT
+              SETPROP           EGLTotals,Value=GLTotals
+              RETURN
+.=============================================================================
+.GetEditText
+.              DISPLAY           "result 13 :",result13
+
+.              CALC              RowHit = result13 / 100
+.              CALC              SubItemHit = result13 - (RowHit * 100)
+.              DISPLAY           "Row : ",RowHit,"    Sub : ",SubItemHit
+
+Harry4
+InlineEdit
+.Only used for inline editing.
+.
+              MOVE              "             ",Dim10
+.              LVDetails.GetItemRect giving Dim16 using *Index=RowHit,*Subitem=SubItemHit
+              UNPACK            DIM16,EditTop,EditBottom,EditLeft,EditRight
+
+.              LVDetails.GetItemText giving DIM10 using *Index=RowHit,*SubItem=SubItemHit
+..HR 7/8/2005              ADD               "4",EditTop
+              ADD               "2",EditTop
+              ADD               "2",EditBottom
+
+              ADD               "2",EditLeft
+..HR 7/8/2005              ADD               "3",EditRight
+              ADD               "3",EditRight
+
+              CALC              EditBottom = EditBottom - EditTop
+              CALC              EditRight = EditRight - EditLeft
+
+              IF                (SubItemHit = 2)
+                SETPROP           NGLAmount,Top=EditTop
+                SETPROP           NGLAmount,Left=EditLeft
+                SETPROP           NGLAmount,Width=EditRight
+                SETPROP           NGLAmount,Height=EditBottom
+
+                SETPROP           NGLAmount,Text=" "
+                SETPROP           NGLAmount,Text=DIM10
+
+                SETPROP           NGLAmount,ZOrder=20000
+                NGLAmount.Select USING *Start=1,*End=0
+                SETPROP           NGLAmount,visible=1
+                SETFOCUS          NGLAmount
+              ELSE
+                SETPROP           NGLCode,Top=EditTop
+                SETPROP           NGLCode,Left=EditLeft
+                SETPROP           NGLCode,Width=EditRight
+                SETPROP           NGLCode,Height=EditBottom
+
+                SETPROP           NGLCode,Text=" "
+                SETPROP           NGLCode,Text=DIM10
+
+                SETPROP           NGLCode,ZOrder=20000
+                NGLCode.Select USING *Start=1,*End=0
+                SETPROP           NGLCode,visible=1
+                SETFOCUS          NGLCode
+              ENDIF
+
+              RETURN
+.=============================================================================
+GetClickedRow
+.              LVDetails.SubItemHitTest  giving result13 using MouseLeft,MouseTop
+
+              CALC              RowHit = result13 / 100
+              CALC              SubItemHit = result13 - (RowHit * 100)
+
+.              LVDetails.GetItemCheck  giving result using *Index=RowHit
+              display           "CheckBox = ",result,"   Row : ",RowHit
+
+.
+              RETURN
+.=============================================================================
+CalculateExtendedAmounts
+              RETURN
+
+.=============================================================================
+UpdateDetailRecord
+              RETURN
+.=============================================================================
+.=============================================================================
+PrintInvoiceHeader
+              RETURN
+.=============================================================================
+ViewComments
+              CALL                  CommentInq using Vendor.AccountNumber
+              RETURN
+.=============================================================================
+PrintStatement
+              RETURN
+.=============================================================================
+MainAbout
+              RETURN
+.=============================================================================
+MainUndo
+              RETURN
+.=============================================================================
+MainToolBar
+              RETURN
+.=============================================================================
+PrintInvoices
+.=============================================================================
+PrintDetailLine
+              RETURN
+;=============================================================================
+Document     FORM              10
+PrintInvoicesLoadMod            ROUTINE Document
+              RETURN
+
+.=============================================================================
+PrintCustomHeader
+              RETURN
+PrintRTN
+              RETURN
+.=============================================================================
+OnClickDetailToolBar
+DIM4          DIM               4
+#NewAddCharge DIM               10
+#NewAddAmount FORM              4.2
+WrkLineTemp   FORM              2
+              RETURN
+;=============================================================================
+UpdateTransactionDates
+.              GetMSDate         DTInvoiceDate,InvoiceDate
+              getprop                  DTInvoiceDate,text=InvoiceDate
+
+              CALL              ConvDateToDays using InvoiceDate,TodayDays
+              ADD               TodayDays,AgingDays,NewAgingDays       //Calculate the new Invoice Due Dates, etc
+              ADD               TodayDays,DiscountDays,NewDiscountDays
+
+              CALL              ConvDaysToDate using NewAgingDays,Date8
+..              PutMSDate         DTDueDate,Date8
+              setprop           DTDueDate,text=Date8
+              CALL              ConvDaysToDate using NewDiscountDays,Date8
+..              PutMSDate         DTDiscDate,Date8
+              setprop                  DTDiscDate,text=Date8
+              GETPROP           EAmount,value=GrossAmount
+              IF                (GLCounter = 1)                        //HR 7/25/2005
+                SETPROP           EGLAmount(1),Value=GrossAmount       //HR 7/25/2005
+                CALL              UpdateGLTotals
+              ENDIF                                                    //HR 7/25/2005
+
+              GETPROP           ENonDiscAmt,value=NonDiscAmount
+
+              CALC              NetAmount = (GrossAmount - NonDiscAmount) * (DiscountPercent / 100)
+              SETPROP           EDiscAmt,value=NetAmount
+              RETURN
+;=============================================================================
+LoadGLDetails
+              MOVE              "0",GLCounter                        //HR 7/25/2005
+              MOVE              Vendor.AccountNumber,VendorGLKY
+              CALL              RDVendorGL
+              LOOP
+                CALL              KSVendorGL
+              UNTIL             (ReturnFL = 1 or Vendor.AccountNumber != VendorGL.AccountNumber)
+                SETITEM           EGLAccount(VendorGL.Line),0,VendorGL.GLCode
+                SETITEM           EGLEntity(VendorGL.Line),0,VendorGL.SubEntity
+                ADD               "1",GLCounter
+              REPEAT
+              RETURN
+;==============================================================================
+CalculateNextPeriod
+.                   IF                (APCTLREC.Period < 12)
+.                     ADD               "1",APCTLREC.Period,NextPeriod
+.                     MOVE              APCTLREC.Year,NextYear
+.                   ELSE
+.                     MOVE              "1",NextPeriod
+.                     ADD               "1",APCTLrec.Year,NextYear
+.                   ENDIF
+                   RETURN
+;==========================================================================================================
+KeyPress_EVendAcctNo
+                   F2SEARCH          EVendor,Vendor
+                   IF                 (PassedVar = "Y")
+                   CALL               MainValid
+                   ENDIF
+                   RETURN
+;==========================================================================================================
+SaveMode
+                    return
+;==========================================================================================================
+MainCancel
+                    return
+;==========================================================================================================
+MainHelp            return
+;==========================================================================================================
+                    include            MenuDefs.inc

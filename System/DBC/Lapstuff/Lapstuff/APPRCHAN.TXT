@@ -1,0 +1,140 @@
+. 
+         INCLUDE   COMMON
+. 
+APDISTFL IFILE     KEYL=6,UNCOMPRESSED
+DCODE    DIM       6
+DESC     DIM       20
+DSAL     FORM      6.2
+DCSL     FORM      6.2
+MTDS     FORM      6.2
+MTDC     FORM      6.2
+YTDS     FORM      8.2
+YTDC     FORM      8.2
+DIVNO    DIM       2
+TDS      FORM      8.2
+TDC      FORM      8.2
+TMS      FORM      8.2
+TMC      FORM      8.2
+TYS      FORM      8.2
+TYC      FORM      8.2
+LINES    FORM      "55"
+PAGE     FORM      3
+ANS      DIM       1
+TODMON   DIM       2
+TODDAY   DIM       2
+TODYEAR  DIM       2
+CNAME    DIM       20
+DATEDESC DIM       15
+DATERROR DIM       1
+MM DIM 2
+DD DIM 2
+YY DIM 2
+FM FORM 2
+FD FORM 2
+FY FORM 2
+BKUPFLG  DIM       1
+DATFLG   DIM       1
+ZCODE    DIM       3
+. 
+         DISPLAY   *ES,*P1:1,*HON,"PRINT ACCOUNTS PAYABLE SYSTEM - ":
+                       "PURCHASE ANALYSIS REPORT",*HOFF
+. 
+         OPEN      APDISTFL,"APDISTFL"
+         MOVE      "X",BKUPFLG
+. 
+         MOVE      TODAY  TO  MM
+         RESET     TODAY  TO  4
+         MOVE      TODAY  TO  DD
+         RESET     TODAY  TO  7
+         MOVE      TODAY  TO  YY
+         RESET     TODAY  TO  1
+         REP       " 0"   IN  MM
+. 
+         MOVE      MM TO TODMON
+         MOVE      DD TO TODDAY
+         MOVE      YY TO TODYEAR
+         MOVE      "000000"  TO  DCODE
+         READ      APDISTFL,DCODE;ZCODE,CNAME
+A1       READKS    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A50 IF OVER
+         COMPARE   "55",LINES
+         GOTO      A2 IF LESS
+         ADD       "1",PAGE
+         PRINT     *F,*53,CNAME
+         PRINT     *52,"PURCHASE ANALYSIS"
+         PRINT     *54,"FOR: ",TODMON,"/",TODDAY,"/",TODYEAR,*110,"PAGE: ":
+                   PAGE
+         PRINT     " "
+         PRINT     *3,"DIST CODE",*18,"DESCRIPTION",*36,"DAY PURCHASES":
+                   *60,"MONTH PURCHASES",*91,"YEAR PURCHASES"
+         PRINT     " "
+         MOVE      "9",LINES
+A2       ADD       DSAL,MTDS
+         ADD       MTDS,YTDS
+.  TOTAL
+. 
+         ADD       DSAL,TDS
+         ADD       MTDS,TMS
+         ADD       YTDS,TYS
+         PRINT     *4,DCODE,*14,DESC,*38,DSAL,*65,MTDS:
+                   *92,YTDS
+         ADD       "1",LINES
+         GOTO      A1
+A50      PRINT     *36,"-----------",*63,"-----------",*92,"-----------"
+         PRINT     *36,TDS,*63,TMS,*92,TYS
+A50A     KEYIN     *P1:23,*EL,"CLEAR DAY (Y/N)? ",ANS
+         CMATCH    "Y",ANS
+         GOTO      A50A IF EOS
+         GOTO      A50B IF EQUAL
+         CMATCH    "N",ANS
+         GOTO      EOJ IF EQUAL
+         GOTO      A50A
+A50B     MOVE      "000000",DCODE
+         READ      APDISTFL,DCODE;DCODE
+A51      READKS    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A60 IF OVER
+         ADD       DSAL,MTDS
+         MOVE      "0",DSAL
+         MOVE      "0",DCSL
+         UPDATE    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A51
+A60      KEYIN     *P1:23,*EL,"CLEAR MONTH (Y/N)? ",ANS
+         CMATCH    "Y",ANS
+         GOTO      A60 IF EOS
+         GOTO      A60A IF EQUAL
+         CMATCH    "N",ANS
+         GOTO      EOJ IF EQUAL
+         GOTO      A60
+A60A     MOVE      "000000",DCODE
+         READ      APDISTFL,DCODE;DCODE
+A61      READKS    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A70 IF OVER
+         ADD       MTDS,YTDS
+         MOVE      "0",MTDS
+         MOVE      "0",MTDC
+         UPDATE    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A61
+A70      KEYIN     *P1:23,*EL,"CLEAR YEAR (Y/N)? ",ANS
+         CMATCH    "Y",ANS
+         GOTO      A70 IF EOS
+         GOTO      A70A IF EQUAL
+         CMATCH    "N",ANS
+         GOTO      EOJ IF EQUAL
+         GOTO      A70
+         GOTO      EOJ IF NOT EQUAL
+A70A     MOVE      "000000",DCODE
+         READ      APDISTFL,DCODE;DCODE
+A71      READKS    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      EOJ IF OVER
+         MOVE      "0",DSAL
+         MOVE      "0",DCSL
+         MOVE      "0",MTDS
+         MOVE      "0",MTDC
+         MOVE      "0",YTDS
+         MOVE      "0",YTDC
+         UPDATE    APDISTFL;DCODE,DESC,DSAL,DCSL,MTDS,MTDC,YTDS,YTDC,DIVNO
+         GOTO      A71
+EOJ      CLOSE     APDISTFL
+         RELEASE
+         CHAIN     "APMENU1"
+. 

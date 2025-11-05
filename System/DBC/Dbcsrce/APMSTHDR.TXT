@@ -1,0 +1,31 @@
+MASTER   FILE       UNCOMPRESSED
+ACCNO    INIT      "000000"
+NAME     DIM       25
+ADD1     DIM       20
+ADD2     DIM       20
+CITY     DIM       14
+STATE    DIM       2
+ZIP      DIM       5
+TAXC     DIM       1
+ACCST    DIM       1
+CRDRAT   DIM       1
+AMT      FORM      "       .00"
+LACCNO   FORM      "001000"
+LPAT     FORM      "      .00"
+EXT      DIM       5
+DIVNO    INIT      "00"
+FUT      DIM       4
+SEQ      FORM      "-1"
+         PREP      MASTER,"APMASTER"
+         KEYIN     *R,*P1:24,"NAME   = ",NAME
+         KEYIN     *R,*P1:24,"ADD1   = ",ADD1
+         KEYIN     *R,*P1:24,"ADD2   = ",ADD2
+         KEYIN     *R,*P1:24,"CITY   = ",CITY
+         KEYIN     *R,*P1:24,"STATE  = ",STATE
+         KEYIN     *R,*P1:24,"ZIP    = ",ZIP
+         WRITE     MASTER,SEQ;ACCNO,NAME,ADD1,ADD2,CITY,STATE,ZIP:
+                   TAXC,ACCST,CRDRAT,AMT,AMT,AMT,AMT,AMT,AMT,AMT,LACCNO:
+                   LPAT,EXT,DIVNO,FUT
+         WEOF      MASTER,SEQ
+         CLOSE     MASTER
+         STOP

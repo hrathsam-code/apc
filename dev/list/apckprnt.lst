@@ -1,0 +1,46 @@
+
+
+
+PAGE    1      apckprnt                                                                                       02-11-19 11:35:24
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP apckprnt -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+    5.    INCLUDE  A: mscbrag.txt
+    7.    INCLUDE  B: common.txt
+    9.    INCLUDE  C: aptranfd.txt
+   15.    INCLUDE  D: apmastfd.txt
+   77.    INCLUDE  E: apcalndr.txt
+  251.    INCLUDE  F: apmastrd.txt
+  263.    INCLUDE  G: apmastks.txt
+  269.    INCLUDE  H: apcknew.txt
+   24. H   INCLUDE  I: aptranks.txt
+  297.    INCLUDE  J: apmastrd.txt
+  328.    INCLUDE  K: apmastrd.txt
+  342.    INCLUDE  L: aptranks.txt
+  386.    INCLUDE  M: aptranks.txt
+  431.    INCLUDE  N: aptranks.txt
+  503.    INCLUDE  O: aptranks.txt
+  522.    INCLUDE  P: aptranks.txt
+  613.    INCLUDE  Q: appaidwt.txt
+  629.    INCLUDE  R: aptranup.txt
+  636.    INCLUDE  S: apdates.txt
+  740.    INCLUDE  T: apmastup.txt
+  793.    INCLUDE  U: apmasthr.txt
+  795.                                         PRINT     " ",*FLUSH 
+                                                                   *WARNING*
+Warning: I/O control not implemented.
+  803.    INCLUDE  V: apmasthu.txt
+  868.                                         MOVE      "Y" TO REPLY
+                                                   *WARNING*
+Warning: Statement has no label and follows unconditional GOTO/RETURN.
+  881.    INCLUDE  W: getdate.txt
+  882.    INCLUDE  X: apmastvk.txt
+  883.    INCLUDE  Y: aptranbk.txt
+
+   Output: c:\apc\plc\apckprnt.plc                                                                                                                                                                                                                                   
+      1359 LINES;      0 ERRORS;      2 WARNINGS; Start/Stop: 11:35:24 11:35:24
+  00003320 DATA;  00001578  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+

@@ -1,0 +1,32 @@
+
+
+
+PAGE    1      prtvendor                                                                                      02-11-19 11:36:01
+                                         
+
+PL/B COMPILER   Version 9.9    28 Oct 2016 
+COMMAND LINE WAS: PLBCMP prtvendor -L=32 ZG ZI=0 ZT S ZL E PE"" 
+PLBCMP_OPT=-ZG -ZI=0 -E -l=32 -ZT -p""
+
+   24.    INCLUDE  A: common.inc
+   25.    INCLUDE  B: workvar.inc
+  284. B   INCLUDE  C: macrolib.inc
+  285. B   INCLUDE  D: users.fd
+   86. D    INCLUDE  E: users.io
+   50.    INCLUDE  F: sequence.fd
+   73. F   INCLUDE  G: sequence.io
+   52.    INCLUDE  H: vendor.fd
+  282. H   INCLUDE  I: vendor.io
+   53.    INCLUDE  J: printrtn.inc
+   76. J   INCLUDE  K: printvia.plf
+   77. J   INCLUDE  L: prntprog.plf
+  119. J   INCLUDE  M: print.fd
+   85. M    INCLUDE  N: print.io
+  122. J   INCLUDE  O: cust.fd
+  187. O    INCLUDE  P: cust.io
+   55.    INCLUDE  Q: prtvendor.plf
+
+   Output: c:\apc\plc\prtvendor.plc                                                                                                                                                                                                                                  
+      7608 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 11:36:01 11:36:02
+  00045008 DATA;  00001CE4  CODE;   SYMBOL TABLE USAGE:  UDA:   1% EXE:   0%
+

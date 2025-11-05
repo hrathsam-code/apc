@@ -1,0 +1,98 @@
+.................................................................
+. MSPOIO/TXT - MODULE PROVIDES I/O FACILITY FOR MSPURCHS/ISI    .
+.                                                               .
+.    MODULE REQUIRES INCLUDE OF MSPURCHF/TXT FILE DESCRIPTION   .
+.................................................................
+. 
+MSPOOPEN TRAP      NOPURCH   IF IO
+         TRAP      STDPARER  IF PARITY
+         TRAP      STDFMTER  IF FORMAT
+         TRAP      STDRANGE  IF RANGE
+         MOVE      "MSPURCHS.ISI" TO  IOERFILE
+         MOVE      "OPEN"         TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         OPEN      MSPURCHS,MSPURNM
+         MOVE      "H"            TO  IOSW
+. 
+MSPORTRN RETURN
+. 
+NOPURCH  BEEP
+         DISPLAY   *P01:23,*EL,*HON,"SALES HISTORY FILE NOT ON-LINE!":
+                   " - REINDEX NECESSARY!",*HOFF,*W2
+         GOTO      NOPURCH
+. 
+MSPOREAD TRAP      NOPOFND IF IO
+         TRAP      STDPARER   IF  PARITY
+         TRAP      STDFMTER   IF  FORMAT
+         TRAP      STDRANGE   IF  RANGE
+         MOVE      "MSPURCHS/ISI" TO  IOERFILE
+         MOVE      "READ"         TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSPURCHS
+         READ      MSPURCHS,MSPOKEY;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                                    MSPONUMB,MSPOUOP,MSPOQTY,MSPODATE,MSPOVEND:
+                                    MSPOPRC,MSPOVNAM
+         GOTO      NOPOFND IF OVER
+         MOVE      "H"     TO IOSW
+         RETURN
+. 
+NOPOFND  BEEP
+         DISPLAY   *P01:23,*EL,*HON,"PURCHASE HISTORY RECORD FOR ",MSPOKEY:
+                   " NOT FOUND - RETRY! ",*HOFF,*W2,*P1:23,*EL
+         RETURN
+. 
+MSPORDKS TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSPURCHS/ISI" TO  IOERFILE
+         MOVE      "READKS"       TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSPURCHS
+         READKS    MSPURCHS;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                            MSPONUMB,MSPOUOP,MSPOQTY,MSPODATE,MSPOVEND:
+                            MSPOPRC,MSPOVNAM
+. 
+. OVER CONDITION MEANS WE HAVE ENCOUNTERED THE END-OF-FILE ON READKS
+. 
+         GOTO      MSPORTRN IF OVER
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+MSPOWRIT TRAP      MSPODUPE IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSPURCHS/ISI" TO  IOERFILE
+         MOVE      "WRITE"        TO  IOTYPE
+         MOVE      "X"            TO  IOSW
+         FILEPI    1;MSPURCHS
+         WRITE     MSPURCHS,MSPOKEY;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                                    MSPONUMB,MSPOUOP,MSPOQTY,MSPODATE,MSPOVEND:
+                                    MSPOPRC,MSPOVNAM
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+MSPODUPE BEEP
+         DISPLAY   *P1:23,*EL,*HON,"PURCHASE RECORD FOR ",MSSALEKY," ALREADY ":
+                   "EXISTS! ",*HOFF,*W2,*P1:23,*EL
+         RETURN
+. 
+MSPOUPDT TRAP      STDIOERR IF IO
+         TRAP      STDPARER IF PARITY
+         TRAP      STDFMTER IF FORMAT
+         TRAP      STDRANGE IF RANGE
+         MOVE      "MSPURCHS/ISI" TO  IOERFILE
+         MOVE      "UPDATE"       TO  IOTYPE
+         MOVE      "M"            TO  IOSW
+         FILEPI    1;MSPURCHS
+         UPDATE    MSPURCHS;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                            MSPONUMB,MSPOUOP,MSPOQTY,MSPODATE,MSPOVEND:
+                            MSPOPRC,MSPOVNAM
+. 
+         MOVE      "H"            TO  IOSW
+         RETURN
+. 
+...........................................................................

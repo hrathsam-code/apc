@@ -1,0 +1,130 @@
+       %IFNDEF   $ARDETVAR
+$ARDETVAR  EQUATE            1
+.
+.
+. Field Definitions
+. -----------------
+.
+. Field       Type            Length    From - To      Description
+.---------------------------------------------------------------------------
+ARDETREC      RECORD
+Entity        DIM               8        1 - 8
+SubEntity     DIM               8        9 - 16
+CustomerID    DIM               6       17 - 22
+CustFill      DIM               4       23 - 26
+...Invoice       DIM               8
+ARAccount     DIM               8       27 - 34
+TransCode     FORM              1       35 - 35
+Reference     DIM               10      36 - 45
+DiscAmt       FORM              7.2     46 - 55
+DiscDate      DIM               8       56 - 63
+TransDate     DIM               8       64 - 71
+EntryDate     DIM               8       72 - 79
+BillDate      DIM               8       80 - 87
+PostDate      DIM               8       88 - 95
+Year          DIM               4       96 - 99
+Month         FORM              2       100 - 101
+Amount        FORM              7.2     102 - 111
+Memo          DIM               20      112 - 131
+CustomerPO    dim               18      132 - 149
+SeqMajor      FORM              7       150 - 156    157 - 163
+SeqMinor      FORM              3       157 - 159    164 - 166
+Filler        DIM               32      160 - 191
+TransSubCode  FORM              1       192 - 192
+LockBoxID     DIM               14      193 - 206
+ReasonCode    DIM               4       207 - 210
+NonARFlag     DIM               1       211 - 211             //'Y' = Non A/R
+              RECORDEND
+.
+.
+. File Keys and File Labels
+. -------------------------
+.
+ARDETK1SIZE CONST            "18"                                   .Index Size of Key 1
+ARDETK2SIZE CONST            "24"                                   .Index Size of Key 2
+ARDETK3SIZE CONST            "24"                                   .Index Size of Key 3
+ARDETK4SIZE CONST            "24"                                   .Index Size of Key 4
+ARDETK5SIZE CONST            "24"                                   .Index Size of Key 5
+.
+. By Entity, Seq Major, Seq Minor
+.
+ARDETI1DEF  INIT             "1-8,150-156,157-159"                      .Index definitions for Key 1
+.
+. By Entity, Year, Period, Seq Major, Seq Minor
+.
+ARDETI2DEF  INIT             "1-8,96-99,100-101,150-156,157-191"          .Index definitions for Key 2
+.
+. By Entity, Trans Code, Entry Date, Seq Major, Seq Minor
+.
+ARDETI3DEF  INIT             "1-8,35-35,72-79,150-156,157-191"          .Index definitions for Key 4
+.
+. By Entity, Trans Code, Entry Date, CustomerID, Referenceeq Major, Seq Minor
+.
+ARDETI4DEF  INIT             "1-8,35-35,72-79,17-26,36-45,150-156,157-191"  .Index definitions for Key 4
+. By Entity, Trans Code, Entry Date, CustomerID, Referenceeq Major, Seq Minor
+.
+ARDETI5DEF  INIT             "1-8,72-79,17-26,36-45,35-35,150-156,157-191"  .Index definitions for Key 4
+.
+ARDETFSIZE  CONST            "230"                                   .Length of Text Record
+
+ARDETKY    DIM               ARDETK1SIZE
+ARDETKY2   DIM               ARDETK2SIZE
+ARDETKY3   DIM               ARDETK3SIZE
+ARDETKY4   DIM               ARDETK4SIZE
+ARDETKY5   DIM               ARDETK4SIZE
+
+
+ARDETTITLE INIT              "AR Transaction Record"
+ARDETHLP   INIT              "ARDETER.HLP"
+
+ARDETTXTNM    INIT        "$APDATA\","ARDETFL.TXT"         .Actual Text Filename
+ARDETISI1NM   INIT        "$APDATA\","ARDETFL.ISI"         .Actual ISI Filename
+ARDETISI2NM   INIT        "$APDATA\","ARDETFL2.ISI"        .Actual ISI Filename
+ARDETISI3NM   INIT        "$APDATA\","ARDETFL3.ISI"        .Actual ISI Filename
+ARDETISI4NM   INIT        "$APDATA\","ARDETFL4.ISI"        .Actual ISI Filename
+ARDETISI5NM   INIT        "$APDATA\","ARDETFL5.ISI"        .Actual ISI Filename
+
+ARDETFLST  FILELIST
+           %IFDEF            ARDETKY
+ARDETFL    IFILE             Name=ARDETISI1NM,DUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ARDETKY2
+ARDETFL2   IFILE             Name=ARDETISI2NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ARDETKY3
+ARDETFL3   IFILE             Name=ARDETISI3NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ARDETKY4
+ARDETFL4   IFILE             Name=ARDETISI4NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDETKY5
+
+ARDETFL5   IFILE             Name=ARDETISI5NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDETKY6
+
+ARDETFL6   IFILE             Name=ARDETISI6NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDETKY7
+
+ARDETFL7   IFILE             Name=ARDETISI7NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           %IFDEF            ARDETKY8
+
+ARDETFL8   IFILE             Name=ARDETISI8NM,NODUP,NOPATH,UPPER
+           %ENDIF
+
+           %IFDEF            ARDETKY9
+ARDETFL9   IFILE             Name=ARDETISI9NM,NODUP,NOPATH,UPPER
+           %ENDIF
+           FILELISTEND
+         %ENDIF
+
+         goto              #End
+         %IFNDEF           $ARDETIO
+           INCLUDE           ARDET.IO
+         %ENDIF
+#end

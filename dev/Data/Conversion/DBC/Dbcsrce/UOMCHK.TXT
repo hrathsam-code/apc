@@ -1,0 +1,24 @@
+...............................................................
+. UOMCHK/TEXT  ROUTINE FOR EXTENSIONS
+...............................................................
+. 
+CHK100X  MATCH     "C " TO UOM
+         GOTO      CHK1000 IF NOT EQUAL
+         MOVE      PCSSOLD TO CALCFLD1
+         DIVIDE    "100" INTO CALCFLD1
+         MULT      LNDOLS BY CALCFLD1
+         MOVE      CALCFLD1 TO LINECOST
+         GOTO      DSPCOSTX
+. 
+CHK1000  MATCH     "M " TO UOM
+         GOTO      EACHX   IF NOT EQUAL
+         MOVE      PCSSOLD TO CALCFLD1
+         DIVIDE    "1000"  INTO CALCFLD1
+         MULT      LNDOLS  BY   CALCFLD1
+         MOVE      CALCFLD1 TO   LINECOST
+         GOTO      DSPCOSTX
+. 
+EACHX    MOVE      PCSSOLD TO LINECOST
+         MULT      LNDOLS BY LINECOST
+. 
+..............................................................

@@ -1,0 +1,152 @@
+         INCLUDE   COMMON
+. 
+         INCLUDE   RCVBLES
+. 
+ARFILE   IFILE
+WORKFILE FILE
+. 
+         INCLUDE   CUSTMAST
+. 
+CUSTFILE IFILE
+CSTNAME  INIT      "ACCOUNTS/ISI"
+. 
+IOSW     DIM       1
+. 
+LOWDATE  FORM      "830501"
+HIDATE   FORM      "830701"
+. 
+TESTDATE FORM      6
+TDATEX   DIM       6
+PAIDMNTH FORM      2
+MONTHX   DIM       2
+. 
+TOTALS   FORM      8.2
+PAGES    FORM      2
+LINES    FORM      2
+. 
+REPLY    DIM       1
+SEQ      FORM      "-1"
+FIRSTSW  INIT      "1"
+. 
+SAVEACCT DIM       6
+ACCTTOTS FORM      6.2
+. 
+START    DISPLAY   *ES,*P1:1,*HON,"PRINT THE A/R AS OF JUNE 30"
+         MOVE      " " TO REPLY
+KEYIN1   KEYIN     *P1:3,"DO YOU WANT TO EXTRACT THE DATA ? (Y/N) ",REPLY
+         CMATCH    "Y",REPLY
+         GOTO      EXTRACT IF EQUAL
+         CMATCH    "N",REPLY
+         GOTO      REPORT IF EQUAL
+         BEEP
+         GOTO      KEYIN1
+. 
+EXTRACT  OPEN      RCVBFILE,"ARFILE/ISI"
+         PREPARE   WORKFILE,"ARJUNE30/DAT:D3"
+         GOTO      LOOP
+. 
+LOOP     INCLUDE   ARREADKS
+. 
+         GOTO      EOFWORK IF OVER
+.  
+         CMATCH    "P" TO INVSTAT
+         GOTO      CHKOPEN IF NOT EQUAL
+         GOTO      CHKMONTH
+. 
+CHKOPEN  CMATCH    "O" TO INVSTAT
+         GOTO      CHKMORE IF NOT EQUAL
+. 
+. FALLTHRU MEANS ITS OPEN BUT WE MUST DETERMINE THE MONTH
+. 
+CHKMONTH MOVE      INVDATE TO MONTHX
+         MOVE      MONTHX  TO PAIDMNTH
+         COMPARE   "7" TO PAIDMNTH
+         GOTO      LOOP IF NOT LESS
+. 
+. FALLTHRU MEANS IT WAS A LIVE RECEIVABLE ON JUNE 30
+. 
+         GOTO      WRITEIT
+. 
+. 
+CHKMORE  MOVE      IPRGDTE TO MONTHX
+         MOVE      MONTHX  TO PAIDMNTH
+. 
+         COMPARE   "07" TO PAIDMNTH
+         GOTO      LOOP IF LESS
+. 
+         MOVE      INVDATE TO MONTHX
+         MOVE      MONTHX  TO PAIDMNTH
+         COMPARE   "07" TO PAIDMNTH
+         GOTO      LOOP IF NOT LESS  (INVOICE MONTH MUST BE BEFORE JULY)
+. 
+WRITEIT  WRITE     WORKFILE,SEQ;INVCUST,INVDATE,INVKEY,INVTOTL
+         ADD       IDOLSLFT TO TOTALS
+         GOTO      LOOP
+. 
+............................
+. 
+EOFWORK  PRINT     " "
+         PRINT     "** TOTAL IS ",TOTALS," **"
+         WEOF      WORKFILE,SEQ
+         CLOSE     WORKFILE
+         KEYIN     REPLY
+. 
+REPORT   OPEN      WORKFILE,"ARJUNE30/DAT"
+         MOVE      "0.00" TO TOTALS
+. 
+         CALL      OPENCUST
+         CALL      HEADER
+         MOVE      "1" TO FIRSTSW
+. 
+READWORK READ      WORKFILE,SEQ;INVCUST,INVDATE,INVKEY,INVTOTL
+         GOTO      EOJ IF OVER
+. 
+         MATCH     "000000" TO INVCUST
+         GOTO      READWORK IF EQUAL
+. 
+         CMATCH    "1" TO FIRSTSW
+         GOTO      CHKACCT IF NOT EQUAL
+. 
+         MOVE      INVCUST TO SAVEACCT
+         MOVE      " " TO FIRSTSW
+. 
+CHKACCT  MATCH     INVCUST TO SAVEACCT
+         CALL      ACCTBRK IF NOT EQUAL
+. 
+. FALLTHRU IS MATCH ON ACCT NUMBER
+. 
+         ADD       INVTOTL TO ACCTTOTS
+         ADD       INVTOTL TO TOTALS
+         GOTO      READWORK
+. 
+RCVNTFD  BEEP
+         GOTO      RCVNTFD
+. 
+ACCTBRK  MOVE      SAVEACCT TO CUSTKEY
+         MOVE      "NO ACCOUNT FOUND" TO CUSTNAME
+.
+         CALL      GETCUST
+. 
+         PRINT     *1,SAVEACCT,*8,CUSTNAME,*36,ACCTTOTS
+         ADD       "1" TO LINES
+         COMPARE   "56" TO LINES
+         CALL      HEADER IF NOT LESS
+         MOVE      INVCUST TO SAVEACCT
+         MOVE      "0.00" TO ACCTTOTS
+         RETURN
+. 
+         INCLUDE   CUSTIO
+. 
+HEADER   ADD       "1" TO PAGES
+         PRINT     *F,*1,"AMERICAN PRECISION COMPONENTS - ACCOUNTS ":
+                   "RECEIVABLE AS OF JUNE 30, 1983"
+         PRINT     " "
+         PRINT     *1,"CUSTOMER   NAME",*36,"AMOUNT DUE"
+         MOVE      "3" TO LINES
+         RETURN
+. 
+EOJ      PRINT     " "
+         PRINT     "*** RECEIVABLES TOTAL ***",*34,TOTALS
+         PRINT     *F
+         RELEASE   
+         CHAIN     "APMENU1"

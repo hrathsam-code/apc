@@ -1,0 +1,1208 @@
+.
+. FAST DB/C routines for user verbs
+. TITLE, MENU, ERROR, MESSAGE, MESSAGEERASE, LISTBOX, FASTio
+.
+. tab settings 7,13,19,...
+.
+
+noextdef1	equate 1
+	inc fastdbc
+.
+. variables
+.
+keyword		char @
+var1			var @
+var2			var @
+parmindex		int 5
+tempint	int	@
+letters		init "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+toupper		init "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ"
+ctlchars		init 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a:
+			     0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13:
+			     0x14,0x15,0x16,0x17,0x18,0x19,0x1a
+errormsg		char 20
+routine		label @
+
+. title variables
+title.left		char @
+title.center		char @
+title.right		char @
+title.width		int 2
+title.h		int 3
+title.flag1		int 1
+title.flag2		int 1
+title.flag3		int 1
+title.errflag	int 1
+
+. menu variables
+menu.level	int 1
+menu.h		int 3
+menu.v		int 3
+menu.wtop		int 3
+menu.wbot		int 3
+menu.wlft		int 3
+menu.wrgt		int 3
+menu.flag1		int 1
+menu.titleix	int 3[5]
+menu.horz		int 3[5]
+menu.vert		int 3[5]
+menu.width		int 3[5]
+menu.length		int 3[5]
+menu.itemnum	int 3[5]
+menu.itemcnt	int 3[5]
+menu.item		char [5, 25]@
+menu.itempgmix	int 5[5, 25]
+menu.itemfkey	char 38[5]
+menu.winsave	char 1500[5]
+menu.statesave	char 300[5]
+menu.trapsave	char 50[5]
+menu.maxwidth	int 3
+menu.fkey		int 2
+menu.charvar	char @
+menu.char1		char 1
+menu.char1a		char 1
+menu.char20		char 20
+menu.index		int 3
+menu.worknum	int 3
+menu.worknum2	int 3
+
+. error variables
+err.tabcnt		int 3
+err.tabmap		char 20
+err.tabh		int 3[20]
+err.tabv		int 3[20]
+err.tabvar		var [20]@
+err.state		char 300
+err.win		char 1000
+err.horz		int 3
+err.vert		int 3
+err.h			int 3
+err.v			int 3
+err.width		int 3
+err.length		int 3
+err.maxh		int 3
+err.maxv		int 3
+err.wtop		int 3
+err.wbot		int 3
+err.wlft		int 3
+err.wrgt		int 3
+err.worknum		int 3
+err.index		int 3
+err.numvar		num @
+err.charvar		char @
+err.char1		char 1
+err.char20		char 20
+err.msgflg		int 1
+
+. message variables
+msg.dspflg		int 1
+msg.wtop		int 3
+msg.wbot		int 3
+msg.wlft		int 3
+msg.wrgt		int 3
+msg.win	char		1000
+
+. listbox variables
+lst.state		char 300
+lst.win		char 1000
+lst.horz		int 3
+lst.vert		int 3
+lst.width		int 3
+lst.length		int 3
+lst.title	char 80
+lst.titleflg	int 1
+lst.count	int 2
+lst.result	int @
+lst.wtop		int 3
+lst.wbot		int 3
+lst.wlft		int 3
+lst.wrgt		int 3
+lst.top	int 2
+lst.oldtop	int 2
+lst.bottom	int 2
+lst.worknum		int 3
+lst.index		int 3
+lst.line	int 2
+lst.oldline	int 2
+lst.char1	char 1
+lst.charvar		char @
+lst.arraychar	char @[]
+lst.arraynum	num @[]
+lst.type	int 1
+.
+. fast I/O variables
+fst.table	list @
+fst.file	file @
+fst.ifile	ifile @
+fst.record	list @
+fst.charvar	char @
+fst.numvar	num @
+fst.listvar	list @
+fst.templist	list @
+fst.list	var [3]@
+fst.fileblk	var [6]@
+fst.temp	var [6]@
+fst.num		int 2
+fst.index	int 2
+fst.oldkey	char 99[6]
+fst.seq		num "-1"
+fst.zero	int "0"
+fst.one		int "1"
+fst.fileflag	int 1
+fst.listflag	int 1
+fst.flag		int 1
+fst.error	dim	30
+fst.listcount	int	2
+fst.keycount	int	2
+fst.string	char 99
+fst.trapsave	char 300
+.
+.
+. TITLE verb
+.
+. TITLE LEFT=<varlit>, CENTER=<varlit>, RIGHT=<varlit>
+.
+TITLE	routine
+	clear title.flag1, title.flag2, title.flag3, title.errflag
+	loop
+		getparm keyword, var1
+		break if over
+		switch keyword
+		case "LEFT"
+			moveadr var1 to title.left
+			set title.flag1
+		case "CENTER"
+			moveadr var1 to title.center
+			set title.flag2
+		case "RIGHT"
+			moveadr var1 to title.right
+			set title.flag3
+		default
+			set title.errflag
+		endswitch
+	repeat
+	goto titleerr1 if (title.errflag | (not title.flag1 & not title.flag2 & not title.flag3))
+	display *resetsw, *color=colorfore.title, *bgcolor=colorback.title, *es;
+	if (title.flag1)
+		display title.left;
+	endif
+	if (title.flag2)
+		move (length title.center) to title.width
+		move ((80 - title.width) / 2) to title.h
+		display *h=title.h, title.center;
+	endif
+	if (title.flag3)
+		move (length title.right) to title.width
+		move (80 - title.width + 1) to title.h
+		display *h=title.h, title.right;
+	endif
+	display *coloroff;
+	return
+
+.
+. MENU verb
+.
+. MENU TITLE=<cvarlit>, H=<nvarlit>, V=<nvarlit>, WIDTH=<nvarlit>,
+.      LENGTH=<nvarlit>, ITEM=<cvarlit>, ROUTINE=<label>, PROGRAM=<cvarlit>,
+.      F1, ... F12, CTLA, CTLB, ... CTLZ,
+.
+
+MENU routine
+menu routine
+	clear parmindex, menu.h, menu.v, menu.maxwidth
+	add 1 to menu.level
+	clear menu.titleix[menu.level], menu.itemcnt[menu.level]
+	clear menu.horz[menu.level], menu.vert[menu.level], menu.length[menu.level], menu.width[menu.level]
+	fill " " into menu.itemfkey[menu.level]
+	set menu.flag1
+	loop
+		getparm keyword, var1
+		break if over
+		add 1 to parmindex
+		switch keyword
+		case "TITLE"
+			move parmindex to menu.titleix[menu.level]
+			moveadr var1 to menu.charvar
+			move (length menu.charvar) to menu.worknum
+			if (menu.worknum > menu.maxwidth)
+				move menu.worknum to menu.maxwidth
+			endif
+		case "HORZ"
+			moveadr var1 to tempint
+			move tempint to menu.horz[menu.level]
+		case "VERT"
+			moveadr var1 to tempint
+			move tempint to menu.vert[menu.level]
+		case "WIDTH"
+			moveadr var1 to tempint
+			move tempint to menu.width[menu.level]
+		case "LENGTH"
+			moveadr var1 to tempint
+			move tempint to menu.length[menu.level]
+		case "ITEM"
+			clear menu.flag1
+			add 1 to menu.itemcnt[menu.level]
+			goto menuerr1 if (menu.itemcnt[menu.level] > 25)
+			moveadr var1 to menu.item[menu.level, menu.itemcnt[menu.level]]
+			move (length menu.item[menu.level, menu.itemcnt[menu.level]]) to menu.worknum
+			if (menu.worknum > menu.maxwidth)
+				move menu.worknum to menu.maxwidth
+			endif
+		case "ROUTINE"
+			goto menuerr2 if (menu.flag1)
+			set menu.flag1
+			move parmindex to menu.itempgmix[menu.level, menu.itemcnt[menu.level]]
+		case "PROGRAM"
+			goto menuerr2 if (menu.flag1)
+			set menu.flag1
+			move parmindex to menu.itempgmix[menu.level, menu.itemcnt[menu.level]]
+		case "TERMINATE"
+			goto menuerr2 if (menu.flag1)
+			set menu.flag1
+			move parmindex to menu.itempgmix[menu.level, menu.itemcnt[menu.level]]
+		default
+			reset letters to menu.itemcnt[menu.level]
+			move letters to menu.char1
+			reset letters
+			move (length keyword) to menu.worknum
+			if (fchar keyword = "F" and menu.worknum > 1 and menu.worknum < 4)
+				move keyword to menu.char20
+				bump menu.char20
+				clear menu.index
+				move menu.char20 to menu.index
+				if (menu.index > 0 and menu.index < 13)
+					add 26 to menu.index
+					reset menu.itemfkey[menu.level] to menu.index
+					cmove menu.char1 to menu.itemfkey[menu.level]
+					reset menu.itemfkey[menu.level]
+					continue
+				endif
+			endif
+			if (menu.worknum = 4)
+				move keyword to menu.char20
+				setlptr menu.char20 to 3
+				if (menu.char20 = "CTL")
+					reset menu.char20 to 4
+					scan menu.char20 in letters
+					if equal
+						movefptr letters to menu.index
+						reset letters
+						reset menu.itemfkey[menu.level] to menu.index
+						cmove menu.char1 to menu.itemfkey[menu.level]
+						reset menu.itemfkey[menu.level]
+						continue
+					endif
+				endif
+			endif
+			goto menuerr3
+		endswitch
+	repeat
+
+	if (menu.itemcnt[menu.level] = 0)
+		sub 1 from menu.level
+		return
+	endif
+	if (menu.width[menu.level] = 0)
+		move (menu.maxwidth + 4) to menu.width[menu.level]
+	endif
+	if (menu.length[menu.level] = 0)
+		move menu.itemcnt[menu.level] to menu.index
+		if (menu.titleix[menu.level] <> 0)
+			add 4 to menu.index
+		else
+			add 2 to menu.index
+		endif
+		move menu.index to menu.length[menu.level]
+	endif
+
+	if (menu.horz[menu.level] = 0)
+		move (menu.level * 3 + (74 - menu.width[menu.level]) / 2) to menu.horz[menu.level]
+		subtract 2 from menu.h
+	endif
+	if (menu.horz[menu.level] + menu.width[menu.level] > 80)
+		move (79 - menu.width[menu.level]) to menu.horz[menu.level]
+	endif
+
+	if (menu.vert[menu.level] = 0)
+		move (menu.level * 2 + 4) to menu.vert[menu.level]
+	endif
+	if (menu.vert[menu.level] + menu.length[menu.level] > 25)
+		move (24 - menu.length[menu.level]) to menu.vert[menu.level]
+	endif
+
+. draw the menu
+	move menu.vert[menu.level] to menu.wtop
+	move menu.horz[menu.level] to menu.wlft
+	move (menu.wtop + menu.length[menu.level] - 1) to menu.wbot
+	move (menu.wlft + menu.width[menu.level] - 1) to menu.wrgt
+	statesave menu.statesave[menu.level]
+	trapsave menu.trapsave[menu.level]
+	display *setswall=menu.wtop:menu.wbot:menu.wlft:menu.wrgt;
+	winsave menu.winsave[menu.level]
+	display *color=colorfore.menu, *bgcolor=colorback.menu, *es;
+	move (menu.titleix[menu.level]) to menu.worknum2
+	if (menu.worknum2 <> 0)
+		loadparm menu.worknum2, keyword, var1
+		moveadr var1 to menu.charvar
+		move (length menu.charvar) to menu.index
+		move ((menu.width[menu.level] - menu.index) / 2 + 1) to menu.h
+		display *p=menu.h:2, menu.charvar;
+	endif
+	move (menu.width[menu.level] - 2) to menu.index
+	move (menu.wbot - menu.wtop - 1) to menu.worknum
+	display *hu, *ulc, *rptchar=*hln:menu.index, *urc:
+		*va=1, *rptdown=*vln:menu.worknum:
+		*p=1:2, *rptdown=*vln:menu.worknum:
+		*hd, *llc, *rptchar=*hln:menu.index, *lrc;
+	add 1 to menu.wlft
+	sub 1 from menu.wrgt
+	add 1 to menu.wtop
+	if (menu.worknum2 <> 0)
+		add 2 to menu.wtop
+		display *p=1:3, *rtk, *rptchar=*hln:menu.index, *ltk;
+	endif
+	display *setswall=menu.wtop:menu.wbot:menu.wlft:menu.wrgt;
+	for menu.worknum from 1 to menu.itemcnt[menu.level]
+		display *p=1:menu.worknum, " ", *ll, menu.item[menu.level, menu.worknum], " ";
+	repeat
+
+. loop doing keyin's to move around in menu or execute menu item
+	trap menucont if interrupt
+	trap menucont if esc
+	clear menu.char1
+	move 1 to menu.itemnum[menu.level]
+	loop
+		move menu.itemnum[menu.level] to menu.worknum2
+		display *revon, *color=colorback.sel, *bgcolor=colorfore.sel:
+			*p=1:menu.worknum2, " ", *ll, menu.item[menu.level, menu.worknum2], *el, *revoff;
+		clear menu.char1
+		keyin *p=1:menu.worknum2, *eoff, *cursoff, *kcon, *uc, menu.char1, *in;
+		if (formptr menu.char1 = 1)
+		else if enter
+			move menu.itempgmix[menu.level, menu.itemnum[menu.level]] to menu.worknum2
+			loadparm menu.worknum2, keyword, var1
+			call menuend
+			continue
+		endif
+		display *color=colorfore.menu, *bgcolor=colorback.menu:
+			*p=1:menu.worknum2, " ", *ll, menu.item[menu.level, menu.worknum2], *el;
+		if up
+			if (menu.worknum2 < 2)
+				move menu.itemcnt[menu.level] to menu.itemnum[menu.level]
+			else
+				move (menu.worknum2 - 1) to menu.itemnum[menu.level]
+			endif
+			continue
+		endif
+		if down
+			if (menu.worknum2 >= menu.itemcnt[menu.level])
+				move 1 to menu.itemnum[menu.level]
+			else
+				move (menu.worknum2 + 1) to menu.itemnum[menu.level]
+			endif
+			continue
+		endif
+		if home
+			move 1 to menu.itemnum[menu.level]
+			continue
+		endif
+		if end
+			move menu.itemcnt[menu.level] to menu.itemnum[menu.level]
+			continue
+		endif
+		clear menu.fkey
+		if (formptr menu.char1 = 1)	
+			reset ctlchars
+			if (menu.char1 >= fchar ctlchars and menu.char1 <= lchar ctlchars)
+				scan menu.char1 in ctlchars
+				movefptr ctlchars to menu.fkey
+			else
+				move menu.worknum2 to menu.index
+				loop
+					add 1 to menu.index
+					if (menu.index > menu.itemcnt[menu.level])
+						move 1 to menu.index
+					endif
+					move (fchar menu.item[menu.level, menu.index]) to menu.char1a
+					rep toupper in menu.char1a
+					break if (menu.index = menu.worknum2 or menu.char1a = menu.char1)
+				repeat
+				move menu.index to menu.itemnum[menu.level]
+				continue
+			endif
+		endif
+		if f1
+			move 27 to menu.fkey
+		endif
+		if f2
+			move 28 to menu.fkey
+		endif
+		if f3
+			move 29 to menu.fkey
+		endif
+		if f4
+			move 30 to menu.fkey
+		endif
+		if f5
+			move 31 to menu.fkey
+		endif
+		if f6
+			move 32 to menu.fkey
+		endif
+		if f7
+			move 33 to menu.fkey
+		endif
+		if f8
+			move 34 to menu.fkey
+		endif
+		if f9
+			move 35 to menu.fkey
+		endif
+		if f10
+			move 36 to menu.fkey
+		endif
+		if f11
+			move 37 to menu.fkey
+		endif
+		if f12
+			move 38 to menu.fkey
+		endif
+		if (menu.fkey)
+			reset menu.itemfkey[menu.level] to menu.fkey
+			move menu.itemfkey[menu.level] to menu.char1
+			scan menu.char1 in letters
+			movefptr letters to menu.itemnum[menu.level]
+			reset letters
+			move menu.itempgmix[menu.level, menu.itemnum[menu.level]] to menu.worknum2
+			loadparm menu.worknum2, keyword, var1
+			call menuend
+		endif
+	repeat
+
+. menu end via continue execution
+menucont
+	move 0 to menu.worknum2
+
+. menu end via continue execution, chain or call
+menuend
+	move (menu.wlft + menu.width[menu.level] - 2) to menu.worknum
+	display *setswall=menu.vert[menu.level]:menu.wbot:menu.horz[menu.level]:menu.worknum, *coloroff;
+	if (keyword = "TERMINATE")
+		winrestore menu.winsave[menu.level]
+		staterestore menu.statesave[menu.level]
+		traprestore menu.trapsave[menu.level]
+		sub 1 from menu.level
+		noreturn
+		return
+	else if (keyword = "PROGRAM")
+		winrestore menu.winsave[menu.level]
+		staterestore menu.statesave[menu.level]
+		traprestore menu.trapsave[menu.level]
+		moveadr var1 to menu.charvar
+		chain menu.charvar
+		stop
+	endif
+	movevl var1 to routine
+	call routine
+	display *setswall=menu.wtop:menu.wbot:menu.wlft:menu.wrgt:
+		*color=colorfore.menu, *bgcolor=colorback.menu;
+	return
+
+.
+. ERROR verb
+.
+. ERROR	HORZ=<nvarlit>, VERT=<nvarlit>, WIDTH=<nvarlit>, LENGTH=<nvarlit>:
+.        H=<varlit>, V=<nvarlit>, TEXT=<cvarlit>
+.
+. MESSAGE verb
+.
+. MESSAGE HORZ=<nvarlit>, VERT=<nvarlit>, WIDTH=<nvarlit>, LENGTH=<nvarlit>:
+.        H=<varlit>, V=<nvarlit>, TEXT=<cvarlit>
+.
+MESSAGE routine
+message routine
+	set err.msgflg, msg.dspflg
+	clear msg.wtop, msg.wbot, msg.wlft, msg.wrgt
+	goto error1
+.
+ERROR routine
+error routine
+	clear err.msgflg
+error1	clear err.horz, err.vert, err.width, err.length, err.maxh, err.maxv
+	clear err.tabcnt, err.tabh, err.tabv
+	move 1 to err.h
+	move 1 to err.v
+	loop
+		getparm keyword, var1, var2
+		break if over
+		switch keyword
+		case "HORZ"
+			moveadr var1 to tempint
+			move tempint to err.horz
+		case "VERT"
+			moveadr var1 to tempint
+			move tempint to err.vert
+		case "WIDTH"
+			moveadr var1 to tempint
+			move tempint to err.width
+		case "LENGTH"
+			moveadr var1 to tempint
+			move tempint to err.length
+		case "TEXT"
+			add 1 to err.tabcnt
+			if (err.tabh[err.tabcnt] = 0)
+				move 3 to err.h
+			endif
+			if (err.tabv[err.tabcnt] = 0)
+				add 1 to err.v
+			endif
+			reset err.tabmap to err.tabcnt
+			cmove "T" to err.tabmap
+			move err.h to err.tabh[err.tabcnt]
+			move err.v to err.tabv[err.tabcnt]
+			moveadr var1 to err.tabvar[err.tabcnt]
+			moveadr var1 to err.charvar
+			movesize err.charvar to err.worknum
+			add err.worknum to err.h
+		case "H"
+			moveadr var1 to tempint
+			move (tempint + 1) to err.h
+			move err.h to err.tabh[err.tabcnt + 1]
+		case "V"
+			moveadr var1 to tempint
+			move (tempint + 1) to err.v
+			move err.v to err.tabv[err.tabcnt + 1]
+		default
+			if (err.msgflg)
+				goto messageerr1
+			else
+				goto errorerr1
+			endif
+		endswitch
+		if (err.h > err.maxh)
+			move err.h to err.maxh
+		endif
+		if (err.v > err.maxv)
+			move err.v to err.maxv
+		endif
+	repeat
+	if (not err.msgflg & err.maxh < 28)
+		move 28 to err.maxh
+	endif
+	if (err.width = 0)
+		move (err.maxh + 1) to err.width
+	endif
+	if (err.length = 0)
+		if (err.msgflg)
+			move (err.maxv + 1) to err.length
+		else
+			move (err.maxv + 2) to err.length
+		endif
+	endif
+	if (err.horz = 0)
+		move (41 - err.width / 2) to err.horz
+	endif
+	if (err.vert = 0)
+		move (25 - err.length) to err.vert
+	endif
+	move (err.horz + err.width - 1) to err.wrgt
+	move (err.vert + err.length - 1) to err.wbot
+	statesave err.state
+	display *setswall=err.vert:err.wbot:err.horz:err.wrgt;
+	winsave err.win
+	if (err.msgflg)
+		move err.vert to msg.wtop
+		move err.wbot to msg.wbot
+		move err.horz to msg.wlft
+		move err.wrgt to msg.wrgt
+		move err.win to msg.win
+		display *color=colorfore.box, *bgcolor=colorback.box;
+	else
+		display *color=colorfore.error, *bgcolor=colorback.error;
+	endif
+	move (err.width - 2) to err.worknum
+	move (err.length - 2) to err.index
+	display *es, *ulc, *rptchar=*hln:err.worknum, *urc, *va=1:
+		*rptdown=*vln:err.index, *p=1:2, *rptdown=*vln:err.index:
+		*hd, *llc, *rptchar=*hln:err.worknum, *lrc;
+	for err.index from 1 to err.tabcnt
+		type err.tabvar[err.index] into err.worknum
+		if (err.worknum = 1)
+			moveadr err.tabvar[err.index] to err.charvar
+		endif
+		if (err.worknum = 2)
+			moveadr err.tabvar[err.index] to err.numvar
+			move err.numvar to err.char20
+			moveadr err.char20 to err.charvar
+		endif
+		move err.tabh[err.index] to err.h
+		move err.tabv[err.index] to err.v
+		if (err.h = 0)
+			movesize err.charvar to err.worknum
+			move (err.width - err.worknum / 2) to err.h
+		endif
+		display *p=err.h:err.v, *ll, err.charvar;
+	repeat
+	if (not err.msgflg)
+		move (err.v + 1) to err.v
+		keyin *p=3:err.v, "Press any key to continue", *b, *cursoff:
+			*+, err.char1;
+		winrestore err.win
+	endif
+	staterestore err.state
+	display *coloroff;
+	return
+.
+MESSAGEERASE routine
+messageerase routine
+	if (msg.dspflg)
+		statesave err.state
+		display *setswall=msg.wtop:msg.wbot:msg.wlft:msg.wrgt;
+		winrestore msg.win
+		clear msg.dspflg
+		staterestore err.state
+	endif
+	return
+.
+. LISTBOX verb HORZ=nvarlit, VERT=nvarlit, WIDTH=nvarlit, LENGTH=nvarlit,
+.	TITLE=varlit, ARRAY=list, COUNT=nvarlit, RESULT=nvar
+
+LISTBOX routine
+listbox routine
+	clear lst.horz, lst.vert, lst.width, lst.length, lst.title
+	clear lst.count, lst.titleflg
+	loop
+		getparm keyword, var1, var2
+		break if over
+		switch keyword
+		case "HORZ"
+			moveadr var1 to tempint
+			move tempint to lst.horz
+		case "VERT"
+			moveadr var1 to tempint
+			move tempint to lst.vert
+		case "WIDTH"
+			moveadr var1 to tempint
+			move tempint to lst.width
+		case "LENGTH"
+			moveadr var1 to tempint
+			move tempint to lst.length
+		case "TITLE"
+			moveadr var1 to lst.charvar
+			move lst.charvar to lst.title
+			set lst.titleflg
+		case "ARRAY"
+			type var1 to lst.type, lst.worknum
+			if (lst.type = 3)
+				moveadr var1 to lst.arraychar
+				if (lst.width = 0)
+					move (length lst.arraychar[1] + 4) to lst.width
+				endif
+			else
+				clear lst.type
+				moveadr var1 to lst.arraynum
+				if (lst.width = 0)
+					move (size lst.arraynum[1] + 4) to lst.width
+				endif
+			endif
+			if (lst.count = 0)
+				move lst.worknum to lst.count
+			endif
+		case "COUNT"
+			moveadr var1 to tempint
+			move tempint to lst.count
+		case "RESULT"
+			moveadr var1 to lst.result
+		endswitch
+	repeat
+	if (lst.length = 0)
+		if (lst.count < 15)
+			move (lst.count + 2) to lst.length
+		else
+			move 17 to lst.length
+		endif
+		if (lst.titleflg)
+			add 2 to lst.length
+		endif
+	endif
+	if (lst.horz = 0)
+		move (41 - lst.width / 2) to lst.horz
+		if (lst.titleflg and size lst.title > lst.width)
+			move (size lst.title) to lst.width
+		endif
+	endif
+	if (lst.vert = 0)
+		move (25 - lst.length) to lst.vert
+	endif
+	move (lst.horz + lst.width - 1) to lst.wrgt
+	
+	move (lst.vert + lst.length - 1) to lst.wbot
+	statesave lst.state
+	display *setswall=lst.vert:lst.wbot:lst.horz:lst.wrgt;
+	winsave lst.win
+	move (lst.width - 2) to lst.worknum
+	move (lst.length - 2) to lst.index
+	display *color=colorfore.box, *bgcolor=colorback.box, *es, *ulc:
+		*rptchar=*hln:lst.worknum, *urc:
+		*va=1, *rptdown=*vln:lst.index:
+		*p=1:2, *rptdown=*vln:lst.index:
+		*hd, *llc, *rptchar=*hln:lst.worknum, *lrc;
+	if (lst.titleflg)
+		move ((lst.width - size lst.title) / 2 + 1) to lst.index
+		display *p=1:3, *rtk, *rptchar=*hln:lst.worknum, *ltk, *plst.index:2, *sl, lst.title;
+		add 3 to lst.vert
+	else
+		add 1 from lst.vert
+	endif
+	sub 1 from lst.wbot
+	add 1 to lst.horz
+	sub 1 from lst.wrgt
+	display *setswall=lst.vert:lst.wbot:lst.horz:lst.wrgt;
+
+	move 1 to lst.top
+	move -1 to lst.oldtop
+	move (lst.wbot - lst.vert + 1) to lst.bottom
+	if (lst.bottom > lst.count)
+		move lst.count to lst.bottom
+	endif
+	move 1 to lst.line
+	move 1 to lst.oldline
+	loop
+		if (lst.oldtop = lst.top - 1)
+			display *r;
+		else if (lst.oldtop = lst.top + 1)
+			display *rd;
+		else if (lst.oldtop <> lst.top)
+			move lst.top to lst.worknum
+			for lst.index from 1 to lst.bottom
+				if (lst.type)
+					display *p1:lst.index, " ", *sl, lst.arraychar[lst.worknum], *el;
+				else
+					display *p1:lst.index, " ", *sl, lst.arraynum[lst.worknum], *el;
+				endif
+				add 1 to lst.worknum
+			repeat
+		endif
+		display *revon, *color=colorback.sel, *bgcolor=colorfore.sel;
+		if (lst.type)
+			display *p1:lst.line, " ", *sl, lst.arraychar[lst.top + lst.line - 1], *el, *revoff;
+		else
+			display *p1:lst.line, " ", *sl, lst.arraynum[lst.top + lst.line - 1], *el, *revoff;
+		endif
+		move lst.top to lst.oldtop
+		move lst.line to lst.oldline
+		clear lst.char1
+		keyin *cursoff, *kcon, lst.char1, *kcoff;
+		if up
+			if (lst.line > 1)
+				sub 1 from lst.line
+			else if (lst.line = 1 & lst.top > 1)
+				sub 1 from lst.top
+			endif
+		else if down
+			if (lst.line < lst.bottom)
+				add 1 to lst.line
+			else if (lst.line = lst.bottom & lst.top + lst.line - 1 < lst.count)
+				add 1 to lst.top
+			endif
+		else if home
+			move 1 to lst.top
+			move 1 to lst.line
+		else if end
+			move (lst.count - lst.bottom + 1) to lst.top
+			move lst.bottom to lst.line
+			if (lst.top < 1)
+				move 1 to lst.top
+			endif
+		else if pgup
+			move (lst.top - lst.bottom) to lst.worknum
+			if (lst.worknum > 0)
+				move lst.worknum to lst.top
+			else if (lst.top > 1)
+				move 1 to lst.top
+			endif
+		else if pgdn
+			move (lst.top + (lst.bottom * 2)) to lst.worknum
+			if (lst.worknum <= lst.count)
+				move (lst.worknum - lst.bottom) to lst.top
+			else
+				move (lst.count - lst.bottom + 1) to lst.top
+			endif
+		else if enter
+			if (formptr lst.char1 = 0)
+				move (lst.top + lst.line - 1) to lst.result
+				break
+			endif
+		else
+			beep
+		endif
+		display *color=colorfore.box, *bgcolor=colorback.box;
+		if (lst.type)
+			display *p1:lst.oldline, " ", *sl, lst.arraychar[lst.oldtop + lst.oldline - 1], *el;
+		else
+			display *p1:lst.oldline, " ", *sl, lst.arraynum[lst.oldtop + lst.oldline - 1], *el;
+		endif
+	repeat
+
+	staterestore lst.state
+	winsave lst.win
+	return
+.
+FASTOPEN routine fst.table
+	trapsave fst.trapsave
+	trap fastopenbad if io
+	set fst.flag
+	loop
+		call fastnextlist
+		call fastpackchar with fst.zero
+		if (fst.fileflag)
+			open fst.file, fst.string
+		else
+			open fst.ifile, fst.string
+		endif
+		while (fst.flag)
+		clear fst.flag
+	repeat
+	traprestore fst.trapsave
+	setflag not over
+	return
+fastopenbad
+	noreturn
+	traprestore fst.trapsave
+	setflag over
+	return
+.
+FASTCLOSE routine fst.table
+	set fst.flag
+	loop
+		call fastnextlist
+		if (fst.fileflag)
+			close fst.file
+		else
+			close fst.ifile
+		endif
+		while (fst.flag)
+		clear fst.flag
+	repeat
+	return
+.
+FASTCREATE routine fst.table
+	set fst.flag
+	loop
+		call fastnextlist
+		call fastpackchar with fst.zero
+		if (fst.fileflag)
+			prep fst.file, fst.string
+		else
+			prep fst.ifile, fst.string
+		endif
+		while (fst.flag)
+		clear fst.flag
+	repeat
+	return
+.
+FASTREAD routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		read fst.file, fst.zero; fst.record
+	else
+		call fastpackchar with fst.one
+		read fst.ifile, fst.string; fst.record
+	endif
+ 	return
+.
+FASTREADPART routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	setflag over
+	return if (fst.fileflag)
+	call fastpackchar with fst.one
+	read fst.ifile, fst.string;;
+ 	return
+.
+FASTREADWITHKEY routine fst.table, fst.record, fst.charvar
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		setflag over
+	else
+		read fst.ifile, fst.charvar; fst.record
+	endif
+ 	return
+.
+FASTREADNEXT routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		setflag over
+	else
+		readks fst.ifile; fst.record
+	endif
+ 	return
+.
+FASTREADNEXTPART routine fst.table
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		setflag over
+	else
+		readks fst.ifile;;
+	endif
+ 	return
+.
+FASTREADSEQ routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		read fst.file, fst.seq; fst.record
+	else
+		read fst.ifile, fst.seq; fst.record
+	endif
+ 	return
+.
+FASTREADBACK routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		setflag over
+	else
+		readkp fst.ifile; fst.record
+	endif
+ 	return
+.
+FASTREADBACKPART routine fst.table
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		setflag over
+	else
+		readkp fst.ifile;;
+	endif
+ 	return
+.
+FASTWRITE routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		write fst.file, fst.zero; fst.record
+	else
+		call fastpackchar with fst.one
+		write fst.ifile, fst.string; fst.record
+		loop while (fst.flag)
+			clear fst.flag
+			call fastnextlist
+			call fastpackchar with fst.one
+			insert fst.ifile, fst.string
+		repeat
+	endif
+	return
+.
+FASTUPDATE routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		write fst.file, fst.zero; fst.record
+	else
+		update fst.ifile; fst.record
+	endif
+	return
+.
+FASTUPDATEALL routine fst.table, fst.record
+	set fst.flag
+	call fastnextlist
+	if (fst.fileflag)
+		write fst.file, fst.zero; fst.record
+	else
+		call fastpackchar with fst.one
+		if (fst.string <> fst.oldkey[1])
+			trap fastupdate2 giving fst.error if io
+			insert fst.ifile, fst.string
+			trapclr io
+			deletek fst.ifile, fst.oldkey[1]
+		endif
+		update fst.ifile; fst.record
+		move 2 to fst.keycount
+		loop while (fst.flag)
+			clear fst.flag
+			call fastnextlist
+			call fastpackchar with fst.one
+			if (fst.string <> fst.oldkey[fst.keycount])
+				insert fst.ifile, fst.string
+				deletek fst.ifile, fst.oldkey[fst.keycount]
+			endif
+			add 1 to fst.keycount
+		repeat
+	endif
+	return
+fastupdate2
+	bump fst.error to 2
+	setlptr fst.error to 5
+	if (fst.error <> "709")
+		setflag eos
+	endif
+	noreturn
+	setflag over
+	return
+.
+FASTDELETE routine fst.table
+	set fst.flag
+	call fastnextlist
+	return if (fst.fileflag)
+	call fastpackchar with fst.one
+	delete fst.ifile, fst.string
+	loop while (fst.flag)
+		clear fst.flag
+		call fastnextlist
+		call fastpackchar with fst.one
+		deletek fst.ifile, fst.string
+	repeat
+	return
+.
+FASTGETKEY routine fst.charvar
+	move fst.oldkey[1] to fst.charvar
+	return
+.
+. This routine builds the keys and puts then in fst.oldkey array
+.
+FASTBUILDKEY routine fst.table, fst.record
+	set fst.flag
+	move 1 to fst.keycount
+	loop
+		call fastnextlist
+		return if (fst.fileflag)
+		call fastpackchar with fst.one
+		move fst.string to fst.oldkey[fst.keycount]
+		while (fst.flag)
+		clear fst.flag
+		add 1 to fst.keycount
+	repeat
+	return
+.
+. This routine returns the file declare blocks in fst.table one at a time.
+. If fst.flag is 1, then this is the first call to fastnextlist.  Return 0
+. in fst.flag if the current file declare block is the last.
+
+fastnextlist routine
+	if (fst.flag)
+		unpacklist fst.table into fst.fileblk
+		type fst.fileblk[1] to fst.num
+		if (fst.num = 5)
+			move 1 to fst.listcount
+		else
+			clear fst.flag
+			moveadr fst.table to fst.listvar
+			if (fst.num = 6)
+				set fst.fileflag
+				moveadr fst.fileblk[1] to fst.file
+			else if (fst.num = 7)
+				clear fst.fileflag
+				moveadr fst.fileblk[1] to fst.ifile
+			else 
+				goto fastnexterr1
+			endif
+			return
+		endif
+	endif
+	moveadr fst.fileblk[fst.listcount] into fst.listvar
+	unpacklist fst.listvar into fst.temp
+	type fst.temp[1] to fst.num
+	if (fst.num = 6)
+		set fst.fileflag
+		moveadr fst.temp[1] to fst.file
+	else if (fst.num = 7)
+		clear fst.fileflag
+		moveadr fst.temp[1] to fst.ifile
+	else 
+		goto fastnexterr2
+	endif
+	add 1 to fst.listcount
+	if (fst.listcount <= 6)
+		type fst.fileblk[fst.listcount] to fst.num
+		if (fst.num = 5)
+			set fst.flag
+			return
+		endif
+	endif
+	clear fst.flag
+	return
+.
+. This routine packs the list of variables (or single variable) into fst.string.
+. If fst.numvar = 0, then the list is at offset 2 in fst.listvar (filename).
+. If fst.numvar = 1, then the list is at offset 3 in fst.listvar (key).
+.
+fastpackchar routine fst.numvar
+	clear fst.string
+	unpacklist fst.listvar into fst.temp
+	move (fst.numvar + 2) to fst.index
+	type fst.temp[fst.index] to fst.num
+	if (fst.num = 5)
+		moveadr fst.temp[fst.index] to fst.templist
+		unpacklist fst.templist into fst.temp
+		type fst.temp[1] to fst.num
+		move 1 to fst.index
+		set fst.listflag
+	else
+		clear fst.listflag
+	endif
+	loop
+		if (fst.num = 2)
+			moveadr fst.temp[fst.index] to fst.numvar
+			move (fst.string + char fst.numvar) to fst.string
+		else if (fst.num = 1)
+			moveadr fst.temp[fst.index] to fst.charvar
+			test fst.charvar
+			if eos
+				fill " " into fst.charvar
+			else
+				setlptr fst.charvar 
+			endif
+			move (fst.string + fst.charvar) to fst.string
+		else if (fst.num = 0)
+			break
+		else
+			goto fastpackcharerr1
+		endif
+		while (fst.listflag)
+		add 1 to fst.index
+		type fst.temp[fst.index] to fst.num
+	repeat
+	if (not fst.numvar)
+		squeeze fst.string to fst.string
+	endif
+	return
+.
+. errors
+.
+titleerr1
+	move "TITLE 1" to errormsg
+	goto errorexit
+menuerr1
+	move "MENU 1" to errormsg
+	goto errorexit
+menuerr2
+	move "MENU 2" to errormsg
+	goto errorexit
+menuerr3
+	move "MENU 3" to errormsg
+	goto errorexit
+errorerr1
+	move "ERROR 1" to errormsg
+	goto errorexit
+messageerr1
+	move "MESSAGE 1" to errormsg
+	goto errorexit
+fastundoerr1
+	move "FASTUNDO 1" to errormsg
+	goto errorexit
+fastnexterr1
+	move "FASTNEXTLIST 1" to errormsg
+	goto errorexit
+fastnexterr2
+	move "FASTNEXTLIST 2" to errormsg
+	goto errorexit
+fastpackcharerr1
+	move "FASTPACKCHAR 1" to errormsg
+errorexit
+	display *resetsw, *hu, "*** ERROR - ", *ll, errormsg;
+	stop

@@ -1,0 +1,56 @@
+............................................................................
+. MSPORECS/TXT - INCLUDE MODULE TO WRITE PURCHASE HISTORY RECORDS
+. 
+MSPORECS MOVE      MSPARTNO  TO  MSPOPART
+         MOVE      DT6       TO  MSPOJULD
+         MOVE      "000"     TO  MSPOSUFX
+         MOVE      TYPEIN    TO  MSPOTYPE
+         MOVE      POIN      TO  MSPONUMB
+         MOVE      UOPIN     TO  MSPOUOP
+         MOVE      QTYIN     TO  MSPOQTY
+         MOVE      PRCIN     TO  MSPOPRC
+         MOVE      DATEIN    TO  MSPODATE
+         MOVE      VENDIN    TO  MSPOVEND
+         MOVE      NAMEIN    TO  MSPOVNAM
+         CLEAR     MSPOKEY
+         APPEND    MSPOPART  TO  MSPOKEY
+. 
+. NOTE....IS MSSLJULD / DT6  IN  YY/MM/DD ORDER ? ? ?
+. 
+         APPEND    MSPOJULD  TO  MSPOKEY
+         APPEND    MSPOSUFX  TO  MSPOKEY
+         LENSET    MSPOKEY
+         RESET     MSPOKEY  TO  1
+. 
+WVENDREC CALL      CLRTRAPS
+         MOVE      " " TO IOSW
+         TRAP      BUMPVSUF IF IO
+. 
+         CMATCH    "X",IOSW
+         GOTO      WVENDREC IF EQUAL   (TRY TO WRITE AGAIN!)
+         CMOVE     " " TO IOSW
+. 
+         CALL      CLRTRAPS
+         CALL      MSPOWRIT
+. 
+         WRITE     NPURCH,MSPOKEY;MSPOPART,MSPOJULD,MSPOSUFX,MSPOTYPE:
+                                  MSPONUMB,MSPOUOP:
+                                  MSPOQTY,MSPODATE,MSPOPRC,MSPOVNAM
+         GOTO      MOREDATA
+. 
+BUMPVSUF MOVE      MSPOSUFX  TO  CINDX1
+         ADD       "1"       TO  CINDX1
+         MOVE      CINDX1    TO  MSPOSUFX
+         REP       " 0"      IN  MSPOSUFX
+. 
+         RESET     MSPOKEY  TO  26
+         APPEND    MSPOSUFX  TO  MSPOKEY
+         RESET     MSPOKEY  TO  29
+         LENSET    MSPOKEY
+         RESET     MSPOKEY  TO  1
+. 
+         MOVE      "X" TO  IOSW
+         RETURN
+. 
+.............................................................................
+. 

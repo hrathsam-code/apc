@@ -1,0 +1,89 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    1 Meade Ave                                              ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 532-6266                                           ;
+;=============================================================================;
+;                                                                             ;
+;     PROGRAM: TaxType.FD                                                ;
+;                                                                             ;
+;   AUTHOR:    Harry Rathsam                                                  ;
+;                                                                             ;
+;     DATE:    05-02-2018 At 13:51                                            ;
+;                                                                             ;
+; REVISION:     Ver        Date     INIT       DETAILS                        ;
+;         00107   05-02-2018   HOR     INITIAL VERSION                  ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+;
+;                                                                                 
+                     %IFNDEF         $TaxTypeVAR
+$TaxTypeVAR                      EQUATE         1
+;
+;
+;
+;         Field Definitions                              
+;================================================================================================;
+;                                          
+;                                          
+. Field                           Type            Length             From - To       Description
+;--------------------------------------------------------------------------------------------------------------
+TaxType                          RECORD
+Code                             Dim                8                   1 - 8        //1 - 8
+Description                      Dim                30                  9 - 38       //9 - 38
+GLCode                           Dim                8                  39 - 46       //8
+Inactive                         Form               1                  47 - 47       //51 - 51
+SeqNo                            Form               9                  48 - 56
+TaxEntity                        Form               2                  57 - 58       //1=State, 2= County, 3=etc
+                                 RECORDEND
+;
+;======================================================================================;
+TempTaxType                         record          like   TaxType                         
+OrigTaxType                         record          like   TaxType                         
+SaveTaxType                         record          like   TaxType                         
+;======================================================================================;
+; 
+; File Keys and File Labels  
+; --------------------------------------------------  
+TaxTypeTXTNM                          INIT         "TaxType"
+TaxTypeISI1NM                         INIT               "TaxType.ISI"
+TaxTypeISI2NM                         INIT               "TaxType2.ISI"
+TaxTypeI1DEF                           init            "-n,z,y,1-8"
+TaxTypeI2DEF                           init            "-n,z,y,48-56"
+;
+; By Code
+; 1-8
+;
+TaxTypeKY                        DIM                 8
+;
+; By SeqNo
+; 48-56
+;
+TaxTypeKY2                       DIM                 9
+;=============================================================================;
+;
+TaxTypeFLST                         FILELIST
+TaxTypeFL                           IFILE              name="TaxType.ISI",FIX=180,NODUP,NOPATH
+TaxTypeFL2                          IFILE              name="TaxType2.ISI",FIX=180,NODUP,NOPATH
+                                    FILELISTEND
+ 
+TaxTypeFileSize       CONST      "180"
+ 
+TaxTypeProg           INIT       "TaxType Program"
+TaxTypeDesc           INIT       "TaxType Maintenance"
+TaxTypeTITLE          INIT       "TaxType Record"
+TaxTypeHelp           INIT       "TaxType.HLP"
+ 
+ 
+ 
+ 
+          %ENDIF          //End of FD Include File
+ 
+ 
+          %IFNDEF $TaxTypeVARIO
+            INCLUDE TaxType.IO 
+          %ENDIF          //End of IO Include File

@@ -1,0 +1,396 @@
+;=============================================================================;
+;       CREATED BY:  CHIRON SOFTWARE & SERVICES, INC.                         ;
+;                    4 NORFOLK LANE                                           ;
+;                    BETHPAGE, NY  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  PROGRAM:    WorkVar.INC                                                    ;
+;                                                                             ;
+;   AUTHOR:    HARRY RATHSAM                                                  ;
+;                                                                             ;
+;     DATE:    05/07/2015 AT 2:37AM                                           ;
+;                                                                             ;
+;  PURPOSE:                                                                   ;
+;                                                                             ;
+; REVISION:    VER     DATE     INIT       DETAILS                            ;
+;                                                                             ;
+;              1.0   05/07/2015   HOR     INITIAL VERSION                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+.
+. WORKVAR.INC -	work variables
+.
+ProgName           DIM               12
+CancelFlag         FORM              1
+CMDLINE            DIM               80
+RowClicked         FORM              7
+alertstring        dim                 255
+OSCOMMAND          INIT              "WINHELP "
+LOCKTITLE          INIT              "LOCKING Error occured during I/O operation"
+YES                DIM               1
+ANS                FORM              1
+LINE               FORM              2
+COUNT              FORM              2
+NoRow              FORM              "-1"
+FirstRow           FORM              "-1"
+SEQ                FORM              "-1"
+SeqEOF             FORM              "-3"
+PAGE               FORM              4
+FNAME              DIM               8
+FILLER             DIM               20
+WORK               FORM              9.4
+YYYY               DIM               4
+YY                 DIM               2         Year field
+MM                 DIM               2         Month Field
+DD                 DIM               2         Day Field
+CC                 DIM               2         Century Field                                   \
+MMF                FORM              2                          //HR 2/17/2005
+DDF                FORM              2
+YYF                FORM              2
+YYYYF              FORM              4
+Hours              DIM               2
+Minutes            DIM               2
+HoursF             form              2
+TimeZone           dim               2
+Seconds            DIM               2
+RETURNFL           FORM              1   ...1=ERRORRETURN
+TRAPERR            DIM               19   ...trap error message
+TRAPFL             FORM              2   ...assigns number to each routine within incl.
+TRAPDESC           DIM               7
+ErrorMsg            dim                120
+TodayDays           form               10
+UPSMask            init              "XXBXXXBXXXBXXBXXXXBXXXX"
+
+TR1                INIT              "READ"
+TR2                INIT              "READ2"
+TR3                INIT              "ADD"
+TR4                INIT              "DELETE"
+TR5                INIT              "UPDATE"
+TR6                INIT              "BINTEST"
+TR7                INIT              "READKS"
+TR8                INIT              "READKS2"
+CompanyName        INIT              "APC Components"
+BACKFL             FORM              2
+ERRFL              FORM              2
+RunType            FORM              1
+FILDESC            DIM               8
+RECTYP             DIM               1
+TIME               INIT              "HH:MM:SS"
+TimeDisplayed      dim               10
+WORKF              FORM              7
+Today8             DIM               8
+SPNAME             DIM               12
+CancelTitle        INIT              "&Cancel"
+ExitTitle          INIT              "&Exit"
+SaveTitle          INIT              "&Save"
+ChangeTitle        INIT              "&Change"
+ClearTitle         INIT              "&Clear"
+NewTitle           INIT              "&New"
+LastASCII          INIT              "~"       ...Last ASCII character (for finding last record)
+FirstASCII         INIT              " "       ...First ASCII character (for finding First record)
+SingleLine         Const             "18"
+SubSingleLine      CONST             "14"
+DoubleLine         Const             "36"
+ZEROSEQ            FORM              "0"
+TransFlag          FORM              1
+LVDataLine          dim                1024
+DataLine            dim                255
+;
+Space              INIT              " "
+SingleQuote        INIT              "'"
+singlequote2       INIT              "''"
+
+LVOptions          form               3
+SelectedRow        form               9
+ItemParam          form               9
+SortOrder          FORM              2
+SortColumn         FORM              3
+SortHeader         FORM              3(0..99)
+SortType           FORM              3(0..99)
+SortMask           DIM               20
+;
+$On                equate           1
+$Off               equate           0
+;==========================================================================================================
+;
+; Error Routine fields
+;
+FileNameError       DIM                120
+ErrorFile           FILE
+ErrorDateTime       dim                15
+
+
+
+ExportFilePath     DIM               100        //HR 6/2/2005
+ExportFileName     DIM               50         //HR 6/2/2005
+ExportFile         DIM               200        //HR 6/2/2005
+ExportFL           FILE                         //HR 6/2/2005
+
+UpdateTimer        TIMER
+
+;==========================================================================================================
+; Print variables
+;
+PrinterFallThrough  form               1
+p                  pfile
+
+FirstTimeThrough   dim               1
+PrintCancelFlag    FORM              1
+printPageCnt       form              3
+printLineCnt       form              4
+PO_PORTRAIT        const             "0"
+PO_LANDSCAPE       const             "1"
+printOrientation   form              1
+printInitFailed    dim               1
+
+HeaderFont         FONT                   //Used for the Name of the Company/Entity
+DetailFont         FONT                   //Used for printing Detail Lines
+SubFont            FONT                   //Used for Printing Sub Detail Lines
+TitleFont          FONT                   //Used for the Title of the Program, etc
+TitleHeadingFont   FONT
+LineFont           FONT
+SubLineFont        FONT
+FooterFont         FONT                   //Used for printing the Footer
+
+;==========================================================================================================
+
+$YESNO             DEFINE            4
+RESULT             form              2
+RESULT4            FORM              3
+RESULT9            FORM              9
+CROSSYR            DIM               4
+DateTime           DIM               12
+
+Time8              dim               8
+Checked            form              1
+RowSelected   FORM              6
+
+
+StartingRow        FORM              6
+
+NWK4               FORM              4
+NWK6               FORM              6
+AWK4               DIM               4
+AWK6               DIM               6
+FirstFlag          DIM               1           //Used for checking if routines have already passed through
+FirstPrint         DIM               1           //Used to see if we've printed anything yet...If Not, don't do a *F
+PrintGuiMode       INIT              "Y"
+
+
+DATE8               DIM               8
+date10             dim               10
+BlankDate          init              "        "
+wrk1               DIM               1
+wrk2               DIM               2
+Status             FORM              1                (0=New Record, 1=Updating Status, 2=New Record, 3=Record Found)
+RecordStatus        dim                1              (" "=Main Program, "F"=Record Found, "U"=Updating Record, "N"=New Record
+ValidFlag          FORM              1                (0=All fields are OK, 1=All fields are not valid!!!)
+CharCount          FORM              4
+TestChars          DIM               100
+ProgLoaded         FORM              "0"              (Has program been loaded 0=No, 1=Yes)
+SearchTitle        DIM               40
+EnvData            DIM               100              . Environmental Data variable (Clock INI)
+AlertReturn        init              0x7f
+FailureFlag        FORM              1
+Slash              INIT              "/"
+dash               INIT              "-"
+MenuClickItem      FORM              2
+CBResult           FORM              6
+MenuTag            FORM              6
+MenuItem           DIM               20
+CloseProgram       FORM              1
+SearchCounter       form               9
+
+ProgramName        DIM               25
+ProgramStamp       DIM               25
+ProgramSerial      DIM               25
+ProgramVer         DIM               25
+CompileDate        DIM               25
+
+PassedVar          DIM               %1
+AlertResult         form               2
+
+
+$BACKGROUND        DEFINE            2147483657    ;Hex value 0x80000001
+$ACTIVECAPTION     DEFINE            2147483650    ;Hex value 0x80000002
+$INACTIVECAPTION   DEFINE            2147483651    ;Hex value 0x80000003
+$MENU              DEFINE            2147483652    ;Hex value 0x80000004
+$WINDOW            DEFINE            2147483653    ;Hex value 0x80000005
+$WINDOWFRAME       DEFINE            2147483654    ;Hex value 0x80000006
+$MENUTEXT          DEFINE            2147483655    ;Hex value 0x80000007
+$WINDOWTEXT        DEFINE            2147483656    ;Hex value 0x80000008
+$CAPTIONTEXT       DEFINE            2147483657    ;Hex value 0x80000009
+$ACTIVEBORDER      DEFINE            2147483658    ;Hex value 0x8000000A
+$INACTIVEBORDER    DEFINE            2147483659    ;Hex value 0x8000000B
+$APPWORKSPACE      DEFINE            2147483660    ;Hex value 0x8000000C
+$HIGHLIGHT         DEFINE            2147483661    ;Hex value 0x8000000D
+$HIGHLIGHTTEXT     DEFINE            2147483662    ;Hex value 0x8000000E
+$BTNFACE           DEFINE            2147483663    ;Hex value 0x8000000F
+$BTNSHADOW         DEFINE            2147483664    ;Hex value 0x80000010
+$GRAYTEXT          DEFINE            2147483665    ;Hex value 0x80000011
+$BTNTEXT           DEFINE            2147483666    ;Hex value 0x80000012
+$INACTIVECAPTTXT   DEFINE            2147483667    ;Hex value 0x80000013
+$BTNHIGHLIGHT      DEFINE            2147483668    ;Hex value 0x80000014
+
+.
+. Variables & Defines for 'Record' Alert titles
+.
+FirstTitle         INIT              "Find First Failed"
+LastTitle          INIT              "Find Last Failed"
+PrevTitle          INIT              "Find Previous Record Failed"
+NextTitle          INIT              "Find Next Record Failed"
+
+.
+. Other Alert Titles
+.
+DelTitle           INIT              "Delete Record?"
+DelOKTitle         INIT              "Record Deleted?"
+SureTitle          INIT              "Are you Sure?"
+
+BnkFlag            DIM               %1
+APTRMFlag          DIM               %1
+BuyerFlag          DIM               %1
+VNDFlag            DIM               %1
+CLASSFlag          DIM               %1
+PRJCTFlag          DIM               %1
+CNTRYFlag          DIM               %1
+TYPEFlag           DIM               %1
+APCTLFlag          DIM               %1
+VOUCHFlag          DIM               %1
+GLMSTFlag          DIM               %1
+CMPNYFlag          DIM               %1
+USERFlag           DIM               %1
+.
+. Variables that are used througout the programs
+. These are setup & loaded when the PASSWORD program
+. is used.
+.
+$UserID            DIM               %20
+$CompanyName       DIM               %40
+$Password          DIM               %20
+$LoginName         DIM               %20
+$RealName          DIM               %30
+$GroupID           DIM               %6
+$Dept              DIM               %6
+$Security          DIM               %2
+$Active            FORM              %1
+$SelectAll         FORM              %1
+$ReadAhead         FORM              %1
+$LoggedOn          FORM              %1
+$Entity            init              % "APC     "
+$AppraiserID       DIM               %6
+$Station           DIM               %12
+.
+$SearchKey         DIM               %30
+$SearchNum          form               9
+
+$StartNewMode      INTEGER           1,"1"
+$StartUpdateMode   INTEGER           1,"2"
+$AllowUpdateMode   INTEGER           1,"4"
+$AllowNewMode      INTEGER           1,"8"
+
+StartNewMode      INTEGER            1
+StartUpdateMode   INTEGER            1
+AllowUpdateMode   INTEGER            1
+AllowNewMode      INTEGER            1
+
+                   GOTO              #EXIT
+                   INCLUDE           MacroLib.INC
+                   INCLUDE           Users.FD
+#EXIT
+PaymentEntry        external           "CashEnt;STARTPGM"
+LOADPASSWD          EXTERNAL           "UsersMaint;STARTPGM"
+BANKPGM             EXTERNAL           "BANK;STARTPGM"
+TYPEPGM             EXTERNAL           "TYPE;STARTPGM"
+APTRMPGM            EXTERNAL           "APTRM;STARTPGM"
+BUYERPGM            EXTERNAL           "BUYER;STARTPGM"
+VENDORPGM           EXTERNAL           "VENDOR;STARTPGM"
+CLASSPGM            EXTERNAL           "CLASS;STARTPGM"
+CNTRYPGM            EXTERNAL           "CNTRY;STARTPGM"
+PRJCTPGM            EXTERNAL           "PRJCT;STARTPGM"
+APCTLPGM            EXTERNAL           "APCTL;STARTPGM"
+VOUCHPGM            EXTERNAL           "VOUCH;STARTPGM"
+CMPNYPGM            EXTERNAL           "CMPNY;STARTPGM"
+GLMSTPGM            EXTERNAL           "GLMST;STARTPGM"
+USERPGM             EXTERNAL           "UsersMaint;STARTPGM"
+
+
+ConvDateToDays      EXTERNAL           "datertn;CalDateToDays"
+ConvDaysToDate      EXTERNAL           "datertn;LinearDateToCalDate"
+
+ViewParts            external            "Parts;BROWSEFILE"
+
+ViewUPS             external           "ViewTrack;STARTPGM"
+ViewFedex           external           "ViewFedex;STARTPGM"
+PrtInvDetails       external           "PrtInvDetails;STARTPGM"
+PrtPymnt            external           "PrtPymnt;STARTPGM"
+OrderEntry          external           "OrderEntry;STARTPGM"
+SWRCHTYPE           EXTERNAL           "TYPE;BRWSETYPE"
+VIEWBANK            EXTERNAL           "BANK;BROWSEFILE"
+VIEWGLMAST          EXTERNAL           "GLMast;BROWSEFILE"
+VIEWCMPNY           EXTERNAL           "CMPNY;BROWSEFILE"
+VIEWAPTYPE          EXTERNAL           "TYPE;BROWSEFILE"
+VIEWTYPE            EXTERNAL           "TYPE;BROWSEFILE"
+VIEWCNTRY           EXTERNAL           "CNTRY;BROWSEFILE"
+VIEWBUYER           EXTERNAL           "BUYER;BROWSEFILE"
+VIEWAPTRM           EXTERNAL           "APTRM;BROWSEFILE"
+VIEWARTRM           EXTERNAL           "ARTRM;BROWSEFILE"
+VIEWCLASS           EXTERNAL           "CLASS;BROWSEFILE"
+VIEWAPCLASS         EXTERNAL           "CLASS;BROWSEFILE"
+VIEWPRJCT           EXTERNAL           "PRJCT;BROWSEFILE"
+VIEWVENDOR          EXTERNAL           "Vendor;BROWSEFILE"
+VIEWSTATE           EXTERNAL           "STATE;BROWSEFILE"
+VIEWCUST            EXTERNAL           "CUST;BROWSEFILE"
+VIEWCUSTOMER        EXTERNAL           "CUST;BROWSEFILE"
+ViewSource          EXTERNAL           "Source;BROWSEFILE"
+ViewDiscounts       EXTERNAL           "Discounts;BROWSEFILE"
+ViewInstructors     EXTERNAL           "Instructors;BROWSEFILE"
+ViewSLSMN           EXTERNAL           "SLSMN;BROWSEFILE"
+ViewCOMM            EXTERNAL           "Comm;BROWSEFILE"
+ViewReason          EXTERNAL           "Reason;BROWSEFILE"
+ViewApprs           EXTERNAL           "APPRS;BROWSEFILE"
+ViewLend            EXTERNAL           "LEND;BROWSEFILE"
+ViewStudents        external           "Students;BROWSEFILE"
+ViewContacts        external           "ContactsNEW;BROWSEFILE"
+.ViewComments        external           "Comments;STARTPGM"
+ViewCreditCards     external           "CreditCards;STARTPGM"
+
+About               EXTERNAL           "About;STARTPGM"
+AboutChiron         EXTERNAL           "AboutChiron;STARTPGM"
+
+
+AddContact          EXTERNAL           "Contact;STARTPGM"
+
+VendorInq           external           "VINQ;STARTPGM"
+PrintOpenAP         external           "PRTOPNAP;STARTPGM"
+PrintVendor         external           "PRTVEND;STARTPGM"
+PrintVendorA        external           "PRTVENDA;STARTPGM"
+PrintAgingAP        external           "PrtAgeAP;STARTPGM"
+PrintVendPerf       external           "PRTPERFM;STARTPGM"
+PrintAPDistr        external           "PRTAPGL;STARTPGM"
+PrintBank           external           "PRTBANK;STARTPGM"
+PrintAPTerms        external           "PRTAPTRM;STARTPGM"
+PrintChkList        external           "PRTCHKLS;STARTPGM"
+PrintVouchReg       external           "PRTVCHRG;STARTPGM"
+PrintChkAudit       external           "PRTCHKRG;STARTPGM"
+PrintChkReq         external           "PRTCHKRQ;STARTPGM"
+PrintAutoChk        external           "PRTCHCK;STARTPGM"
+PrintReconc         external           "PRTCHKCL;STARTPGM"
+CheckReqEdit        external           "CHECK;STARTPGM"
+ChngVchStatus       external           "VCHAPPRV;STARTPGM"
+CustInquiry         EXTERNAL           "CINQ;STARTPGM"
+CustMaint           external           "Cust;STARTPGM"
+CheckInquiry        external           "CHCKINQ;STARTPGM"
+.=============================================================================
+. Print Program LoadMods
+.
+PrintStatemnt      EXTERNAL          "PRTSTMT;StartProgram"
+PrintInvoice       EXTERNAL          "INVRPTC2;StartProgram"
+PrintScreen        EXTERNAL          "PrtScrn;StartProgram"
+CommentInq         EXTERNAL          "Comments;STARTPGM"
+
+CONVDATE           EXTERNAL          "STANDARD;CONVDATE"
+;==========================================================================================================
+

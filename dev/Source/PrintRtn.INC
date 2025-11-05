@@ -1,0 +1,694 @@
+;=============================================================================;
+;       created by:  chiron software & services, inc.                         ;
+;                    4 norfolk lane                                           ;
+;                    bethpage, ny  11714                                      ;
+;                    (516) 935-0196                                           ;
+;=============================================================================;
+;                                                                             ;
+;  program:    printrtn                                                       ;
+;                                                                             ;
+;   author:    harry rathsam                                                  ;
+;                                                                             ;
+;     date:    07/11/2019 at 11:22am                                          ;
+;                                                                             ;
+;  purpose:    Printer Routines including                                     ;
+;                                                                             ;
+;              1) Opening Printers                                            ;
+;              2) Selecting Printer Options                                   ;
+;              3) E-Mailing Options                                           ;
+;              4) Faxing Options including E-Fax and Hylafax                  ;
+;              5) Closing Printers and Zoom Options                           ;
+;                                                                             ;
+; revision:    ver     date     init       details                            ;
+;                                                                             ;
+;              1.0   07/11/2019   hor     initial version                     ;
+;                                                                             ;
+;                                                                             ;
+;=============================================================================;
+
+#PrinterName        dim                40
+TestHar             dim                40
+#PrinterName2       dim                40
+#DefaultPrinter     dim                40
+#DefaultCB          form               2
+#ComboSelected      form               2
+#PrinterSelected    dim                40
+#ItemCount          form               2
+#ValidFaxJobs       form               1
+ReportProg          dim                14
+PrintByCustomer     dim                1
+SpoolReport         form               1
+SpoolFileName       dim                128
+reportMonth         dim                2
+reportDay           dim                2
+reportYear          dim                4
+ReportYear2         dim                2
+ReportCentury2      dim                2
+reportTime4         dim                4
+reportTime          dim                5
+reportDate8         dim                8
+reportDate          dim                10
+reportTimeStamp     dim                12
+reportProgVer       dim                40
+selectedPrinter     dim                50
+reportTitle         dim                50
+reportDateAndTime   dim                100
+FaxDirectory        dim                50
+.
+#FaxSystem          dim                50
+#FTPServer          init               "192.168.10.187"
+#FTPFileName        dim                100
+#FTPFullFileName    dim                100
+#FTPUser            init               "harry"
+#FTPPassword        init               "tim1156"
+
+#Destination        dim                100
+
+EmailAddress        dim                60
+EmailName           dim                50
+EmailFile           dim                50
+
+PrintJobFLST        filelist
+PrintJobFile        ifile              name="PrintJob"
+PrintJobFileP       ifile              name="PrintJbP"
+                    filelistend
+
+PrintJobREC         record
+JobNumber           form               8            1  -  8
+OutputMethod        form               1            9  -  9
+Subject             dim                100         10  -  109
+SentTo              dim                300        110  -  409
+FileName            dim                20         410  -  429
+DocumentType        dim                30         430  -  459
+CustomerID          dim                6          460  -  465
+CustomerName        dim                30         466  -  495
+SubmitDate          dim                14         496  -  509
+Processed           form               1          510  -  510       // 0 - Not Processed, 1 - Processed
+ProcessDate         dim                14         511  -  524
+SuccessFlag         dim                1          525  -  525       // Y-Success, N-Not Successful, Null-
+Modem               dim                10         526  -  535       //Modem Port (i.e. ttyS0, ttyS1)     //HR 3/2/2005
+FaxJob              form               8          536  -  543       //Hylafax Job Number                 //HR 3/2/2005
+StatusMessage       dim                60         544  -  603       //Fax Error message (if any)         //HR 3/2/2005
+PagesSent           form               2          604  -  605       //Pages sent                         //HR 3/2/2005
+FaxTime             dim                8          606  -  613       //Fax Time (Actual Telephone Time)   //HR 3/2/2005
+ModemTime           dim                8          614  -  621       //Modem Time (Total Time spent)      //HR 3/2/2005
+                    recordend
+
+#RadioSelected      form               1
+PrinterOpened       form               1
+
+#PrintJobKY         dim                8
+.
+PageWidth           form               4
+PageHeight          form               4
+PreviewOption       form               1
+
+PrtPrintOption        dim                1
+
+PrintViaF           plform             PrintVia
+PrintProgress       plform             PrntProg.PLF
+
+#Progress           form               4.2
+#Percent            form               4.2
+
+FaxJobNumber        form               4
+FaxJobFile          dim                50
+TimesFont           font
+
+GothicFont          font
+#X                  form               2
+PDFFile             file
+
+FaxPDFNumber        dim                12       //HR 12/10/2004
+FaxPDFSubject       dim                100      //HR 12/10/2004
+
+PDFCounter          form               7
+PDFCounterD         dim                7
+PrintJobs           form               4
+#PrintJobs          form               4.2
+PDFInfo             dim                40(1000,2)                               //Changed from 300 on 10.20.2011
+PDFMethod           form               1(1000)                                  //Changed from 300 on 10.20.2011
+FTPFileName         dim                50
+FTPServer           init               "192.168.10.187"
+FTPUser             init               "harry"
+FTPPassword         init               "tim1156"
+FaxTimetoSend       dim                20
+FaxDate             dim                8
+FaxSubject          dim                100(1000)                                //Changed from 300 on 10.20.2011
+PrintByCust         dim                1         //Are we printing by Customer???
+DocumentType        dim                30
+FaxCustomerID       dim                10              //Was 6  HR 2019.8.30
+
+#SubmitTime         dim                18
+#SubmitFile         dim                25
+#ActualFile         dim                125
+#FaxFile            file
+#SeqEOF             form               "-3"
+.
+                    include            Print.FD
+
+                    %ifndef            $CUST
+                      include           Cust.FD            //HR 10/4/2004
+                    %endif
+
+                    goto               #End
+
+PrintPreviewInit
+                    move               "1",PreviewOption
+                    goto               PrintContinue
+PrintInit
+                    move               "0",PreviewOption
+PrintContinue
+                    move               CompanyName,$CompanyName
+                    move               "0",FaxJobNumber
+                    clock              timestamp to reportTimestamp
+                    unpack             reportTimestamp into reportDate8,reportTime4
+                    unpack             reportDate8 into ReportCentury2,ReportYear2,reportMonth,reportDay
+                    pack               reportDate with reportMonth,"/",reportDay,"/",reportYear2
+                    move               "99:99" to reportTime
+                    edit               reportTime4 into reportTime
+                    pack               reportDateAndTime with "Generated on ",reportDate," at ",reportTime
+                    getmode            *ProgName=ReportProg
+                    if                   (ProgLoaded = 1)
+                      if                   (SelectedPrinter != "-")
+                        clear                SelectedPrinter
+                      endif
+                    else
+                      if                 (PreviewOption = 1)                   //1 should be the Print Preview, Not Zero 0
+                        pack                 SelectedPrinter with "@?"
+                      else
+                        clear                SelectedPrinter
+                      endif
+                    endif
+
+                    trap               noPrinterSelected if spool
+                       move            "Y",PrintInitFailed
+
+                       if                (SpoolReport = 1)
+                         prtopen           p,selectedPrinter,reportTitle:
+                                           PageWidth=PageWidth:
+                                           PageHeight=PageHeight:
+                                           SpoolFile=SpoolFileName:
+                                           PageNum=0
+                       else
+                         prtopen           p,selectedPrinter,reportTitle:
+                                           PageWidth=PageWidth:
+                                           PageHeight=PageHeight:
+                                           PageNum=0
+                       endif
+
+                    if                   (ProgLoaded = 1)
+                      if                   (SelectedPrinter != "-")
+                        move                 "-",SelectedPrinter
+                      endif
+                    endif
+                    prtpage            p;*Units=*LoEnglish
+                    trapclr            spool
+
+                    move               "0" to printPageCnt
+                    move               "1000" to printLineCnt
+
+                    create             DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+                    create             SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+                    create             HeaderFont,">Arial",Size=16,bold=1
+                    create             TitleFont,">Arial",Size=14,Bold=0
+                    create             TitleHeadingFont,">Arial",Size=10,Bold=1
+
+                    prtpage            p;*Font=DetailFont;
+                    return
+.=============================================================================
+PrintClose
+                    prtclose           P,Maximize=1,Zoom=3
+                    call               SubmitPDFFiles
+                    return
+.=============================================================================
+PrintClose1
+                    prtclose           P,Maximize=1,Zoom=3
+                    return
+.=============================================================================
+printHeader
+                    add                "1" to printPageCnt
+                    compare            "1" to printPageCnt
+                    if not equal
+                      prtpage            p;*f;
+                    endif
+
+                    if                 (PrintOrientation = PO_Portrait)     //Portrait Mode
+                      prtpage            P;*font=HeaderFont:
+                                         *p=385:20,*alignment=*center:
+                                         *LL,*jc,$CompanyName
+
+                      prtpage            P;*font=TitleFont:
+                                         *alignment=*center:
+                                         *p=377:48,ReportTitle
+                      prtpage            P;*font=TitleHeadingFont:
+                                         *P=10:38,*alignment=*left:
+                                         "Time :":
+                                         *p=10:54,"Date :":
+                                         *alignment=*left:
+                                         *p=690:38:
+                                         "Page :":
+                                         PrintPageCnt:
+                                         *p=60:38,ReportTime:
+                                         *p=60:54,ReportDate:
+                                         *p=668:54,ReportProg:
+                                         *alignment=*left
+                    else                                                   //Landscape Mode
+                      prtpage            P;*font=HeaderFont:
+                                         *alignment=*center:
+                                         *p=535:20:
+                                         *jc,$CompanyName
+
+                      prtpage            P;*font=TitleFont:
+                                         *alignment=*center:
+                                         *p=522:48,ReportTitle
+
+                      prtpage            P;*font=TitleHeadingFont:
+                                         *P=10:38,*alignment=*left:
+                                         "Time :":
+                                         *p=10:54,"Date :":
+                                         *alignment=*left:
+                                         *p=930:38:
+                                         "Page :":
+                                         PrintPageCnt:
+                                         *p=60:38,ReportTime:
+                                         *p=60:54,ReportDate:
+                                         *p=938:54,ReportProg:
+                                        *alignment=*left
+                    endif
+
+                    move               "80",PrintLineCnt
+                    call               PrintCustomHeader
+                    prtpage            P;*pensize=2:
+                                       *p=10:PrintLineCnt,*line=1070:PrintLineCnt
+
+
+                    add                "15",PrintLineCnt
+
+                    return
+.=============================================================================
+PrintLandScapeMode
+                    move               PO_LandScape,PrintOrientation
+                    prtpage            p;*orient=*landscape;
+                    return
+.=============================================================================
+PrintPortraitMode
+                    move               PO_Portrait,PrintOrientation
+                    prtpage            p;*orient=*Portrait;
+                    return
+.=============================================================================
+noPrinterSelected
+                    trapclr            spool
+                    noreturn
+                    pack               selectedPrinter with "@?"
+                    move               "N" to printInitFailed
+                    return
+.=============================================================================
+LoadPrintersIntoList
+                    DLPrinters.ResetContent
+                    getinfo            Printers,#PrinterName
+                    explode            #PrinterName,",",#DefaultPrinter
+                    chop               #DefaultPrinter,#DefaultPrinter
+
+                    move               "0",#ComboSelected
+
+                    getinfo            Printers,DLPrinters
+                    DLPrinters.GetCount giving #ItemCount
+                    for                #X FROM "0" TO #ItemCount USING "1"
+                      DLPrinters.GetText giving #PrinterName using #X
+                      chop               #PrinterName
+                      if                 (#PrinterName = "Win2PDF")
+                        continue
+                      endif
+                      add                "1",#ComboSelected
+
+                      if                 (#PrinterName = #DefaultPrinter)   //Is it the Default Printer
+                        move               #ComboSelected,#DefaultCB
+                      endif
+
+                    insertitem         CBPrinters,#x,#PrinterName
+                    repeat
+                    setitem            CBPrinters,#DefaultCB,#DefaultCB
+                    return
+.=============================================================================
+GetSelectedPrinter
+                    getitem            RPrintViaPrinter,0,#RadioSelected
+                    CBPrinters.GetCurSel giving #ComboSelected
+                    clear              #PrinterSelected
+                    if                 (#ComboSelected = -1)
+                      beep
+                      alert              Caution,"A valid printer has not been selected",result,"Printer Error"
+                      setflag            OVER
+                      return
+                    else
+                      setflag            NOT OVER
+                    endif
+
+                    CBPrinters.GetText giving #PrinterSelected using #ComboSelected
+                    return
+.=============================================================================
+PrintInit2
+                    move               "FAXDIR",FaxDirectory
+                    clock              INI,FaxDirectory
+                    if                 ( RunType = 0 or ( PrinterOpened = 0 and RunType = 1))
+
+                      formload           PrintViaF
+.                      if                 (PrintByCust = "Y")              //HR Was Customer
+.                        setitem            RPrintViaEmail,0,1             //HR 4/26/2005  Set as the Default (i.e. By Customer)
+.                      endif
+                      %ifdef           PrintType
+                      if                 (PrintType = "R")
+                        setitem            RPrintViaPrinter,0,1             //HR 4/26/2005  Set as the Default (i.e. By Customer)
+                      endif
+                      %endif
+
+
+                      setprop            WPrintVia,visible=1
+                      return             IF (PrintCancelFlag = 1)            //User Aborted Print options
+                    endif
+
+                    move               PO_PORTRAIT,printOrientation
+                    clock              timestamp to reportTimestamp
+                    unpack             reportTimestamp into reportDate8,reportTime4
+                    unpack             reportDate8 into ReportCentury2,ReportYear2,reportMonth,reportDay
+                    pack               reportDate with reportMonth,"/",reportDay,"/",reportYear2
+                    move               "99:99" to reportTime
+                    edit               reportTime4 into reportTime
+                    pack               reportDateAndTime with "Generated on ",reportDate," at ",reportTime
+                    getmode            *ProgName=ReportProg
+
+                    getitem            RPrintViaCustomer,0,#RadioSelected
+                    if                 (#RadioSelected = 1)
+                      move               "C",PrtPrintOption
+                      move               "Y",PrintByCust
+                    endif
+
+                    getitem            RPrintViaFax,0,#RadioSelected
+                    if                 (#RadioSelected = 1)
+                      move               "F",PrtPrintOption
+                      move               "Y",PrintByCust
+                    endif
+
+                    getitem            RPrintViaEMail,0,#RadioSelected
+                    if                 (#RadioSelected = 1)
+                      move               "E",PrtPrintOption
+                      move               "Y",PrintByCust
+                    endif
+
+                    getitem            RPrintViaPrinter,0,#RadioSelected
+                    if                 (#RadioSelected = 1)
+                      move               "P",PrtPrintOption
+                      move               "Y",PrintByCust                 //HR 2019.7.22   Was "N"
+                    endif
+
+                    switch             PrtPrintOption
+                    case               "E"                    //E-Mail
+..HR 2019.7.11                      call               OpenPDFPrinter
+                    case               "F"                  //Fax
+..HR 2019.7.11                      call               OpenPDFPrinter
+                    case               "P"                    //Standard Printer Dialog
+                      getitem            CBPrinters,0,#ComboSelected
+                      getitem            CBPrinters,#ComboSelected,#PrinterSelected
+                      if                 (PreviewOption = 1)
+                        pack                SelectedPrinter FROM "@",#PRinterSelected
+                      else
+                        move               #PrinterSelected,SelectedPrinter
+                      endif
+                      prtopen            p,selectedPrinter,reportTitle:
+                                         PageWidth=PageWidth:
+                                         PageHeight=PageHeight:
+                                         PageNum=0
+
+..HR 2019.7.11                      prtpage            p;*Units=*LoEnglish
+
+                    case               "C"                    //Standard Printer Dialog
+                      getitem            CBPrinters,0,#ComboSelected
+                      getitem            CBPrinters,#ComboSelected,#PrinterSelected
+                      move               #PrinterSelected,SelectedPrinter
+                    endswitch
+;
+; Get the "Default" Printer Name for when printing Non E-mail/Fax print jobs
+;
+                    getitem            CBPrinters,0,#ComboSelected
+                    getitem            CBPrinters,#ComboSelected,#PrinterSelected
+
+.HR 2019.7.11                    getfile            P
+.HR 2019.7.11                    if                 (not zero)
+.HR 2019.7.11                      trap               noPrinterSelected if spool
+.HR 2019.7.11                      move               "Y",PrintInitFailed
+
+.HR 2019.7.11                      move               #PrinterSelected,SelectedPrinter
+.HR 2019.7.11                      prtopen            p,selectedPrinter,reportTitle:
+.HR 2019.7.11                                         PageWidth=PageWidth:
+.HR 2019.7.11                                         PageHeight=PageHeight:
+.HR 2019.7.11                                         PageNum=0
+
+..HR 2019.7.11                      prtpage            p;*Units=*LoEnglish
+.HR 2019.7.11                      trapclr            spool
+.HR 2019.7.11                    endif
+
+                    move               "0" to printPageCnt
+                    move               "1000" to printLineCnt
+
+                    create             DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+                    create             SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+                    create             HeaderFont,">Arial",Size=16,bold=1
+                    create             TitleFont,">Arial",Size=14,Bold=0
+                    create             TitleHeadingFont,">Arial",Size=10,Bold=1
+
+..HR 2019.7.11                    prtpage            p;*Font=DetailFont;
+                    move               "1",PrinterOpened
+                    return
+.=============================================================================
+PrintOpenByCustomer
+.
+. IF we're NOT Faxing, OR the CustomerID != the last fax that we prepared then return
+.
+                    return             IF (PrintByCust != "Y" or Cust.CustomerID = FaxCustomerID)    //Nothing to do if we're not by Customer!!!
+
+                    move               Cust.CustomerID,FaxCustomerID
+.
+. This routine will open the "appropriate" Printer based upon the Customer selection.....
+.  "IF" we're using the "Print By Customer" method    HR 4/20/2005
+.
+OpenCustomerPrinter
+                    return             IF (PrintByCust != "Y")           //Nothing to do if we're not by Customer!!!
+
+                    move               "Y",FirstPrint
+                    prtclose           P
+                    chop               Cust.Fax,Cust.Fax
+                    chop               Cust.EMail,Cust.EMail
+                    if                 ((( Cust.InvMethod = 1 and Cust.Fax != "") or:         //0=E-Mail, 1=Fax   //HR 2019.11.25
+                                       ( Cust.InvMethod = 0 and Cust.EMail != "") or:
+                                       ( PrtPrintOption = "E" and Cust.EMail != "") or:       //1=Fax, 0=EMail    //HR 2019.11.25
+                                       ( PrtPrintOption = "F" and Cust.Fax != "")) AND :      //1=Fax, 0=EMail //HR 2019.11.25
+                                       PrinterFallThrough != 1)                             //Are we defaulting to "Standard" printer?
+                      call             OpenPDFPrinter
+
+                      pack             FaxSubject(FaxJobNumber) from "JOBID:",PDFInfo(FaxJobNumber,1)," - ",DocumentType," :  for Customer : ":
+                                                  Cust.CustomerID," - ",Cust.Name         //HR 3/25/2005
+
+                    else
+                      if               (PrinterFallThrough = 1)
+                        move                 #PrinterSelected,SelectedPrinter        //Set the Default Printer for the rest of the report(s)
+                      endif
+
+                      trap             noPrinterSelected if spool
+                      move             "Y",PrintInitFailed
+
+                      prtopen          p,selectedPrinter,reportTitle:
+                                       PageWidth=PageWidth:
+                                       PageHeight=PageHeight:
+                                       PageNum=0
+
+                      trapclr          spool
+                    endif
+
+                    prtpage            p;*Units=*LoEnglish
+                    move               "0" to printPageCnt
+                    move               "1000" to printLineCnt
+
+                    create             DetailFont,">Times New Roman",Size=10,bold=0         //Not too Bad!!!
+                    create             SubLineFont,">Times New Roman",Size=8,bold=0         //Excellent!!!
+                    create             HeaderFont,">Arial",Size=16,bold=1
+                    create             TitleFont,">Arial",Size=14,Bold=0
+                    create             TitleHeadingFont,">Arial",Size=10,Bold=1
+
+                    prtpage            p;*Font=DetailFont;
+                    return
+;==========================================================================================================
+OpenPDFPrinter
+PrintOpenFax
+.
+. Read next Sequential number
+.
+                    add                "1",FaxJobNumber
+.
+                    getnextseq         PDF
+                    move               Sequence.SeqNo,PDFCounter
+
+.              filepi          3;PDFFile
+.              read            PDFFile,ZEROSEQ;PDFCounter
+.              add             "1",PDFCounter
+.              write           PDFFile,ZEROSEQ;PDFCounter
+
+                    move               PDFCounter,PDFCounterD
+                    replace            " 0",PDFCounterD
+                    move               PDFCounterD,PDFInfo(FaxJobNumber,1)
+
+                    switch             PrtPrintOption
+                    case               "C"                           //Customer Method, use the default Invoice Method from customer
+                      move               Cust.InvMethod,PDFMethod(FaxJobNumber)   //HR 10/11/2004
+                      if                 (Cust.InvMethod = 2)       //Fax Method
+                        move               Cust.fax,PDFInfo(FaxJobNumber,2)
+                      else                                            //E-Mail Method
+                        move               Cust.Email,PDFInfo(FaxJobNumber,2)
+                      endif
+                    case               "E"                           //Email method, use it no matter what
+                      move               "1",PDFMethod(FaxJobNumber)   //HR 10/11/2004
+                      move               Cust.Email,PDFInfo(FaxJobNumber,2)
+                    case               "F"                           //Fax Method, use it no matter what
+                      move               "2",PDFMethod(FaxJobNumber)   //HR 10/11/2004
+                      move               Cust.fax,PDFInfo(FaxJobNumber,2)
+                    endswitch
+
+
+                    pack               FaxSubject(FaxJobNumber) from "JOBID:",PDFInfo(FaxJobNumber,1)," - ",DocumentType," :  for Customer : ":
+                                                                      Cust.CustomerID," - ",Cust.Name
+
+...              PACk              FaxJobFile FROM "PrintID=","C:\APC\",PDFCounterD
+.              PACK              FaxJobFile FROM "PrintID=","C:\APC\",PDFCounterD
+.              SQUEEze           FaxJobFile,FaxJobFile
+
+.              SETMOde           *ENV=FaxJobFile
+
+                    pack               #FTPFileName,PDFInfo(FaxJobNumber,1),".pdf"
+                    pack               #FTPFullFileName from FaxDirectory,"\",PDFInfo(FaxJobNumber,1),".pdf"
+                    squeeze            #FTPFileName,#FTPFileName
+
+                    prtopen            P,"pdf:",#FTPFullFileName                 //HR 11.13.2014
+
+                    move               "SeqNo",PrintREC.FileName
+                    move               "F",PrintREC.SendVia
+                    move               "5169328140",PrintREC.Destination
+                    add                "1",PrintREC.SeqNo
+                    call               WritePrintRecord
+                    return
+;=============================================================================
+WritePrintRecord
+                    getfile            PrintJobFile
+                    if                 Not ZERO             //File is not opened
+                      open               PrintJobFLST
+                    endif
+
+                    move               Cust.InvMethod,PrintJobREC.OutputMethod
+                    move               PDFCounter,PrintJobREC.JobNumber
+                    move               PDFInfo(FaxJobNumber,2),PrintJobREC.SentTo
+                    move               FaxSubject(FaxJobNumber),PrintJobREC.Subject
+                    move               Cust.CustomerID,PrintJobREC.CustomerID
+                    move               Cust.Name,PrintJobREC.CustomerName
+                    move               DocumentType,PrintJobREC.DocumentType
+                    move               #FtpFileName,PrintJobREC.FileName
+                    move               " ",PrintJobREC.SuccessFlag
+                    if                 (PrintJobREC.OutputMethod = 1)
+                      move               "1",PrintJobREC.Processed                 //E-Mail...Consider it already processed
+                    else
+                      move               "0",PrintJobREC.Processed
+                    endif
+                    clock              TimeStamp,PrintJobREC.SubmitDate
+                    write              PrintJobFLST;PrintJobREC
+                    return
+.=============================================================================
+SubmitPDFFiles
+SendFaxJobs
+                    return             if ( FaxJobNumber = 0 )   //Nothing to do, THAT'S why!!!!
+                    clear              #ValidFaxJobs                                     //Flag used to see if we have valid Faxes
+
+                    formload           PrintProgress
+                    setprop            PProgressBar,value=0
+
+SendFaxJobs2
+                    for                PrintJobs FROM "1" to FaxJobNumber BY "1"
+
+                    pack               FTPFileName from FaxDirectory,"\",PDFInfo(PrintJobs,1),".pdf"
+                    squeeze            FTPFileName,FTPFileName
+                    clock              TimeStamp to Date8                          //Get the Date from Today
+.
+. Convert into GMT for 8:00PM EST
+.
+                    call               ConvDateToDays using DATE8,TodayDays        //HR 9/27/2004
+                    add                "1",TodayDays                               //HR 9/27/2004
+                    call               ConvDaysToDate using TodayDays,FaxDate      //HR 9/27/2004
+
+                    pack               FaxTimeToSend from "08:00PM"        //9:00PM EST :00 seconds
+                    if                 (PDFMethod(PrintJobs) = 1)      //E-Mail
+                      move               FTPFileName,EMailFile
+                      move               PDFInfo(PrintJobs,2),EmailName
+                      move               PDFInfo(PrintJobs,2),EmailAddress
+                      call               "SendMail;SendMail" using EMailAddress,EmailName,EmailFile
+                      move               FaxSubject(PrintJobs),FaxPDFSubject       //HR 3/18/2005
+                    else
+                      set                #ValidFaxJobs
+
+                      getfile            #FaxFile
+                      if                 (Not Zero)
+                        clock              TimeStamp,#SubmitTime
+                        pack               #SubmitFile,#SubmitTime,".new"
+                        prep               #FaxFile,#SubmitFile,Exclusive
+                      endif
+
+                      move               FaxSubject(PrintJobs),FaxPDFSubject
+                      move               FaxSubject(PrintJobs),FaxPDFSubject       //HR 3/18/2005
+                      move               PDFInfo(PrintJobs,2),FaxPDFNumber
+                      pack               #Destination FROM "/var/spool/hylafax/tmp/",FTPFileName,"|192.168.10.187:3934"
+
+                      move               "FAX_SYSTEM",#FaxSystem
+                      if                 (over or #FaxSystem ="hylafax")
+                        trap               ErrorWithSunFM IF IO
+                        copyfile           FTPFileName,#Destination  // Local to SunFM
+                        trapclr            IO
+
+                        call               "Fax;CreateFax" using FTPFileName,FaxPDFNumber:
+                                                                 FaxTimeToSend,FaxPDFSubject:
+                                                                 #FaxFile
+                      else if            (#FaxSystem = "EFAX")
+                        pack               EMailAddress from FaxPDFNumber,"@efaxSend.com"
+                        call               "SendMail;SendMail" using EMailAddress,EmailName,EmailFile
+                      endif
+                    endif
+
+                    move               PDFInfo(PrintJobs,1),PrintJobREC.JobNumber
+                    move               PrintJobREC.JobNumber,#PrintJobKY
+                    read               PrintJobFile,#PrintJobKY;PrintJobREC
+                    if                 NOT OVER
+                      move               FaxPDFSubject,PrintJobREC.Subject
+                      update             PrintJobFLST;PrintJobREC
+                    endif
+
+                    move               FaxJobNumber,#Progress
+                    move               PrintJobs,#PrintJobs
+                    calc               #Percent = (#PrintJobs / #Progress) * 100
+                    setprop            PProgressBar,value=#Percent
+                    repeat
+
+
+                    if                 (#ValidFaxJobs = 1)
+                      weof               #FaxFile,#SEQEOF
+                      close              #FaxFile
+                      pack               #Destination FROM "/faxjobs/",#SubmitFile,"|192.168.10.187:3934"
+
+                      trap               ErrorWithSunFM IF IO
+                      copyfile           #SubmitFile,#Destination           //HR 2/3/2005  Copy the files to the Server
+                      trapclr            IO
+
+                      erase              #SubmitFile                   //HR 11.13.2014
+                    endif
+
+                    setprop            WPrintProgress,visible=0   //Start the PrintProgess Window
+                    return
+.=============================================================================
+ErrorWithSunFM
+                    trapclr            IO
+                    return
+.=============================================================================
+#End

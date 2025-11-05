@@ -1,0 +1,127 @@
+
+
+
+PAGE    1      MSHISTRY.DBS IDE                                                                               03-26-04 15:28:30
+                                         
+
+PL/B COMPILER   Version 8.7E  06 Jan 2004 
+COMMAND LINE WAS: PLBCMP "MSHISTRY.DBS","F:\PLC\MSHISTRY.PLC",,c:\docume~1\lauraa~1\applic~1\sunide\SCRATCH -ZG,ZT,S,ZH,E,X,P "IDE" 
+
+    3.    INCLUDE  A: f:\source\mscbrag.txt
+    5.    INCLUDE  B: common.txt
+
+   Output: f:\plc\mshistry.plc                                                                                                                                                                                                                                       
+       290 LINES;      0 ERRORS;      0 WARNINGS; Start/Stop: 15:28:30 15:28:30
+  00001084 DATA;  0000032E  CODE;   SYMBOL TABLE USAGE:  UDA:   0% EXE:   0%
+
+
+
+PAGE    2      MSHISTRY.DBS IDE                                                                               03-26-04 15:28:30
+                                         
+
+"ANSWER                                    D     246.  *
+"APPMENU                                   D     245.  *
+"CHAIN MSEODCHN.CHN                        D     183.  *
+"MSALHST                                   D     156.  *   157.  
+"MSALLHS                                   D     238.  *
+"MSALLPR                                   D     232.  *
+"MSALLSL                                   D     235.  *
+"MSHSTADD                                  D     115.  *   116.  
+"MSINDEXS.BAT                              D     143.  *
+"MSPARTDE                                  D     103.  *   104.  
+"MSPARTLS                                  D     196.  *   197.  
+"MSPOUPDT                                  D     122.  *   123.  
+"MSPTUPDT                                  D     110.  *   111.  
+"MSPURH84                                  D     225.  *   226.  
+"MSPURH86                                  D     229.  *
+"MSPURHST                                  D     163.  *   164.  
+"MSSALH84                                  D     215.  *   216.  
+"MSSALH86                                  D     219.  *
+"MSSHOW                                    D     149.  *
+"MSSHOW                                    D     150.  *
+"MSSHOW84                                  D     203.  *   204.  
+"MSSHOW86                                  D     208.  *   209.  
+"MSSLINDX                                  D     136.  *
+"MSSLUPDT                                  D     129.  *   130.  
+"PROGRAM                                   D     102.  *   109.     114.     121.     128.     135.     148.     155.  
+                                                     *   162.     169.     195.     202.     207.     214.     224.     244.  
+"TERM0                                     D     181.  *
+1                                          F      69.  *
+12                                         F      73.  *
+99                                         F      71.  *
+ACCTNUMB                                   D      14. B*
+APPCODE                                    D      31. B*
+APPMENU                                    X     244.  *    90.  
+APPSECUR                                   F      32. B*
+BADCHAIN                                   X      96.  *    78.  
+CANT                                       X     186.  *   182.  
+DATE6                                      D      10. B*
+DPORT                                      D      12.  *   138.     179.     181.  
+ENVS                                       D      11. B*
+ERRORSW1                                   D      21. B*
+ERRORSW2                                   D      22. B*
+ERRORSW3                                   D      23. B*
+ERRORSW4                                   D      24. B*
+FIRSTIME                                   D      17. B*
+FROMPGM                                    D      16. B*
+GETINDEX                                   X      63.  *    70.      74.      92.     105.     112.     117.     124.  
+                                                     *   131.     151.     158.     165.     176.     184.     190.     198.  
+                                                     *   205.     210.     217.     220.     227.     230.     233.     236.  
+                                                     *   239.     247.  
+INDEX                                      F       7.  *    67.      69.      71.      73.      80.  
+INDEXX                                     D       9.  *    65.      66.      67.  
+INVNUMB                                    D      13. B*
+IOERFILE                                   D      28. B*
+
+
+
+PAGE    3      MSHISTRY.DBS IDE                                                                               03-26-04 15:28:30
+                                         
+
+IOTEST                                     D      26. B*
+IOTYPE                                     D      27. B*
+LOGINFO                                    D      18.  *   103.     110.     115.     122.     129.     136.     149.  
+                                                     *   156.     163.     196.     203.     208.     215.     225.     245.  
+LOGTYPE                                    D      17.  *   102.     109.     114.     121.     128.     135.     148.  
+                                                     *   155.     162.     169.     195.     202.     207.     214.     224.  
+                                                     *   244.  
+MPURHST                                    X     162.  *    87.  
+MSALHST                                    X     155.  *    86.  
+MSALLHS                                    X     238.  *
+MSALLPR                                    X     232.  *
+MSALLSL                                    X     235.  *
+MSEOD                                      X     169.  *    88.  
+MSHSTADD                                   X     114.  *    82.  
+MSPARTDE                                   X     102.  *    80.  
+MSPARTLS                                   X     195.  *    89.  
+MSPOUPDT                                   X     121.  *
+MSPTUPDT                                   X     109.  *    81.  
+MSPUR84                                    X     224.  *
+MSPUR86                                    X     229.  *
+MSSAL84                                    X     214.  *
+MSSAL86                                    X     219.  *
+MSSHOW                                     X     148.  *    85.  
+MSSHOW84                                   X     202.  *
+MSSHOW86                                   X     207.  *
+MSSLINDX                                   X     135.  *    84.  
+MSSLUPDT                                   X     128.  *    83.  
+PONUMBS                                    D      12. B*
+PORTN                                      D       7. B*   137.     138.     139.     178.     179.     180.  
+PORTNUMB                                   D      14.  *
+REPLY                                      D      15.  *   173.     175.  
+ROLLNAME                                   D      13.  *
+S$CMDLIN                                   D       0.  *
+S$ERROR$                                   D       0.  *
+S$RETVAL                                   F       0.  *
+SECURITY                                   F       9. B*
+START                                      X      28.  *   144.  
+TESTONE                                    D      18. B*
+TESTTHRE                                   D      20. B*
+TESTTWO                                    D      19. B*
+TIME                                       D       8.  *    79.  
+TODAY                                      D       8. B*    33.  
+USERCODE                                   D      29. B*
+USERLOCN                                   D      25. B*
+USERNAME                                   D      30. B*
+VENDNUMB                                   D      15. B*
+
